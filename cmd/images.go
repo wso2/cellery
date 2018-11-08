@@ -25,10 +25,24 @@ func runImage() error {
 
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{"CELL", "VERSION", "CELL-IMAGE-ID", "SIZE"})
+	table.SetBorders(tablewriter.Border{Left: false, Top: false, Right: false, Bottom: false})
+	table.SetAlignment(3)
+	table.SetRowSeparator("-")
+	table.SetCenterSeparator(" ")
+	table.SetColumnSeparator(" ")
+	table.SetHeaderColor(
+		tablewriter.Colors{tablewriter.Bold},
+		tablewriter.Colors{tablewriter.Bold},
+		tablewriter.Colors{tablewriter.Bold},
+		tablewriter.Colors{tablewriter.Bold})
+	table.SetColumnColor(
+		tablewriter.Colors{},
+		tablewriter.Colors{},
+		tablewriter.Colors{tablewriter.FgHiCyanColor},
+		tablewriter.Colors{})
 
-	for _, v := range data {
-		table.Append(v)
-	}
+	table.AppendBulk(data)
 	table.Render()
+
 	return nil
 }

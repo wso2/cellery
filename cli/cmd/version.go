@@ -58,7 +58,7 @@ func runVersion() error {
 	// Call API server to get the version details.
 	resp, err := http.Get(BASE_URL + "/version")
 	if err != nil {
-		fmt.Println("Error connecting to the cellery api-serser server.")
+		fmt.Println("Error connecting to the cellery api-server.")
 	}
 	defer resp.Body.Close()
 

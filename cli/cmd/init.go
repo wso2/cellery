@@ -114,7 +114,7 @@ func runInit() error {
 	//// Call API server to get the version details.
 	//resp, err := http.Post(BASE_URL + "/cell/init", "application/json", bytes.NewBuffer(bytesPayload))
 	//if err != nil {
-	//	fmt.Println("Error connecting to the cellery api-serser server.")
+	//	fmt.Println("Error connecting to the cellery api-server server.")
 	//}
 	//defer resp.Body.Close()
 	//body, err := ioutil.ReadAll(resp.Body)

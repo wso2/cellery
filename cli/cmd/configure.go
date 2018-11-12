@@ -46,7 +46,7 @@ func runConfigure() error {
 		Active:   "\U000027A4 {{ .| cyan }}",
 		Inactive: "  {{ . | white }}",
 		Selected: green("\U00002713 ") + boldWhite("cell environment: ") + "{{ .  | faint }}",
-		Help: " ",
+		Help: faint("[Use arrow keys]"),
 	}
 
 

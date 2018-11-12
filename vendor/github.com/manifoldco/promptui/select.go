@@ -222,10 +222,6 @@ func (s *Select) innerRun(starting int, top rune) (int, string, error) {
 	canSearch := s.Searcher != nil
 	searchMode := s.StartInSearchMode
 
-	///////////////// START CELLERY CLI CUSTERMIZATION ///////////////
-	firstRender := true
-	///////////////// END CELLERY CLI CUSTERMIZATION ///////////////
-
 	c.SetListener(func(line []rune, pos int, key rune) ([]rune, int, bool) {
 		switch {
 		case key == KeyEnter:
@@ -269,35 +265,13 @@ func (s *Select) innerRun(starting int, top rune) (int, string, error) {
 			}
 		}
 
-		///////////////// START CELLERY CLI CUSTERMIZATION ///////////////
-
-		// Comment following lines to remove search mode
-
-		//if searchMode {
-		//	header := fmt.Sprintf("Search: %s%s", string(searchInput), cursor)
-		//	sb.WriteString(header)
-		//} else {
-		//	help := s.renderHelp(canSearch)
-		//	sb.Write(help)
-		//}
-
-		///////////////// END CELLERY CLI CUSTERMIZATION ///////////////
-
-		///////////////// START CELLERY CLI CUSTERMIZATION ///////////////
-		help := s.renderHelp(canSearch)
-
-		b := make([]byte, len(help))
-		for i, v := range help {
-			b[i] = byte(v)
-		}
-
-
-		if (firstRender && " " != string(b)) {
-
+		if searchMode {
+			header := fmt.Sprintf("Search: %s%s", string(searchInput), cursor)
+			sb.WriteString(header)
+		} else {
+			help := s.renderHelp(canSearch)
 			sb.Write(help)
-			firstRender = false
 		}
-		///////////////// END CELLERY CLI CUSTERMIZATION ///////////////
 
 		label := render(s.Templates.label, s.Label)
 		sb.Write(label)

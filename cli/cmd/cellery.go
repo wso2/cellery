@@ -27,6 +27,7 @@ func newCliCommand() *cobra.Command {
 		newImageCommand(),
 		newVersionCommand(),
 		newInitCommand(),
+		newRunCommand(),
 	)
 	return cmd
 }

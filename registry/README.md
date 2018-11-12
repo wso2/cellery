@@ -4,7 +4,7 @@ Cellery Registry is a repository to maintain the cell images. It provide the cap
 
 Cellery registry can be deployed as a private registry. Also there will be a central registry managed by WSO2. Following diagram illustrates the basic components of the registry.
 
-![Cellery Registry](cellery_registry.png)
+![Cellery Registry](cellery_registry.png){:height="50%" width="50%"}
 
 The Cell image will be persisted into a Storage Volume (i.e File system) and a Docker registry will be used to keep the docker images used in the Cells. This Docker registry will be fronted by the Cellery Registry API, which will block any direct docker pushes to the docker registry used by Cellery. Furthermore, Native Basic Auth will be used to make sure that Docker registry is accessed only via the Cellery registry API. This will guarantee the integrity of the images pushed into the docker registry 
 

@@ -78,7 +78,7 @@ service<http:Service> registry bind apiEndpoint {
                 match request.getBodyParts() {
                     mime:Entity[] entities => {
                         match getArtifactContent(entities) {
-                            (io:ByteChannel) sourceChannel => {
+                            (io:ReadableByteChannel) sourceChannel => {
                                 var archiveFileCopyResult = copyArtifactFile(sourceChannel, dstFilePath);
                                 match archiveFileCopyResult {
                                     string => {
@@ -180,8 +180,8 @@ service<http:Service> registry bind apiEndpoint {
 # Get the artifact information from the entities in the multipart request.
 # + entities - The entities of the multipart request.
 # + return - Map with artifact metadata and byte channel of the artifact. Else error.
-function getArtifactContent (mime:Entity[] entities) returns (io:ByteChannel | error) {
-    io:ByteChannel? artifactByteChannel;
+function getArtifactContent (mime:Entity[] entities) returns (io:ReadableByteChannel | error) {
+    io:ReadableByteChannel? artifactByteChannel;
     foreach mimeEntity in entities {
         if (mimeEntity.getContentDisposition() != null) {
             if (mimeEntity.getContentDisposition().name == "file") {
@@ -189,7 +189,7 @@ function getArtifactContent (mime:Entity[] entities) returns (io:ByteChannel | e
                     error mimeErr => {
                         return mimeErr;
                     }
-                    io:ByteChannel byteChannel => {
+                    io:ReadableByteChannel byteChannel => {
                         artifactByteChannel = byteChannel;
                     }
                 }
@@ -203,7 +203,7 @@ function getArtifactContent (mime:Entity[] entities) returns (io:ByteChannel | e
             };
             return err;
         }
-        io:ByteChannel byteChannel => {
+        io:ReadableByteChannel byteChannel => {
             return untaint (byteChannel);
         }
     }

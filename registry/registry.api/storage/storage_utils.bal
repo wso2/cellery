@@ -36,7 +36,7 @@ function createDirectory(string path) returns (boolean) {
 # + artifactByteChannel - The byte channel of the artifact file.
 # + filePath - The path to the file
 # + return - Path of the artifact else error cause in creating the artifact file.
-function copyArtifactFile (io:ByteChannel artifactByteChannel, string filePath) returns (string | RegistryError) {
+function copyArtifactFile (io:ReadableByteChannel artifactByteChannel, string filePath) returns (string | RegistryError) {
     try {
         file:Path artifactFile = new (filePath);
         // Delete if artifact file already exists. This is to overwrite existing artifact content.
@@ -97,8 +97,8 @@ function copyArtifactFile (io:ByteChannel artifactByteChannel, string filePath) 
 
 }
 
-function writeToFile (io:ByteChannel src, file:Path dstFile) returns (error | ()) {
-    io:ByteChannel dst = getFileChannel(dstFile);
+function writeToFile (io:ReadableByteChannel src, file:Path dstFile) returns (error | ()) {
+    io:WritableByteChannel dst = getFileChannel(dstFile);
     // Specifies the number of bytes that should be read from a single read operation.
     int numberOfBytesWritten = 0;
     int readCount = 0;
@@ -129,14 +129,14 @@ function writeToFile (io:ByteChannel src, file:Path dstFile) returns (error | ()
     }
 }
 
-function writeBytes (io:ByteChannel byteChannel, byte[] content) returns (int) {
+function writeBytes (io:WritableByteChannel byteChannel, byte[] content) returns (int) {
     match byteChannel.write(content, 0) {
         int numberOfBytesWritten => return numberOfBytesWritten;
         error err => throw err;
     }
 }
 
-function readBytes (io:ByteChannel byteChannel, int numberOfBytes) returns (byte[], int)|() {
+function readBytes (io:ReadableByteChannel byteChannel, int numberOfBytes) returns (byte[], int)|() {
     match byteChannel.read(numberOfBytes) {
         (byte[], int) content => return content;
         error readError => {
@@ -146,7 +146,7 @@ function readBytes (io:ByteChannel byteChannel, int numberOfBytes) returns (byte
     }
 }
 
-function getFileChannel (file:Path fileToOpen) returns (io:ByteChannel) {
-    io:ByteChannel byteChannel = io:openFile(untaint fileToOpen.getPathValue(), "rw");
+function getFileChannel (file:Path fileToOpen) returns (io:WritableByteChannel) {
+    io:WritableByteChannel byteChannel = io:openWritableFile(untaint fileToOpen.getPathValue());
     return byteChannel;
 }

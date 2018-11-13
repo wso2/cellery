@@ -19,7 +19,6 @@ import ballerina/system;
 import ballerina/config;
 import ballerina/log;
 
-@final string FILE_SEPARATOR = "/";
 @final string REGISTRY_ROOT_DIRECTORY_PATH = createRegistryRootDirectory();
 @final string ARCHIVES_DIRECTORY_PATH = string `{{REGISTRY_ROOT_DIRECTORY_PATH}}{{FILE_SEPARATOR}}archives`;
 @final string REPOSITORY_DIRECTORY_PATH = string `{{REGISTRY_ROOT_DIRECTORY_PATH}}{{FILE_SEPARATOR}}repository`;
@@ -106,8 +105,7 @@ function initializeFileStorage() returns (boolean|RegistryError) {
 # Creates or identify existing registry root location.
 # + return - Location of the repository.
 function createRegistryRootDirectory() returns (string) {
-    file:Path rootDir = new (config:getAsString("REGISTRY_REPOSITORY_ROOT_LOCATION",
-            default = system:getUserHome() + FILE_SEPARATOR + "cellery-registry"));
+    file:Path rootDir = new (REGISTRY_REPOSITORY_ROOT_LOCATION);
     try {
         if (!rootDir.exists()) {
             log:printDebug(string `Creating Registry root directory: {{rootDir.getPathValue()}}`);

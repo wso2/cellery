@@ -15,6 +15,7 @@
 // under the License.
 
 import ballerina/config;
+import ballerina/system;
 
 // Configuration for Web API.
 @final int API_SERVICE_PORT = config:getAsInt("API_SERVICE_PORT", default = 9090);
@@ -34,6 +35,7 @@ import ballerina/config;
 
 @final string ARTIFACT_EXTENSION = config:getAsString("ARTIFACT_EXTENSION", default = ".zip");
 
-// Webserver
-@final string FILE_SERVER_URL = config:getAsString("FILE_SERVER_URL", default = "https://localhost:8080");
-@final string FILE_SERVER_URL_ARTIFACT_LOCATION = config:getAsString("FILE_SERVER_URL_ARTIFACT_LOCATION", default = "/");
+@final string REGISTRY_REPOSITORY_ROOT_LOCATION = config:getAsString("REGISTRY_REPOSITORY_ROOT_LOCATION",
+    default = system:getUserHome() + FILE_SEPARATOR + "cellery-registry");
+
+@final string FILE_SEPARATOR = "/";

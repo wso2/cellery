@@ -15,14 +15,14 @@
 # under the License.
 #
 
-### WebServer Configuration ###
-WEBSERVER_SERVICE_PORT=9090
-WEBSERVER_APP_FOLDER="/tmp/cellery-repository/"
+API_SERVICE_PORT=9090
+API_VERSION="0.0.1"
 
+REGISTRY_REPOSITORY_ROOT_LOCATION="/home/ballerina/cellery-repository/"
 ARTIFACT_EXTENSION=".zip"
 
 ### Keystore ###
-KEYSTORE_FILE="${ballerina.home}/bre/security/ballerinaKeystore.p12"
-KEYSTORE_PASSWORD="ballerina"
-TRUSTSTORE_FILE="${ballerina.home}/bre/security/ballerinaTruststore.p12"
-TRUSTSTORE_PASSWORD="ballerina"
+KEYSTORE_FILE="cellery-registry-keystore.p12"
+KEYSTORE_PASSWORD="cellery"
+TRUSTSTORE_FILE="cellery-registry-truststore.p12"
+TRUSTSTORE_PASSWORD="cellery"

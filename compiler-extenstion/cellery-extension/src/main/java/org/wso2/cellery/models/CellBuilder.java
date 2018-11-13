@@ -18,62 +18,50 @@
 
 package org.wso2.cellery.models;
 
-
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 
 /**
- * Cell POJO model.
+ * API model.
  */
-public class Cell {
-    private static Cell cell;
+public final class CellBuilder {
     private String apiVersion;
     private String kind;
     private ObjectMeta metadata;
     private CellSpec spec;
 
-    private Cell() {
+    public CellBuilder() {
     }
 
-    public static Cell getInstance() {
-        synchronized (Cell.class) {
-            if (cell == null) {
-                cell = new Cell();
-            }
-        }
+    public static CellBuilder aCell() {
+        return new CellBuilder();
+    }
+
+    public CellBuilder withApiVersion(String apiVersion) {
+        this.apiVersion = apiVersion;
+        return this;
+    }
+
+    public CellBuilder withKind(String kind) {
+        this.kind = kind;
+        return this;
+    }
+
+    public CellBuilder withMetadata(ObjectMeta metadata) {
+        this.metadata = metadata;
+        return this;
+    }
+
+    public CellBuilder withSpec(CellSpec spec) {
+        this.spec = spec;
+        return this;
+    }
+
+    public Cell build() {
+        Cell cell = Cell.getInstance();
+        cell.setApiVersion(apiVersion);
+        cell.setKind(kind);
+        cell.setMetadata(metadata);
+        cell.setSpec(spec);
         return cell;
     }
-
-    public String getApiVersion() {
-        return apiVersion;
-    }
-
-    public void setApiVersion(String apiVersion) {
-        this.apiVersion = apiVersion;
-    }
-
-    public String getKind() {
-        return kind;
-    }
-
-    public void setKind(String kind) {
-        this.kind = kind;
-    }
-
-    public ObjectMeta getMetadata() {
-        return metadata;
-    }
-
-    public void setMetadata(ObjectMeta metadata) {
-        this.metadata = metadata;
-    }
-
-    public CellSpec getSpec() {
-        return spec;
-    }
-
-    public void setSpec(CellSpec spec) {
-        this.spec = spec;
-    }
 }
-
-

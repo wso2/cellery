@@ -18,12 +18,28 @@
 
 package org.wso2.cellery.utils;
 
+import com.esotericsoftware.yamlbeans.YamlWriter;
+import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
+import org.wso2.cellery.models.API;
+import org.wso2.cellery.models.APIBuilder;
+import org.wso2.cellery.models.APIDefinition;
+import org.wso2.cellery.models.APIDefinitionBuilder;
+import org.wso2.cellery.models.Cell;
+import org.wso2.cellery.models.CellSpec;
+import org.wso2.cellery.models.GatewaySpecBuilder;
+import org.wso2.cellery.models.GatewayTemplateBuilder;
+
 import java.io.File;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.apache.commons.lang3.StringUtils.removePattern;
 
 /**
  * Utility methods for Cellery extension.
@@ -49,5 +65,45 @@ public class Utils {
             return;
         }
         Files.write(Paths.get(outputFileName), context.getBytes(StandardCharsets.UTF_8));
+    }
+
+    public static <T> String toYaml(T object) {
+        try (StringWriter stringWriter = new StringWriter()) {
+            YamlWriter writer = new YamlWriter(stringWriter);
+            writer.write(object);
+            writer.getConfig().writeConfig.setWriteRootTags(false); //replaces only root tag
+            writer.close(); //don't add this to finally, because the text will not be flushed
+            return removeTags(stringWriter.toString());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static String removeTags(String string) {
+        //a tag is a sequence of characters starting with ! and ending with whitespace
+        return removePattern(string, " ![^\\s]*");
+    }
+
+    public static void main(String[] args) {
+        Cell cell = Cell.getInstance();
+        cell.setApiVersion("v1");
+        cell.setKind("Cell");
+        cell.setMetadata(new ObjectMetaBuilder().addToLabels("DD", "bb").withName("myCell").build());
+        List<APIDefinition> apiDefinitions = new ArrayList<>();
+        apiDefinitions.add(APIDefinitionBuilder.anAPIDefinition().withMethod("GET").withPath("/").build());
+        List<API> apis = new ArrayList<>();
+        apis.add(APIBuilder.anAPI().withBackend("blah")
+                .withContext("/")
+                .withGlobal(false)
+                .withDefinitions(apiDefinitions)
+                .build());
+
+
+        CellSpec cellSpec = new CellSpec();
+        cellSpec.setGatewayTemplate(GatewayTemplateBuilder.aGatewayTemplate().withSpec(
+                GatewaySpecBuilder.aGatewaySpec().withApis(apis).build()
+        ).build());
+        cell.setSpec(cellSpec);
+        //.out.println(toYaml(cell));
     }
 }

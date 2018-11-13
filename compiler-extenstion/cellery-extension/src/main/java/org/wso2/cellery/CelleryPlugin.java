@@ -49,8 +49,8 @@ public class CelleryPlugin extends AbstractCompilerPlugin {
     }
 
     @Override
-    public void process(VariableNode recordNode, List<AnnotationAttachmentNode> annotations) {
-
+    public void process(VariableNode variableNode, List<AnnotationAttachmentNode> annotations) {
+        variableNode.getName().setValue("ddd");
     }
 
     @Override

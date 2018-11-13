@@ -17,7 +17,7 @@
   -->
 <FindBugsFilter>
     <Match>
-        <Package name="org.wso2.cellery"/>
+        <Package backend="org.wso2.cellery"/>
         <Bug pattern="SIC_INNER_SHOULD_BE_STATIC_ANON"/>
     </Match>
 </FindBugsFilter>

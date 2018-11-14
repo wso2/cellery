@@ -21,7 +21,7 @@ package org.wso2.cellery.models;
 import java.util.List;
 
 /**
- * Gateway Template Spec.
+ * Gateway Spec.
  */
 public class GatewaySpec {
     private List<API> apis;

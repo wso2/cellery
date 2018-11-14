@@ -59,10 +59,15 @@
             <groupId>io.fabric8</groupId>
             <artifactId>kubernetes-client</artifactId>
         </dependency>
-        <!--<dependency>-->
-            <!--<groupId>com.esotericsoftware.yamlbeans</groupId>-->
-            <!--<artifactId>yamlbeans</artifactId>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>com.esotericsoftware.yamlbeans</groupId>
+            <artifactId>yamlbeans</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.immutables</groupId>
+            <artifactId>value</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
 
@@ -83,6 +88,20 @@
         </resources>
 
         <plugins>
+
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <version>3.1.7</version>
+                <dependencies>
+                    <!-- overwrite dependency on spotbugs if you want to specify the version of spotbugs -->
+                    <dependency>
+                        <groupId>com.github.spotbugs</groupId>
+                        <artifactId>spotbugs</artifactId>
+                        <version>3.1.8</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
 
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -235,6 +254,7 @@
                             <artifactSet>
                                 <includes>
                                     <include>io.fabric8:docker*</include>
+                                    <include>com.esotericsoftware.yamlbeans*</include>
                                     <include>commons-io:commons-io</include>
                                     <include>commons-codec:commons-codec</include>
                                     <include>javax.validation:validation-api</include>

@@ -18,11 +18,14 @@
 
 package org.wso2.cellery.models;
 
+import java.util.List;
+
 /**
  * Cell Spec.
  */
 public class CellSpec {
     private GatewayTemplate gatewayTemplate;
+    private List<ServiceTemplate> serviceTemplates;
 
     public GatewayTemplate getGatewayTemplate() {
         return gatewayTemplate;
@@ -30,5 +33,13 @@ public class CellSpec {
 
     public void setGatewayTemplate(GatewayTemplate gatewayTemplate) {
         this.gatewayTemplate = gatewayTemplate;
+    }
+
+    public List<ServiceTemplate> getServiceTemplates() {
+        return serviceTemplates;
+    }
+
+    public void setServiceTemplates(List<ServiceTemplate> serviceTemplates) {
+        this.serviceTemplates = serviceTemplates;
     }
 }

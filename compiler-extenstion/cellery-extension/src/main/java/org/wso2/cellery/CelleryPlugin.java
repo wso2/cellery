@@ -18,6 +18,9 @@
 
 package org.wso2.cellery;
 
+import io.fabric8.kubernetes.api.model.ContainerBuilder;
+import io.fabric8.kubernetes.api.model.ContainerPortBuilder;
+import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import org.ballerinalang.compiler.plugins.AbstractCompilerPlugin;
 import org.ballerinalang.compiler.plugins.SupportedAnnotationPackages;
 import org.ballerinalang.model.elements.PackageID;
@@ -25,12 +28,23 @@ import org.ballerinalang.model.tree.AnnotationAttachmentNode;
 import org.ballerinalang.model.tree.PackageNode;
 import org.ballerinalang.model.tree.VariableNode;
 import org.ballerinalang.util.diagnostic.DiagnosticLog;
+import org.wso2.cellery.models.APIBuilder;
+import org.wso2.cellery.models.APIDefinitionBuilder;
+import org.wso2.cellery.models.Cell;
+import org.wso2.cellery.models.CellSpec;
+import org.wso2.cellery.models.GatewaySpecBuilder;
+import org.wso2.cellery.models.GatewayTemplateBuilder;
+import org.wso2.cellery.models.ServiceTemplateBuilder;
 import org.wso2.cellery.utils.Utils;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+
+import static org.wso2.cellery.utils.Utils.toYaml;
 
 /**
  * Compiler plugin to generate Cellery artifacts.
@@ -50,77 +64,70 @@ public class CelleryPlugin extends AbstractCompilerPlugin {
 
     @Override
     public void process(VariableNode variableNode, List<AnnotationAttachmentNode> annotations) {
-//        variableNode.getName().setValue("ddd");
+        //TODO:Implement to process variable node.
     }
 
     @Override
     public void codeGenerated(PackageID packageID, Path binaryPath) {
-        String testYAML = "apiVersion: vick.wso2.com/v1alpha1\n" +
-                "kind: Cell\n" +
-                "metadata:\n" +
-                "  name: my-cell\n" +
-                "spec:\n" +
-                "  gatewayTemplate:\n" +
-                "    spec:\n" +
-                "      apis:\n" +
-                "      - context: time\n" +
-                "        definitions:\n" +
-                "        - path: /\n" +
-                "          method: GET\n" +
-                "        backend: server-time\n" +
-                "        global: true\n" +
-                "      - context: hello\n" +
-                "        definitions:\n" +
-                "        - path: /\n" +
-                "          method: GET\n" +
-                "        backend: node-hello\n" +
-                "        global: true\n" +
-                "  servicesTemplates:\n" +
-                "  - metadata:\n" +
-                "      name: time-us\n" +
-                "    spec:\n" +
-                "      replicas: 1\n" +
-                "      container:\n" +
-                "        image: docker.io/mirage20/time-us\n" +
-                "        ports:\n" +
-                "        - containerPort: 8080\n" +
-                "      servicePort: 80\n" +
-                "  - metadata:\n" +
-                "      name: time-uk\n" +
-                "    spec:\n" +
-                "      replicas: 1\n" +
-                "      container:\n" +
-                "        image: docker.io/mirage20/time-uk\n" +
-                "        ports:\n" +
-                "        - containerPort: 8080\n" +
-                "      servicePort: 80\n" +
-                "  - metadata:\n" +
-                "      name: server-time\n" +
-                "    spec:\n" +
-                "      replicas: 1\n" +
-                "      container:\n" +
-                "        image: docker.io/mirage20/time\n" +
-                "        ports:\n" +
-                "        - containerPort: 8080\n" +
-                "      servicePort: 80\n" +
-                "  - metadata:\n" +
-                "      name: debug\n" +
-                "    spec:\n" +
-                "      replicas: 1\n" +
-                "      container:\n" +
-                "        image: docker.io/mirage20/k8s-debug-tools\n" +
-                "      servicePort: 80\n" +
-                "  - metadata:\n" +
-                "      name: node-hello\n" +
-                "    spec:\n" +
-                "      replicas: 1\n" +
-                "      container:\n" +
-                "        image: docker.io/nipunaprashan/node-hello\n" +
-                "        ports:\n" +
-                "        - containerPort: 8080\n" +
-                "      servicePort: 80";
+        Cell cell = Cell.getInstance();
+        cell.setApiVersion("v1");
+        cell.setKind("Cell");
+        cell.setMetadata(new ObjectMetaBuilder()
+                .addToLabels("app", "test")
+                .withName("myCell")
+                .build());
+        CellSpec cellSpec = new CellSpec();
+        cellSpec.setGatewayTemplate(GatewayTemplateBuilder.aGatewayTemplate().withSpec(
+                GatewaySpecBuilder.aGatewaySpec()
+                        .withApis(
+                        Collections.singletonList(APIBuilder.anAPI()
+                                .withBackend("mock-backend")
+                                .withContext("/")
+                                .withGlobal(false)
+                                .withDefinitions(Collections.singletonList(
+                                        APIDefinitionBuilder.anAPIDefinition()
+                                                .withMethod("GET")
+                                                .withPath("/")
+                                                .build()))
+                                .build())
+                ).build()
+        ).build());
+        cellSpec.setServiceTemplates(
+                Arrays.asList(
+                        ServiceTemplateBuilder.
+                                aServiceTemplate()
+                                .withReplicas(1)
+                                .withServicePort(9090)
+                                .withMetadata(new ObjectMetaBuilder()
+                                        .addToLabels("app", "myApp1")
+                                        .build())
+                                .withContainer(new ContainerBuilder()
+                                        .withImage("ballerina-service1:v1.0.0")
+                                        .withPorts(Collections.singletonList(
+                                                new ContainerPortBuilder()
+                                                        .withContainerPort(9090)
+                                                        .build()))
+                                        .build())
+                                .build(),
+                        ServiceTemplateBuilder.
+                                aServiceTemplate()
+                                .withReplicas(1)
+                                .withServicePort(9091)
+                                .withMetadata(new ObjectMetaBuilder()
+                                        .addToLabels("app", "myApp2")
+                                        .build())
+                                .withContainer(new ContainerBuilder()
+                                        .withImage("ballerina-service2:v1.0.0")
+                                        .withPorts(Collections.singletonList(
+                                                new ContainerPortBuilder()
+                                                        .withContainerPort(9091)
+                                                        .build()))
+                                        .build())
+                                .build())
+        );
+        cell.setSpec(cellSpec);
         try {
-            Utils.writeToFile(testYAML,
+            Utils.writeToFile(toYaml(cell),
                     binaryPath.toAbsolutePath().getParent() + File.separator + "target" +
                             File.separator + "cellery" + File.separator + "test" + ".yaml");
         } catch (IOException ex) {

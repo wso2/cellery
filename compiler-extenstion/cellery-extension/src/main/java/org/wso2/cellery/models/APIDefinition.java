@@ -18,7 +18,7 @@
 
 package org.wso2.cellery.models;
 /**
- * API model.
+ * API Definition model.
  */
 public class APIDefinition {
     private String path;
@@ -39,4 +39,5 @@ public class APIDefinition {
     public void setMethod(String method) {
         this.method = method;
     }
+
 }

@@ -15,9 +15,3 @@
   ~ specific language governing permissions and limitations
   ~ under the License.
   -->
-<FindBugsFilter>
-    <Match>
-        <Package backend="org.wso2.cellery"/>
-        <Bug pattern="SIC_INNER_SHOULD_BE_STATIC_ANON"/>
-    </Match>
-</FindBugsFilter>

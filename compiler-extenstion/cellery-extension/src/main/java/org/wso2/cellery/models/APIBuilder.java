@@ -21,15 +21,13 @@ package org.wso2.cellery.models;
 import java.util.List;
 
 /**
- * API model.
+ * API Builder.
  */
 public final class APIBuilder {
-    private String context;
-    private String backend;
-    private List<APIDefinition> definitions;
-    private boolean global;
+    private API aPI;
 
     private APIBuilder() {
+        aPI = new API();
     }
 
     public static APIBuilder anAPI() {
@@ -37,31 +35,26 @@ public final class APIBuilder {
     }
 
     public APIBuilder withContext(String context) {
-        this.context = context;
+        aPI.setContext(context);
         return this;
     }
 
     public APIBuilder withBackend(String backend) {
-        this.backend = backend;
+        aPI.setBackend(backend);
         return this;
     }
 
     public APIBuilder withDefinitions(List<APIDefinition> definitions) {
-        this.definitions = definitions;
+        aPI.setDefinitions(definitions);
         return this;
     }
 
     public APIBuilder withGlobal(boolean global) {
-        this.global = global;
+        aPI.setGlobal(global);
         return this;
     }
 
     public API build() {
-        API aPI = new API();
-        aPI.setContext(context);
-        aPI.setBackend(backend);
-        aPI.setDefinitions(definitions);
-        aPI.setGlobal(global);
         return aPI;
     }
 }

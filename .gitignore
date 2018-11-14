@@ -23,7 +23,7 @@
 hs_err_pid*
 
 # Idea files
-.idea/*
+.idea/
 *.iml
 
 # MacOS

@@ -18,7 +18,6 @@
 
 package org.wso2.cellery.models;
 
-
 import java.util.List;
 
 /**
@@ -61,4 +60,5 @@ public class API {
     public void setGlobal(boolean global) {
         this.global = global;
     }
+
 }

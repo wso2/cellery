@@ -19,7 +19,7 @@
 package org.wso2.cellery.models;
 
 /**
- * API model.
+ * Gateway Template model.
  */
 public final class GatewayTemplateBuilder {
     private GatewaySpec spec;

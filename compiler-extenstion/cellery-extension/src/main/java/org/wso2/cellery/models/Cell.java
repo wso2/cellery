@@ -74,6 +74,5 @@ public class Cell {
     public void setSpec(CellSpec spec) {
         this.spec = spec;
     }
+
 }
-
-

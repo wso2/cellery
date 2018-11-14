@@ -21,26 +21,33 @@ package org.wso2.cellery.models;
 import java.util.List;
 
 /**
- * Gateway Spec Builder.
+ * Cell Spec Builder.
  */
-public final class GatewaySpecBuilder {
-    private List<API> apis;
+public final class CellSpecBuilder {
+    private GatewayTemplate gatewayTemplate;
+    private List<ServiceTemplate> serviceTemplates;
 
-    private GatewaySpecBuilder() {
+    private CellSpecBuilder() {
     }
 
-    public static GatewaySpecBuilder aGatewaySpec() {
-        return new GatewaySpecBuilder();
+    public static CellSpecBuilder aCellSpec() {
+        return new CellSpecBuilder();
     }
 
-    public GatewaySpecBuilder withApis(List<API> apis) {
-        this.apis = apis;
+    public CellSpecBuilder withGatewayTemplate(GatewayTemplate gatewayTemplate) {
+        this.gatewayTemplate = gatewayTemplate;
         return this;
     }
 
-    public GatewaySpec build() {
-        GatewaySpec gatewaySpec = new GatewaySpec();
-        gatewaySpec.setApis(apis);
-        return gatewaySpec;
+    public CellSpecBuilder withServiceTemplates(List<ServiceTemplate> serviceTemplates) {
+        this.serviceTemplates = serviceTemplates;
+        return this;
+    }
+
+    public CellSpec build() {
+        CellSpec cellSpec = new CellSpec();
+        cellSpec.setGatewayTemplate(gatewayTemplate);
+        cellSpec.setServiceTemplates(serviceTemplates);
+        return cellSpec;
     }
 }

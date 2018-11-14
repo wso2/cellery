@@ -18,7 +18,7 @@
 
 package org.wso2.cellery.models;
 /**
- * API model.
+ * API Definition Builder.
  */
 public final class APIDefinitionBuilder {
     private String path;

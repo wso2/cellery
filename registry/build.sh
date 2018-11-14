@@ -19,6 +19,6 @@ echo "Building Registry API ..."
 ballerina build
 
 echo "Building Docker images ..."
-docker build --no-cache -f Dockerfile -t cellery-registry:0.0.1 .
+docker build --no-cache -f Dockerfile -t cellery/cellery-registry:0.0.1 .
 
 echo "Building Cellery Registry Completed"

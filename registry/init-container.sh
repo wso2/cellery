@@ -1,3 +1,4 @@
+#!/bin/sh
 # --------------------------------------------------------------------
 # Copyright (c) 2018, WSO2 Inc. (http://wso2.com) All Rights Reserved.
 #
@@ -13,27 +14,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # -----------------------------------------------------------------------
+#
+# This script will initiate the container and start the registry service
+#
+# -----------------------------------------------------------------------
 
-FROM ballerina/ballerina:0.983.0
-LABEL maintainer="cellery.io"
+REGISTRY_DATA_DIRECTORY=/mnt/cellery-registry-data
+CONFIG_DIRECTORY=/mnt/cellery-registry-config
 
-ARG WORK_DIR="/home/ballerina"
-WORKDIR ${WORK_DIR}
+# Copy any configuration changes mounted to cellery-registry-config
+if test -d ${CONFIG_DIRECTORY}; then
+    cp -r ${CONFIG_DIRECTORY}/* ${WORKING_DIRECTORY}/
+fi
 
-COPY init-container.sh .
-COPY target/registry.api.balx .
-COPY registry.api/resources/registry.toml .
-COPY resources/security/ security/
-
-USER root
-
-RUN mkdir -p /mnt/cellery-registry-data && chown -R ballerina:troupe /mnt/cellery-registry-data
-VOLUME ["/mnt/cellery-registry-data"]
-
-USER ballerina
-
-ENV WORKING_DIRECTORY=${WORK_DIR}
-
-EXPOSE 9090
-
-ENTRYPOINT ${WORKING_DIRECTORY}/init-container.sh
+ballerina run -c registry.toml registry.api.balx

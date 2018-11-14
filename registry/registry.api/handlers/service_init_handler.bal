@@ -105,7 +105,7 @@ function initializeFileStorage() returns (boolean|RegistryError) {
 # Creates or identify existing registry root location.
 # + return - Location of the repository.
 function createRegistryRootDirectory() returns (string) {
-    file:Path rootDir = new (REGISTRY_REPOSITORY_ROOT_LOCATION);
+    file:Path rootDir = new (REGISTRY_ROOT_DIRECTORY);
     try {
         if (!rootDir.exists()) {
             log:printDebug(string `Creating Registry root directory: {{rootDir.getPathValue()}}`);

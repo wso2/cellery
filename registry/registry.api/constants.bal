@@ -25,17 +25,21 @@ import ballerina/system;
 @final string CORS_ORIGINS = config:getAsString("CORS_ORIGINS", default = "*");
 
 // Keystore to secure Web API Service
-@final string KEYSTORE_FILE = config:getAsString("KEYSTORE_FILE", default = "${ballerina.home}/bre/security/ballerinaKeystore.p12");
+@final string KEYSTORE_FILE = config:getAsString("KEYSTORE_FILE",
+    default = "${ballerina.home}/bre/security/ballerinaKeystore.p12");
 @final string KEYSTORE_PASSWORD = config:getAsString("KEYSTORE_PASSWORD", default = "ballerina");
-
+@final string TRUSTSTORE_FILE = config:getAsString("TRUSTSTORE_FILE",
+    default = "${ballerina.home}/bre/security/ballerinaTruststore.p12");
+@final string TRUSTSTORE_PASSWORD = config:getAsString("TRUSTSTORE_PASSWORD", default = "ballerina");
 
 @final string ORG_NAME_REGEX = "^[a-z0-9_]*$";
 @final string PACKAGE_NAME_REGEX = "^[a-zA-Z0-9_.]*$";
-@final string VERSION_REGEX = "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(-(0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(\\.(0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*)?(\\+[0-9a-zA-Z-]+(\\.[0-9a-zA-Z-]+)*)?$";
+@final string VERSION_REGEX = "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(-(0|[1-9]\\d*|\\d*[a-zA-Z-]" +
+    "[0-9a-zA-Z-]*)(\\.(0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*)?(\\+[0-9a-zA-Z-]+(\\.[0-9a-zA-Z-]+)*)?$";
 
 @final string ARTIFACT_EXTENSION = config:getAsString("ARTIFACT_EXTENSION", default = ".zip");
 
-@final string REGISTRY_REPOSITORY_ROOT_LOCATION = config:getAsString("REGISTRY_REPOSITORY_ROOT_LOCATION",
-    default = system:getUserHome() + FILE_SEPARATOR + "cellery-registry");
+@final string REGISTRY_ROOT_DIRECTORY = config:getAsString("REGISTRY_ROOT_DIRECTORY",
+    default = system:getUserHome() + FILE_SEPARATOR + "cellery-registry-data");
 
 @final string FILE_SEPARATOR = "/";

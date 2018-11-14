@@ -124,7 +124,7 @@ func getComponentByUniqueId (uniqueId string, componentArrays [][]Component) []C
 }
 
 func componentArrayToStringArray(components []Component) [][]string {
-	componentArray := [][]string{}
+	convertedArray := [][]string{}
 
 	for i := 0; i < len(components); i++  {
 		component := make([]string, 5)
@@ -134,10 +134,10 @@ func componentArrayToStringArray(components []Component) [][]string {
 		component[3] = components[i].deployment
 		component[4] = components[i].service
 
-		componentArray = append(componentArray, component)
+		convertedArray = append(convertedArray, component)
 	}
 
-	return componentArray
+	return convertedArray
 }
 
 func intArrayToString(intArray []int) string {

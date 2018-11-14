@@ -27,4 +27,4 @@ if test -d ${CONFIG_DIRECTORY}; then
     cp -r ${CONFIG_DIRECTORY}/* ${WORKING_DIRECTORY}/
 fi
 
-ballerina run -c registry.toml registry.api.balx
+ballerina run -c registry.toml registry.api.balx 2>&1 | tee cellery-registry.log

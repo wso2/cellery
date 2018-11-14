@@ -137,7 +137,6 @@ func componentArrayToStringArray(components []Component) [][]string {
 		componentArray = append(componentArray, component)
 	}
 
-
 	return componentArray
 }
 

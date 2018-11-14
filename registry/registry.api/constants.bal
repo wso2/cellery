@@ -39,7 +39,8 @@ import ballerina/system;
 
 @final string ARTIFACT_EXTENSION = config:getAsString("ARTIFACT_EXTENSION", default = ".zip");
 
+@final string FILE_SEPARATOR = "/";
+
 @final string REGISTRY_ROOT_DIRECTORY = config:getAsString("REGISTRY_ROOT_DIRECTORY",
     default = system:getUserHome() + FILE_SEPARATOR + "cellery-registry-data");
 
-@final string FILE_SEPARATOR = "/";

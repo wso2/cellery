@@ -89,11 +89,11 @@
                 <artifactId>docker-client</artifactId>
                 <version>${docker.client.version}</version>
             </dependency>
-            <dependency>
-                <groupId>com.esotericsoftware.yamlbeans</groupId>
-                <artifactId>yamlbeans</artifactId>
-                <version>1.13</version>
-            </dependency>
+            <!--<dependency>-->
+                <!--<groupId>com.esotericsoftware.yamlbeans</groupId>-->
+                <!--<artifactId>yamlbeans</artifactId>-->
+                <!--<version>1.13</version>-->
+            <!--</dependency>-->
 
             <!--<dependency>-->
                 <!--<groupId>com.amihaiemil.web</groupId>-->

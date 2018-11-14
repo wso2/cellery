@@ -59,10 +59,10 @@
             <groupId>io.fabric8</groupId>
             <artifactId>kubernetes-client</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.esotericsoftware.yamlbeans</groupId>
-            <artifactId>yamlbeans</artifactId>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>com.esotericsoftware.yamlbeans</groupId>-->
+            <!--<artifactId>yamlbeans</artifactId>-->
+        <!--</dependency>-->
     </dependencies>
 
 

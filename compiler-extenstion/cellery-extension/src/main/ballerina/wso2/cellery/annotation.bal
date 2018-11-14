@@ -16,7 +16,7 @@
 
 # Cellery annotation configuration.
 #
-# + backend - Name of the docker image
+# + name - Name of the docker image
 # + registry - Docker registry url
 # + tag - Docker image tag
 # + username - Docker registry username
@@ -29,7 +29,7 @@
 # + dockerHost - Docker host IP and docker PORT. ( e.g minikube IP and docker PORT)
 # + dockerCertPath - Docker certificate path
 public type CelleryConfiguration record {
-    string backend;
+    string name;
     string registry;
     string tag;
     string username;
@@ -65,7 +65,7 @@ public type GitSource record{
 };
 
 public type Port record{
-    string? backend;
+    string? name;
     int port;
     string protocol;
     !...
@@ -103,7 +103,7 @@ public type Security record{
 };
 
 public type Component record{
-    string backend;
+    string name;
     DockerSource|ImageSource|GitSource source;
     int replicas;
     Port[] container;

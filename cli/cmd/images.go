@@ -50,7 +50,7 @@ func runImage() error {
 	table.SetColumnColor(
 		tablewriter.Colors{},
 		tablewriter.Colors{},
-		tablewriter.Colors{tablewriter.FgHiCyanColor},
+		tablewriter.Colors{tablewriter.FgHiBlueColor},
 		tablewriter.Colors{})
 
 	table.AppendBulk(data)

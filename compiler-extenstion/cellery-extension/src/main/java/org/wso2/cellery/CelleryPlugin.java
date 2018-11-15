@@ -37,7 +37,6 @@ import org.wso2.cellery.models.GatewayTemplate;
 import org.wso2.cellery.models.ServiceTemplate;
 import org.wso2.cellery.utils.Utils;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -122,9 +121,7 @@ public class CelleryPlugin extends AbstractCompilerPlugin {
                                         .build()).build()).build();
 
         try {
-            Utils.writeToFile(toYaml(cell),
-                    binaryPath.toAbsolutePath().getParent() + File.separator + "target" +
-                            File.separator + "cellery" + File.separator + "test" + ".yaml");
+            Utils.writeToFile(toYaml(cell), binaryPath);
         } catch (IOException ex) {
         }
     }

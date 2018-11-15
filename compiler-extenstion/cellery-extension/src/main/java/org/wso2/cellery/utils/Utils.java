@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static org.apache.commons.lang3.StringUtils.removePattern;
@@ -36,13 +37,16 @@ public class Utils {
     /**
      * Write content to a File. Create the required directories if they don't not exists.
      *
-     * @param context        context of the file
-     * @param outputFileName target file path
+     * @param context    context of the file
+     * @param binaryPath target file path
      * @throws IOException If an error occurs when writing to a file
      */
-    public static void writeToFile(String context, String outputFileName) throws IOException {
+    public static void writeToFile(String context, Path binaryPath) throws IOException {
+        String outputFileName = binaryPath.toAbsolutePath().getParent() + File.separator + "target" +
+                File.separator + "cellery" + File.separator +
+                extractBalxName(binaryPath.toAbsolutePath().toString()) + ".yaml";
         File newFile = new File(outputFileName);
-        // append if file exists
+        // delete if file exists
         if (newFile.exists()) {
             Files.delete(Paths.get(newFile.getPath()));
         }
@@ -54,6 +58,13 @@ public class Utils {
         Files.write(Paths.get(outputFileName), context.getBytes(StandardCharsets.UTF_8));
     }
 
+    /**
+     * Generates Yaml from a object.
+     *
+     * @param object Object
+     * @param <T>    Any Object type
+     * @return Yaml as a string.
+     */
     public static <T> String toYaml(T object) {
         try (StringWriter stringWriter = new StringWriter()) {
             YamlWriter writer = new YamlWriter(stringWriter);
@@ -69,5 +80,19 @@ public class Utils {
     private static String removeTags(String string) {
         //a tag is a sequence of characters starting with ! and ending with whitespace
         return removePattern(string, " ![^\\s]*");
+    }
+
+    /**
+     * Extract the ballerina file name from a given file path
+     *
+     * @param balxFilePath balx file path.
+     * @return output file name of balx
+     */
+    private static String extractBalxName(String balxFilePath) {
+        if (balxFilePath.contains(".balx")) {
+            return balxFilePath.substring(balxFilePath.lastIndexOf(File.separator) + 1, balxFilePath.lastIndexOf(
+                    ".balx"));
+        }
+        return null;
     }
 }

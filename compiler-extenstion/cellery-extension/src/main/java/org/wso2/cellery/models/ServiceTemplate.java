@@ -20,46 +20,21 @@ package org.wso2.cellery.models;
 
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * Service Template.
  */
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ServiceTemplate {
     private ObjectMeta metadata;
     private int replicas;
     private int servicePort;
     private Container container;
-
-    public ObjectMeta getMetadata() {
-        return metadata;
-    }
-
-    public void setMetadata(ObjectMeta metadata) {
-        this.metadata = metadata;
-    }
-
-    public int getReplicas() {
-        return replicas;
-    }
-
-    public void setReplicas(int replicas) {
-        this.replicas = replicas;
-    }
-
-    public int getServicePort() {
-        return servicePort;
-    }
-
-    public void setServicePort(int servicePort) {
-        this.servicePort = servicePort;
-    }
-
-    public Container getContainer() {
-        return container;
-    }
-
-    public void setContainer(Container container) {
-        this.container = container;
-    }
-
 }

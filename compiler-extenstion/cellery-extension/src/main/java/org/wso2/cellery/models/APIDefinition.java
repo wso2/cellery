@@ -17,27 +17,20 @@
  */
 
 package org.wso2.cellery.models;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 /**
  * API Definition model.
  */
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class APIDefinition {
     private String path;
     private String method;
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-    }
-
-    public String getMethod() {
-        return method;
-    }
-
-    public void setMethod(String method) {
-        this.method = method;
-    }
-
 }

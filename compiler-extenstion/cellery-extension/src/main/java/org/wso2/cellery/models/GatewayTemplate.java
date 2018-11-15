@@ -18,17 +18,18 @@
 
 package org.wso2.cellery.models;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 /**
  * Gateway Template.
  */
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class GatewayTemplate {
     private GatewaySpec spec;
-
-    public GatewaySpec getSpec() {
-        return spec;
-    }
-
-    public void setSpec(GatewaySpec spec) {
-        this.spec = spec;
-    }
 }

@@ -28,19 +28,18 @@ import org.ballerinalang.model.tree.AnnotationAttachmentNode;
 import org.ballerinalang.model.tree.PackageNode;
 import org.ballerinalang.model.tree.VariableNode;
 import org.ballerinalang.util.diagnostic.DiagnosticLog;
-import org.wso2.cellery.models.APIBuilder;
-import org.wso2.cellery.models.APIDefinitionBuilder;
+import org.wso2.cellery.models.API;
+import org.wso2.cellery.models.APIDefinition;
 import org.wso2.cellery.models.Cell;
 import org.wso2.cellery.models.CellSpec;
-import org.wso2.cellery.models.GatewaySpecBuilder;
-import org.wso2.cellery.models.GatewayTemplateBuilder;
-import org.wso2.cellery.models.ServiceTemplateBuilder;
+import org.wso2.cellery.models.GatewaySpec;
+import org.wso2.cellery.models.GatewayTemplate;
+import org.wso2.cellery.models.ServiceTemplate;
 import org.wso2.cellery.utils.Utils;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -69,63 +68,59 @@ public class CelleryPlugin extends AbstractCompilerPlugin {
 
     @Override
     public void codeGenerated(PackageID packageID, Path binaryPath) {
-        Cell cell = Cell.getInstance();
-        cell.setApiVersion("v1");
-        cell.setKind("Cell");
-        cell.setMetadata(new ObjectMetaBuilder()
-                .addToLabels("app", "test")
-                .withName("myCell")
-                .build());
-        CellSpec cellSpec = new CellSpec();
-        cellSpec.setGatewayTemplate(GatewayTemplateBuilder.aGatewayTemplate().withSpec(
-                GatewaySpecBuilder.aGatewaySpec()
-                        .withApis(
-                        Collections.singletonList(APIBuilder.anAPI()
-                                .withBackend("mock-backend")
-                                .withContext("/")
-                                .withGlobal(false)
-                                .withDefinitions(Collections.singletonList(
-                                        APIDefinitionBuilder.anAPIDefinition()
-                                                .withMethod("GET")
-                                                .withPath("/")
-                                                .build()))
-                                .build())
-                ).build()
-        ).build());
-        cellSpec.setServiceTemplates(
-                Arrays.asList(
-                        ServiceTemplateBuilder.
-                                aServiceTemplate()
-                                .withReplicas(1)
-                                .withServicePort(9090)
-                                .withMetadata(new ObjectMetaBuilder()
-                                        .addToLabels("app", "myApp1")
+        Cell cell = Cell.builder()
+                .apiVersion("v1")
+                .kind("Cell")
+                .metadata(new ObjectMetaBuilder()
+                        .addToLabels("app", "test")
+                        .withName("myCell")
+                        .build())
+                .spec(CellSpec.builder()
+                        .gatewayTemplate(
+                                GatewayTemplate.builder().spec(
+                                        GatewaySpec.builder()
+                                                .apis(API.builder()
+                                                        .backend("mock-backend")
+                                                        .context("/")
+                                                        .global(false)
+                                                        .definition(APIDefinition.builder()
+                                                                .method("POST")
+                                                                .path("/")
+                                                                .build())
+                                                        .build()
+                                                ).build()
+                                ).build())
+                        .serviceTemplate(
+                                ServiceTemplate.builder()
+                                        .replicas(1)
+                                        .servicePort(9090)
+                                        .metadata(new ObjectMetaBuilder()
+                                                .addToLabels("app", "myApp1")
+                                                .build())
+                                        .container(new ContainerBuilder()
+                                                .withImage("ballerina-service1:v1.0.0")
+                                                .withPorts(Collections.singletonList(
+                                                        new ContainerPortBuilder()
+                                                                .withContainerPort(9090)
+                                                                .build()))
+                                                .build())
                                         .build())
-                                .withContainer(new ContainerBuilder()
-                                        .withImage("ballerina-service1:v1.0.0")
-                                        .withPorts(Collections.singletonList(
-                                                new ContainerPortBuilder()
-                                                        .withContainerPort(9090)
-                                                        .build()))
-                                        .build())
-                                .build(),
-                        ServiceTemplateBuilder.
-                                aServiceTemplate()
-                                .withReplicas(1)
-                                .withServicePort(9091)
-                                .withMetadata(new ObjectMetaBuilder()
-                                        .addToLabels("app", "myApp2")
-                                        .build())
-                                .withContainer(new ContainerBuilder()
-                                        .withImage("ballerina-service2:v1.0.0")
-                                        .withPorts(Collections.singletonList(
-                                                new ContainerPortBuilder()
-                                                        .withContainerPort(9091)
-                                                        .build()))
-                                        .build())
-                                .build())
-        );
-        cell.setSpec(cellSpec);
+                        .serviceTemplate(
+                                ServiceTemplate.builder()
+                                        .replicas(1)
+                                        .servicePort(9091)
+                                        .metadata(new ObjectMetaBuilder()
+                                                .addToLabels("app", "myApp2")
+                                                .build())
+                                        .container(new ContainerBuilder()
+                                                .withImage("ballerina-service2:v1.0.0")
+                                                .withPorts(Collections.singletonList(
+                                                        new ContainerPortBuilder()
+                                                                .withContainerPort(9091)
+                                                                .build()))
+                                                .build())
+                                        .build()).build()).build();
+
         try {
             Utils.writeToFile(toYaml(cell),
                     binaryPath.toAbsolutePath().getParent() + File.separator + "target" +
@@ -133,5 +128,4 @@ public class CelleryPlugin extends AbstractCompilerPlugin {
         } catch (IOException ex) {
         }
     }
-
 }

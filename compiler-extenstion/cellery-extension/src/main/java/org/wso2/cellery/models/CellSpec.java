@@ -18,28 +18,22 @@
 
 package org.wso2.cellery.models;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.Singular;
+
 import java.util.List;
 
 /**
  * Cell Spec.
  */
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class CellSpec {
     private GatewayTemplate gatewayTemplate;
-    private List<ServiceTemplate> serviceTemplates;
-
-    public GatewayTemplate getGatewayTemplate() {
-        return gatewayTemplate;
-    }
-
-    public void setGatewayTemplate(GatewayTemplate gatewayTemplate) {
-        this.gatewayTemplate = gatewayTemplate;
-    }
-
-    public List<ServiceTemplate> getServiceTemplates() {
-        return serviceTemplates;
-    }
-
-    public void setServiceTemplates(List<ServiceTemplate> serviceTemplates) {
-        this.serviceTemplates = serviceTemplates;
-    }
+    private @Singular List<ServiceTemplate> serviceTemplates;
 }

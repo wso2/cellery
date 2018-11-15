@@ -18,19 +18,21 @@
 
 package org.wso2.cellery.models;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.Singular;
+
 import java.util.List;
 
 /**
  * Gateway Spec.
  */
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class GatewaySpec {
-    private List<API> apis;
-
-    public List<API> getApis() {
-        return apis;
-    }
-
-    public void setApis(List<API> apis) {
-        this.apis = apis;
-    }
+    private @Singular("apis") List<API> apis;
 }

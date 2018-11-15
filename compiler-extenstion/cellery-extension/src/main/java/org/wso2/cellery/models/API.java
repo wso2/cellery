@@ -18,47 +18,25 @@
 
 package org.wso2.cellery.models;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.Singular;
+
 import java.util.List;
 
 /**
  * API model.
  */
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class API {
     private String context;
     private String backend;
-    private List<APIDefinition> definitions;
+    private @Singular
+    List<APIDefinition> definitions;
     private boolean global;
-
-    public String getContext() {
-        return context;
-    }
-
-    public void setContext(String context) {
-        this.context = context;
-    }
-
-    public String getBackend() {
-        return backend;
-    }
-
-    public void setBackend(String backend) {
-        this.backend = backend;
-    }
-
-    public List<APIDefinition> getDefinitions() {
-        return definitions;
-    }
-
-    public void setDefinitions(List<APIDefinition> definitions) {
-        this.definitions = definitions;
-    }
-
-    public boolean isGlobal() {
-        return global;
-    }
-
-    public void setGlobal(boolean global) {
-        this.global = global;
-    }
-
 }

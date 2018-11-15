@@ -20,17 +20,17 @@ Default Cell Image Storage will be File System. There should be support for diff
 ├── blobs
 │   └── sha256
 │       ├── 0addb6fece630456e0ab187b0aa4304d0851ba60576e7f6f9042a97ee908a796
-│       │   └── hr-app.cel
+│       │   └── hr-app.zip
 │       ├── 18d680d616571900d78ee1c8fff0310f2a2afe39c6ed0ba2651ff667af406c3e
-│       │   └── hr-app.cel
+│       │   └── hr-app.zip
 │       ├── 473ede7ed136b710ab2dd51579af038b7d00fbbf6a1790c6294c93666203c0a6
-│       │   └── hr-app.cel
+│       │   └── hr-app.zip
 │       ├── 4a689991aa24aeb0339a27a1b5f42d040f28b0411d37d4812816e79f7049516c
-│       │   └── travel-service.cel
+│       │   └── travel-service.zip
 │       ├── 5de5f69f42d765af6ffb6753242b18dd4a33602ad7d76df52064833e5c527cb4
-│       │   └── travel-service.cel
+│       │   └── travel-service.zip
 │       └── 6b9eb699512656fc6ef936ddeb45ab25edcd17ab94901790989f89dbf782344a
-│           └── hello-world.cel
+│           └── hello-world.zip
 └── repository
     ├── foo
     │   └── hello-world

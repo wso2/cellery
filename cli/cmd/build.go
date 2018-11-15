@@ -1,19 +1,29 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"github.com/tj/go-spin"
-	"os/exec"
-	"bufio"
+	"io"
+	"io/ioutil"
+	"log"
 	"os"
+	"os/exec"
 	"strings"
 	"time"
 )
 
+var isSpinning = true
+var isFirstPrint = true
+var white = color.New(color.FgWhite)
+var boldWhite = white.Add(color.Bold).SprintFunc()
+var tag string
+var descriptorName string
+var balFileName string
+
 func newBuildCommand() *cobra.Command {
-	var tag string
-	var descriptorName string
 	cmd := &cobra.Command{
 		Use:   "build [OPTIONS]",
 		Short: "Build an immutable cell image with required dependencies",
@@ -36,6 +46,62 @@ func newBuildCommand() *cobra.Command {
 	return cmd
 }
 
+/**
+ Spinner
+ */
+func spinner(tag string) {
+	s := spin.New()
+	for {
+		if (isSpinning) {
+			fmt.Printf("\r\033[36m%s\033[m Building %s %s", s.Next(), "image", boldWhite(tag))
+			time.Sleep(100 * time.Millisecond)
+		}
+	}
+}
+
+func createBalFile() string {
+	// Create a temp directory
+	tempDir, err := ioutil.TempDir("", "cell")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Copy file
+	r, err := os.Open(descriptorName)
+	if err != nil {
+		panic(err)
+	}
+	defer r.Close()
+
+	balFileName = tempDir + "/" + descriptorName + ".bal"
+	w, err := os.Create(balFileName)
+	if err != nil {
+		panic(err)
+	}
+	defer w.Close()
+
+	_, err = io.Copy(w, r)
+	if err != nil {
+		panic(err)
+	}
+
+	return tempDir
+}
+
+func trim(stream string) string {
+	var trimmedString string
+	if (strings.Contains(stream, ".cell.balx")) {
+		trimmedString = strings.Replace(stream, ".cell.balx", ".celx", -1)
+	} else if (strings.Contains(stream, ".bal")) {
+		trimmedString = strings.Replace(stream, ".bal", "", -1)
+	} else if (strings.Contains(stream, ".cell")) {
+		trimmedString = strings.Replace(stream, ".cell", "", -1)
+	} else {
+		trimmedString = stream
+	}
+	return trimmedString
+}
+
 func runBuild(tag string, descriptorName string) error {
 	if tag == "" {
 		tag = strings.Split(descriptorName, ".")[0]
@@ -44,26 +110,29 @@ func runBuild(tag string, descriptorName string) error {
 		return fmt.Errorf("no descriptor name specified")
 	}
 
-	s := spin.New()
-	for i := 0; i < 40; i++ {
-		fmt.Printf("\r\033[36m%s\033[m Building %s %q", s.Next(), "image", tag)
-		time.Sleep(100 * time.Millisecond)
-	}
-	fmt.Printf("\n")
+	// Start spinner in a seperate thread
+	go spinner(tag)
 
-	cmd := exec.Command("ballerina", "build", descriptorName)
+	// Move cell file to a ballerina file
+	tempDir := createBalFile()
+
+	// clean up after finishing the task
+	defer os.RemoveAll(tempDir)
+
+	// Run ballerina command
+	cmd := exec.Command("ballerina", "build", balFileName)
 	stdoutReader, _ := cmd.StdoutPipe()
 	stdoutScanner := bufio.NewScanner(stdoutReader)
 	go func() {
 		for stdoutScanner.Scan() {
-			fmt.Println(stdoutScanner.Text())
-		}
-	}()
-	stderrReader, _ := cmd.StderrPipe()
-	stderrScanner := bufio.NewScanner(stderrReader)
-	go func() {
-		for stderrScanner.Scan() {
-			fmt.Println(stderrScanner.Text())
+			isSpinning = false
+			if (isFirstPrint) {
+				isFirstPrint = false
+				// At the first time, print with a new line
+				fmt.Println("\n  " + stdoutScanner.Text())
+			} else {
+				fmt.Println("  " + trim(stdoutScanner.Text()))
+			}
 		}
 	}()
 	err := cmd.Start()
@@ -77,7 +146,10 @@ func runBuild(tag string, descriptorName string) error {
 		os.Exit(1)
 	}
 
-	fmt.Printf("\r\033[32m Successfully built cell image \033[m %q \n", tag)
+	// Move balx file to a celx
+	os.Rename(descriptorName + ".balx", strings.Replace(descriptorName, ".cell", ".celx", -1))
+
+	fmt.Printf("\r\033[32m Successfully built cell image \033[m %s \n", boldWhite(tag))
 
 	return nil
 }

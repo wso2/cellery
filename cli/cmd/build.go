@@ -129,7 +129,7 @@ func runBuild(tag string, descriptorName string) error {
 	// Move balx file to a celx
 	os.Rename(descriptorName+".balx", strings.Replace(descriptorName, ".cell", ".celx", -1))
 
-	//// Create  file
+	//// Create zip file
 	var descripterFile string = strings.Split(descriptorName, ".")[0]
 	files := []string{descripterFile + ".celx"}
 	folders := []string{"target/cellery"}

@@ -21,10 +21,10 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"github.com/NipunaPrashan/cellery/cli/util"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"github.com/tj/go-spin"
-	"io"
 	"io/ioutil"
 	"log"
 	"os"
@@ -52,7 +52,7 @@ func newBuildCommand() *cobra.Command {
 			}
 			descriptorName = args[0]
 			err := runBuild(tag, descriptorName)
-			if err != nil{
+			if err != nil {
 				cmd.Help()
 				return err
 			}
@@ -77,49 +77,6 @@ func spinner(tag string) {
 	}
 }
 
-func createBalFile() string {
-	// Create a temp directory
-	tempDir, err := ioutil.TempDir("", "cell")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Copy file
-	r, err := os.Open(descriptorName)
-	if err != nil {
-		panic(err)
-	}
-	defer r.Close()
-
-	balFileName = tempDir + "/" + descriptorName + ".bal"
-	w, err := os.Create(balFileName)
-	if err != nil {
-		panic(err)
-	}
-	defer w.Close()
-
-	_, err = io.Copy(w, r)
-	if err != nil {
-		panic(err)
-	}
-
-	return tempDir
-}
-
-func trim(stream string) string {
-	var trimmedString string
-	if (strings.Contains(stream, ".cell.balx")) {
-		trimmedString = strings.Replace(stream, ".cell.balx", ".celx", -1)
-	} else if (strings.Contains(stream, ".bal")) {
-		trimmedString = strings.Replace(stream, ".bal", "", -1)
-	} else if (strings.Contains(stream, ".cell")) {
-		trimmedString = strings.Replace(stream, ".cell", "", -1)
-	} else {
-		trimmedString = stream
-	}
-	return trimmedString
-}
-
 func runBuild(tag string, descriptorName string) error {
 	if tag == "" {
 		tag = strings.Split(descriptorName, ".")[0]
@@ -132,7 +89,12 @@ func runBuild(tag string, descriptorName string) error {
 	go spinner(tag)
 
 	// Move cell file to a ballerina file
-	tempDir := createBalFile()
+	tempDir, err := ioutil.TempDir("", "cell")
+	if err != nil {
+		log.Fatal(err)
+	}
+	balFileName = tempDir + "/" + descriptorName + ".bal"
+	util.CopyFile(tempDir, descriptorName, balFileName)
 
 	// clean up after finishing the task
 	defer os.RemoveAll(tempDir)
@@ -149,11 +111,11 @@ func runBuild(tag string, descriptorName string) error {
 				// At the first time, print with a new line
 				fmt.Println("\n  " + stdoutScanner.Text())
 			} else {
-				fmt.Println("  " + trim(stdoutScanner.Text()))
+				fmt.Println("  " + util.Trim(stdoutScanner.Text()))
 			}
 		}
 	}()
-	err := cmd.Start()
+	err = cmd.Start()
 	if err != nil {
 		fmt.Printf("Error in executing cell build: %v \n", err)
 		os.Exit(1)
@@ -165,7 +127,18 @@ func runBuild(tag string, descriptorName string) error {
 	}
 
 	// Move balx file to a celx
-	os.Rename(descriptorName + ".balx", strings.Replace(descriptorName, ".cell", ".celx", -1))
+	os.Rename(descriptorName+".balx", strings.Replace(descriptorName, ".cell", ".celx", -1))
+
+	//// Create  file
+	var descripterFile string = strings.Split(descriptorName, ".")[0]
+	files := []string{descripterFile + ".celx"}
+	folders := []string{"target/cellery"}
+	output := descripterFile + ".zip"
+	err = util.RecursiveZip(files, folders, output);
+	if err != nil {
+		fmt.Printf("\x1b[31;1m Cell build finished with error: \x1b[0m %v \n", err)
+		os.Exit(1)
+	}
 
 	fmt.Printf("\r\033[32m Successfully built cell image \033[m %s \n", boldWhite(tag))
 

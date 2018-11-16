@@ -4,6 +4,7 @@ import (
 	"archive/zip"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -86,6 +87,60 @@ func ZipFiles(filename string, files []string) error {
 		if _, err = io.Copy(writer, zipfile); err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+func RecursiveZip(files []string, folders []string, destinationPath string) error {
+	destinationFile, err := os.Create(destinationPath)
+	if err != nil {
+		return err
+	}
+	myZip := zip.NewWriter(destinationFile)
+	for _, folder := range folders {
+		err = filepath.Walk(folder, func(filePath string, info os.FileInfo, err error) error {
+			if info.IsDir() {
+				return nil
+			}
+			if err != nil {
+				return err
+			}
+			relPath := strings.TrimPrefix(filePath, filepath.Dir(folder))
+
+			zipFile, err := myZip.Create(strings.Replace(relPath, "/", "", 1))
+			if err != nil {
+				return err
+			}
+
+			fsFile, err := os.Open(filePath)
+			if err != nil {
+				return err
+			}
+
+			_, err = io.Copy(zipFile, fsFile)
+
+			if err != nil {
+				return err
+			}
+			return nil
+		})
+	}
+
+	// Copy files
+	for _, file := range files {
+		zipFile, err := myZip.Create(file)
+		files, err := os.Open(file)
+		if err != nil {
+			return err
+		}
+		_, err = io.Copy(zipFile, files)
+	}
+	if err != nil {
+		return err
+	}
+	err = myZip.Close()
+	if err != nil {
+		return err
 	}
 	return nil
 }

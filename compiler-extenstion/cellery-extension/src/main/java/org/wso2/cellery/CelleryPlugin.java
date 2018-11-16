@@ -68,8 +68,6 @@ public class CelleryPlugin extends AbstractCompilerPlugin {
     @Override
     public void codeGenerated(PackageID packageID, Path binaryPath) {
         Cell cell = Cell.builder()
-                .apiVersion("v1")
-                .kind("Cell")
                 .metadata(new ObjectMetaBuilder()
                         .addToLabels("app", "test")
                         .withName("myCell")
@@ -116,9 +114,15 @@ public class CelleryPlugin extends AbstractCompilerPlugin {
                                                 .withPorts(Collections.singletonList(
                                                         new ContainerPortBuilder()
                                                                 .withContainerPort(9091)
-                                                                .build()))
-                                                .build())
-                                        .build()).build()).build();
+                                                                .build()
+                                                        )
+                                                )
+                                                .build()
+                                        )
+                                        .build()
+                        )
+                        .build())
+                .build();
 
         try {
             Utils.writeToFile(toYaml(cell), binaryPath);

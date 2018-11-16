@@ -19,7 +19,6 @@
 package org.wso2.cellery.models;
 
 import io.fabric8.kubernetes.api.model.ObjectMeta;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -28,12 +27,18 @@ import lombok.NoArgsConstructor;
  * Cell POJO model.
  */
 @Data
-@Builder
 @NoArgsConstructor
-@AllArgsConstructor
 public class Cell {
     private String apiVersion;
     private String kind;
     private ObjectMeta metadata;
     private CellSpec spec;
+
+    @Builder
+    public Cell(ObjectMeta metadata, CellSpec spec) {
+        kind = "Cell";
+        apiVersion = "vick.wso2.com/v1alpha1";
+        this.metadata = metadata;
+        this.spec = spec;
+    }
 }

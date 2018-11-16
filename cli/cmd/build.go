@@ -21,7 +21,7 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"github.com/NipunaPrashan/cellery/cli/util"
+	"github.com/wso2/cellery/cli/util"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"github.com/tj/go-spin"

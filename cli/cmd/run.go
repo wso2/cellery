@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"github.com/spf13/cobra"
 	"github.com/tj/go-spin"
+	"github.com/wso2/cellery/cli/util"
 	"os/exec"
 	"bufio"
 	"os"
@@ -29,7 +30,6 @@ import (
 )
 
 func newRunCommand() *cobra.Command {
-	var instance string
 	var cellImage string
 	cmd := &cobra.Command{
 		Use:   "run [OPTIONS]",
@@ -40,25 +40,25 @@ func newRunCommand() *cobra.Command {
 				return nil
 			}
 			cellImage = args[0]
-			err := run(instance, cellImage)
+			err := run(cellImage)
 			if err != nil{
 				cmd.Help()
 				return err
 			}
 			return nil
 		},
-		Example: "  cellery run my-project:v1.0 -n myproject-v1.0.0",
+		Example: "  cellery run hrApp",
 	}
-	cmd.Flags().StringVarP(&instance, "name", "n", "", "cell instance name")
 	return cmd
 }
 
-func run(instance string, cellImage string) error {
-	if instance == "" {
-		return fmt.Errorf("no instance name specified")
-	}
+func run(cellImage string) error {
 	if cellImage == "" {
 		return fmt.Errorf("no cellImage name specified")
+	}
+
+	if _, err := os.Stat(cellImage + ".zip"); os.IsNotExist(err) {
+		return fmt.Errorf("cellImage does not exist")
 	}
 
 	s := spin.New()
@@ -67,8 +67,9 @@ func run(instance string, cellImage string) error {
 		time.Sleep(100 * time.Millisecond)
 	}
 	fmt.Printf("\n")
+	util.Unzip(cellImage + ".zip", cellImage)
 
-	cmd := exec.Command("ballerina", "run", instance)
+	cmd := exec.Command("kubectl", "apply", "-f", cellImage + "/cellery/test.yaml")
 	stdoutReader, _ := cmd.StdoutPipe()
 	stdoutScanner := bufio.NewScanner(stdoutReader)
 	go func() {
@@ -94,7 +95,7 @@ func run(instance string, cellImage string) error {
 		os.Exit(1)
 	}
 
-	fmt.Printf("\r\033[32m Successfully created cell instance \033[m %q \n", instance)
+	fmt.Printf("\r\033[32m Successfully created cell instance \033[m  \n")
 
 	return nil
 }

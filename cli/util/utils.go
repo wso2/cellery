@@ -22,6 +22,7 @@ import (
 	"archive/zip"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -218,4 +219,18 @@ func Unzip(zipFolderName string, destinationFolderName string) error {
 		}
 	}
 	return nil
+}
+
+func FindInDirectory(directory, suffix string) ([]string, error) {
+	files, err := ioutil.ReadDir(directory)
+	if err != nil {
+		return nil, err
+	}
+	fileList := []string{}
+	for _, f := range files {
+		if !f.IsDir() && strings.HasSuffix(f.Name(), suffix) {
+			fileList = append(fileList, filepath.Join(directory, f.Name()))
+		}
+	}
+	return fileList, nil
 }

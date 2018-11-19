@@ -168,28 +168,28 @@ func Unzip(zipFolderName string, destinationFolderName string) error {
 
 	var fileNames []string
 
-	r, err := zip.OpenReader(zipFolderName)
+	zipFolder, err := zip.OpenReader(zipFolderName)
 	if err != nil {
 		return err
 	}
-	defer r.Close()
+	defer zipFolder.Close()
 
-	for _, f := range r.File {
+	for _, file := range zipFolder.File {
 
-		rc, err := f.Open()
+		fileContent, err := file.Open()
 		if err != nil {
 			return err
 		}
-		defer rc.Close()
+		defer fileContent.Close()
 
-		fpath := filepath.Join(destinationFolderName, f.Name)
+		fpath := filepath.Join(destinationFolderName, file.Name)
 		if !strings.HasPrefix(fpath, filepath.Clean(destinationFolderName)+string(os.PathSeparator)) {
 			return fmt.Errorf("%s: illegal file path", fpath)
 		}
 
 		fileNames = append(fileNames, fpath)
 
-		if f.FileInfo().IsDir() {
+		if file.FileInfo().IsDir() {
 
 			// Make Folder
 			os.MkdirAll(fpath, os.ModePerm)
@@ -201,12 +201,12 @@ func Unzip(zipFolderName string, destinationFolderName string) error {
 				return err
 			}
 
-			outFile, err := os.OpenFile(fpath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
+			outFile, err := os.OpenFile(fpath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, file.Mode())
 			if err != nil {
 				return err
 			}
 
-			_, err = io.Copy(outFile, rc)
+			_, err = io.Copy(outFile, fileContent)
 
 			// Close the file without defer to close before next iteration of loop
 			outFile.Close()

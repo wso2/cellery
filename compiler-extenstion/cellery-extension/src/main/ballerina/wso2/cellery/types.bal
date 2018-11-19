@@ -45,6 +45,7 @@ public type Definition record{
 
 public type API record{
     string context;
+    boolean global;
     Definition[] definitions;
 };
 

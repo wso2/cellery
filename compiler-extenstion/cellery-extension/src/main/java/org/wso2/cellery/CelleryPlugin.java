@@ -28,16 +28,22 @@ import org.ballerinalang.model.tree.AnnotationAttachmentNode;
 import org.ballerinalang.model.tree.PackageNode;
 import org.ballerinalang.model.tree.VariableNode;
 import org.ballerinalang.util.diagnostic.DiagnosticLog;
+import org.wso2.ballerinalang.compiler.tree.BLangVariable;
+import org.wso2.ballerinalang.compiler.tree.expressions.BLangRecordLiteral;
+import org.wso2.ballerinalang.compiler.tree.expressions.BLangSimpleVarRef;
 import org.wso2.cellery.models.API;
 import org.wso2.cellery.models.APIDefinition;
 import org.wso2.cellery.models.Cell;
 import org.wso2.cellery.models.CellSpec;
+import org.wso2.cellery.models.Component;
+import org.wso2.cellery.models.ComponentHolder;
 import org.wso2.cellery.models.GatewaySpec;
 import org.wso2.cellery.models.GatewayTemplate;
 import org.wso2.cellery.models.ServiceTemplate;
 import org.wso2.cellery.utils.Utils;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
@@ -63,6 +69,31 @@ public class CelleryPlugin extends AbstractCompilerPlugin {
     @Override
     public void process(VariableNode variableNode, List<AnnotationAttachmentNode> annotations) {
         //TODO:Implement to process variable node.
+        PrintStream out = System.out;
+        List<BLangRecordLiteral.BLangRecordKeyValue> fields =
+                ((BLangRecordLiteral) ((BLangVariable) variableNode).expr).keyValuePairs;
+        Component component = new Component();
+        for (BLangRecordLiteral.BLangRecordKeyValue keyValue : fields) {
+            ComponentKey variableKey = ComponentKey.valueOf(((BLangSimpleVarRef) keyValue.key.expr).variableName.value);
+            switch (variableKey) {
+                case name:
+                    component.setName(keyValue.valueExpr.toString());
+                    break;
+                case replicas:
+                    component.setReplicas(Integer.parseInt(keyValue.valueExpr.toString()));
+                    break;
+                case apis:
+                    component.addApi(CelleryParser.parseAPI(keyValue));
+                    break;
+                case env:
+                    component.setEnvVars(CelleryParser.parseEnv(keyValue));
+                    break;
+                default:
+                    break;
+            }
+        }
+        ComponentHolder.getInstance().addComponent(component);
+        out.println(component);
     }
 
     @Override
@@ -128,5 +159,15 @@ public class CelleryPlugin extends AbstractCompilerPlugin {
             Utils.writeToFile(toYaml(cell), binaryPath);
         } catch (IOException ex) {
         }
+    }
+
+    private enum ComponentKey {
+        name,
+        source,
+        replicas,
+        container,
+        env,
+        apis,
+        security
     }
 }

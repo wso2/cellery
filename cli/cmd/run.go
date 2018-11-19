@@ -58,7 +58,7 @@ func run(cellImage string) error {
 	}
 
 	if _, err := os.Stat(cellImage + ".zip"); os.IsNotExist(err) {
-		return fmt.Errorf("cellImage does not exist")
+		return fmt.Errorf("zip folder does not exist")
 	}
 
 	s := spin.New()
@@ -69,7 +69,7 @@ func run(cellImage string) error {
 	fmt.Printf("\n")
 	util.Unzip(cellImage + ".zip", cellImage)
 
-	cmd := exec.Command("kubectl", "apply", "-f", cellImage + "/cellery/test.yaml")
+	cmd := exec.Command("kubectl", "apply", "-f", getImageFileName(cellImage))
 	stdoutReader, _ := cmd.StdoutPipe()
 	stdoutScanner := bufio.NewScanner(stdoutReader)
 	go func() {
@@ -98,4 +98,14 @@ func run(cellImage string) error {
 	fmt.Printf("\r\033[32m Successfully created cell instance \033[m  \n")
 
 	return nil
+}
+
+func getImageFileName (cellImage string) string {
+	imageYaml, pathErr := util.FindInDirectory(cellImage + "/cellery", ".yaml")
+	if pathErr != nil {
+		fmt.Printf("Error in returning image file name: %v \n", pathErr)
+		os.Exit(1)
+	}
+
+	return imageYaml[0]
 }

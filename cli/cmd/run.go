@@ -47,7 +47,7 @@ func newRunCommand() *cobra.Command {
 			}
 			return nil
 		},
-		Example: "  cellery run hrApp",
+		Example: "  cellery run my-project:v1.0 -n myproject-v1.0.0",
 	}
 	return cmd
 }

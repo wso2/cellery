@@ -166,9 +166,7 @@ func RecursiveZip(files []string, folders []string, destinationPath string) erro
 }
 
 func Unzip(zipFolderName string, destinationFolderName string) error {
-
 	var fileNames []string
-
 	zipFolder, err := zip.OpenReader(zipFolderName)
 	if err != nil {
 		return err
@@ -176,7 +174,6 @@ func Unzip(zipFolderName string, destinationFolderName string) error {
 	defer zipFolder.Close()
 
 	for _, file := range zipFolder.File {
-
 		fileContent, err := file.Open()
 		if err != nil {
 			return err
@@ -189,33 +186,25 @@ func Unzip(zipFolderName string, destinationFolderName string) error {
 		}
 
 		fileNames = append(fileNames, fpath)
-
 		if file.FileInfo().IsDir() {
-
 			// Make Folder
 			os.MkdirAll(fpath, os.ModePerm)
-
 		} else {
-
 			// Make File
 			if err = os.MkdirAll(filepath.Dir(fpath), os.ModePerm); err != nil {
 				return err
 			}
-
 			outFile, err := os.OpenFile(fpath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, file.Mode())
 			if err != nil {
 				return err
 			}
-
 			_, err = io.Copy(outFile, fileContent)
 
 			// Close the file without defer to close before next iteration of loop
 			outFile.Close()
-
 			if err != nil {
 				return err
 			}
-
 		}
 	}
 	return nil

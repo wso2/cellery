@@ -46,7 +46,7 @@ func newStopCommand() *cobra.Command {
 			}
 			return nil
 		},
-		Example: "  cellery stop hrApp -n myproject-v1.0.0",
+		Example: "  cellery stop my-project:v1.0",
 	}
 	return cmd
 }

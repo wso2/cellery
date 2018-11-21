@@ -57,6 +57,9 @@ func ps() error {
 	go func() {
 		for stderrScanner.Scan() {
 			fmt.Println(stderrScanner.Text())
+			if (stderrScanner.Text() == "No resources found.") {
+				os.Exit(0)
+			}
 		}
 	}()
 	err := cmd.Start()
@@ -69,8 +72,5 @@ func ps() error {
 		fmt.Printf("\x1b[31;1m Cell ps finished with error: \x1b[0m %v \n", err)
 		os.Exit(1)
 	}
-
-	fmt.Printf("\r\033[32m Successfully listed all running  cells \033[m  \n")
-
 	return nil
 }

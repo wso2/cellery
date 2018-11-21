@@ -19,14 +19,12 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"github.com/spf13/cobra"
-	"github.com/tj/go-spin"
 	"github.com/wso2/cellery/cli/util"
-	"os/exec"
-	"bufio"
 	"os"
-	"time"
+	"os/exec"
 )
 
 func newRunCommand() *cobra.Command {
@@ -61,12 +59,6 @@ func run(cellImage string) error {
 		return fmt.Errorf("zip folder does not exist")
 	}
 
-	s := spin.New()
-	for i := 0; i < 40; i++ {
-		fmt.Printf("\r\033[36m%s\033[m Running %s %q", s.Next(), "image", cellImage)
-		time.Sleep(100 * time.Millisecond)
-	}
-	fmt.Printf("\n")
 	util.Unzip(cellImage + ".zip", cellImage)
 
 	cmd := exec.Command("kubectl", "apply", "-f", getImageFileName(cellImage))
@@ -94,8 +86,6 @@ func run(cellImage string) error {
 		fmt.Printf("\x1b[31;1m Cell run finished with error: \x1b[0m %v \n", err)
 		os.Exit(1)
 	}
-
-	fmt.Printf("\r\033[32m Successfully created cell instance \033[m  \n")
 
 	return nil
 }

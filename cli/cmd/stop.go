@@ -22,10 +22,8 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/spf13/cobra"
-	"github.com/tj/go-spin"
 	"os"
 	"os/exec"
-	"time"
 )
 
 func newStopCommand() *cobra.Command {
@@ -56,13 +54,6 @@ func stop(instanceName string) error {
 		return fmt.Errorf("no cell instance name specified")
 	}
 
-	s := spin.New()
-	for i := 0; i < 40; i++ {
-		fmt.Printf("\r\033[36m%s\033[m Stopping %s %q", s.Next(), "cell instance", instanceName)
-		time.Sleep(100 * time.Millisecond)
-	}
-	fmt.Printf("\n")
-
 	cmd := exec.Command("kubectl", "delete", "cell", instanceName)
 	stdoutReader, _ := cmd.StdoutPipe()
 	stdoutScanner := bufio.NewScanner(stdoutReader)
@@ -88,8 +79,5 @@ func stop(instanceName string) error {
 		fmt.Printf("\x1b[31;1m Cell stop finished with error: \x1b[0m %v \n", err)
 		os.Exit(1)
 	}
-
-	fmt.Printf("\r\033[32m Successfully stopped cell instance \033[m  \n")
-
 	return nil
 }

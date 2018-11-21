@@ -75,8 +75,5 @@ func describe(cellImage string) error {
 		fmt.Printf("\x1b[31;1m Cell describe finished with error: \x1b[0m %v \n", err)
 		os.Exit(1)
 	}
-
-	fmt.Printf("\r\033[32m Successfully described cell \033[m  \n")
-
 	return nil
 }

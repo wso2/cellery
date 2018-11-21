@@ -42,6 +42,7 @@ func newCliCommand() *cobra.Command {
 		newVersionCommand(),
 		newInitCommand(),
 		newRunCommand(),
+		newStopCommand(),
 	)
 	return cmd
 }

@@ -12,6 +12,12 @@ import java.util.Map;
  */
 class CelleryParser {
 
+    /**
+     * Create {@link API} object from key value pairs.
+     *
+     * @param apiKeyValues Record values
+     * @return {@link API} object
+     */
     static API parseAPI(BLangRecordLiteral.BLangRecordKeyValue apiKeyValues) {
         API api = new API();
         ((BLangRecordLiteral) apiKeyValues.valueExpr).keyValuePairs.forEach(bLangRecordKeyValue -> {
@@ -29,6 +35,12 @@ class CelleryParser {
         return api;
     }
 
+    /**
+     * Create Map object from key value pairs.
+     *
+     * @param envKeyValues Record values
+     * @return Map object
+     */
     static Map<String, String> parseEnv(BLangRecordLiteral.BLangRecordKeyValue envKeyValues) {
         Map<String, String> envVars = new HashMap<>();
         ((BLangRecordLiteral) envKeyValues.valueExpr).keyValuePairs.forEach(bLangRecordKeyValue -> {

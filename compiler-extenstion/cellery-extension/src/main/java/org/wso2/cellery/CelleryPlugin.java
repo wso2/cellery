@@ -101,7 +101,7 @@ public class CelleryPlugin extends AbstractCompilerPlugin {
         Cell cell = Cell.builder()
                 .metadata(new ObjectMetaBuilder()
                         .addToLabels("app", "test")
-                        .withName("myCell")
+                        .withName("my-cell")
                         .build())
                 .spec(CellSpec.builder()
                         .gatewayTemplate(

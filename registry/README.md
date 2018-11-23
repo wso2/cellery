@@ -14,6 +14,11 @@ Before you can deploy a Celley Registry, you need to have Docker or Kubernetes i
 
 #### Run a local registry
 
+Build Registry APIs and Docker image with the bash script.
+```
+$ bash build.sh
+``` 
+
 You can run the Cellery Registry locally as a docker container with the following command.
 
 ```

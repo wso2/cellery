@@ -14,6 +14,24 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
+FROM ballerina/ballerina:0.983.0 as builder
+
+ARG PROJECT_DIR=/workspace/
+WORKDIR /workspace
+
+COPY registry.api registry.api
+COPY registry-natives registry-natives
+COPY registry-natives/target/cellery-registry-0.0.0.jar /ballerina/runtime/bre/lib
+COPY registry-natives/target/generated-balo/repo /ballerina/runtime/lib/repo
+COPY resources resources
+COPY Ballerina.toml .
+
+USER root
+RUN chown -R ballerina $PROJECT_DIR
+
+USER ballerina
+RUN ballerina init && cp -r registry-natives/target/generated-balo/repo .ballerina && ballerina build registry.api
+
 FROM ballerina/ballerina:0.983.0
 LABEL maintainer="cellery.io"
 
@@ -21,7 +39,7 @@ ARG WORK_DIR="/home/ballerina"
 WORKDIR ${WORK_DIR}
 
 COPY init-container.sh .
-COPY target/registry.api.balx .
+COPY --from=builder /workspace/target/registry.api.balx .
 COPY registry.api/resources/registry.toml .
 COPY resources/security/ security/
 COPY registry-natives/target/cellery-registry-* /ballerina/runtime/bre/lib/

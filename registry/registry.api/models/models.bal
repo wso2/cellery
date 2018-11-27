@@ -14,6 +14,33 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/time;
+import ballerina/log;
+import ballerina/sql;
+
+# A model for a Cell Image.
+# + id - An ID for the artifact.
+# + orgName - Organization name.
+# + name - Image name.
+# + imageVersion - Version of the Image.
+# + imageRevision - Revision of the Image.
+public type CellImage object {
+    public string id;
+    public string orgName;
+    public string name;
+    public string imageVersion;
+    public string imageRevision;
+
+    function getImageTag() returns (string) {
+        if (imageVersion.trim() == "") {
+            return orgName.trim() + "/" + name.trim();
+        } else {
+            return orgName.trim() + "/" + name.trim() + ":" + imageVersion;
+        }
+    }
+};
+
+
 # Error struct for encapsulating artifact handling errors.
 # + message - Error message.
 # + code - The error code. This is not an http status code.

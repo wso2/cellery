@@ -22,6 +22,7 @@ import ballerina/log;
 @final string REGISTRY_ROOT_DIRECTORY_PATH = createRegistryRootDirectory();
 @final string ARCHIVES_DIRECTORY_PATH = string `{{REGISTRY_ROOT_DIRECTORY_PATH}}{{FILE_SEPARATOR}}archives`;
 @final string REPOSITORY_DIRECTORY_PATH = string `{{REGISTRY_ROOT_DIRECTORY_PATH}}{{FILE_SEPARATOR}}repository`;
+@final string TMP_DIRECTORY_PATH = string `{{REGISTRY_ROOT_DIRECTORY_PATH}}{{FILE_SEPARATOR}}tmp`;
 
 # Initializes the registry
 # + return - True if server started successfully.
@@ -58,6 +59,7 @@ function initializeFileStorage() returns (boolean|RegistryError) {
         // Creating directory structure.
         file:Path archivesDirectory = new(ARCHIVES_DIRECTORY_PATH);
         file:Path repositoryDirectory = new(REPOSITORY_DIRECTORY_PATH);
+        file:Path tmpDirectory = new(TMP_DIRECTORY_PATH);
         if (!archivesDirectory.exists()) {
             log:printDebug(string `Creating archives directory: {{archivesDirectory.getPathValue()}}`);
             match archivesDirectory.createDirectory() {
@@ -65,8 +67,8 @@ function initializeFileStorage() returns (boolean|RegistryError) {
                     intialized = true;
                 }
                 error err => {
-                    RegistryError regErr = new (string `Error occurred while initializing registry:
-                        {{archivesDirectory.getPathValue()}}`, "R2000", cause = err
+                    RegistryError regErr = new (string `Error occurred while initializing registry.
+                        Unable to create directory : {{archivesDirectory.getPathValue()}}`, "R2000", cause = err
                     );
                     return regErr;
                 }
@@ -83,8 +85,8 @@ function initializeFileStorage() returns (boolean|RegistryError) {
                     intialized = intialized && true;
                 }
                 error err => {
-                    RegistryError regErr = new (string `Error occurred while initializing remote repository:
-                        {{repositoryDirectory.getPathValue()}}`, "R2000", cause = err
+                    RegistryError regErr = new (string `Error occurred while initializing remote repository.
+                        Unable to create directory :{{repositoryDirectory.getPathValue()}}`, "R2000", cause = err
                     );
                     return regErr;
                 }
@@ -92,6 +94,24 @@ function initializeFileStorage() returns (boolean|RegistryError) {
         } else {
             intialized = intialized && true;
             log:printDebug(string `Using existing repository directory: {{repositoryDirectory.getPathValue()}}`);
+        }
+
+        if (!tmpDirectory.exists()) {
+            log:printDebug(string `Creating tmp directory: {{tmpDirectory.getPathValue()}}`);
+            match tmpDirectory.createDirectory() {
+                () => {
+                    intialized = true;
+                }
+                error err => {
+                    RegistryError regErr = new (string `Error occurred while initializing registry.
+                        Unable to create directory :{{tmpDirectory.getPathValue()}}`, "R2000", cause = err
+                    );
+                    return regErr;
+                }
+            }
+        } else {
+            intialized = true;
+            log:printDebug(string `Using existing tmp directory: {{tmpDirectory.getPathValue()}}`);
         }
 
         return intialized;
@@ -113,7 +133,8 @@ function createRegistryRootDirectory() returns (string) {
                 () => {}
                 error err => {
                     error regErrRuntime = {
-                        message: string `Unable to create Registry root directory at location: {{rootDir.getPathValue()}}.`,
+                        message: string `Unable to create Registry root directory at location:
+                            {{rootDir.getPathValue()}}.`,
                         cause: err
                     };
                     throw regErrRuntime;
@@ -123,7 +144,8 @@ function createRegistryRootDirectory() returns (string) {
         return rootDir.getPathValue();
     } catch (error err) {
         error regErrRuntime = {
-            message: string `Unable to create or identify Registry root directtory at location: {{rootDir.getPathValue()}}.`,
+            message: string `Unable to create or identify Registry root directtory at location:
+                {{rootDir.getPathValue()}}.`,
             cause: err
         };
         throw regErrRuntime;

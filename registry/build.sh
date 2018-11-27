@@ -67,12 +67,23 @@ if [[ -z "$BUILD_VERSION" ]]; then
 fi
 
 echo "Building Registry API ..."
-ballerina build
+ballerina build registry.api
 
 STATUS=$?
 
 if [[ ${STATUS} != 0 ]]; then
     showErrorAndExit "Registry API build failed." ${STATUS}
+fi
+
+echo "Building Registry Ballerina Native module ..."
+pushd registry-natives >/dev/null 2>&1
+mvn clean install
+popd >/dev/null 2>&1
+
+STATUS=$?
+
+if [[ ${STATUS} != 0 ]]; then
+    showErrorAndExit "Registry Ballerina Native module build failed." ${STATUS}
 fi
 
 echo

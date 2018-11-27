@@ -20,115 +20,127 @@ import ballerina/log;
 import ballerina/system;
 
 # Creates a directory in the given path
-# + return - true if successfully created or directory exists
-function createDirectory(string path) returns (boolean) {
-    file:Path directory = new (path);
-    try {
-        if (!directory.exists()) {
-            match directory.createDirectory() {
-                () => {
-                    log:printDebug(string `New directory created: {{directory.getPathValue()}}`);
-                }
-                error err => {
-                    error regErrRuntime = {
-                        message: string `Unable to create directory at location: {{directory.getPathValue()}}.`,
-                        cause: err
-                    };
-                    throw regErrRuntime;
-                }
-            }
-        }
-        return true;
-    } catch (error err) {
-        error regErrRuntime = {
-            message: string `Unable to create directory at location: {{directory.getPathValue()}}.`,
-            cause: err
-        };
-        throw regErrRuntime;
-    }
-}
-
-# Copy artifact file into file system. Overwrites if file exists.
-# + artifactByteChannel - The byte channel of the artifact file.
-# + filePath - The path to the file
-# + return - Path of the artifact else error cause in creating the artifact file.
-function copyArtifactFile (io:ReadableByteChannel artifactByteChannel, string filePath) returns (string | RegistryError) {
-    try {
-        file:Path artifactFile = new (filePath);
-        // Delete if artifact file already exists. This is to overwrite existing artifact content.
-        if (artifactFile.exists()) {
-            log:printDebug(string `Deleting existing artifact file: {{artifactFile.getPathValue()}}`);
-            match artifactFile.delete() {
-                () => {}
-                error ioError => {
-                    RegistryError regErr = new (
-                                               string `Error deleting existing artifact file: {{artifactFile.getPathValue()}}.`,
-                                               "f2101",
-                                               cause = ioError
-                    );
-                    return regErr;
-                }
-            }
-        }
-
-        // Creating artifact file.
-        log:printDebug(string `Creating artifact file: {{artifactFile.getPathValue()}}`);
-        var artifactFileCreateRes = artifactFile.createFile();
-        match artifactFileCreateRes {
-            () => {}
-            error err => {
-                RegistryError regErr = new (
-                                           string `Error creating artifact file: {{artifactFile.getPathValue()}}`,
-                                           "f2102",
-                                           cause = err
-                );
-                return regErr;
-            }
-        }
-
-        log:printDebug(string `Writing content to artifact file: {{artifactFile.getPathValue()}}`);
-        var writeToFileRes = writeToFile(artifactByteChannel, artifactFile);
-        match writeToFileRes {
+# + path - The path to the directory
+# + return -  RegistryError if the directory could not be created
+function createDirectory(string path) returns RegistryError? {
+    file:Path directory = new(path);
+    if (!directory.exists()) {
+        match directory.createDirectory() {
             () => {
-                log:printDebug(string `Artifact file written: {{artifactFile.getPathValue()}}`);
-                return artifactFile.getPathValue();
+                log:printDebug(string `New directory created: {{directory.getPathValue()}}`);
             }
             error err => {
-                RegistryError regErr = new (
-                                           string `Error creating artifact file: {{artifactFile.getPathValue()}}`,
-                                           "f2103",
-                                           cause = err
-                );
+                string msg = string `Unable to create directory at location: {{directory.getPathValue()}}.`;
+                RegistryError regErr = new (msg, "R2100", cause = err);
                 return regErr;
             }
         }
-    } catch (error err) {
-        RegistryError regErr = new (
-                                   string `Error creating artifact file`,
-                                   "f2000",
-                                   cause = err
-        );
-        return regErr;
     }
-
+    return ();
 }
 
-function writeToFile (io:ReadableByteChannel src, file:Path dstFile) returns (error | ()) {
-    io:WritableByteChannel dst = getFileChannel(dstFile);
-    // Specifies the number of bytes that should be read from a single read operation.
+# Persist file into file system. Overwrites if file exists.
+# + sourceByteChannel - The byte channel of the file source
+# + path - The path to persist the file
+# + return -  RegistryError if the file could not be peristed
+function persistFile(io:ReadableByteChannel sourceByteChannel, string path) returns RegistryError? {
+    file:Path file = new(path);
+    // Delete if the file already exists.
+    if (file.exists()) {
+        log:printDebug(string `Deleting existing file: {{file.getPathValue()}}`);
+        match file.delete() {
+            () => {}
+            error ioError => {
+                string msg = string `Error while deleting existing file: {{file.getPathValue()}}.`;
+                RegistryError regErr = new(msg, "R2100", cause = ioError);
+                return regErr;
+            }
+        }
+    }
+
+    // Creating file.
+    log:printDebug(string `Creating file: {{file.getPathValue()}}`);
+    var artifactFileCreateRes = file.createFile();
+    match artifactFileCreateRes {
+        () => {}
+        error err => {
+            string msg = string `Error while creating new file: {{file.getPathValue()}}`;
+            RegistryError regErr = new(msg, "R2100", cause = err);
+            return regErr;
+        }
+    }
+
+    log:printDebug(string `Writing content to file: {{file.getPathValue()}}`);
+    var writeToFileRes = writeByteChannelToFile(sourceByteChannel, file);
+    match writeToFileRes {
+        () => {
+            log:printDebug(string `File written: {{file.getPathValue()}}`);
+        }
+        error err => {
+            string msg = string `Error while writing to new file: {{file.getPathValue()}}`;
+            RegistryError regErr = new(msg, "R2100", cause = err);
+            return regErr;
+        }
+    }
+
+    return ();
+}
+
+
+
+# Create the file with the given path
+# + path - The path of the file to be deleted
+# + return -  RegistryError if the file could not be deleted
+function createFile(string path) returns RegistryError? {
+    file:Path file = new(path);
+    log:printDebug(string `Creating file: {{file.getPathValue()}}`);
+    var artifactFileCreateRes = file.createFile();
+    match artifactFileCreateRes {
+        () => {}
+        error err => {
+            string msg = string `Error while creating new file: {{file.getPathValue()}}`;
+            RegistryError regErr = new(msg, "R2100", cause = err);
+            return regErr;
+        }
+    }
+    return ();
+}
+
+# Delete the file with the given path
+# + path - The path of the file to be deleted
+# + return -  RegistryError if the file could not be deleted
+function deleteFile(string path) returns RegistryError? {
+    file:Path file = new(path);
+    if (file.exists()) {
+        log:printDebug(string `Deleting  file: {{file.getPathValue()}}`);
+        match file.delete() {
+            () => {}
+            error ioError => {
+                string msg = string `Error while deleting file: {{file.getPathValue()}}.`;
+                RegistryError regErr = new(msg, "R2100", cause = ioError);
+                return regErr;
+            }
+        }
+    }
+    return ();
+}
+
+# Writes a byte channel to the given file
+# + src - The source byte channel
+# + dstFile - The destination file
+# + return -  RegistryError if error occured while writing
+function writeByteChannelToFile(io:ReadableByteChannel src, file:Path dstFile) returns error? {
+    io:WritableByteChannel dst = io:openWritableFile(untaint dstFile.getPathValue());
     int numberOfBytesWritten = 0;
     int readCount = 0;
     byte[] readContent;
     boolean completed = false;
     try {
-        // Here is how to specify to read all the content from
-        // the source and copy it to the destination.
         while (!completed) {
             match readBytes(src, 1024) {
                 (byte[], int) out => {
                     (readContent, readCount) = out;
                     if (readCount <= 0) {
-                        //If no content is read we end the loop
                         completed = true;
                     }
                     numberOfBytesWritten = writeBytes(dst, readContent);
@@ -142,17 +154,55 @@ function writeToFile (io:ReadableByteChannel src, file:Path dstFile) returns (er
         return ();
     } catch (error err) {
         return err;
+    } finally {
+        _ = dst.close();
     }
 }
 
-function writeBytes (io:WritableByteChannel byteChannel, byte[] content) returns (int) {
+# Write the given string to the file with the given path
+# + strContent - The string to be written
+# + path - The path of the file
+# + return -  RegistryError if error occured while writing
+function writeStringToFile(string strContent, string path) returns error? {
+    file:Path dstFile = new(path);
+    io:WritableByteChannel dst = io:openWritableFile(untaint path);
+    try {
+        byte[] byteContent = strContent.toByteArray("UTF-8");
+        _ = writeBytes(dst, byteContent);
+        return ();
+    } catch (error err) {
+        return err;
+    } finally {
+        _ = dst.close();
+    }
+}
+
+# Reads the file with the given path and returns the a string content
+# + path - The path of the file
+# + return -  RegistryError if error occured while reading
+function readFile(string path) returns (string|error) {
+    io:ReadableByteChannel byteChannel = io:openReadableFile(path);
+    io:ReadableCharacterChannel characterChannel = new io:ReadableCharacterChannel(byteChannel, "UTF8");
+    match characterChannel.read (100) {
+        string characters => {
+            _ = byteChannel.close();
+            _ = characterChannel.close();
+            return characters;
+        }
+        error err => {
+            return err;
+        }
+    }
+}
+
+function writeBytes(io:WritableByteChannel byteChannel, byte[] content) returns (int) {
     match byteChannel.write(content, 0) {
         int numberOfBytesWritten => return numberOfBytesWritten;
         error err => throw err;
     }
 }
 
-function readBytes (io:ReadableByteChannel byteChannel, int numberOfBytes) returns (byte[], int)|() {
+function readBytes(io:ReadableByteChannel byteChannel, int numberOfBytes) returns (byte[], int)|() {
     match byteChannel.read(numberOfBytes) {
         (byte[], int) content => return content;
         error readError => {
@@ -160,9 +210,4 @@ function readBytes (io:ReadableByteChannel byteChannel, int numberOfBytes) retur
             return (emptyContent, 0);
         }
     }
-}
-
-function getFileChannel (file:Path fileToOpen) returns (io:WritableByteChannel) {
-    io:WritableByteChannel byteChannel = io:openWritableFile(untaint fileToOpen.getPathValue());
-    return byteChannel;
 }

@@ -19,7 +19,7 @@ API_SERVICE_PORT=9090
 API_VERSION="0.0.1"
 
 REGISTRY_ROOT_DIRECTORY="/mnt/cellery-registry-data/"
-ARTIFACT_EXTENSION=".zip"
+IMAGE_EXTENSION=".zip"
 
 ### Keystore ###
 KEYSTORE_FILE="security/cellery-registry-keystore.p12"

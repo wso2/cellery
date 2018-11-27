@@ -24,6 +24,8 @@ COPY init-container.sh .
 COPY target/registry.api.balx .
 COPY registry.api/resources/registry.toml .
 COPY resources/security/ security/
+COPY registry-natives/target/cellery-registry-* /ballerina/runtime/bre/lib/
+COPY registry-natives/target/generated-balo/repo/ /ballerina/runtime/lib/repo/
 
 USER root
 
@@ -33,6 +35,7 @@ VOLUME ["/mnt/cellery-registry-data"]
 USER ballerina
 
 ENV WORKING_DIRECTORY=${WORK_DIR}
+ENV WORKING_DIRECTORY2=${WORK_DIR}
 
 EXPOSE 9090
 

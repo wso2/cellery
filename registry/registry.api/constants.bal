@@ -33,14 +33,19 @@ import ballerina/system;
 @final string TRUSTSTORE_PASSWORD = config:getAsString("TRUSTSTORE_PASSWORD", default = "ballerina");
 
 @final string ORG_NAME_REGEX = "^[a-z0-9_]*$";
-@final string PACKAGE_NAME_REGEX = "^[a-zA-Z0-9_.]*$";
-@final string VERSION_REGEX = "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(-(0|[1-9]\\d*|\\d*[a-zA-Z-]" +
-    "[0-9a-zA-Z-]*)(\\.(0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*)?(\\+[0-9a-zA-Z-]+(\\.[0-9a-zA-Z-]+)*)?$";
+@final string IMAGE_NAME_REGEX = "^[a-zA-Z0-9_.-]*$";
+@final string VERSION_REGEX = "^(latest)?(v?V?(\\d+(?:\\.\\d+)*)(?:-[A-Za-z]+[\\d]*)?)?$";
+@final string REVISION_REGEX = "([a-fA-F0-9]{64})";
 
-@final string ARTIFACT_EXTENSION = config:getAsString("ARTIFACT_EXTENSION", default = ".zip");
+//@final string VERSION_REGEX = "^([0-9]+(?:\\.[0-9]+)*)$";
+
+@final string IMAGE_EXTENSION = config:getAsString("IMAGE_EXTENSION", default = ".zip");
 
 @final string FILE_SEPARATOR = "/";
 
+@final string REVISIONS_DIR_NAME = "revisions";
+@final string CURRENT_DIR_NAME = "current";
+@final string TAGS_DIR_NAME = "tags";
+@final string LINK_FILE_NAME = "link";
 @final string REGISTRY_ROOT_DIRECTORY = config:getAsString("REGISTRY_ROOT_DIRECTORY",
     default = system:getUserHome() + FILE_SEPARATOR + "cellery-registry-data");
-

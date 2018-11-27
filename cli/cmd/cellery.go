@@ -46,6 +46,7 @@ func newCliCommand() *cobra.Command {
 		newPsCommand(),
 		newDescribeCommand(),
 		newApisCommand(),
+		newComponentsCommand(),
 	)
 	return cmd
 }

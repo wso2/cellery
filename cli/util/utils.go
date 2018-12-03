@@ -25,7 +25,9 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
+	"time"
 )
 
 func CopyFile(directory string, oldFile string, newFile string) {
@@ -222,4 +224,79 @@ func FindInDirectory(directory, suffix string) ([]string, error) {
 		}
 	}
 	return fileList, nil
+}
+
+func GetDuration(startTime time.Time) string {
+	duration := ""
+	var year, month, day, hour, min, sec int
+	currentTime := time.Now()
+	if startTime.Location() != currentTime.Location() {
+		currentTime = currentTime.In(startTime.Location())
+	}
+	if startTime.After(currentTime) {
+		startTime, currentTime = currentTime, startTime
+	}
+	startYear, startMonth, startDay := startTime.Date()
+	currentYear, currentMonth, currentDay := currentTime.Date()
+
+	startHour, startMinute, startSecond := startTime.Clock()
+	currentHour, currentMinute, currentSecond := currentTime.Clock()
+
+	year = int(currentYear - startYear)
+	month = int(currentMonth - startMonth)
+	day = int(currentDay - startDay)
+	hour = int(currentHour - startHour)
+	min = int(currentMinute - startMinute)
+	sec = int(currentSecond - startSecond)
+
+	// Normalize negative values
+	if sec < 0 {
+		sec += 60
+		min--
+	}
+	if min < 0 {
+		min += 60
+		hour--
+	}
+	if hour < 0 {
+		hour += 24
+		day--
+	}
+	if day < 0 {
+		// days in month:
+		t := time.Date(startYear, startMonth, 32, 0, 0, 0, 0, time.UTC)
+		day += 32 - t.Day()
+		month--
+	}
+	if month < 0 {
+		month += 12
+		year--
+	}
+
+	numOfTimeUnits := 0
+	if year > 0 && numOfTimeUnits < 2 {
+		duration += strconv.Itoa(year) + " years "
+		numOfTimeUnits++
+	}
+	if month > 0 && numOfTimeUnits < 2 {
+		duration += strconv.Itoa(month) + " months "
+		numOfTimeUnits++
+	}
+	if day > 0 && numOfTimeUnits < 2 {
+		duration += strconv.Itoa(day) + " days "
+		numOfTimeUnits++
+	}
+	if hour > 0 && numOfTimeUnits < 2 {
+		duration += strconv.Itoa(hour) + " hours "
+		numOfTimeUnits++
+	}
+	if min > 0 && numOfTimeUnits < 2 {
+		duration += strconv.Itoa(min) + " minutes "
+		numOfTimeUnits++
+	}
+	if sec > 0 && numOfTimeUnits < 2 {
+		duration += strconv.Itoa(sec) + " seconds"
+		numOfTimeUnits++
+	}
+	return duration
 }

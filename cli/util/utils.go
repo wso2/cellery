@@ -300,3 +300,12 @@ func GetDuration(startTime time.Time) string {
 	}
 	return duration
 }
+
+func ConvertStringToTime(timeString string) time.Time {
+	convertedTime, err := time.Parse(time.RFC3339, timeString)
+	if err != nil {
+		fmt.Printf("\x1b[31;1m Error parsing time: \x1b[0m %v \n", err)
+		os.Exit(1)
+	}
+	return convertedTime
+}

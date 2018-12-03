@@ -30,20 +30,20 @@ import (
 	"strings"
 )
 
-type CellComponent struct {
-	Items []Item `json:"items"`
+type Service struct {
+	Items []ServiceItem `json:"items"`
 }
 
-type Item struct {
-	Metadata MetaData `json:"metadata"`
-	Spec ComponentSpec `json:"spec"`
+type ServiceItem struct {
+	Metadata ServiceMetaData `json:"metadata"`
+	Spec ServiceSpec `json:"spec"`
 }
 
-type MetaData struct {
+type ServiceMetaData struct {
 	Name string `json:"name"`
 }
 
-type ComponentSpec struct {
+type ServiceSpec struct {
 	Ports []Port `json:"ports"`
 }
 
@@ -102,7 +102,7 @@ func components(cellName string) error {
 		os.Exit(1)
 	}
 
-	jsonOutput := &CellComponent{}
+	jsonOutput := &Service{}
 
 	errJson := json.Unmarshal([]byte(output), jsonOutput)
 	if errJson!= nil{
@@ -113,14 +113,13 @@ func components(cellName string) error {
 	return nil
 }
 
-func displayComponentsTable(componentArray []Item, cellName string) error {
+func displayComponentsTable(componentArray []ServiceItem, cellName string) error {
 	tableData := [][]string{}
 
 	for i := 0; i < len(componentArray); i++ {
 		var name string
-		name = strings.Replace(componentArray[i].Metadata.Name, cellName, "", -1)
+		name = strings.Replace(componentArray[i].Metadata.Name, cellName + "--", "", -1)
 		name = strings.Replace(name, "-service", "", -1)
-		name = strings.Replace(name, "--", "", -1)
 
 		ports := strconv.Itoa(componentArray[i].Spec.Ports[0].Port)
 		for j := 1; j < len(componentArray[i].Spec.Ports); j++ {

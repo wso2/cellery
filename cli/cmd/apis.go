@@ -30,10 +30,10 @@ import (
 )
 
 type Gateway struct {
-	Spec Spec  `json:"spec"`
+	GatewaySpec GatewaySpec  `json:"spec"`
 }
 
-type Spec struct {
+type GatewaySpec struct {
 	Apis []Api `json:"apis"`
 }
 
@@ -108,7 +108,7 @@ func apis(cellName string) error {
 		fmt.Println(errJson)
 	}
 
-	displayApisTable(jsonOutput.Spec.Apis)
+	displayApisTable(jsonOutput.GatewaySpec.Apis)
 	return nil
 }
 

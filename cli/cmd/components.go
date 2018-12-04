@@ -44,10 +44,10 @@ type ServiceMetaData struct {
 }
 
 type ServiceSpec struct {
-	Ports []Port `json:"ports"`
+	Ports []ServicePort `json:"ports"`
 }
 
-type Port struct {
+type ServicePort struct {
 	Port int `json:"port"`
 } 
 

@@ -55,7 +55,7 @@ func newStatusCommand() *cobra.Command {
 }
 
 func status(cellName string) error {
-	cmd := exec.Command("kubectl", "get", "pods", "-l", "vick.wso2.com/cell=" + cellName, "-o", "json")
+	cmd := exec.Command("kubectl", "get", "pods", "-l", GroupName + "/cell=" + cellName, "-o", "json")
 	output := ""
 
 	outfile, errPrint := os.Create("./out.txt")

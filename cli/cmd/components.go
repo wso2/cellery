@@ -54,7 +54,7 @@ func newComponentsCommand() *cobra.Command {
 }
 
 func components(cellName string) error {
-	cmd := exec.Command("kubectl", "get", "services", "-l", "vick.wso2.com/cell=" + cellName, "-o", "json")
+	cmd := exec.Command("kubectl", "get", "services", "-l", GroupName + "/cell=" + cellName, "-o", "json")
 	stdoutReader, _ := cmd.StdoutPipe()
 	stdoutScanner := bufio.NewScanner(stdoutReader)
 	output := ""

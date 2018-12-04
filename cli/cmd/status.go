@@ -92,10 +92,14 @@ func status(cellName string) error {
 		fmt.Println(errJson)
 	}
 
-	cellCreationTime, cellStatus := getCellSummary(cellName)
-	displayStatusSummaryTable(cellCreationTime, cellStatus)
-	fmt.Println("\n")
-	displayStatusDetailedTable(jsonOutput.Items, cellName)
+	if len(jsonOutput.Items) == 0 {
+		fmt.Printf("Cannot find cell: %v \n", cellName)
+	} else {
+		cellCreationTime, cellStatus := getCellSummary(cellName)
+		displayStatusSummaryTable(cellCreationTime, cellStatus)
+		fmt.Println("\n")
+		displayStatusDetailedTable(jsonOutput.Items, cellName)
+	}
 	return nil
 }
 

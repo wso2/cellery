@@ -88,7 +88,11 @@ func components(cellName string) error {
 		fmt.Println(errJson)
 	}
 
-	displayComponentsTable(jsonOutput.Items, cellName)
+	if len(jsonOutput.Items) == 0 {
+		fmt.Printf("Cannot find cell: %v \n", cellName)
+	} else {
+		displayComponentsTable(jsonOutput.Items, cellName)
+	}
 	return nil
 }
 

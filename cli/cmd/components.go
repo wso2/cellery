@@ -30,27 +30,6 @@ import (
 	"strings"
 )
 
-type Service struct {
-	Items []ServiceItem `json:"items"`
-}
-
-type ServiceItem struct {
-	Metadata ServiceMetaData `json:"metadata"`
-	Spec ServiceSpec `json:"spec"`
-}
-
-type ServiceMetaData struct {
-	Name string `json:"name"`
-}
-
-type ServiceSpec struct {
-	Ports []ServicePort `json:"ports"`
-}
-
-type ServicePort struct {
-	Port int `json:"port"`
-} 
-
 func newComponentsCommand() *cobra.Command {
 	var cellName string
 	cmd := &cobra.Command{

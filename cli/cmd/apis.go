@@ -29,25 +29,6 @@ import (
 	"strings"
 )
 
-type Gateway struct {
-	GatewaySpec GatewaySpec  `json:"spec"`
-}
-
-type GatewaySpec struct {
-	Apis []Api `json:"apis"`
-}
-
-type Api struct {
-	Backend string `json:"backend"`
-	Context string `json:"context"`
-	Definitions []Definition `json:"definitions"`
-}
-
-type Definition struct {
-	Method string `json:"method"`
-	Path string `json:"path"`
-}
-
 func newApisCommand() *cobra.Command {
 	var cellName string
 	cmd := &cobra.Command{
@@ -112,7 +93,7 @@ func apis(cellName string) error {
 	return nil
 }
 
-func displayApisTable(apiArray []Api) error {
+func displayApisTable(apiArray []GatewayApi) error {
 	tableData := [][]string{}
 
 	for i := 0; i < len(apiArray); i++ {
@@ -155,7 +136,7 @@ func displayApisTable(apiArray []Api) error {
 	return nil
 }
 
-func getApiMethodsArray(definitions []Definition) []string {
+func getApiMethodsArray(definitions []GatewayDefinition) []string {
 	methodArray := make([]string, 5)
 
 	for i := 0; i < len(definitions) ; i++ {

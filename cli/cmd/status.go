@@ -44,11 +44,11 @@ type CellStatus struct {
 	Status string `json:"status"`
 }
 
-type Pod struct {
-	Items []PodItem `json:"items"`
+type CellPods struct {
+	Items []Pod `json:"items"`
 }
 
-type PodItem struct {
+type Pod struct {
 	MetaData PodMetaData `json:"metadata"`
 	PodStatus PodStatus `json:"status"`
 }
@@ -124,7 +124,7 @@ func status(cellName string) error {
 	}
 
 	output = string(outputByteArray)
-	jsonOutput := &Pod{}
+	jsonOutput := &CellPods{}
 	errJson := json.Unmarshal([]byte(output), jsonOutput)
 	if errJson!= nil{
 		fmt.Println(errJson)
@@ -202,7 +202,7 @@ func displayStatusSummaryTable(cellCreationTime, cellStatus string) error {
 	return nil
 }
 
-func displayStatusDetailedTable(podItems []PodItem, cellName string) error {
+func displayStatusDetailedTable(podItems []Pod, cellName string) error {
 	tableData := [][]string{}
 
 	for i := 0; i < len(podItems); i++ {

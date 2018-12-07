@@ -31,13 +31,6 @@ public type GitSource record{
     !...
 };
 
-public type Port record{
-    string? name;
-    int port;
-    string protocol;
-    !...
-};
-
 public type Definition record{
     string path;
     string method;
@@ -46,44 +39,48 @@ public type Definition record{
 public type API record{
     string context;
     boolean global;
-    Definition[] definitions;
+    Ingress|Definition[] definitions;
 };
 
-public type InternalEgress record{
+public type Egress record{
+    Ingress name;
     string envVar;
-    string value;
+    Policy policy;
 };
 
-public type ExternalEgress record{
-    string host;
-    string protocol;
+public type Policy record{
+    RetryConfig policyConfig;
 };
 
-public type Dependencies record{
-    InternalEgress[] inernalEgresses;
-    ExternalEgress[] externalEgresses;
+public type RetryConfig record {
+    int interval;
+    int count;
+    float backOffFactor;
+    int maxWaitInterval;
 };
 
-public type Security record{
-    string ^"type";
-    string issuer;
-    string jwksURL;
-};
 
 public type Component record{
     string name;
     DockerSource|ImageSource|GitSource source;
     int replicas;
-    Port[] container;
-    map env;
-    API apis;
-    Dependencies dependencies;
-    Security security;
+    string[] env;
+    Ingress[] ingresses;
+    Egress[] egresses;
     !...
 };
 
+public type Ingress record{
+    string name;
+    string port;
+    string context;
+    Definition[] definitions;
+};
+
+
 public type Cell object {
     Component[] components;
+    API[] apis;
 
     public function addComponent(Component component) {
         components[lengthof components] = component;

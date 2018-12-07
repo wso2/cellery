@@ -18,9 +18,6 @@
 
 package org.wso2.cellery;
 
-import io.fabric8.kubernetes.api.model.ContainerBuilder;
-import io.fabric8.kubernetes.api.model.ContainerPortBuilder;
-import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import org.ballerinalang.compiler.plugins.AbstractCompilerPlugin;
 import org.ballerinalang.compiler.plugins.SupportedAnnotationPackages;
 import org.ballerinalang.model.elements.PackageID;
@@ -31,23 +28,17 @@ import org.ballerinalang.util.diagnostic.DiagnosticLog;
 import org.wso2.ballerinalang.compiler.tree.BLangVariable;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangRecordLiteral;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangSimpleVarRef;
-import org.wso2.cellery.models.API;
-import org.wso2.cellery.models.APIDefinition;
 import org.wso2.cellery.models.Cell;
-import org.wso2.cellery.models.CellSpec;
 import org.wso2.cellery.models.Component;
 import org.wso2.cellery.models.ComponentHolder;
-import org.wso2.cellery.models.GatewaySpec;
-import org.wso2.cellery.models.GatewayTemplate;
-import org.wso2.cellery.models.ServiceTemplate;
 import org.wso2.cellery.utils.Utils;
 
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.List;
 
+import static org.wso2.cellery.CelleryParser.generateCell;
 import static org.wso2.cellery.utils.Utils.toYaml;
 
 /**
@@ -88,6 +79,10 @@ public class CelleryPlugin extends AbstractCompilerPlugin {
                 case env:
                     component.setEnvVars(CelleryParser.parseEnv(keyValue));
                     break;
+                case source:
+                    component.setSource(((BLangRecordLiteral) keyValue.valueExpr).
+                            keyValuePairs.get(0).valueExpr.toString());
+                    break;
                 default:
                     break;
             }
@@ -98,63 +93,7 @@ public class CelleryPlugin extends AbstractCompilerPlugin {
 
     @Override
     public void codeGenerated(PackageID packageID, Path binaryPath) {
-        Cell cell = Cell.builder()
-                .metadata(new ObjectMetaBuilder()
-                        .addToLabels("app", "test")
-                        .withName("my-cell")
-                        .build())
-                .spec(CellSpec.builder()
-                        .gatewayTemplate(
-                                GatewayTemplate.builder().spec(
-                                        GatewaySpec.builder()
-                                                .apis(API.builder()
-                                                        .backend("mock-backend")
-                                                        .context("/")
-                                                        .global(false)
-                                                        .definition(APIDefinition.builder()
-                                                                .method("POST")
-                                                                .path("/")
-                                                                .build())
-                                                        .build()
-                                                ).build()
-                                ).build())
-                        .serviceTemplate(
-                                ServiceTemplate.builder()
-                                        .replicas(1)
-                                        .servicePort(9090)
-                                        .metadata(new ObjectMetaBuilder()
-                                                .addToLabels("app", "myApp1")
-                                                .build())
-                                        .container(new ContainerBuilder()
-                                                .withImage("ballerina-service1:v1.0.0")
-                                                .withPorts(Collections.singletonList(
-                                                        new ContainerPortBuilder()
-                                                                .withContainerPort(9090)
-                                                                .build()))
-                                                .build())
-                                        .build())
-                        .serviceTemplate(
-                                ServiceTemplate.builder()
-                                        .replicas(1)
-                                        .servicePort(9091)
-                                        .metadata(new ObjectMetaBuilder()
-                                                .addToLabels("app", "myApp2")
-                                                .build())
-                                        .container(new ContainerBuilder()
-                                                .withImage("ballerina-service2:v1.0.0")
-                                                .withPorts(Collections.singletonList(
-                                                        new ContainerPortBuilder()
-                                                                .withContainerPort(9091)
-                                                                .build()
-                                                        )
-                                                )
-                                                .build()
-                                        )
-                                        .build()
-                        )
-                        .build())
-                .build();
-
+        Cell cell = generateCell();
         try {
             Utils.writeToFile(toYaml(cell), binaryPath);
         } catch (IOException ex) {

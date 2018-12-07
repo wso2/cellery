@@ -29,6 +29,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static org.apache.commons.lang3.StringUtils.removePattern;
+import static org.wso2.cellery.CelleryConstants.BALX;
+import static org.wso2.cellery.CelleryConstants.CELLERY;
+import static org.wso2.cellery.CelleryConstants.TARGET;
+import static org.wso2.cellery.CelleryConstants.YAML;
 
 /**
  * Utility methods for Cellery extension.
@@ -42,9 +46,9 @@ public class Utils {
      * @throws IOException If an error occurs when writing to a file
      */
     public static void writeToFile(String context, Path binaryPath) throws IOException {
-        String outputFileName = binaryPath.toAbsolutePath().getParent() + File.separator + "target" +
-                File.separator + "cellery" + File.separator +
-                extractBalxName(binaryPath.toAbsolutePath().toString()) + ".yaml";
+        String outputFileName = binaryPath.toAbsolutePath().getParent() + File.separator + TARGET +
+                File.separator + CELLERY + File.separator +
+                extractBalxName(binaryPath.toAbsolutePath().toString()) + "." + YAML;
         File newFile = new File(outputFileName);
         // delete if file exists
         if (newFile.exists()) {
@@ -89,9 +93,9 @@ public class Utils {
      * @return output file name of balx
      */
     private static String extractBalxName(String balxFilePath) {
-        if (balxFilePath.contains(".balx")) {
+        if (balxFilePath.contains(BALX)) {
             return balxFilePath.substring(balxFilePath.lastIndexOf(File.separator) + 1, balxFilePath.lastIndexOf(
-                    ".balx"));
+                    "." + BALX));
         }
         return null;
     }

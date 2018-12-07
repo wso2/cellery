@@ -14,26 +14,17 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
+ *
  */
 
-package org.wso2.cellery.models;
-
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.Singular;
-
-import java.util.List;
+package org.wso2.cellery;
 
 /**
- * Gateway Spec.
+ * Cellery Constants.
  */
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class GatewaySpec {
-    private @Singular("apis")
-    List<API> apis;
+public class CelleryConstants {
+    public static final String TARGET = "target";
+    public static final String CELLERY = "cellery";
+    public static final String BALX = "balx";
+    public static final String YAML = "yaml";
 }

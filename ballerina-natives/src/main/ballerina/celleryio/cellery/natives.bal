@@ -21,7 +21,7 @@ public type DockerSource record{
 };
 
 public type ImageSource record{
-    string dockerImage;
+    string image;
     !...
 };
 
@@ -37,15 +37,15 @@ public type Definition record{
 };
 
 public type API record{
-    string context;
+    string|Ingress context;
     boolean global;
-    Ingress|Definition[] definitions;
+    Ingress|Definition[]? definitions;
 };
 
 public type Egress record{
     Ingress name;
     string envVar;
-    Policy policy;
+    Policy? policy;
 };
 
 public type Policy record{
@@ -59,10 +59,9 @@ public type RetryConfig record {
     int maxWaitInterval;
 };
 
-
 public type Component record{
     string name;
-    DockerSource|ImageSource|GitSource source;
+    ImageSource source;
     int replicas;
     string[] env;
     Ingress[] ingresses;
@@ -77,10 +76,10 @@ public type Ingress record{
     Definition[] definitions;
 };
 
-
 public type Cell object {
-    Component[] components;
-    API[] apis;
+    public Component[] components;
+    public API[] apis;
+    public Egress[] egresses;
 
     public function addComponent(Component component) {
         components[lengthof components] = component;

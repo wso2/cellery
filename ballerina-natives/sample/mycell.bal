@@ -20,10 +20,10 @@ cellery:Component comp1 = {
             ]
         }
     ]
-
 };
 
 cellery:Component comp2 = {
+    name: "comp2",
     source: {
         image: "docker.io/wso2vick/component2:v1"
     },
@@ -62,6 +62,10 @@ public function lifeCycleBuild() {
     cellA.apis = [
         {
             context:comp2.ingresses[0],
+            global: true
+        },
+        {
+            context: comp1.ingresses[0],
             global: true
         }
     ];

@@ -17,35 +17,21 @@
  */
 package io.cellery;
 
-import org.apache.commons.codec.digest.DigestUtils;
+import io.cellery.models.API;
+import io.cellery.models.APIDefinition;
 import org.ballerinalang.bre.Context;
-import org.ballerinalang.bre.bvm.BLangVMErrors;
-import org.ballerinalang.bre.bvm.BLangVMStructs;
 import org.ballerinalang.bre.bvm.BlockingNativeCallableUnit;
 import org.ballerinalang.model.types.TypeKind;
 import org.ballerinalang.model.values.BMap;
-import org.ballerinalang.model.values.BString;
-import org.ballerinalang.model.values.BValue;
+import org.ballerinalang.model.values.BRefType;
+import org.ballerinalang.model.values.BRefValueArray;
 import org.ballerinalang.natives.annotations.Argument;
 import org.ballerinalang.natives.annotations.BallerinaFunction;
 import org.ballerinalang.natives.annotations.ReturnType;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
-import java.nio.file.Paths;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-
-import org.ballerinalang.util.codegen.PackageInfo;
-import org.ballerinalang.util.codegen.StructureTypeInfo;
-import org.ballerinalang.util.exceptions.BallerinaException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import static org.ballerinalang.util.BLangConstants.BALLERINA_BUILTIN_PKG;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 /**
  * Native function cellery/registry:hash.
@@ -60,8 +46,84 @@ import static org.ballerinalang.util.BLangConstants.BALLERINA_BUILTIN_PKG;
 public class CelleryBuild extends BlockingNativeCallableUnit {
 
     public void execute(Context ctx) {
-        System.out.println("Build Called....");
+        System.out.println("----------------------------------");
+        System.out.println("Build Called...." + ctx.toString());
+        System.out.println(ctx.getNullableRefArgument(0));
+        processAPIs(((BRefValueArray) ((BMap) ctx.getNullableRefArgument(0)).getMap().get("apis")).getValues());
+        System.out.println("done");
     }
+
+    private void processAPIs(BRefType<?>[] apiMap) {
+        List<API> apiList = new ArrayList<>();
+        for (BRefType apiDefinition : apiMap) {
+            if (apiDefinition == null) {
+                continue;
+            }
+            API api = new API();
+            ((BMap<?, ?>) apiDefinition).getMap().forEach((key, value) -> {
+                switch (key.toString()) {
+                    case "global":
+                        api.setGlobal(Boolean.parseBoolean(value.toString()));
+                        break;
+                    case "context":
+                        ((BMap<?, ?>) value).getMap().forEach((contextKey, contextValue) -> {
+                            switch (contextKey.toString()) {
+                                case "context":
+                                    api.setContext(contextValue.toString());
+                                    break;
+                                case "definitions":
+                                    api.setDefinitions(processDefinitions(((BRefValueArray) contextValue).getValues()));
+                                    break;
+                                default:
+                                    break;
+                            }
+                        });
+                        break;
+                    default:
+                        break;
+
+                }
+            });
+            apiList.add(api);
+        }
+        System.out.println("processed API" + apiList);
+    }
+
+    private List<APIDefinition> processDefinitions(BRefType<?>[] definitions) {
+        List<APIDefinition> apiDefinitions = new ArrayList<>();
+        for (BRefType definition : definitions) {
+            if (definition == null) {
+                continue;
+            }
+            APIDefinition apiDefinition = new APIDefinition();
+            ((BMap<?, ?>) definition).getMap().forEach((key, value) -> {
+                switch (key.toString()) {
+                    case "path":
+                        apiDefinition.setPath(value.toString());
+                        break;
+                    case "method":
+                        apiDefinition.setMethod(value.toString());
+                        break;
+                    default:
+                        break;
+
+                }
+            });
+            apiDefinitions.add(apiDefinition);
+        }
+        return apiDefinitions;
+    }
+
+    /**
+     * Returns valid kubernetes name.
+     *
+     * @param name actual value
+     * @return valid name
+     */
+    private String getValidName(String name) {
+        return name.toLowerCase(Locale.getDefault()).replace("_", "-").replace(".", "-");
+    }
+
 }
 
 

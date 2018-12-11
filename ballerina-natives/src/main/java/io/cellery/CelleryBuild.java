@@ -19,19 +19,26 @@ package io.cellery;
 
 import io.cellery.models.API;
 import io.cellery.models.APIDefinition;
+import io.cellery.models.Cell;
+import io.cellery.models.Component;
+import io.cellery.models.ComponentHolder;
 import org.ballerinalang.bre.Context;
 import org.ballerinalang.bre.bvm.BlockingNativeCallableUnit;
 import org.ballerinalang.model.types.TypeKind;
 import org.ballerinalang.model.values.BMap;
 import org.ballerinalang.model.values.BRefType;
 import org.ballerinalang.model.values.BRefValueArray;
+import org.ballerinalang.model.values.BValue;
 import org.ballerinalang.natives.annotations.Argument;
 import org.ballerinalang.natives.annotations.BallerinaFunction;
 import org.ballerinalang.natives.annotations.ReturnType;
+import org.ballerinalang.util.exceptions.BallerinaException;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * Native function cellery/registry:hash.
@@ -47,23 +54,94 @@ public class CelleryBuild extends BlockingNativeCallableUnit {
 
     public void execute(Context ctx) {
         System.out.println("----------------------------------");
-        System.out.println("Build Called...." + ctx.toString());
+        System.out.println("Build Called....");
         System.out.println(ctx.getNullableRefArgument(0));
+        processComponents(
+                ((BRefValueArray) ((BMap) ctx.getNullableRefArgument(0)).getMap().get("components")).getValues());
         processAPIs(((BRefValueArray) ((BMap) ctx.getNullableRefArgument(0)).getMap().get("apis")).getValues());
         System.out.println("done");
     }
 
+    private void processComponents(BRefType<?>[] components) {
+        for (BRefType componentDefinition : components) {
+            if (componentDefinition == null) {
+                continue;
+            }
+            Component component = new Component();
+            ((BMap<?, ?>) componentDefinition).getMap().forEach((key, value) -> {
+                switch (key.toString()) {
+                    case "name":
+                        component.setName(value.toString());
+                        component.setService(getValidName(value.toString()));
+                        break;
+                    case "replicas":
+                        component.setReplicas(Integer.parseInt(value.toString()));
+                        break;
+                    case "source":
+                        component.setSource(Collections.
+                                singletonList(((BMap) value).getMap()).get(0).values().toArray()[0].toString());
+                        break;
+                    case "ingresses":
+                        String portString = processIngressPort(((BRefValueArray) value).getValues());
+                        component.setServicePort(Integer.parseInt(portString.substring(portString.indexOf(":") + 1)));
+                        component.setContainerPort(Integer.parseInt(portString.substring(0, portString.indexOf(":"))));
+                        break;
+                    default:
+                        break;
+                }
+            });
+            ComponentHolder.getInstance().addComponent(component);
+        }
+        System.out.println("Holder" + ComponentHolder.getInstance().getComponentNameToComponentMap());
+    }
+
+    /**
+     * Extract the ingress port
+     *
+     * @param ingressMap list of ingressee defined
+     * @return A string with container port and Service port
+     */
+    private String processIngressPort(BRefType<?>[] ingressMap) {
+        String portString = null;
+        for (BRefType ingressDefinition : ingressMap) {
+            if (ingressDefinition == null) {
+                continue;
+            }
+
+            for (Map.Entry<?, ?> entry : ((BMap<?, ?>) ingressDefinition).getMap().entrySet()) {
+                Object key = entry.getKey();
+                BValue value = (BValue) entry.getValue();
+                switch (key.toString()) {
+                    case "port":
+                        portString = value.toString();
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        if (portString == null) {
+            throw new BallerinaException("Ingress port is not defined");
+        }
+        return portString;
+    }
+
     private void processAPIs(BRefType<?>[] apiMap) {
-        List<API> apiList = new ArrayList<>();
         for (BRefType apiDefinition : apiMap) {
             if (apiDefinition == null) {
                 continue;
             }
             API api = new API();
-            ((BMap<?, ?>) apiDefinition).getMap().forEach((key, value) -> {
+            String componentName = null;
+            for (Map.Entry<?, ?> entry : ((BMap<?, ?>) apiDefinition).getMap().entrySet()) {
+                Object key = entry.getKey();
+                BValue value = (BValue) entry.getValue();
                 switch (key.toString()) {
                     case "global":
                         api.setGlobal(Boolean.parseBoolean(value.toString()));
+                        break;
+                    case "parent":
+                        componentName = value.toString();
                         break;
                     case "context":
                         ((BMap<?, ?>) value).getMap().forEach((contextKey, contextValue) -> {
@@ -83,10 +161,14 @@ public class CelleryBuild extends BlockingNativeCallableUnit {
                         break;
 
                 }
-            });
-            apiList.add(api);
+            }
+            if (componentName != null) {
+                ComponentHolder.getInstance().addAPI(componentName, api);
+            } else {
+                throw new BallerinaException("Undefined parent component");
+            }
         }
-        System.out.println("processed API" + apiList);
+        System.out.println("Holder" + ComponentHolder.getInstance().getComponentNameToComponentMap());
     }
 
     private List<APIDefinition> processDefinitions(BRefType<?>[] definitions) {
@@ -124,6 +206,9 @@ public class CelleryBuild extends BlockingNativeCallableUnit {
         return name.toLowerCase(Locale.getDefault()).replace("_", "-").replace(".", "-");
     }
 
+    private void generateCell(){
+        Cell cell = new Cell();
+    }
 }
 
 

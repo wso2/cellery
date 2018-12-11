@@ -1,30 +1,45 @@
 package io.cellery.models;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.ballerinalang.util.exceptions.BallerinaException;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Singleton Component Holder Class.
  */
 public class ComponentHolder {
 
-
-    private List<Component> components;
+    private Map<String, Component> componentNameToComponentMap;
 
     private ComponentHolder() {
-        components = new ArrayList<>();
+        componentNameToComponentMap = new HashMap<>();
     }
 
     public static ComponentHolder getInstance() {
         return SingletonHelper.INSTANCE;
     }
 
-    public List<Component> getComponents() {
-        return components;
+    public Map<String, Component> getComponentNameToComponentMap() {
+        return componentNameToComponentMap;
     }
 
     public void addComponent(Component component) {
-        this.components.add(component);
+        if (componentNameToComponentMap.get(component.getName()) != null) {
+            throw new BallerinaException("Two components with same name exists " + component.getName());
+        }
+        this.componentNameToComponentMap.put(component.getName(), component);
+
+    }
+
+    public void addAPI(String componentName, API api) {
+        Component temp = componentNameToComponentMap.remove(componentName);
+        if (temp == null) {
+            throw new BallerinaException("Invalid component name " + componentName);
+        }
+        api.setBackend(temp.getService());
+        temp.addApi(api);
+        componentNameToComponentMap.put(componentName, temp);
     }
 
     private static class SingletonHelper {

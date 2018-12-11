@@ -34,22 +34,29 @@ public type GitSource record{
 public type Definition record{
     string path;
     string method;
+    !...
 };
 
 public type API record{
+    string name;
+    string parent;
     string|Ingress context;
     boolean global;
     Ingress|Definition[]? definitions;
+    !...
 };
 
 public type Egress record{
-    Ingress name;
+    string parent;
+    Ingress ingress;
     string envVar;
-    Policy? policy;
+    Resiliency policy?;
+    !...
 };
 
-public type Policy record{
+public type Resiliency record{
     RetryConfig policyConfig;
+    !...
 };
 
 public type RetryConfig record {
@@ -57,13 +64,14 @@ public type RetryConfig record {
     int count;
     float backOffFactor;
     int maxWaitInterval;
+    !...
 };
 
 public type Component record{
     string name;
     ImageSource source;
     int replicas;
-    string[] env;
+    map env;
     Ingress[] ingresses;
     Egress[] egresses;
     !...
@@ -74,9 +82,11 @@ public type Ingress record{
     string port;
     string context;
     Definition[] definitions;
+    !...
 };
 
 public type Cell object {
+    public string name;
     public Component[] components;
     public API[] apis;
     public Egress[] egresses;

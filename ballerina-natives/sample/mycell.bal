@@ -6,7 +6,8 @@ cellery:Component comp1 = {
     source: {
         image: "docker.io/wso2vick/component1:v1"
     },
-    env: ["ENV1", "ENV2"],
+    env: { "ENV1": "", "ENV2": "" },
+    replicas: 1,
     ingresses: [
         {
             name: "foo",
@@ -27,7 +28,8 @@ cellery:Component comp2 = {
     source: {
         image: "docker.io/wso2vick/component2:v1"
     },
-    env: ["ENV1", "ENV2"],
+    replicas: 1,
+    env: { "ENV1": "", "ENV2": "" },
     ingresses: [
         {
             name: "bar",
@@ -43,8 +45,9 @@ cellery:Component comp2 = {
     ],
     egresses: [
         {
-            name:comp1.ingresses[0],
-            env: "ENV1"
+            parent:comp1.name,
+            ingress: comp1.ingresses[0],
+            envVar: "ENV1"
         }
     ]
 };
@@ -52,25 +55,29 @@ cellery:Component comp2 = {
 cellery:Cell cellA = new;
 
 public function lifeCycleBuild() {
+    cellA.name = "my-cell";
     cellA.addComponent(comp1);
     cellA.addComponent(comp2);
     cellA.egresses = [
         {
-            name:comp1.ingresses[0]
+            parent:comp1.name,
+            ingress: comp1.ingresses[0]
         }
     ];
     cellA.apis = [
         {
-            context:comp2.ingresses[0],
+            parent:comp2.name,
+            context: comp2.ingresses[0],
             global: true
         },
         {
+            parent: comp1.name,
             context: comp1.ingresses[0],
             global: true
         }
     ];
 
-    io:println(cellA);
+    //io:println(cellA);
     var v = cellery:build(cellA);
 }
 

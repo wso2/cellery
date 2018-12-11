@@ -17,6 +17,9 @@ public class Component {
     Map<String, String> envVars;
     List<API> apis;
     String source;
+    String service;
+    int containerPort;
+    int servicePort;
 
     public Component() {
         envVars = new HashMap<>();

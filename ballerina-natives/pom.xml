@@ -40,6 +40,11 @@
             <artifactId>kubernetes-client</artifactId>
             <version>${fabric8.kubernetes.client.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.esotericsoftware.yamlbeans</groupId>
+            <artifactId>yamlbeans</artifactId>
+            <version>1.13</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -157,23 +162,74 @@
                 </executions>
             </plugin>
 
-            <!--<plugin>-->
-            <!--<groupId>org.apache.maven.plugins</groupId>-->
-            <!--<artifactId>maven-assembly-plugin</artifactId>-->
-            <!--<version>2.5.2</version>-->
-            <!--<executions>-->
-            <!--<execution>-->
-            <!--<id>distribution</id>-->
-            <!--<phase>package</phase>-->
-            <!--<goals>-->
-            <!--<goal>attached</goal>-->
-            <!--</goals>-->
-            <!--<configuration>-->
-            <!--<descriptorSourceDirectory>assembly</descriptorSourceDirectory>-->
-            <!--</configuration>-->
-            <!--</execution>-->
-            <!--</executions>-->
-            <!--</plugin>-->
+            <plugin>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.4.3</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <createDependencyReducedPom>true</createDependencyReducedPom>
+                            <minimizeJar>true</minimizeJar>
+                            <artifactSet>
+                                <includes>
+                                    <include>com.esotericsoftware.yamlbeans*</include>
+                                    <include>commons-io:commons-io</include>
+                                    <include>commons-codec:commons-codec</include>
+                                    <include>javax.validation:validation-api</include>
+                                    <include>com.squareup.okhttp3:okhttp</include>
+                                    <include>com.squareup.okhttp3:logging-interceptor</include>
+                                    <include>com.squareup.okio:okio</include>
+                                    <include>org.apache.commons:commons-compress</include>
+                                    <include>com.github.jnr:jnr-unixsocket</include>
+                                    <include>com.github.jnr:jnr-ffi</include>
+                                    <include>com.github.jnr:jffi</include>
+                                    <include>com.github.jnr:jnr-constants</include>
+                                    <include>com.github.jnr:jnr-enxio</include>
+                                    <include>com.github.jnr:jnr-posix</include>
+                                    <include>org.ow2.asm:asm</include>
+                                    <include>com.fasterxml.jackson.core:jackson-databind</include>
+                                    <include>com.fasterxml.jackson.core:jackson-core</include>
+                                    <include>com.fasterxml.jackson.core:jackson-annotations</include>
+                                </includes>
+                                <excludes>
+                                    <include>io.fabric8:docker*</include>
+                                    <exclude>org.slf4j:slf4j-api</exclude>
+                                    <exclude>org.slf4j:slf4j-jdk14</exclude>
+                                    <exclude>com.fasterxml.jackson.dataformat:jackson-dataformat-yaml</exclude>
+                                    <exclude>com.fasterxml.jackson.core:jackson-databind</exclude>
+                                    <exclude>com.fasterxml.jackson.core:jackson-annotations</exclude>
+                                    <exclude>com.fasterxml.jackson.core:jackson-core</exclude>
+                                    <exclude>commons-lang:commons-lang</exclude>
+                                    <exclude>org.yaml:snakeyaml</exclude>
+                                    <exclude>org.ballerinalang:ballerina-lang</exclude>
+                                    <exclude>org.ballerinalang:ballerina-launcher</exclude>
+                                    <exclude>org.ballerinalang:ballerina-builtin</exclude>
+                                    <exclude>org.ballerinalang:ballerina-core</exclude>
+                                    <exclude>org.ballerinalang:ballerina-mime</exclude>
+                                    <exclude>org.ballerinalang:ballerina-logging</exclude>
+                                    <exclude>org.ballerinalang:ballerina-http</exclude>
+                                    <exclude>junit:junit</exclude>
+                                    <exclude>org.bsc.maven:maven-processor-plugin</exclude>
+                                </excludes>
+                            </artifactSet>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
@@ -206,5 +262,6 @@
         <ballerina.version>0.983.0</ballerina.version>
         <lombok.version>1.18.4</lombok.version>
         <fabric8.kubernetes.client.version>3.1.10</fabric8.kubernetes.client.version>
+        <yaml.beans.version>1.13</yaml.beans.version>
     </properties>
 </project>

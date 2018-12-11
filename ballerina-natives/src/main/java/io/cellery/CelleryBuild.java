@@ -17,11 +17,19 @@
  */
 package io.cellery;
 
+import com.esotericsoftware.yamlbeans.YamlWriter;
 import io.cellery.models.API;
 import io.cellery.models.APIDefinition;
 import io.cellery.models.Cell;
+import io.cellery.models.CellSpec;
 import io.cellery.models.Component;
 import io.cellery.models.ComponentHolder;
+import io.cellery.models.GatewaySpec;
+import io.cellery.models.GatewayTemplate;
+import io.cellery.models.ServiceTemplate;
+import io.fabric8.kubernetes.api.model.ContainerBuilder;
+import io.fabric8.kubernetes.api.model.ContainerPortBuilder;
+import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import org.ballerinalang.bre.Context;
 import org.ballerinalang.bre.bvm.BlockingNativeCallableUnit;
 import org.ballerinalang.model.types.TypeKind;
@@ -34,14 +42,22 @@ import org.ballerinalang.natives.annotations.BallerinaFunction;
 import org.ballerinalang.natives.annotations.ReturnType;
 import org.ballerinalang.util.exceptions.BallerinaException;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import static org.apache.commons.lang3.StringUtils.removePattern;
+
 /**
- * Native function cellery/registry:hash.
+ * Native function cellery/build.
  */
 @BallerinaFunction(
         orgName = "celleryio", packageName = "cellery:0.0.0",
@@ -53,13 +69,10 @@ import java.util.Map;
 public class CelleryBuild extends BlockingNativeCallableUnit {
 
     public void execute(Context ctx) {
-        System.out.println("----------------------------------");
-        System.out.println("Build Called....");
-        System.out.println(ctx.getNullableRefArgument(0));
         processComponents(
                 ((BRefValueArray) ((BMap) ctx.getNullableRefArgument(0)).getMap().get("components")).getValues());
         processAPIs(((BRefValueArray) ((BMap) ctx.getNullableRefArgument(0)).getMap().get("apis")).getValues());
-        System.out.println("done");
+        generateCell(((BMap) ctx.getNullableRefArgument(0)).getMap().get("name").toString());
     }
 
     private void processComponents(BRefType<?>[] components) {
@@ -92,7 +105,6 @@ public class CelleryBuild extends BlockingNativeCallableUnit {
             });
             ComponentHolder.getInstance().addComponent(component);
         }
-        System.out.println("Holder" + ComponentHolder.getInstance().getComponentNameToComponentMap());
     }
 
     /**
@@ -168,7 +180,6 @@ public class CelleryBuild extends BlockingNativeCallableUnit {
                 throw new BallerinaException("Undefined parent component");
             }
         }
-        System.out.println("Holder" + ComponentHolder.getInstance().getComponentNameToComponentMap());
     }
 
     private List<APIDefinition> processDefinitions(BRefType<?>[] definitions) {
@@ -206,9 +217,87 @@ public class CelleryBuild extends BlockingNativeCallableUnit {
         return name.toLowerCase(Locale.getDefault()).replace("_", "-").replace(".", "-");
     }
 
-    private void generateCell(){
+    private void generateCell(String name) {
+        List<Component> components =
+                new ArrayList<>(ComponentHolder.getInstance().getComponentNameToComponentMap().values());
+        GatewaySpec spec = new GatewaySpec();
+        List<ServiceTemplate> serviceTemplateList = new ArrayList<>();
+        for (Component component : components) {
+            spec.setApis(component.getApis());
+            ServiceTemplate serviceTemplate = new ServiceTemplate();
+            serviceTemplate.setReplicas(component.getReplicas());
+            serviceTemplate.setServicePort(component.getServicePort());
+            serviceTemplate.setMetadata(new ObjectMetaBuilder().withName(component.getService()).build());
+            serviceTemplate.setContainer(new ContainerBuilder()
+                    .withImage(component.getSource())
+                    .withPorts(new ContainerPortBuilder().
+                            withContainerPort(component.getContainerPort())
+                            .build())
+                    .build());
+            serviceTemplateList.add(serviceTemplate);
+        }
+        GatewayTemplate gatewayTemplate = new GatewayTemplate();
+        gatewayTemplate.setSpec(spec);
+        CellSpec cellSpec = new CellSpec();
+        cellSpec.setGatewayTemplate(gatewayTemplate);
+        cellSpec.setServiceTemplates(serviceTemplateList);
         Cell cell = new Cell();
+        cell.setMetadata(new ObjectMetaBuilder().withName(name).build());
+        cell.setSpec(cellSpec);
+        String targetPath = System.getProperty("user.dir") + File.separator + name + ".yaml";
+        try {
+            writeToFile(toYaml(cell), targetPath);
+        } catch (IOException e) {
+            throw new BallerinaException(e.getMessage());
+        }
     }
+
+    /**
+     * Write content to a File. Create the required directories if they don't not exists.
+     *
+     * @param context    context of the file
+     * @param targetPath target file path
+     * @throws IOException If an error occurs when writing to a file
+     */
+    private void writeToFile(String context, String targetPath) throws IOException {
+        File newFile = new File(targetPath);
+        // delete if file exists
+        if (newFile.exists()) {
+            Files.delete(Paths.get(newFile.getPath()));
+        }
+        //create required directories
+        if (newFile.getParentFile().mkdirs()) {
+            Files.write(Paths.get(targetPath), context.getBytes(StandardCharsets.UTF_8));
+            return;
+        }
+        Files.write(Paths.get(targetPath), context.getBytes(StandardCharsets.UTF_8));
+    }
+
+    /**
+     * Generates Yaml from a object.
+     *
+     * @param object Object
+     * @param <T>    Any Object type
+     * @return Yaml as a string.
+     */
+    private <T> String toYaml(T object) {
+        try (StringWriter stringWriter = new StringWriter()) {
+            YamlWriter writer = new YamlWriter(stringWriter);
+            writer.write(object);
+            writer.getConfig().writeConfig.setWriteRootTags(false); //replaces only root tag
+            writer.close(); //don't add this to finally, because the text will not be flushed
+            return removeTags(stringWriter.toString());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private String removeTags(String string) {
+        //a tag is a sequence of characters starting with ! and ending with whitespace
+        return removePattern(string, " ![^\\s]*");
+    }
+
+
 }
 
 

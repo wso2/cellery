@@ -52,10 +52,9 @@ cellery:Component comp2 = {
     ]
 };
 
-cellery:Cell cellA = new;
+cellery:Cell cellA = new("my-cell");
 
 public function lifeCycleBuild() {
-    cellA.name = "my-cell";
     cellA.addComponent(comp1);
     cellA.addComponent(comp2);
     cellA.egresses = [
@@ -77,7 +76,7 @@ public function lifeCycleBuild() {
         }
     ];
 
-    //io:println(cellA);
-    var v = cellery:build(cellA);
+    string cellYaml = cellery:build(cellA);
+    io:println(cellYaml);
 }
 

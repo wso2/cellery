@@ -95,10 +95,14 @@ public type Cell object {
         int size = self.components.length();
         self.components[size] = component;
     }
+
+    public function __init(string name) {
+        self.name = name;
+    }
 };
 
 # Build the cell aritifacts
 #
 # + cell - The cell
 # + return - true/false
-public extern function build(Cell cell) returns (boolean|error);
+public extern function build(Cell cell) returns (string);

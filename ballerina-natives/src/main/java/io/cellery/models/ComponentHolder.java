@@ -6,18 +6,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Singleton Component Holder Class.
+ * Component Holder Class.
  */
 public class ComponentHolder {
 
     private Map<String, Component> componentNameToComponentMap;
 
-    private ComponentHolder() {
+    public ComponentHolder() {
         componentNameToComponentMap = new HashMap<>();
-    }
-
-    public static ComponentHolder getInstance() {
-        return SingletonHelper.INSTANCE;
     }
 
     public Map<String, Component> getComponentNameToComponentMap() {
@@ -40,9 +36,5 @@ public class ComponentHolder {
         api.setBackend(temp.getService());
         temp.addApi(api);
         componentNameToComponentMap.put(componentName, temp);
-    }
-
-    private static class SingletonHelper {
-        private static final ComponentHolder INSTANCE = new ComponentHolder();
     }
 }

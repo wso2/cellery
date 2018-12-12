@@ -50,12 +50,13 @@ public type Egress record{
     string parent;
     Ingress ingress;
     string envVar?;
-    Resiliency policy?;
+    Resiliency resiliency?;
     !...
 };
 
 public type Resiliency record{
-    RetryConfig policyConfig;
+    RetryConfig retryConfig?;
+    FailoverConfig failoverConfig?;
     !...
 };
 
@@ -67,12 +68,17 @@ public type RetryConfig record {
     !...
 };
 
+public type FailoverConfig record {
+    int timeOut;
+    !...
+};
+
 public type Component record{
     string name;
     ImageSource source;
-    int replicas;
-    map<string> env;
-    Ingress[] ingresses;
+    int replicas = 1;
+    map<string> env?;
+    Ingress[] ingresses?;
     Egress[] egresses?;
     !...
 };
@@ -80,13 +86,13 @@ public type Component record{
 public type Ingress record{
     string name;
     string port;
-    string context;
-    Definition[] definitions;
+    string context?;
+    Definition[] definitions?;
     !...
 };
 
 public type Cell object {
-    public string name = "";
+    public string name;
     public Component[] components = [];
     public API?[] apis = [];
     public Egress?[] egresses = [];

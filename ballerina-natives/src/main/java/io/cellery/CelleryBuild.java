@@ -69,7 +69,10 @@ import static org.apache.commons.lang3.StringUtils.removePattern;
 )
 public class CelleryBuild extends BlockingNativeCallableUnit {
 
+    private ComponentHolder componentHolder;
+
     public void execute(Context ctx) {
+        componentHolder = new ComponentHolder();
         processComponents(
                 ((BValueArray) ((BMap) ctx.getNullableRefArgument(0)).getMap().get("components")).getValues());
         processAPIs(((BValueArray) ((BMap) ctx.getNullableRefArgument(0)).getMap().get("apis")).getValues());
@@ -101,11 +104,15 @@ public class CelleryBuild extends BlockingNativeCallableUnit {
                         component.setServicePort(Integer.parseInt(portString.substring(portString.indexOf(":") + 1)));
                         component.setContainerPort(Integer.parseInt(portString.substring(0, portString.indexOf(":"))));
                         break;
+                    case "env":
+                        ((BMap<?, ?>) value).getMap().forEach((envKey, envValue) -> {
+                            component.addEnv(envKey.toString(), envValue.toString());
+                        });
                     default:
                         break;
                 }
             });
-            ComponentHolder.getInstance().addComponent(component);
+            componentHolder.addComponent(component);
         }
     }
 
@@ -177,7 +184,7 @@ public class CelleryBuild extends BlockingNativeCallableUnit {
                 }
             }
             if (componentName != null) {
-                ComponentHolder.getInstance().addAPI(componentName, api);
+                componentHolder.addAPI(componentName, api);
             } else {
                 throw new BallerinaException("Undefined parent component");
             }
@@ -221,7 +228,7 @@ public class CelleryBuild extends BlockingNativeCallableUnit {
 
     private String generateCell(String name) {
         List<Component> components =
-                new ArrayList<>(ComponentHolder.getInstance().getComponentNameToComponentMap().values());
+                new ArrayList<>(componentHolder.getComponentNameToComponentMap().values());
         GatewaySpec spec = new GatewaySpec();
         List<ServiceTemplate> serviceTemplateList = new ArrayList<>();
         for (Component component : components) {
@@ -246,7 +253,8 @@ public class CelleryBuild extends BlockingNativeCallableUnit {
         Cell cell = new Cell();
         cell.setMetadata(new ObjectMetaBuilder().withName(name).build());
         cell.setSpec(cellSpec);
-        String targetPath = System.getProperty("user.dir") + File.separator + name + ".yaml";
+        String targetPath = System.getProperty("user.dir") + File.separator + "target" + File.separator + name +
+                ".yaml";
         String yamlContent = toYaml(cell);
         try {
             writeToFile(yamlContent, targetPath);

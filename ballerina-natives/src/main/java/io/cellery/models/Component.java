@@ -29,4 +29,8 @@ public class Component {
     public void addApi(API api) {
         this.apis.add(api);
     }
+
+    public void addEnv(String key, String value) {
+        this.envVars.put(key, value);
+    }
 }

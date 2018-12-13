@@ -1,18 +1,18 @@
 import ballerina/io;
+import ballerina/config;
 import celleryio/cellery;
 
-cellery:Component comp1 = {
-    name: "comp1",
+// Salary Component
+cellery:Component salary = {
+    name: "Salary",
     source: {
-        image: "docker.io/wso2vick/component1:v1"
+        image: "docker.io/wso2vick/sampleapp-salary"
     },
-    env: { "ENV1": "", "ENV2": "" },
-    replicas: 1,
     ingresses: [
         {
-            name: "foo",
+            name: "salary",
             port: "8080:80",
-            context: "foo",
+            context: "salary",
             definitions: [
                 {
                     path: "*",
@@ -23,18 +23,18 @@ cellery:Component comp1 = {
     ]
 };
 
-cellery:Component comp2 = {
-    name: "comp2",
+// Employee Component
+cellery:Component employee = {
+    name: "Employee",
     source: {
-        image: "docker.io/wso2vick/component2:v1"
+        image: "docker.io/wso2vick/sampleapp-employee"
     },
-    replicas: 1,
-    env: { "ENV1": "", "ENV2": "" },
+    env: { SALARYSVC_URL: "employee--sallary--service" },
     ingresses: [
         {
-            name: "bar",
+            name: "employee",
             port: "8080:80",
-            context: "bar",
+            context: "employee",
             definitions: [
                 {
                     path: "*",
@@ -45,38 +45,175 @@ cellery:Component comp2 = {
     ],
     egresses: [
         {
-            parent:comp1.name,
-            ingress: comp1.ingresses[0],
-            envVar: "ENV1"
+            parent:salary.name,
+            ingress: salary.ingresses[0],
+            envVar: "SALARYSVC_URL"
         }
     ]
 };
 
-cellery:Cell cellA = new("my-cell");
-
-public function lifeCycleBuild() {
-    cellA.addComponent(comp1);
-    cellA.addComponent(comp2);
-    cellA.egresses = [
+// MySQL Component
+cellery:Component mysql = {
+    name: "MySQL",
+    source: {
+        image: "mysql:5.7.24"
+    },
+    env: { MYSQL_ROOT_PASSWORD: "" },
+    ingresses: [
         {
-            parent:comp1.name,
-            ingress: comp1.ingresses[0]
+            name: "mysql",
+            port: "3306:3306"
+        }
+    ]
+};
+
+// Stocks Component
+cellery:Component stocks = {
+    name: "Stocks",
+    source: {
+        image: "docker.io/wso2vick/sampleapp-stocks"
+    },
+    env: { MYSQL_HOST: "", MYSQL_USER: "", MYSQL_PW: "" },
+    ingresses: [
+        {
+            name: "stocks",
+            port: "8080:80",
+            context: "stocks",
+            definitions: [
+                {
+                    path: "*",
+                    method: "GET,POST,PUT,DELETE"
+                }
+            ]
+        }
+    ]
+};
+
+// HR Component
+cellery:Component hr = {
+    name: "HR",
+    source: {
+        image: "docker.io/wso2vick/sampleapp-hr"
+    },
+    env: { "EMPLOYEEGW_URL": "", "STOCKGW_URL": "" },
+    ingresses: [
+        {
+            name: "info",
+            port: "8080:80",
+            context: "info",
+            definitions: [
+                {
+                    path: "*",
+                    method: "GET,POST,PUT,DELETE"
+                }
+            ]
+        }
+    ]
+};
+
+// Cells
+cellery:Cell hrCell = new("HRCell");
+cellery:Cell employeeCell = new("EmployeeCell");
+cellery:Cell stocksCell = new("StocksCell");
+cellery:Cell mysqlCell = new("MySQLCell");
+
+// Build Function
+public function lifeCycleBuild() {
+
+    //Employee Cell
+    io:println("Building Employee Cell ...");
+    employee.replicas = config:getAsInt("EMPLOYEE_REPLICAS");
+    salary.replicas = config:getAsInt("SALARY_REPLICAS");
+    employeeCell.addComponent(employee);
+    employeeCell.addComponent(salary);
+    employeeCell.apis = [
+        {
+            parent:employee.name,
+            context: employee.ingresses[0],
+            global: false
         }
     ];
-    cellA.apis = [
+    _ = cellery:build(employeeCell);
+
+    //MySQL cell
+    io:println("Building MySQL Cell ...");
+    mysql.env["MYSQL_ROOT_PASSWORD"] = config:getAsString("MYSQL_ROOT_PASSWORD");
+    mysqlCell.addComponent(mysql);
+    _ = cellery:build(mysqlCell);
+
+    //Stocks Cell
+    io:println("Building Stocks Cell ...");
+    stocks.replicas = config:getAsInt("STOCKS_REPLICAS");
+    stocks.env["MYSQL_USER"] = config:getAsString("MYSQL_USER");
+    stocks.env["MYSQL_PW"] = config:getAsString("MYSQL_PW");
+    stocksCell.addComponent(stocks);
+    stocksCell.apis = [
         {
-            parent:comp2.name,
-            context: comp2.ingresses[0],
-            global: true
+            parent:stocks.name,
+            context: stocks.ingresses[0],
+            global: false
+        }
+    ];
+    stocksCell.egresses = [
+        {
+            parent:mysql.name,
+            ingress: mysql.ingresses[0],
+            envVar: "MYSQL_HOST"
+        }
+    ];
+    _ = cellery:build(stocksCell);
+
+    io:println("Building HR Cell ...");
+    hr.replicas = config:getAsInt("HR_REPLICAS");
+    hrCell.addComponent(hr);
+    hrCell.egresses = [
+        {
+            parent:employee.name,
+            ingress: employee.ingresses[0],
+            envVar: "EMPLOYEEGW_URL"
         },
         {
-            parent: comp1.name,
-            context: comp1.ingresses[0],
+            parent: stocks.name,
+            ingress: stocks.ingresses[0],
+            envVar: "STOCKGW_URL"
+        }
+    ];
+    hrCell.apis = [
+        {
+            parent:hr.name,
+            context: hr.ingresses[0],
             global: true
         }
     ];
+    hrCell.egresses = [
+        {
+            parent:employee.name,
+            ingress: employee.ingresses[0],
+            envVar: "EMPLOYEEGW_URL",
+            resiliency: {
+                retryConfig: {
+                    interval: 100,
+                    count: 10,
+                    backOffFactor: 0.5,
+                    maxWaitInterval: 20000
+                }
+            }
+        },
+        {
+            parent: stocks.name,
+            ingress: stocks.ingresses[0],
+            envVar: "STOCKGW_URL",
+            resiliency: {
+                retryConfig: {
+                    interval: 100,
+                    count: 10,
+                    backOffFactor: 0.5,
+                    maxWaitInterval: 20000
+                }
+            }
+        }
+    ];
+    _ = cellery:build(hrCell);
 
-    string cellYaml = cellery:build(cellA);
-    io:println(cellYaml);
+
 }
-

@@ -3,6 +3,7 @@ package io.cellery.models;
 import org.ballerinalang.util.exceptions.BallerinaException;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -21,7 +22,7 @@ public class ComponentHolder {
     }
 
     public void addComponent(Component component) {
-        if (componentNameToComponentMap.get(component.getName()) != null) {
+        if (componentNameToComponentMap.containsKey(component.getName())) {
             throw new BallerinaException("Two components with same name exists " + component.getName());
         }
         this.componentNameToComponentMap.put(component.getName(), component);

@@ -19,7 +19,6 @@
 package io.cellery.models;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Singular;
@@ -30,10 +29,10 @@ import java.util.List;
  * Cell Spec.
  */
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class CellSpec {
     private GatewayTemplate gatewayTemplate;
-    private @Singular List<ServiceTemplate> serviceTemplates;
+    private @Singular
+    List<ServiceTemplate> serviceTemplates;
 }

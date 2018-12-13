@@ -34,7 +34,6 @@ public class Cell {
     private ObjectMeta metadata;
     private CellSpec spec;
 
-    @Builder
     public Cell(ObjectMeta metadata, CellSpec spec) {
         kind = "Cell";
         apiVersion = "vick.wso2.com/v1alpha1";

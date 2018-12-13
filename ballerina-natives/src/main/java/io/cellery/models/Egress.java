@@ -15,24 +15,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package io.cellery.models;
 
-import io.fabric8.kubernetes.api.model.Container;
-import io.fabric8.kubernetes.api.model.ObjectMeta;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Service Template.
+ * Egress model class.
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ServiceTemplate {
-    private ObjectMeta metadata;
-    private int replicas;
-    private int servicePort;
-    private Container container;
+public class Egress {
+    String parent;
+    String envVar;
 }

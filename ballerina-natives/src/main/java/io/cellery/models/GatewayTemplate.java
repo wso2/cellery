@@ -19,7 +19,6 @@
 package io.cellery.models;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -27,7 +26,6 @@ import lombok.NoArgsConstructor;
  * Gateway Template.
  */
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class GatewayTemplate {

@@ -21,14 +21,18 @@ import com.esotericsoftware.yamlbeans.YamlWriter;
 import io.cellery.models.API;
 import io.cellery.models.APIDefinition;
 import io.cellery.models.Cell;
+import io.cellery.models.CellCache;
 import io.cellery.models.CellSpec;
 import io.cellery.models.Component;
 import io.cellery.models.ComponentHolder;
+import io.cellery.models.Egress;
 import io.cellery.models.GatewaySpec;
 import io.cellery.models.GatewayTemplate;
 import io.cellery.models.ServiceTemplate;
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
 import io.fabric8.kubernetes.api.model.ContainerPortBuilder;
+import io.fabric8.kubernetes.api.model.EnvVar;
+import io.fabric8.kubernetes.api.model.EnvVarBuilder;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import org.ballerinalang.bre.Context;
 import org.ballerinalang.bre.bvm.BlockingNativeCallableUnit;
@@ -51,9 +55,11 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.removePattern;
 
@@ -73,10 +79,14 @@ public class CelleryBuild extends BlockingNativeCallableUnit {
 
     public void execute(Context ctx) {
         componentHolder = new ComponentHolder();
+        String cellName = (((BMap) ctx.getNullableRefArgument(0)).getMap()).get("name").toString();
+        CellCache cellCache = CellCache.getInstance();
         processComponents(
                 ((BValueArray) ((BMap) ctx.getNullableRefArgument(0)).getMap().get("components")).getValues());
         processAPIs(((BValueArray) ((BMap) ctx.getNullableRefArgument(0)).getMap().get("apis")).getValues());
-        String cellYaml = generateCell(((BMap) ctx.getNullableRefArgument(0)).getMap().get("name").toString());
+        Set<Component> components = new HashSet<>(componentHolder.getComponentNameToComponentMap().values());
+        cellCache.setCellNameToComponentMap(cellName, components);
+        String cellYaml = generateCell(cellName);
         ctx.setReturnValues(new BString(cellYaml));
     }
 
@@ -104,15 +114,41 @@ public class CelleryBuild extends BlockingNativeCallableUnit {
                         component.setServicePort(Integer.parseInt(portString.substring(portString.indexOf(":") + 1)));
                         component.setContainerPort(Integer.parseInt(portString.substring(0, portString.indexOf(":"))));
                         break;
+                    case "egresses":
+                        processEgress(((BValueArray) value).getValues(), component);
+                        break;
                     case "env":
-                        ((BMap<?, ?>) value).getMap().forEach((envKey, envValue) -> {
-                            component.addEnv(envKey.toString(), envValue.toString());
-                        });
+                        ((BMap<?, ?>) value).getMap().forEach((envKey, envValue) ->
+                                component.addEnv(envKey.toString(), envValue.toString()));
                     default:
                         break;
                 }
             });
             componentHolder.addComponent(component);
+        }
+    }
+
+    private void processEgress(BRefType<?>[] egresses, Component component) {
+        for (BRefType egressDefinition : egresses) {
+            if (egressDefinition == null) {
+                continue;
+            }
+            Egress egress = new Egress();
+            for (Map.Entry<?, ?> entry : ((BMap<?, ?>) egressDefinition).getMap().entrySet()) {
+                Object key = entry.getKey();
+                BValue value = (BValue) entry.getValue();
+                switch (key.toString()) {
+                    case "parent":
+                        egress.setParent(value.toString());
+                        break;
+                    case "envVar":
+                        egress.setEnvVar(value.toString());
+                        break;
+                    default:
+                        break;
+                }
+            }
+            component.addEgress(egress);
         }
     }
 
@@ -237,11 +273,29 @@ public class CelleryBuild extends BlockingNativeCallableUnit {
             serviceTemplate.setReplicas(component.getReplicas());
             serviceTemplate.setServicePort(component.getServicePort());
             serviceTemplate.setMetadata(new ObjectMetaBuilder().withName(component.getService()).build());
+            component.getEgresses().forEach((egress) -> {
+                //service name = cellName--serviceName--service
+                Component targetComponent = componentHolder.getComponentNameToComponentMap().get(egress.getParent());
+                if (targetComponent == null) {
+                    throw new BallerinaException("Invalid component egress. " +
+                            "Components " + component.getName() + " and " + egress.getParent() + " are not defined in" +
+                            " the same cell.");
+                }
+                String serviceName = getValidName(name) + "--" +
+                        targetComponent.getService()
+                        + "--service";
+                component.addEnv(egress.getEnvVar(), serviceName);
+
+            });
+            List<EnvVar> envVarList = new ArrayList<>();
+            component.getEnvVars().forEach((key, value) ->
+                    envVarList.add(new EnvVarBuilder().withName(key).withValue(value).build()));
             serviceTemplate.setContainer(new ContainerBuilder()
                     .withImage(component.getSource())
                     .withPorts(new ContainerPortBuilder().
                             withContainerPort(component.getContainerPort())
                             .build())
+                    .withEnv(envVarList)
                     .build());
             serviceTemplateList.add(serviceTemplate);
         }
@@ -250,9 +304,7 @@ public class CelleryBuild extends BlockingNativeCallableUnit {
         CellSpec cellSpec = new CellSpec();
         cellSpec.setGatewayTemplate(gatewayTemplate);
         cellSpec.setServiceTemplates(serviceTemplateList);
-        Cell cell = new Cell();
-        cell.setMetadata(new ObjectMetaBuilder().withName(name).build());
-        cell.setSpec(cellSpec);
+        Cell cell = new Cell(new ObjectMetaBuilder().withName(getValidName(name)).build(), cellSpec);
         String targetPath = System.getProperty("user.dir") + File.separator + "target" + File.separator + name +
                 ".yaml";
         String yamlContent = toYaml(cell);

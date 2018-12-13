@@ -61,7 +61,7 @@ func run(cellImage string) error {
 
 	util.Unzip(cellImage + ".zip", cellImage)
 
-	cmd := exec.Command("kubectl", "apply", "-f", getImageFileName(cellImage))
+	cmd := exec.Command("kubectl", "apply", "-f", util.FindInDirectory(cellImage + "/target", ".yaml")[0])
 	stdoutReader, _ := cmd.StdoutPipe()
 	stdoutScanner := bufio.NewScanner(stdoutReader)
 	go func() {
@@ -88,14 +88,4 @@ func run(cellImage string) error {
 	}
 
 	return nil
-}
-
-func getImageFileName (cellImage string) string {
-	imageYaml, pathErr := util.FindInDirectory(cellImage + "/cellery", ".yaml")
-	if pathErr != nil {
-		fmt.Printf("Error in returning image file name: %v \n", pathErr)
-		os.Exit(1)
-	}
-
-	return imageYaml[0]
 }

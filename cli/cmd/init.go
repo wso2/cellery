@@ -19,15 +19,12 @@
 package main
 
 import (
-	"bufio"
-	//"bytes"
-	//"encoding/json"
 	"fmt"
 	"github.com/fatih/color"
 	i "github.com/oxequa/interact"
 	"github.com/spf13/cobra"
-	//"io/ioutil"
-	//"net/http"
+	"github.com/wso2/cellery/cli/util"
+	"os/exec"
 	"os"
 	"path/filepath"
 )
@@ -50,8 +47,6 @@ func newInitCommand() *cobra.Command {
 }
 
 func runInit() error {
-
-	// Define colors
 	cyan := color.New(color.FgCyan).SprintFunc()
 	white := color.New(color.FgWhite)
 	boldWhite := white.Add(color.Bold).SprintFunc()
@@ -62,6 +57,7 @@ func runInit() error {
 	prefix := cyan("?")
 	projectName := ""
 	projectVersion := ""
+	projectPath := ""
 
 	i.Run(&i.Interact{
 		Before: func(c i.Context) error{
@@ -100,60 +96,31 @@ func runInit() error {
 		},
 	})
 
-	// hard coding the cell format for now
-	cellTemplate :=
-	"import wso2/cellery; \n" +
-	"// my-project \n" +
-	"cellery:Component my-project = { \n" +
-		"   name: 'my-project', \n" +
-		"   source: {\n" +
-		"      dockerImage: 'docker.io/my-project:v1' \n" +
-		"   }, \n" +
-		"   replicas: { \n" +
-		"      min: 1, \n" +
-		"      max: 1 \n" +
-		"   }, \n" +
-		"   container:{}, \n" +
-		"   env: {}, \n" +
-		"   apis: {}, \n" +
-		"   dependencies: {}, \n" +
-		"   security: {} \n" +
-	"};"
-	//type Payload struct {
-	//	Name    string `json:"name"`
-	//	Version string `json:"version"`
-	//}
-	//payload := Payload{}
-	//payload.Name = projectName
-	//payload.Version = projectVersion
-	//
-	//bytesPayload, err := json.Marshal(payload)
-	//
-	//// Call API server to get the version details.
-	//resp, err := http.Post(BASE_URL + "/cell/init", "application/json", bytes.NewBuffer(bytesPayload))
-	//if err != nil {
-	//	fmt.Println("Error connecting to the cellery api-server server.")
-	//}
-	//defer resp.Body.Close()
-	//body, err := ioutil.ReadAll(resp.Body)
-
-	// Get current directory
 	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
 		fmt.Println("Error in getting current directory location: " + err.Error());
 		os.Exit(1)
 	}
 
-	file, err := os.Create(dir + "/" + projectName+ "-" + projectVersion + ".cell")
-	if err != nil {
-		fmt.Println("Error in creating file: " + err.Error());
+	if _, err := os.Stat(dir + "/" + projectName); os.IsNotExist(err) {
+		projectPath = dir + "/" + projectName
+		os.Mkdir(projectPath, os.ModePerm)
+	}
+	os.Chdir(projectPath)
+	cmd := exec.Command("ballerina", "init")
+	intitErr := cmd.Start()
+	if intitErr != nil {
+		fmt.Printf("Error in executing ballerina init: %v \n", err)
 		os.Exit(1)
 	}
-	defer file.Close();
-	w := bufio.NewWriter(file)
-	//w.WriteString(string(body))
-	w.WriteString(fmt.Sprintf("%s", cellTemplate))
-	w.Flush()
+	intitErr = cmd.Wait()
+	if err != nil {
+		fmt.Printf("\x1b[31;1m  ballerina init finished with error: \x1b[0m %v \n", err)
+		os.Exit(1)
+	}
+	os.Chdir(dir)
+
+	util.CopyFile("cli/resources/sample.bal", projectPath + "/" + projectName+ "-" + projectVersion + ".bal")
 
 	fmt.Println("Initialized cell project in dir: " + faintWhite(dir))
 

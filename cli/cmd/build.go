@@ -19,14 +19,11 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"github.com/wso2/cellery/cli/util"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"github.com/tj/go-spin"
-	"io/ioutil"
-	"log"
+	"github.com/wso2/cellery/cli/util"
 	"os"
 	"os/exec"
 	"strings"
@@ -84,38 +81,20 @@ func runBuild(tag string, descriptorName string) error {
 	if descriptorName == "" {
 		return fmt.Errorf("no descriptor name specified")
 	}
-
-	// Start spinner in a seperate thread
 	go spinner(tag)
 
-	// Move cell file to a ballerina file
-	tempDir, err := ioutil.TempDir("", "cell")
-	if err != nil {
-		log.Fatal(err)
-	}
-	balFileName = tempDir + "/" + descriptorName + ".bal"
-	util.CopyFile(tempDir, descriptorName, balFileName)
+	//ballerinaFile := util.FindInDirectory(descriptorName, ".bal")[0]
+	//ballerinaFileName := strings.Split(ballerinaFile, ".")[0]
+	//
+	//dir, errPath := filepath.Abs(filepath.Dir(os.Args[0]))
+	//if errPath != nil {
+	//	fmt.Println("Error in getting current directory location: " + errPath.Error());
+	//	os.Exit(1)
+	//}
+	//os.Chdir(dir + "/" + descriptorName)
 
-	// clean up after finishing the task
-	defer os.RemoveAll(tempDir)
-
-	// Run ballerina command
-	cmd := exec.Command("ballerina", "build", balFileName)
-	stdoutReader, _ := cmd.StdoutPipe()
-	stdoutScanner := bufio.NewScanner(stdoutReader)
-	go func() {
-		for stdoutScanner.Scan() {
-			isSpinning = false
-			if (isFirstPrint) {
-				isFirstPrint = false
-				// At the first time, print with a new line
-				fmt.Println("\n  " + stdoutScanner.Text())
-			} else {
-				fmt.Println("  " + util.Trim(stdoutScanner.Text()))
-			}
-		}
-	}()
-	err = cmd.Start()
+	cmd := exec.Command("ballerina", "run", descriptorName + ":lifeCycleBuild")
+	err := cmd.Start()
 	if err != nil {
 		fmt.Printf("Error in executing cell build: %v \n", err)
 		os.Exit(1)
@@ -126,15 +105,9 @@ func runBuild(tag string, descriptorName string) error {
 		os.Exit(1)
 	}
 
-	// Move balx file to a celx
-	os.Rename(descriptorName+".balx", strings.Replace(descriptorName, ".cell", ".celx", -1))
-
-	//// Create zip file
-	var descripterFile string = strings.Split(descriptorName, ".")[0]
-	files := []string{descripterFile + ".celx"}
-	folders := []string{"target/cellery"}
-	output := descripterFile + ".zip"
-	err = util.RecursiveZip(files, folders, output);
+	folders := []string{"./target"}
+	output := strings.Split(descriptorName, ".")[0] + ".zip"
+	err = util.RecursiveZip(nil, folders, output);
 	if err != nil {
 		fmt.Printf("\x1b[31;1m Cell build finished with error: \x1b[0m %v \n", err)
 		os.Exit(1)

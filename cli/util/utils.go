@@ -30,20 +30,20 @@ import (
 	"time"
 )
 
-func CopyFile(directory string, oldFile string, newFile string) {
-	r, err := os.Open(oldFile)
+func CopyFile(oldFile string, newFile string) {
+	input, err := os.Open(oldFile)
 	if err != nil {
 		panic(err)
 	}
-	defer r.Close()
+	defer input.Close()
 
-	w, err := os.Create(newFile)
+	output, err := os.Create(newFile)
 	if err != nil {
 		panic(err)
 	}
-	defer w.Close()
+	defer output.Close()
 
-	_, err = io.Copy(w, r)
+	_, err = io.Copy(output, input)
 	if err != nil {
 		panic(err)
 	}
@@ -129,7 +129,7 @@ func RecursiveZip(files []string, folders []string, destinationPath string) erro
 			}
 			relPath := strings.TrimPrefix(filePath, filepath.Dir(folder))
 
-			zipFile, err := myZip.Create(strings.Replace(relPath, "/", "", 1))
+			zipFile, err := myZip.Create(relPath)
 			if err != nil {
 				return err
 			}
@@ -212,10 +212,10 @@ func Unzip(zipFolderName string, destinationFolderName string) error {
 	return nil
 }
 
-func FindInDirectory(directory, suffix string) ([]string, error) {
+func FindInDirectory(directory, suffix string) ([]string) {
 	files, err := ioutil.ReadDir(directory)
 	if err != nil {
-		return nil, err
+		return nil
 	}
 	fileList := []string{}
 	for _, f := range files {
@@ -223,7 +223,7 @@ func FindInDirectory(directory, suffix string) ([]string, error) {
 			fileList = append(fileList, filepath.Join(directory, f.Name()))
 		}
 	}
-	return fileList, nil
+	return fileList
 }
 
 func GetDuration(startTime time.Time) string {

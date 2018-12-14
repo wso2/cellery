@@ -19,12 +19,11 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"github.com/fatih/color"
 	i "github.com/oxequa/interact"
 	"github.com/spf13/cobra"
-	"github.com/wso2/cellery/cli/util"
-	"os/exec"
 	"os"
 	"path/filepath"
 )
@@ -96,32 +95,112 @@ func runInit() error {
 		},
 	})
 
+	cellTemplate :=
+	 	"import ballerina/io; \n" +
+		"import celleryio/cellery; \n" +
+		"cellery:Component componentB = { \n" +
+		"    name: \"ComponentB\", \n" +
+		"    source: { \n" +
+		"        image: \"docker.io/wso2vick/component-b:v1\" \n" +
+		"    }, \n" +
+		"    env: { ENV1: \"\", ENV2: \"\" }, \n" +
+		"    ingresses: [ \n" +
+		"        { \n" +
+		"            name: \"bar\", \n" +
+		"            port: \"8080:80\", \n" +
+		"            context: \"bar\", \n" +
+		"            definitions: [ \n" +
+		"                { \n" +
+		"                    path: \"*\", \n" +
+		"                    method: \"GET,POST,PUT,DELETE\" \n" +
+		"                } \n" +
+		"            ] \n" +
+		"        } \n" +
+		"    ] \n" +
+		"}; \n" +
+		"//Components \n" +
+		"cellery:Component componentA = { \n" +
+		"   name: \"ComponentA\", \n" +
+		"   source: { \n" +
+		"       image: \"docker.io/wso2vick/component-a:v1\" \n" +
+		"   }, \n" +
+		"   env: { ENV1: \"\", ENV2: \"\" }, \n" +
+		"   ingresses: [ \n" +
+		"       { \n" +
+		"           name: \"foo\", \n" +
+		"           port: \"8080:80\", \n" +
+		"           context: \"foo\", \n" +
+		"           definitions: [ \n" +
+		"               { \n" +
+		"                   path: \"*\", \n" +
+		"                   method: \"GET,POST,PUT,DELETE\" \n" +
+		"               } \n" +
+		"           ] \n" +
+		"       } \n" +
+		"   ], \n" +
+		"   egresses: [ \n" +
+		"       { \n" +
+		"           parent: componentB.name, \n" +
+		"           ingress: componentB.ingresses[0], \n" +
+		"           envVar: \"ENV1\", \n" +
+		"           resiliency: { \n" +
+		"               retryConfig: { \n" +
+		"                   interval: 100, \n" +
+		"                   count: 10, \n" +
+		"                   backOffFactor: 0.5, \n" +
+		"                   maxWaitInterval: 20000 \n" +
+		"               } \n" +
+		"           } \n" +
+		"       } \n" +
+		"   ] \n" +
+		"}; \n" +
+		"//Cell \n" +
+		"cellery:Cell cellA = new (\"CellA\"); \n" +
+		"//Build Function \n" +
+		"public function lifeCycleBuild() { \n" +
+		"   componentA.env[\"ENV2\"] = \"1VALUE2\"; \n" +
+		"   cellA.addComponent(componentA); \n" +
+		"   componentB.env[\"ENV1\"] = \"2VALUE1\"; \n" +
+		"   componentB.env[\"ENV2\"] = \"2VALUE2\"; \n" +
+		"   cellA.addComponent(componentB); \n" +
+		"   cellA.egresses = [ \n" +
+		"       { \n" +
+		"           parent: componentB.name, \n" +
+		"           ingress: componentB.ingresses[0], \n" +
+		"           envVar: \"ENV1\" \n" +
+		"       } \n" +
+		"   ]; \n" +
+		"   cellA.apis = [ \n" +
+		"       { \n" +
+		"           parent: componentB.name, \n" +
+		"           context:componentB.ingresses[0], \n" +
+		"           global: true \n" +
+		"       } \n" +
+		"   ]; \n" +
+		"   _ = cellery:build(cellA); \n" +
+		"}";
+
+
 	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
 		fmt.Println("Error in getting current directory location: " + err.Error());
 		os.Exit(1)
 	}
 
-	if _, err := os.Stat(dir + "/" + projectName); os.IsNotExist(err) {
-		projectPath = dir + "/" + projectName
+	if _, err := os.Stat(dir + "/" + projectName + "-" + projectVersion); os.IsNotExist(err) {
+		projectPath = dir + "/" + projectName + "-" + projectVersion
 		os.Mkdir(projectPath, os.ModePerm)
 	}
-	os.Chdir(projectPath)
-	cmd := exec.Command("ballerina", "init")
-	intitErr := cmd.Start()
-	if intitErr != nil {
-		fmt.Printf("Error in executing ballerina init: %v \n", err)
-		os.Exit(1)
-	}
-	intitErr = cmd.Wait()
+
+	file, err := os.Create(projectPath + "/" + projectName+ "-" + projectVersion + ".bal")
 	if err != nil {
-		fmt.Printf("\x1b[31;1m  ballerina init finished with error: \x1b[0m %v \n", err)
+		fmt.Println("Error in creating file: " + err.Error());
 		os.Exit(1)
 	}
-	os.Chdir(dir)
-
-	util.CopyFile("cli/resources/sample.bal", projectPath + "/" + projectName+ "-" + projectVersion + ".bal")
-
+	defer file.Close();
+	w := bufio.NewWriter(file)
+	w.WriteString(fmt.Sprintf("%s", cellTemplate))
+	w.Flush()
 	fmt.Println("Initialized cell project in dir: " + faintWhite(dir))
 
 	return nil

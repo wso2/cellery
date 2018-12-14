@@ -26,6 +26,7 @@ import (
 	"github.com/wso2/cellery/cli/util"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"time"
 )
@@ -55,7 +56,7 @@ func newBuildCommand() *cobra.Command {
 			}
 			return nil
 		},
-		Example: "  cellery build my-project-1.0.0.cell -t myproject",
+		Example: "  cellery build my-project-v1.0.bal -t myproject",
 	}
 	cmd.Flags().StringVarP(&tag, "tag", "t", "", "Name and optionally a tag in the 'name:tag' format")
 	return cmd
@@ -83,16 +84,6 @@ func runBuild(tag string, descriptorName string) error {
 	}
 	go spinner(tag)
 
-	//ballerinaFile := util.FindInDirectory(descriptorName, ".bal")[0]
-	//ballerinaFileName := strings.Split(ballerinaFile, ".")[0]
-	//
-	//dir, errPath := filepath.Abs(filepath.Dir(os.Args[0]))
-	//if errPath != nil {
-	//	fmt.Println("Error in getting current directory location: " + errPath.Error());
-	//	os.Exit(1)
-	//}
-	//os.Chdir(dir + "/" + descriptorName)
-
 	cmd := exec.Command("ballerina", "run", descriptorName + ":lifeCycleBuild")
 	err := cmd.Start()
 	if err != nil {
@@ -106,8 +97,15 @@ func runBuild(tag string, descriptorName string) error {
 	}
 
 	folders := []string{"./target"}
+	files := []string{descriptorName}
 	output := strings.Split(descriptorName, ".")[0] + ".zip"
-	err = util.RecursiveZip(nil, folders, output);
+	err = util.RecursiveZip(files, folders, output);
+	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	if err != nil {
+		fmt.Println("Error in getting current directory location: " + err.Error());
+		os.Exit(1)
+	}
+	os.RemoveAll(dir + "/target")
 	if err != nil {
 		fmt.Printf("\x1b[31;1m Cell build finished with error: \x1b[0m %v \n", err)
 		os.Exit(1)

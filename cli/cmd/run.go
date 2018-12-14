@@ -25,6 +25,7 @@ import (
 	"github.com/wso2/cellery/cli/util"
 	"os"
 	"os/exec"
+	"path/filepath"
 )
 
 func newRunCommand() *cobra.Command {
@@ -82,10 +83,16 @@ func run(cellImage string) error {
 		os.Exit(1)
 	}
 	err = cmd.Wait()
+
+	dir, errFilePath := filepath.Abs(filepath.Dir(os.Args[0]))
+	if errFilePath != nil {
+		fmt.Println("Error in getting current directory location: " + errFilePath.Error());
+		os.Exit(1)
+	}
+	os.RemoveAll(dir + "/" + cellImage)
 	if err != nil {
 		fmt.Printf("\x1b[31;1m Cell run finished with error: \x1b[0m %v \n", err)
 		os.Exit(1)
 	}
-
 	return nil
 }

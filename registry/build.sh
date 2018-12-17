@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # --------------------------------------------------------------------
 # Copyright (c) 2018, WSO2 Inc. (http://wso2.com) All Rights Reserved.
 #

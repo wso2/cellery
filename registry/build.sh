@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 # --------------------------------------------------------------------
 # Copyright (c) 2018, WSO2 Inc. (http://wso2.com) All Rights Reserved.
 #
@@ -15,6 +15,15 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
+command -v mvn >/dev/null 2>&1 || {
+  echo >&2 "Apache Maven was not found. Please install Maven first."
+  exit 1
+}
+
+command -v docker >/dev/null 2>&1 || {
+  echo >&2 "Docker was not found. Please install Docker first."
+  exit 1
+}
 
 function showUsageAndExit() {
     echo "USAGE$"
@@ -62,9 +71,18 @@ if [[ -z "$BUILD_VERSION" ]]; then
 fi
 
 
+echo "Building Registry Ballerina Native module ..."
+pushd registry-natives >/dev/null 2>&1
+mvn clean install
+popd >/dev/null 2>&1
+ STATUS=$?
+ if [[ ${STATUS} != 0 ]]; then
+    showErrorAndExit "Registry Ballerina Native module build failed." ${STATUS}
+fi
+
 echo
 echo "Building Docker images ..."
-docker build --no-cache -f Dockerfile -t cellery/cellery-registry:${BUILD_VERSION} .
+docker build -f Dockerfile -t cellery/cellery-registry:${BUILD_VERSION} .
 
 STATUS=$?
 

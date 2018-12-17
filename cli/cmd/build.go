@@ -19,6 +19,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
@@ -85,6 +86,14 @@ func runBuild(tag string, descriptorName string) error {
 	go spinner(tag)
 
 	cmd := exec.Command("ballerina", "run", descriptorName + ":lifeCycleBuild")
+	execError := ""
+	stderrReader, _ := cmd.StderrPipe()
+	stderrScanner := bufio.NewScanner(stderrReader)
+	go func() {
+		for stderrScanner.Scan() {
+			execError += stderrScanner.Text()
+		}
+	}()
 	err := cmd.Start()
 	if err != nil {
 		fmt.Printf("Error in executing cell build: %v \n", err)
@@ -92,20 +101,25 @@ func runBuild(tag string, descriptorName string) error {
 	}
 	err = cmd.Wait()
 	if err != nil {
-		fmt.Printf("\x1b[31;1m Cell build finished with error: \x1b[0m %v \n", err)
+		fmt.Printf("\x1b[31;1m\n Error occurred while building cell image:\x1b[0m %v \n", execError)
 		os.Exit(1)
 	}
-
-	folders := []string{"./target"}
-	files := []string{descriptorName}
-	output := strings.Split(descriptorName, ".")[0] + ".zip"
-	err = util.RecursiveZip(files, folders, output);
 	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
 		fmt.Println("Error in getting current directory location: " + err.Error());
 		os.Exit(1)
 	}
-	os.RemoveAll(dir + "/target")
+	folderRenameError := os.Rename(dir + "/target", dir + "/k8s") // rename directory
+	if folderRenameError != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	folders := []string{"./k8s"}
+	files := []string{descriptorName}
+	output := strings.Split(descriptorName, ".")[0] + ".zip"
+	err = util.RecursiveZip(files, folders, output);
+
+	os.RemoveAll(dir + "/k8s")
 	if err != nil {
 		fmt.Printf("\x1b[31;1m Cell build finished with error: \x1b[0m %v \n", err)
 		os.Exit(1)

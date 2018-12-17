@@ -26,6 +26,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 )
 
 func newRunCommand() *cobra.Command {
@@ -51,18 +52,19 @@ func newRunCommand() *cobra.Command {
 	return cmd
 }
 
-func run(cellImage string) error {
-	if cellImage == "" {
+func run(cellImageZip string) error {
+	if cellImageZip == "" {
 		return fmt.Errorf("no cellImage name specified")
 	}
-
-	if _, err := os.Stat(cellImage + ".zip"); os.IsNotExist(err) {
-		return fmt.Errorf("zip folder does not exist")
+	if _, err := os.Stat(cellImageZip); os.IsNotExist(err) {
+		fmt.Printf("\x1b[31;1m\n Error occurred while running cell image:\x1b[0m zip folder %v does not exist  \n", cellImageZip)
+		os.Exit(1)
 	}
+	cellImage := strings.Split(cellImageZip, ".")[0]
+	util.Unzip(cellImageZip, cellImage)
 
-	util.Unzip(cellImage + ".zip", cellImage)
-
-	cmd := exec.Command("kubectl", "apply", "-f", util.FindInDirectory(cellImage + "/target", ".yaml")[0])
+	cmd := exec.Command("kubectl", "apply", "-f", util.FindInDirectory(cellImage + "/k8s", ".yaml")[0])
+	execError := ""
 	stdoutReader, _ := cmd.StdoutPipe()
 	stdoutScanner := bufio.NewScanner(stdoutReader)
 	go func() {
@@ -74,7 +76,7 @@ func run(cellImage string) error {
 	stderrScanner := bufio.NewScanner(stderrReader)
 	go func() {
 		for stderrScanner.Scan() {
-			fmt.Println(stderrScanner.Text())
+			execError += stderrScanner.Text()
 		}
 	}()
 	err := cmd.Start()
@@ -91,7 +93,7 @@ func run(cellImage string) error {
 	}
 	os.RemoveAll(dir + "/" + cellImage)
 	if err != nil {
-		fmt.Printf("\x1b[31;1m Cell run finished with error: \x1b[0m %v \n", err)
+		fmt.Printf("\x1b[31;1m\n Error occurred while running cell image:\x1b[0m %v \n", execError)
 		os.Exit(1)
 	}
 	return nil

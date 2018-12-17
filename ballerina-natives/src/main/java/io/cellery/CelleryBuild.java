@@ -61,6 +61,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.removePattern;
 
 /**
@@ -86,8 +87,33 @@ public class CelleryBuild extends BlockingNativeCallableUnit {
         processAPIs(((BValueArray) ((BMap) ctx.getNullableRefArgument(0)).getMap().get("apis")).getValues());
         Set<Component> components = new HashSet<>(componentHolder.getComponentNameToComponentMap().values());
         cellCache.setCellNameToComponentMap(cellName, components);
+        processCellEgress(((BValueArray) ((BMap) ctx.getNullableRefArgument(0)).getMap().get("egresses")).getValues());
         String cellYaml = generateCell(cellName);
         ctx.setReturnValues(new BString(cellYaml));
+    }
+
+    private void processCellEgress(BRefType<?>[] egresses) {
+        for (BRefType egressDefinition : egresses) {
+            if (egressDefinition == null) {
+                continue;
+            }
+            Egress egress = new Egress();
+            for (Map.Entry<?, ?> entry : ((BMap<?, ?>) egressDefinition).getMap().entrySet()) {
+                Object key = entry.getKey();
+                BValue value = (BValue) entry.getValue();
+                switch (key.toString()) {
+                    case "targetCell":
+                        egress.setCellName(value.toString());
+                        break;
+                    case "envVar":
+                        egress.setEnvVar(value.toString());
+                        break;
+                    default:
+                        break;
+                }
+            }
+            componentHolder.getComponentNameToComponentMap().values().forEach(component -> component.addEgress(egress));
+        }
     }
 
     private void processComponents(BRefType<?>[] components) {
@@ -274,16 +300,29 @@ public class CelleryBuild extends BlockingNativeCallableUnit {
             serviceTemplate.setServicePort(component.getServicePort());
             serviceTemplate.setMetadata(new ObjectMetaBuilder().withName(component.getService()).build());
             component.getEgresses().forEach((egress) -> {
-                //service name = cellName--serviceName--service
-                Component targetComponent = componentHolder.getComponentNameToComponentMap().get(egress.getParent());
-                if (targetComponent == null) {
-                    throw new BallerinaException("Invalid component egress. " +
-                            "Components " + component.getName() + " and " + egress.getParent() + " are not defined in" +
-                            " the same cell.");
+                String serviceName;
+                if (isEmpty(egress.getCellName())) {
+                    //Inter cell mapping
+                    Component targetComponent =
+                            componentHolder.getComponentNameToComponentMap().get(egress.getParent());
+                    if (targetComponent == null) {
+                        throw new BallerinaException("Invalid component egress. " +
+                                "Components " + component.getName() + " and " + egress.getParent() + " are not " +
+                                "defined in the same cell.");
+                    }
+                    // Generate service name => cellName--serviceName-service
+                    serviceName = getValidName(name) + "--" +
+                            targetComponent.getService()
+                            + "-service";
+                } else {
+                    //Intra cell mapping
+                    if (CellCache.getInstance().getCellNameToComponentMap().containsKey(egress.getCellName())) {
+                        // Generate service name => cellName--gateway-service
+                        serviceName = getValidName(egress.getCellName()) + "--gateway-service";
+                    } else {
+                        throw new BallerinaException("Invalid cell reference " + egress.getCellName() + " in egress.");
+                    }
                 }
-                String serviceName = getValidName(name) + "--" +
-                        targetComponent.getService()
-                        + "--service";
                 component.addEnv(egress.getEnvVar(), serviceName);
 
             });

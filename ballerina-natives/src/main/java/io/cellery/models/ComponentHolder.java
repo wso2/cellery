@@ -26,7 +26,6 @@ public class ComponentHolder {
             throw new BallerinaException("Two components with same name exists " + component.getName());
         }
         this.componentNameToComponentMap.put(component.getName(), component);
-
     }
 
     public void addAPI(String componentName, API api) {

@@ -29,5 +29,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Egress {
     String parent;
+    String cellName;
     String envVar;
 }

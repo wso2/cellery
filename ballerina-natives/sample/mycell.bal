@@ -156,7 +156,7 @@ public function lifeCycleBuild() {
     ];
     stocksCell.egresses = [
         {
-            parent:mysql.name,
+            targetCell:mysqlCell.name,
             ingress: mysql.ingresses[0],
             envVar: "MYSQL_HOST"
         }
@@ -166,18 +166,6 @@ public function lifeCycleBuild() {
     io:println("Building HR Cell ...");
     hr.replicas = config:getAsInt("HR_REPLICAS");
     hrCell.addComponent(hr);
-    hrCell.egresses = [
-        {
-            parent:employee.name,
-            ingress: employee.ingresses[0],
-            envVar: "EMPLOYEEGW_URL"
-        },
-        {
-            parent: stocks.name,
-            ingress: stocks.ingresses[0],
-            envVar: "STOCKGW_URL"
-        }
-    ];
     hrCell.apis = [
         {
             parent:hr.name,
@@ -187,7 +175,7 @@ public function lifeCycleBuild() {
     ];
     hrCell.egresses = [
         {
-            parent:employee.name,
+            targetCell:employeeCell.name,
             ingress: employee.ingresses[0],
             envVar: "EMPLOYEEGW_URL",
             resiliency: {
@@ -200,7 +188,7 @@ public function lifeCycleBuild() {
             }
         },
         {
-            parent: stocks.name,
+            targetCell: stocksCell.name,
             ingress: stocks.ingresses[0],
             envVar: "STOCKGW_URL",
             resiliency: {
@@ -214,6 +202,5 @@ public function lifeCycleBuild() {
         }
     ];
     _ = cellery:build(hrCell);
-
 
 }

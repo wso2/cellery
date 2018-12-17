@@ -47,8 +47,8 @@ public type API record{
 };
 
 public type Egress record{
-    string parent;
-    string cell?;
+    string parent?;
+    string targetCell?;
     Ingress ingress;
     string envVar?;
     Resiliency resiliency?;

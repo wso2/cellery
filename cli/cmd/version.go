@@ -26,9 +26,10 @@ import (
 	"io/ioutil"
 	"strconv"
 	"github.com/fatih/color"
+	"github.com/wso2/cellery/cli/constants"
 )
 
-const BASE_URL = "http://localhost:8080"
+
 
 
 func newVersionCommand() *cobra.Command {
@@ -74,7 +75,7 @@ func runVersion() error {
 	}
 
 	// Call API server to get the version details.
-	resp, err := http.Get(BASE_URL + "/version")
+	resp, err := http.Get(constants.BASE_API_URL + "/version")
 	if err != nil {
 		fmt.Println("Error connecting to the cellery api-server.")
 	}

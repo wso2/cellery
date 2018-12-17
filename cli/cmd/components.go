@@ -24,6 +24,7 @@ import (
 	"fmt"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
+	"github.com/wso2/cellery/cli/constants"
 	"os"
 	"os/exec"
 	"strconv"
@@ -54,10 +55,10 @@ func newComponentsCommand() *cobra.Command {
 }
 
 func components(cellName string) error {
-	cmd := exec.Command("kubectl", "get", "services", "-l", GroupName + "/cell=" + cellName, "-o", "json")
+	cmd := exec.Command("kubectl", "get", "services", "-l", constants.GROUP_NAME + "/cell=" + cellName, "-o", "json")
 	stdoutReader, _ := cmd.StdoutPipe()
 	stdoutScanner := bufio.NewScanner(stdoutReader)
-	output := ""
+	output := constants.EMPTY_STRING
 	go func() {
 		for stdoutScanner.Scan() {
 			output = output + stdoutScanner.Text()

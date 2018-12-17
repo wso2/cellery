@@ -22,6 +22,7 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/spf13/cobra"
+	"github.com/wso2/cellery/cli/constants"
 	"os"
 	"os/exec"
 )
@@ -59,7 +60,7 @@ func newLogsCommand() *cobra.Command {
 }
 
 func componentLogs(cellName, componentName string) error {
-	cmd := exec.Command("kubectl", "logs", "-l", GroupName + "/service=" + cellName + "--" + componentName, "-c", componentName)
+	cmd := exec.Command("kubectl", "logs", "-l", constants.GROUP_NAME + "/service=" + cellName + "--" + componentName, "-c", componentName)
 	stdoutReader, _ := cmd.StdoutPipe()
 	stdoutScanner := bufio.NewScanner(stdoutReader)
 	output := ""
@@ -93,7 +94,7 @@ func componentLogs(cellName, componentName string) error {
 }
 
 func cellLogs(cellName string) error {
-	cmd := exec.Command("kubectl", "logs", "-l", GroupName + "/cell=" + cellName, "--all-containers=true")
+	cmd := exec.Command("kubectl", "logs", "-l", constants.GROUP_NAME + "/cell=" + cellName, "--all-containers=true")
 	stdoutReader, _ := cmd.StdoutPipe()
 	stdoutScanner := bufio.NewScanner(stdoutReader)
 	output := ""

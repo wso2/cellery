@@ -24,6 +24,7 @@ import (
 	"fmt"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
+	"github.com/wso2/cellery/cli/constants"
 	"os"
 	"os/exec"
 	"strings"
@@ -140,19 +141,19 @@ func getApiMethodsArray(definitions []GatewayDefinition) []string {
 	methodArray := make([]string, 5)
 
 	for i := 0; i < len(definitions) ; i++ {
-		if strings.EqualFold(definitions[i].Method, "GET") {
+		if strings.EqualFold(definitions[i].Method, constants.HTTP_METHOD_GET) {
 			methodArray[0] = definitions[i].Path
 		}
-		if strings.EqualFold(definitions[i].Method, "POST")  {
+		if strings.EqualFold(definitions[i].Method, constants.HTTP_METHOD_POST)  {
 			methodArray[1] = definitions[i].Path
 		}
-		if strings.EqualFold(definitions[i].Method, "PATCH")  {
+		if strings.EqualFold(definitions[i].Method, constants.HTTP_METHOD_PATCH)  {
 			methodArray[2] = definitions[i].Path
 		}
-		if strings.EqualFold(definitions[i].Method, "PUT")  {
+		if strings.EqualFold(definitions[i].Method, constants.HTTP_METHOD_PUT)  {
 			methodArray[3] = definitions[i].Path
 		}
-		if strings.EqualFold(definitions[i].Method, "DELETE")  {
+		if strings.EqualFold(definitions[i].Method, constants.HTTP_METHOD_DELETE)  {
 			methodArray[4] = definitions[i].Path
 		}
 	}

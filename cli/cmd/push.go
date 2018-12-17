@@ -23,6 +23,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/spf13/cobra"
+	"github.com/wso2/cellery/cli/constants"
 	"github.com/wso2/cellery/cli/util"
 	"log"
 	"net/http"
@@ -65,7 +66,7 @@ func newPushCommand() *cobra.Command {
 }
 
 func runPush(cellImage string) error {
-	var url string = "https://localhost:9090/registry/0.0.1/images/wso2/" + cellImage + "/2.0.0-m1"
+	var url string = constants.REGISTRY_URL + "/" + constants.REGISTRY_ORGANIZATION + "/" + cellImage + "/2.0.0-m1"
 	if cellImage == "" {
 		return fmt.Errorf("no cell image specified")
 	}

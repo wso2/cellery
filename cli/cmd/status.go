@@ -24,6 +24,7 @@ import (
 	"fmt"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
+	"github.com/wso2/cellery/cli/constants"
 	"github.com/wso2/cellery/cli/util"
 	"io/ioutil"
 	"os"
@@ -55,7 +56,7 @@ func newStatusCommand() *cobra.Command {
 }
 
 func status(cellName string) error {
-	cmd := exec.Command("kubectl", "get", "pods", "-l", GroupName + "/cell=" + cellName, "-o", "json")
+	cmd := exec.Command("kubectl", "get", "pods", "-l", constants.GROUP_NAME+ "/cell=" + cellName, "-o", "json")
 	output := ""
 
 	outfile, errPrint := os.Create("./out.txt")

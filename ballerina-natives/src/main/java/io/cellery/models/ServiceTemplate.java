@@ -18,7 +18,6 @@
 
 package io.cellery.models;
 
-import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -32,7 +31,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ServiceTemplate {
     private ObjectMeta metadata;
-    private int replicas;
-    private int servicePort;
-    private Container container;
+    private ServiceTemplateSpec spec;
 }

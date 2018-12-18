@@ -112,4 +112,4 @@ public type Cell object {
 #
 # + cell - The cell
 # + return - true/false
-public extern function build(Cell cell) returns (string);
+public extern function build(Cell cell) returns (boolean|error);

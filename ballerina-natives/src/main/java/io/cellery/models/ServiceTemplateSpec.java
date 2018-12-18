@@ -15,24 +15,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package io.cellery.models;
 
+import io.fabric8.kubernetes.api.model.Container;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Singular;
-
-import java.util.List;
 
 /**
- * Cell Spec.
+ * Service Template Spec.
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CellSpec {
-    private GatewayTemplate gatewayTemplate;
-    private @Singular
-    List<ServiceTemplate> servicesTemplates;
+public class ServiceTemplateSpec {
+    private int replicas;
+    private int servicePort;
+    private Container container;
 }

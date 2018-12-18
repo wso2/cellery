@@ -345,3 +345,29 @@ func FileUploadRequest(uri string, params map[string]string, paramName, path str
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 	return req, err
 }
+
+func DownloadFile(filepath string, url string) (*http.Response, error) {
+	transport := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify : true},
+	}
+	client := &http.Client{Transport: transport}
+
+	resp, err := client.Get(url)
+	if err != nil {
+		return resp, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == 200 {
+		out, err := os.Create(filepath)
+		if err != nil {
+			return nil, err
+		}
+		defer out.Close()
+		_, err = io.Copy(out, resp.Body)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return resp, nil
+}

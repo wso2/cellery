@@ -51,7 +51,6 @@ import org.ballerinalang.util.exceptions.BallerinaException;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -150,6 +149,7 @@ public class CelleryBuild extends BlockingNativeCallableUnit {
                     case "env":
                         ((BMap<?, ?>) value).getMap().forEach((envKey, envValue) ->
                                 component.addEnv(envKey.toString(), envValue.toString()));
+                        break;
                     default:
                         break;
                 }
@@ -183,7 +183,7 @@ public class CelleryBuild extends BlockingNativeCallableUnit {
     }
 
     /**
-     * Extract the ingress port
+     * Extract the ingress port.
      *
      * @param ingressMap list of ingressee defined
      * @return A string with container port and Service port

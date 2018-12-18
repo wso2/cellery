@@ -28,6 +28,7 @@ public class Component {
         envVars = new HashMap<>();
         apis = new ArrayList<>();
         egresses = new HashSet<>();
+        replicas = 1;
     }
 
     public void addApi(API api) {

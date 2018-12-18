@@ -3,7 +3,6 @@ package io.cellery.models;
 import org.ballerinalang.util.exceptions.BallerinaException;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**

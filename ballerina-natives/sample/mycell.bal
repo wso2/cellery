@@ -122,8 +122,8 @@ public function lifeCycleBuild() {
 
     //Employee Cell
     io:println("Building Employee Cell ...");
-    employee.replicas = config:getAsInt("EMPLOYEE_REPLICAS");
-    salary.replicas = config:getAsInt("SALARY_REPLICAS");
+    employee.replicas = config:getAsInt("employee.EMPLOYEE_REPLICAS");
+    salary.replicas = config:getAsInt("salary.SALARY_REPLICAS");
     employeeCell.addComponent(employee);
     employeeCell.addComponent(salary);
     employeeCell.apis = [
@@ -137,15 +137,15 @@ public function lifeCycleBuild() {
 
     //MySQL cell
     io:println("Building MySQL Cell ...");
-    mysql.env["MYSQL_ROOT_PASSWORD"] = config:getAsString("MYSQL_ROOT_PASSWORD");
+    mysql.env["MYSQL_ROOT_PASSWORD"] = config:getAsString("mysql.MYSQL_ROOT_PASSWORD");
     mysqlCell.addComponent(mysql);
     _ = cellery:build(mysqlCell);
 
     //Stocks Cell
     io:println("Building Stocks Cell ...");
-    stocks.replicas = config:getAsInt("STOCKS_REPLICAS");
-    stocks.env["MYSQL_USER"] = config:getAsString("MYSQL_USER");
-    stocks.env["MYSQL_PW"] = config:getAsString("MYSQL_PW");
+    stocks.replicas = config:getAsInt("stocks.STOCKS_REPLICAS");
+    stocks.env["MYSQL_USER"] = config:getAsString("stocks.MYSQL_USER");
+    stocks.env["MYSQL_PW"] = config:getAsString("stocks.MYSQL_PW");
     stocksCell.addComponent(stocks);
     stocksCell.apis = [
         {
@@ -164,7 +164,7 @@ public function lifeCycleBuild() {
     _ = cellery:build(stocksCell);
 
     io:println("Building HR Cell ...");
-    hr.replicas = config:getAsInt("HR_REPLICAS");
+    hr.replicas = config:getAsInt("hr.HR_REPLICAS");
     hrCell.addComponent(hr);
     hrCell.apis = [
         {

@@ -19,7 +19,6 @@
 package io.cellery.models;
 
 import io.fabric8.kubernetes.api.model.ObjectMeta;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

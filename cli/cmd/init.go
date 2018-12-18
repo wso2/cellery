@@ -28,14 +28,13 @@ import (
 	"path/filepath"
 )
 
-
 func newInitCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "init",
 		Short: "Initialize a cell project",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			err := runInit()
-			if err != nil{
+			if err != nil {
 				cmd.Help()
 				return err
 			}
@@ -52,26 +51,25 @@ func runInit() error {
 	whitef := color.New(color.FgWhite)
 	faintWhite := whitef.Add(color.Faint).SprintFunc()
 
-
 	prefix := cyan("?")
 	projectName := ""
 	projectVersion := ""
 	projectPath := ""
 
 	i.Run(&i.Interact{
-		Before: func(c i.Context) error{
+		Before: func(c i.Context) error {
 			c.SetPrfx(color.Output, prefix)
 			return nil
 		},
 		Questions: []*i.Question{
 			{
-				Before: func(c i.Context) error{
+				Before: func(c i.Context) error {
 					c.SetPrfx(nil, cyan("?"))
 					c.SetDef("my-project", faintWhite("[my-project]"))
 					return nil
 				},
 				Quest: i.Quest{
-					Msg:     boldWhite("Enter a project name"),
+					Msg: boldWhite("Enter a project name"),
 				},
 				Action: func(c i.Context) interface{} {
 					projectName, _ = c.Ans().String()
@@ -79,13 +77,13 @@ func runInit() error {
 				},
 			},
 			{
-				Before: func(c i.Context) error{
+				Before: func(c i.Context) error {
 					c.SetPrfx(nil, cyan("?"))
 					c.SetDef("v1.0.0", faintWhite("[v1.0.0]"))
 					return nil
 				},
 				Quest: i.Quest{
-					Msg:     boldWhite("Enter project version"),
+					Msg: boldWhite("Enter project version"),
 				},
 				Action: func(c i.Context) interface{} {
 					projectVersion, _ = c.Ans().String()
@@ -96,94 +94,51 @@ func runInit() error {
 	})
 
 	cellTemplate :=
-	 	"import ballerina/io; \n" +
-		"import celleryio/cellery; \n" +
-		"cellery:Component componentB = { \n" +
-		"    name: \"ComponentB\", \n" +
-		"    source: { \n" +
-		"        image: \"docker.io/wso2vick/component-b:v1\" \n" +
-		"    }, \n" +
-		"    env: { ENV1: \"\", ENV2: \"\" }, \n" +
-		"    ingresses: [ \n" +
-		"        { \n" +
-		"            name: \"bar\", \n" +
-		"            port: \"8080:80\", \n" +
-		"            context: \"bar\", \n" +
-		"            definitions: [ \n" +
-		"                { \n" +
-		"                    path: \"*\", \n" +
-		"                    method: \"GET,POST,PUT,DELETE\" \n" +
-		"                } \n" +
-		"            ] \n" +
-		"        } \n" +
-		"    ] \n" +
-		"}; \n" +
-		"//Components \n" +
-		"cellery:Component componentA = { \n" +
-		"   name: \"ComponentA\", \n" +
-		"   source: { \n" +
-		"       image: \"docker.io/wso2vick/component-a:v1\" \n" +
-		"   }, \n" +
-		"   env: { ENV1: \"\", ENV2: \"\" }, \n" +
-		"   ingresses: [ \n" +
-		"       { \n" +
-		"           name: \"foo\", \n" +
-		"           port: \"8080:80\", \n" +
-		"           context: \"foo\", \n" +
-		"           definitions: [ \n" +
-		"               { \n" +
-		"                   path: \"*\", \n" +
-		"                   method: \"GET,POST,PUT,DELETE\" \n" +
-		"               } \n" +
-		"           ] \n" +
-		"       } \n" +
-		"   ], \n" +
-		"   egresses: [ \n" +
-		"       { \n" +
-		"           parent: componentB.name, \n" +
-		"           ingress: componentB.ingresses[0], \n" +
-		"           envVar: \"ENV1\", \n" +
-		"           resiliency: { \n" +
-		"               retryConfig: { \n" +
-		"                   interval: 100, \n" +
-		"                   count: 10, \n" +
-		"                   backOffFactor: 0.5, \n" +
-		"                   maxWaitInterval: 20000 \n" +
-		"               } \n" +
-		"           } \n" +
-		"       } \n" +
-		"   ] \n" +
-		"}; \n" +
-		"//Cell \n" +
-		"cellery:Cell cellA = new (\"CellA\"); \n" +
-		"//Build Function \n" +
-		"public function lifeCycleBuild() { \n" +
-		"   componentA.env[\"ENV2\"] = \"1VALUE2\"; \n" +
-		"   cellA.addComponent(componentA); \n" +
-		"   componentB.env[\"ENV1\"] = \"2VALUE1\"; \n" +
-		"   componentB.env[\"ENV2\"] = \"2VALUE2\"; \n" +
-		"   cellA.addComponent(componentB); \n" +
-		"   cellA.egresses = [ \n" +
-		"       { \n" +
-		"           parent: componentB.name, \n" +
-		"           ingress: componentB.ingresses[0], \n" +
-		"           envVar: \"ENV1\" \n" +
-		"       } \n" +
-		"   ]; \n" +
-		"   cellA.apis = [ \n" +
-		"       { \n" +
-		"           parent: componentB.name, \n" +
-		"           context:componentB.ingresses[0], \n" +
-		"           global: true \n" +
-		"       } \n" +
-		"   ]; \n" +
-		"   _ = cellery:build(cellA); \n" +
-		"}";
-
+		"import ballerina/io;\n" +
+			"import celleryio/cellery;\n" +
+			"\n" +
+			"cellery:Component helloWorldComp = {\n" +
+			"   name: \"HelloWorld\",\n" +
+			"   source: {\n" +
+			"       image: \"sumedhassk/hello-world:1.0.0\" \n" +
+			"   },\n" +
+			"   ingresses: [\n" +
+			"       {\n" +
+			"           name: \"hello\",\n" +
+			"           port: \"9090:80\",\n" +
+			"           context: \"hello\",\n" +
+			"           definitions: [\n" +
+			"               {\n" +
+			"                   path: \"/\",\n" +
+			"                   method: \"GET\"\n" +
+			"               }\n" +
+			"           ]\n" +
+			"       }\n" +
+			"   ]\n" +
+			"};\n" +
+			"\n" +
+			"cellery:Cell helloCell = new(\"HelloCell\");\n" +
+			"\n" +
+			"public function lifeCycleBuild() {\n" +
+			"   helloCell.addComponent(helloWorldComp);\n" +
+			"\n" +
+			"   helloCell.apis = [\n" +
+			"       {\n" +
+			"           parent:helloWorldComp.name,\n" +
+			"           context: helloWorldComp.ingresses[0],\n" +
+			"           global: true\n" +
+			"       }\n" +
+			"   ];\n" +
+			"\n" +
+			"   var out = cellery:build(helloCell);\n" +
+			"   if(out is boolean) {\n" +
+			"       io:println(\"Hello Cell Built successfully.\");\n" +
+			"   }\n" +
+			"}\n"
 
 	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
-		fmt.Println("Error in getting current directory location: " + err.Error());
+		fmt.Println("Error in getting current directory location: " + err.Error())
 		os.Exit(1)
 	}
 
@@ -192,12 +147,12 @@ func runInit() error {
 		os.Mkdir(projectPath, os.ModePerm)
 	}
 
-	file, err := os.Create(projectPath + "/" + projectName+ "-" + projectVersion + ".bal")
+	file, err := os.Create(projectPath + "/" + projectName + "-" + projectVersion + ".bal")
 	if err != nil {
-		fmt.Println("Error in creating file: " + err.Error());
+		fmt.Println("Error in creating file: " + err.Error())
 		os.Exit(1)
 	}
-	defer file.Close();
+	defer file.Close()
 	w := bufio.NewWriter(file)
 	w.WriteString(fmt.Sprintf("%s", cellTemplate))
 	w.Flush()

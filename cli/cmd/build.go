@@ -28,7 +28,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 	"time"
 )
 
@@ -37,8 +36,7 @@ var isFirstPrint = true
 var white = color.New(color.FgWhite)
 var boldWhite = white.Add(color.Bold).SprintFunc()
 var tag string
-var descriptorName string
-var balFileName string
+var fileName string
 
 func newBuildCommand() *cobra.Command {
 	cmd := &cobra.Command{
@@ -49,8 +47,8 @@ func newBuildCommand() *cobra.Command {
 				cmd.Help()
 				return nil
 			}
-			descriptorName = args[0]
-			err := runBuild(tag, descriptorName)
+			fileName = args[0]
+			err := runBuild(tag, fileName)
 			if err != nil {
 				cmd.Help()
 				return err
@@ -76,16 +74,19 @@ func spinner(tag string) {
 	}
 }
 
-func runBuild(tag string, descriptorName string) error {
-	if tag == "" {
-		tag = strings.Split(descriptorName, ".")[0]
+func runBuild(tag string, fileName string) error {
+	if fileName == "" {
+		return fmt.Errorf("no file name specified")
 	}
-	if descriptorName == "" {
-		return fmt.Errorf("no descriptor name specified")
+	var extension = filepath.Ext(fileName)
+	var fileNameSuffix = fileName[0:len(fileName)-len(extension)]
+
+	if tag == "" {
+		tag = fileNameSuffix
 	}
 	go spinner(tag)
 
-	cmd := exec.Command("ballerina", "run", descriptorName + ":lifeCycleBuild")
+	cmd := exec.Command("ballerina", "run", fileName + ":lifeCycleBuild")
 	execError := ""
 	stderrReader, _ := cmd.StderrPipe()
 	stderrScanner := bufio.NewScanner(stderrReader)
@@ -115,8 +116,8 @@ func runBuild(tag string, descriptorName string) error {
 		os.Exit(1)
 	}
 	folders := []string{"./k8s"}
-	files := []string{descriptorName}
-	output := strings.Split(descriptorName, ".")[0] + ".zip"
+	files := []string{fileName}
+	output := fileNameSuffix + ".zip"
 	err = util.RecursiveZip(files, folders, output);
 
 	os.RemoveAll(dir + "/k8s")
@@ -125,7 +126,6 @@ func runBuild(tag string, descriptorName string) error {
 		os.Exit(1)
 	}
 
-	fmt.Printf("\r\033[32m Successfully built cell image \033[m %s \n", boldWhite(tag))
-
+	fmt.Printf("\r\033[32m Successfully built cell image \033[m %s \n", boldWhite(tag + ".zip"))
 	return nil
 }

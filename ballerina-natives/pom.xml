@@ -4,9 +4,15 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <groupId>io.ballerina</groupId>
+        <artifactId>ballerina</artifactId>
+        <version>1</version>
+    </parent>
+
     <groupId>io.cellery</groupId>
     <artifactId>cellery</artifactId>
-    <version>0.0.0</version>
+    <version>0.990.0</version>
     <packaging>jar</packaging>
     <name>Cellery Ballerina Natives module</name>
     <url>https://cellery.io</url>

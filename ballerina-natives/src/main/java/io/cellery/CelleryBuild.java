@@ -34,6 +34,7 @@ import io.fabric8.kubernetes.api.model.ContainerPortBuilder;
 import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.EnvVarBuilder;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
+import org.apache.commons.lang3.StringUtils;
 import org.ballerinalang.bre.Context;
 import org.ballerinalang.bre.bvm.BlockingNativeCallableUnit;
 import org.ballerinalang.model.types.TypeKind;
@@ -49,6 +50,8 @@ import org.ballerinalang.util.exceptions.BallerinaException;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -77,6 +80,7 @@ import static org.apache.commons.lang3.StringUtils.removePattern;
 public class CelleryBuild extends BlockingNativeCallableUnit {
 
     private ComponentHolder componentHolder;
+    private PrintStream out = System.out;
 
     public void execute(Context ctx) {
         componentHolder = new ComponentHolder();
@@ -327,8 +331,12 @@ public class CelleryBuild extends BlockingNativeCallableUnit {
 
             });
             List<EnvVar> envVarList = new ArrayList<>();
-            component.getEnvVars().forEach((key, value) ->
-                    envVarList.add(new EnvVarBuilder().withName(key).withValue(value).build()));
+            component.getEnvVars().forEach((key, value) -> {
+                if (StringUtils.isEmpty(value)) {
+                    out.println("Warning: Value is empty for environment variable \"" + key + "\"");
+                }
+                envVarList.add(new EnvVarBuilder().withName(key).withValue(value).build());
+            });
             serviceTemplate.setContainer(new ContainerBuilder()
                     .withImage(component.getSource())
                     .withPorts(new ContainerPortBuilder().

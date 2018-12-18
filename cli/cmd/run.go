@@ -56,6 +56,9 @@ func run(cellImageZip string) error {
 	if cellImageZip == "" {
 		return fmt.Errorf("no cellImage name specified")
 	}
+	if !strings.HasSuffix(cellImageZip, ".zip") {
+		cellImageZip = cellImageZip + ".zip"
+	}
 	if _, err := os.Stat(cellImageZip); os.IsNotExist(err) {
 		fmt.Printf("\x1b[31;1m\n Error occurred while running cell image:\x1b[0m zip folder %v does not exist  \n", cellImageZip)
 		os.Exit(1)

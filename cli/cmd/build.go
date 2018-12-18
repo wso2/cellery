@@ -20,6 +20,7 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
@@ -79,14 +80,14 @@ func runBuild(tag string, fileName string) error {
 		return fmt.Errorf("no file name specified")
 	}
 	var extension = filepath.Ext(fileName)
-	var fileNameSuffix = fileName[0:len(fileName)-len(extension)]
+	var fileNameSuffix = fileName[0 : len(fileName)-len(extension)]
 
 	if tag == "" {
 		tag = fileNameSuffix
 	}
 	go spinner(tag)
 
-	cmd := exec.Command("ballerina", "run", fileName + ":lifeCycleBuild")
+	cmd := exec.Command("ballerina", "run", fileName+":lifeCycleBuild")
 	execError := ""
 	stderrReader, _ := cmd.StderrPipe()
 	stderrScanner := bufio.NewScanner(stderrReader)
@@ -95,22 +96,33 @@ func runBuild(tag string, fileName string) error {
 			execError += stderrScanner.Text()
 		}
 	}()
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
 	err := cmd.Start()
 	if err != nil {
 		fmt.Printf("Error in executing cell build: %v \n", err)
+		errStr := string(stderr.Bytes())
+		fmt.Printf("%s\n", errStr)
 		os.Exit(1)
 	}
 	err = cmd.Wait()
 	if err != nil {
 		fmt.Printf("\x1b[31;1m\n Error occurred while building cell image:\x1b[0m %v \n", execError)
+		errStr := string(stderr.Bytes())
+		fmt.Printf("\x1b[31;1m\n  %s\x1b[0m\n", errStr)
 		os.Exit(1)
 	}
+
+	outStr := string(stdout.Bytes())
+	fmt.Printf("\n\033[36m%s\033[m\n", outStr)
+
 	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
 		fmt.Println("Error in getting current directory location: " + err.Error());
 		os.Exit(1)
 	}
-	folderRenameError := os.Rename(dir + "/target", dir + "/k8s") // rename directory
+	folderRenameError := os.Rename(dir+"/target", dir+"/k8s") // rename directory
 	if folderRenameError != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -119,13 +131,12 @@ func runBuild(tag string, fileName string) error {
 	files := []string{fileName}
 	output := fileNameSuffix + ".zip"
 	err = util.RecursiveZip(files, folders, output);
-
 	os.RemoveAll(dir + "/k8s")
 	if err != nil {
 		fmt.Printf("\x1b[31;1m Cell build finished with error: \x1b[0m %v \n", err)
 		os.Exit(1)
 	}
 
-	fmt.Printf("\r\033[32m Successfully built cell image \033[m %s \n", boldWhite(tag + ".zip"))
+	fmt.Printf("\r\033[32m Successfully built cell image \033[m %s \n", boldWhite(tag+".zip"))
 	return nil
 }

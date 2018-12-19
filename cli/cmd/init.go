@@ -98,42 +98,42 @@ func runInit() error {
 			"import celleryio/cellery;\n" +
 			"\n" +
 			"cellery:Component helloWorldComp = {\n" +
-			"   name: \"HelloWorld\",\n" +
-			"   source: {\n" +
-			"       image: \"sumedhassk/hello-world:1.0.0\" \n" +
-			"   },\n" +
-			"   ingresses: [\n" +
-			"       {\n" +
-			"           name: \"hello\",\n" +
-			"           port: \"9090:80\",\n" +
-			"           context: \"hello\",\n" +
-			"           definitions: [\n" +
-			"               {\n" +
-			"                   path: \"/\",\n" +
-			"                   method: \"GET\"\n" +
-			"               }\n" +
-			"           ]\n" +
-			"       }\n" +
-			"   ]\n" +
+			"    name: \"HelloWorld\",\n" +
+			"    source: {\n" +
+			"        image: \"sumedhassk/hello-world:1.0.0\" \n" +
+			"    },\n" +
+			"    ingresses: [\n" +
+			"        {\n" +
+			"            name: \"hello\",\n" +
+			"            port: \"9090:80\",\n" +
+			"            context: \"hello\",\n" +
+			"            definitions: [\n" +
+			"                {\n" +
+			"                    path: \"/\",\n" +
+			"                    method: \"GET\"\n" +
+			"                }\n" +
+			"            ]\n" +
+			"        }\n" +
+			"    ]\n" +
 			"};\n" +
 			"\n" +
 			"cellery:Cell helloCell = new(\"HelloCell\");\n" +
 			"\n" +
 			"public function lifeCycleBuild() {\n" +
-			"   helloCell.addComponent(helloWorldComp);\n" +
+			"    helloCell.addComponent(helloWorldComp);\n" +
 			"\n" +
-			"   helloCell.apis = [\n" +
-			"       {\n" +
-			"           parent:helloWorldComp.name,\n" +
-			"           context: helloWorldComp.ingresses[0],\n" +
-			"           global: true\n" +
-			"       }\n" +
-			"   ];\n" +
+			"    helloCell.apis = [\n" +
+			"        {\n" +
+			"            parent:helloWorldComp.name,\n" +
+			"            context: helloWorldComp.ingresses[0],\n" +
+			"            global: true\n" +
+			"        }\n" +
+			"    ];\n" +
 			"\n" +
-			"   var out = cellery:build(helloCell);\n" +
-			"   if(out is boolean) {\n" +
-			"       io:println(\"Hello Cell Built successfully.\");\n" +
-			"   }\n" +
+			"    var out = cellery:build(helloCell);\n" +
+			"    if(out is boolean) {\n" +
+			"        io:println(\"Hello Cell Built successfully.\");\n" +
+			"    }\n" +
 			"}\n"
 
 	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))

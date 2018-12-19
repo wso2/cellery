@@ -111,7 +111,7 @@ func runVersion() error {
 	fmt.Println(" Experimental:\t\ttrue") //TODO
 
 	boldWhite.Println("\nBallerina:")
-	fmt.Println(" Version:\t" + strings.TrimSpace(strings.Split(balVersion, " ")[1]))
+	fmt.Println(" Version:\t\t" + strings.TrimSpace(strings.Split(balVersion, " ")[1]))
 
 	boldWhite.Println("\nCellery Repository:")
 	fmt.Println(" Server:\t\thttp://central.cellery.io/api") //TODO
@@ -135,7 +135,7 @@ func runVersion() error {
 			fmt.Printf("\x1b[31;1m Cannot connect to Kubernetes Cluster \x1b[0m %v \n", k8sExecErr)
 		}
 		fmt.Println(" Version:\t\t" + k8sVersionJson.ServerVersion.GitVersion)
-		fmt.Println(" CRD:\t\t\tfalse") //TODO
+		fmt.Println(" CRD:\t\t\ttrue") //TODO
 	}
 
 	boldWhite.Println("\nDocker:")

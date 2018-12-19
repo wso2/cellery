@@ -355,8 +355,8 @@ public class CelleryBuild extends BlockingNativeCallableUnit {
         cellSpec.setGatewayTemplate(gatewayTemplate);
         cellSpec.setServicesTemplates(serviceTemplateList);
         Cell cell = new Cell(new ObjectMetaBuilder().withName(getValidName(name)).build(), cellSpec);
-        String targetPath = System.getProperty("user.dir") + File.separator + "target" + File.separator + name +
-                ".yaml";
+        String targetPath = System.getProperty("user.dir") + File.separator + "target" + File.separator
+                + "kubernetes" + File.separator + name + ".yaml";
         try {
             writeToFile(toYaml(cell), targetPath);
         } catch (IOException e) {

@@ -52,7 +52,7 @@ func runInit() error {
 	whitef := color.New(color.FgWhite)
 	faintWhite := whitef.Add(color.Faint).SprintFunc()
 
-	user, err := user.Current()
+	userVar, err := user.Current()
 	if err != nil {
 		panic(err)
 	}
@@ -72,7 +72,7 @@ func runInit() error {
 			{
 				Before: func(c i.Context) error {
 					c.SetPrfx(nil, cyan("?"))
-					c.SetDef(user.Username, faintWhite("["+user.Username+"]"))
+					c.SetDef(userVar.Username, faintWhite("["+userVar.Username+"]"))
 					return nil
 				},
 				Quest: i.Quest{
@@ -100,7 +100,7 @@ func runInit() error {
 			{
 				Before: func(c i.Context) error {
 					c.SetPrfx(nil, cyan("?"))
-					c.SetDef("v1.0.0", faintWhite("[v1.0.0]"))
+					c.SetDef("1.0.0", faintWhite("[1.0.0]"))
 					return nil
 				},
 				Quest: i.Quest{
@@ -158,7 +158,7 @@ func runInit() error {
 			"}\n"
 
 	tomlTemplate := "[project]\n" +
-		"org-name = \"" + orgName + "\"\n" +
+		"organization = \"" + orgName + "\"\n" +
 		"version = \"" + projectVersion + "\"\n"
 
 	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
@@ -182,7 +182,7 @@ func runInit() error {
 	balW.WriteString(fmt.Sprintf("%s", cellTemplate))
 	balW.Flush()
 
-	tomlFile, err := os.Create(projectPath + "/" + projectName + ".toml")
+	tomlFile, err := os.Create(projectPath + "/Cellery.toml")
 	if err != nil {
 		fmt.Println("Error in creating Toml File: " + err.Error())
 		os.Exit(1)
@@ -192,7 +192,11 @@ func runInit() error {
 	tomlW.WriteString(fmt.Sprintf("%s", tomlTemplate))
 	tomlW.Flush()
 
-	fmt.Println("Initialized cell project in dir: " + faintWhite(projectPath))
-
+	fmt.Println("\nInitialized project in directory: " + faintWhite(projectPath))
+	fmt.Println()
+	fmt.Println(boldWhite("Whats next ?"))
+	fmt.Println("======================")
+	fmt.Println("To build the project, Go to the project directory and execute the following command: ")
+	fmt.Println("  $ cellery build " + projectName + ".bal")
 	return nil
 }

@@ -28,38 +28,100 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
+	"path"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
 )
 
-func CopyFile(oldFile string, newFile string) {
-	input, err := os.Open(oldFile)
-	if err != nil {
-		panic(err)
-	}
-	defer input.Close()
+//func CopyFile(oldFile string, newFile string) {
+//	input, err := os.Open(oldFile)
+//	if err != nil {
+//		panic(err)
+//	}
+//	defer input.Close()
+//
+//	output, err := os.Create(newFile)
+//	if err != nil {
+//		panic(err)
+//	}
+//	defer output.Close()
+//
+//	_, err = io.Copy(output, input)
+//	if err != nil {
+//		panic(err)
+//	}
+//}
 
-	output, err := os.Create(newFile)
-	if err != nil {
-		panic(err)
-	}
-	defer output.Close()
+// File copies a single file from src to dst
+func CopyFile(src, dst string) error {
+	var err error
+	var srcfd *os.File
+	var dstfd *os.File
+	var srcinfo os.FileInfo
 
-	_, err = io.Copy(output, input)
-	if err != nil {
-		panic(err)
+	if srcfd, err = os.Open(src); err != nil {
+		return err
 	}
+	defer srcfd.Close()
+
+	if dstfd, err = os.Create(dst); err != nil {
+		return err
+	}
+	defer dstfd.Close()
+
+	if _, err = io.Copy(dstfd, srcfd); err != nil {
+		return err
+	}
+	if srcinfo, err = os.Stat(src); err != nil {
+		return err
+	}
+	return os.Chmod(dst, srcinfo.Mode())
+}
+
+// Dir copies a whole directory recursively
+func CopyDir(src string, dst string) error {
+	var err error
+	var fds []os.FileInfo
+	var srcinfo os.FileInfo
+
+	if srcinfo, err = os.Stat(src); err != nil {
+		return err
+	}
+
+	if err = os.MkdirAll(dst, srcinfo.Mode()); err != nil {
+		return err
+	}
+
+	if fds, err = ioutil.ReadDir(src); err != nil {
+		return err
+	}
+	for _, fd := range fds {
+		srcfp := path.Join(src, fd.Name())
+		dstfp := path.Join(dst, fd.Name())
+
+		if fd.IsDir() {
+			if err = CopyDir(srcfp, dstfp); err != nil {
+				fmt.Println(err)
+			}
+		} else {
+			if err = CopyFile(srcfp, dstfp); err != nil {
+				fmt.Println(err)
+			}
+		}
+	}
+	return nil
 }
 
 func Trim(stream string) string {
 	var trimmedString string
-	if (strings.Contains(stream, ".cell.balx")) {
+	if strings.Contains(stream, ".cell.balx") {
 		trimmedString = strings.Replace(stream, ".cell.balx", ".celx", -1)
-	} else if (strings.Contains(stream, ".bal")) {
+	} else if strings.Contains(stream, ".bal") {
 		trimmedString = strings.Replace(stream, ".bal", "", -1)
-	} else if (strings.Contains(stream, ".cell")) {
+	} else if strings.Contains(stream, ".cell") {
 		trimmedString = strings.Replace(stream, ".cell", "", -1)
 	} else {
 		trimmedString = stream
@@ -216,7 +278,7 @@ func Unzip(zipFolderName string, destinationFolderName string) error {
 	return nil
 }
 
-func FindInDirectory(directory, suffix string) ([]string) {
+func FindInDirectory(directory, suffix string) []string {
 	files, err := ioutil.ReadDir(directory)
 	if err != nil {
 		return nil
@@ -338,7 +400,7 @@ func FileUploadRequest(uri string, params map[string]string, paramName, path str
 		return nil, err
 	}
 
-	if (!secure) {
+	if !secure {
 		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	}
 	req, err := http.NewRequest("POST", uri, body)
@@ -348,7 +410,7 @@ func FileUploadRequest(uri string, params map[string]string, paramName, path str
 
 func DownloadFile(filepath string, url string) (*http.Response, error) {
 	transport := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify : true},
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
 	client := &http.Client{Transport: transport}
 
@@ -370,4 +432,37 @@ func DownloadFile(filepath string, url string) (*http.Response, error) {
 		}
 	}
 	return resp, nil
+}
+
+func UserHomeDir() string {
+	if runtime.GOOS == "windows" {
+		home := os.Getenv("HOMEDRIVE") + os.Getenv("HOMEPATH")
+		if home == "" {
+			home = os.Getenv("USERPROFILE")
+		}
+		return home
+	}
+	return os.Getenv("HOME")
+}
+
+func CreateDir(dirPath string) error {
+	dirExist, _ := exists(dirPath)
+	if !dirExist {
+		err := os.MkdirAll(dirPath, os.ModePerm)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func exists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return true, err
 }

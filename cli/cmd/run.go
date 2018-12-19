@@ -25,8 +25,10 @@ import (
 	"github.com/wso2/cellery/cli/util"
 	"os"
 	"os/exec"
+	"os/user"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 func newRunCommand() *cobra.Command {
@@ -35,44 +37,77 @@ func newRunCommand() *cobra.Command {
 		Use:   "run [OPTIONS]",
 		Short: "Use a cell image to create a running instance",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if (len(args) == 0) {
+			if len(args) == 0 {
 				cmd.Help()
 				return nil
 			}
 			cellImage = args[0]
 			err := run(cellImage)
-			if err != nil{
+			if err != nil {
 				cmd.Help()
 				return err
 			}
 			return nil
 		},
-		Example: "  cellery run my-project:v1.0 -n myproject-v1.0.0",
+		Example: "  cellery run my-project:1.0.0 -n myproject-v1.0.0",
 	}
 	return cmd
 }
 
-func run(cellImageZip string) error {
-	if cellImageZip == "" {
-		return fmt.Errorf("no cellImage name specified")
+func run(cellImageTag string) error {
+	if cellImageTag == "" {
+		return fmt.Errorf("please specify the cell image")
 	}
-	if !strings.HasSuffix(cellImageZip, ".zip") {
-		cellImageZip = cellImageZip + ".zip"
+
+	fmt.Printf("Running cell image: %s ...\n", boldWhite(cellImageTag))
+
+	userVar, err := user.Current()
+	if err != nil {
+		panic(err)
 	}
-	if _, err := os.Stat(cellImageZip); os.IsNotExist(err) {
-		fmt.Printf("\x1b[31;1m\n Error occurred while running cell image:\x1b[0m zip folder %v does not exist  \n", cellImageZip)
+
+	repoLocation := filepath.Join(util.UserHomeDir(), ".cellery", "repo")
+
+	zipLocation := ""
+	if !strings.Contains(cellImageTag, "/") {
+		tags := strings.Split(cellImageTag, ":")
+		zipLocation = filepath.Join(repoLocation, userVar.Username, tags[0], tags[1], tags[0]+".zip")
+	} else {
+		orgName := strings.Split(cellImageTag, "/")[0]
+		tags := strings.Split(strings.Split(cellImageTag, "/")[1], ":")
+		zipLocation = filepath.Join(repoLocation, orgName, tags[0], tags[1], tags[0]+".zip")
+	}
+
+	if _, err := os.Stat(zipLocation); os.IsNotExist(err) {
+		// TODO need to pull from registry if not present, consider for next iteration
+		fmt.Printf("\x1b[31;1m\n Error occurred while running cell image:\x1b[0m%v. Image does not exist\n",
+			cellImageTag)
 		os.Exit(1)
 	}
-	cellImage := strings.Split(cellImageZip, ".")[0]
-	util.Unzip(cellImageZip, cellImage)
 
-	cmd := exec.Command("kubectl", "apply", "-f", util.FindInDirectory(cellImage + "/k8s", ".yaml")[0])
+	//create tmp directory
+	currentTIme := time.Now()
+	timstamp := currentTIme.Format("20060102150405")
+	tmpPath := filepath.Join(util.UserHomeDir(), ".cellery", "tmp", timstamp)
+	err = util.CreateDir(tmpPath)
+	if err != nil {
+		panic(err)
+	}
+
+	err = util.Unzip(zipLocation, tmpPath)
+	if err != nil {
+		panic(err)
+	}
+
+	kubeYamlDir := filepath.Join(tmpPath, "artifacts", "kubernetes")
+
+	cmd := exec.Command("kubectl", "apply", "-f", kubeYamlDir)
 	execError := ""
 	stdoutReader, _ := cmd.StdoutPipe()
 	stdoutScanner := bufio.NewScanner(stdoutReader)
 	go func() {
 		for stdoutScanner.Scan() {
-			fmt.Println(stdoutScanner.Text())
+			fmt.Printf("\033[36m%s\033[m\n", stdoutScanner.Text())
 		}
 	}()
 	stderrReader, _ := cmd.StderrPipe()
@@ -82,22 +117,26 @@ func run(cellImageZip string) error {
 			execError += stderrScanner.Text()
 		}
 	}()
-	err := cmd.Start()
+	err = cmd.Start()
 	if err != nil {
 		fmt.Printf("Error in executing cell run: %v \n", err)
 		os.Exit(1)
 	}
 	err = cmd.Wait()
 
-	dir, errFilePath := filepath.Abs(filepath.Dir(os.Args[0]))
-	if errFilePath != nil {
-		fmt.Println("Error in getting current directory location: " + errFilePath.Error());
-		os.Exit(1)
-	}
-	os.RemoveAll(dir + "/" + cellImage)
+	//_ = os.RemoveAll(tmpPath)
+
 	if err != nil {
 		fmt.Printf("\x1b[31;1m\n Error occurred while running cell image:\x1b[0m %v \n", execError)
 		os.Exit(1)
 	}
+
+	fmt.Printf("\nSuccessfully deployed cell image: %s\n", boldWhite(cellImageTag))
+	fmt.Println()
+	fmt.Println(boldWhite("Whats next ?"))
+	fmt.Println("======================")
+	fmt.Println("Execute the following command to view the running cells: ")
+	fmt.Println("  $ cellery ps ")
+
 	return nil
 }

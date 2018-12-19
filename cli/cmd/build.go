@@ -24,10 +24,12 @@ import (
 	"fmt"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"github.com/tj/go-spin"
 	"github.com/wso2/cellery/cli/util"
 	"os"
 	"os/exec"
+	"os/user"
 	"path/filepath"
 	"time"
 )
@@ -44,7 +46,7 @@ func newBuildCommand() *cobra.Command {
 		Use:   "build [OPTIONS]",
 		Short: "Build an immutable cell image with required dependencies",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if (len(args) == 0) {
+			if len(args) == 0 {
 				cmd.Help()
 				return nil
 			}
@@ -56,19 +58,19 @@ func newBuildCommand() *cobra.Command {
 			}
 			return nil
 		},
-		Example: "  cellery build my-project-v1.0.bal -t myproject",
+		Example: "  cellery build my-project.bal -t myproject:1.0.0",
 	}
 	cmd.Flags().StringVarP(&tag, "tag", "t", "", "Name and optionally a tag in the 'name:tag' format")
 	return cmd
 }
 
 /**
- Spinner
- */
+Spinner
+*/
 func spinner(tag string) {
 	s := spin.New()
 	for {
-		if (isSpinning) {
+		if isSpinning {
 			fmt.Printf("\r\033[36m%s\033[m Building %s %s", s.Next(), "image", boldWhite(tag))
 			time.Sleep(100 * time.Millisecond)
 		}
@@ -82,8 +84,21 @@ func runBuild(tag string, fileName string) error {
 	var extension = filepath.Ext(fileName)
 	var fileNameSuffix = fileName[0 : len(fileName)-len(extension)]
 
+	viper.SetConfigName("Cellery") // name of config file (without extension)
+	viper.SetConfigType("toml")
+	viper.AddConfigPath(".")        // optionally look for config in the working directory
+	confErr := viper.ReadInConfig() // Find and read the config file
+
+	if confErr != nil { // Handle errors reading the config file
+		fmt.Printf("\x1b[31;1m\nError while readng toml file: %s \x1b[0m\n", confErr)
+		os.Exit(1)
+	}
+
+	organization := viper.GetString("project.organization")
+	projectVersion := viper.GetString("project.version")
+
 	if tag == "" {
-		tag = fileNameSuffix
+		tag = fileNameSuffix + ":" + projectVersion
 	}
 	go spinner(tag)
 
@@ -108,7 +123,7 @@ func runBuild(tag string, fileName string) error {
 	}
 	err = cmd.Wait()
 	if err != nil {
-		fmt.Printf("\x1b[31;1m\n Error occurred while building cell image:\x1b[0m %v \n", execError)
+		fmt.Printf("\x1b[31;1m\nError occurred while building cell image:\x1b[0m %v \n", execError)
 		errStr := string(stderr.Bytes())
 		fmt.Printf("\x1b[31;1m\n  %s\x1b[0m\n", errStr)
 		os.Exit(1)
@@ -119,24 +134,55 @@ func runBuild(tag string, fileName string) error {
 
 	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
-		fmt.Println("Error in getting current directory location: " + err.Error());
+		fmt.Println("Error in getting current directory location: " + err.Error())
 		os.Exit(1)
 	}
-	folderRenameError := os.Rename(dir+"/target", dir+"/k8s") // rename directory
-	if folderRenameError != nil {
+	folderCopyError := util.CopyDir(dir+"/target", dir+"/artifacts") // copy directory
+	if folderCopyError != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	folders := []string{"./k8s"}
+	folders := []string{"./artifacts"}
 	files := []string{fileName}
 	output := fileNameSuffix + ".zip"
-	err = util.RecursiveZip(files, folders, output);
-	os.RemoveAll(dir + "/k8s")
+	err = util.RecursiveZip(files, folders, output)
+	_ = os.RemoveAll(dir + "/artifacts")
 	if err != nil {
-		fmt.Printf("\x1b[31;1m Cell build finished with error: \x1b[0m %v \n", err)
+		fmt.Printf("\x1b[31;1mCell build finished with error: \x1b[0m %v \n", err)
 		os.Exit(1)
 	}
 
-	fmt.Printf("\r\033[32m Successfully built cell image \033[m %s \n", boldWhite(tag+".zip"))
+	repoLocation := filepath.Join(util.UserHomeDir(), ".cellery", "repo", organization, fileNameSuffix, projectVersion)
+	repoCreateErr := util.CreateDir(repoLocation)
+	if repoCreateErr != nil {
+		fmt.Println("Error while creating image location: " + repoCreateErr.Error())
+		os.Exit(1)
+	}
+
+	zipSrc := filepath.Join(dir, output)
+	zipDst := filepath.Join(repoLocation, output)
+	zipCopyError := util.CopyFile(zipSrc, zipDst) // copy directory
+	if zipCopyError != nil {
+		fmt.Println("Error while saving image: " + zipCopyError.Error())
+		os.Exit(1)
+	}
+
+	_ = os.Remove(zipSrc)
+
+	userVar, err := user.Current()
+	if err != nil {
+		panic(err)
+	}
+
+	if organization != userVar.Username {
+		tag = organization + "/" + tag
+	}
+
+	fmt.Printf("Successfully built cell image: %s\n", boldWhite(tag))
+	fmt.Println()
+	fmt.Println(boldWhite("Whats next ?"))
+	fmt.Println("======================")
+	fmt.Println("Execute the following command to run the project: ")
+	fmt.Println("  $ cellery run " + tag)
 	return nil
 }

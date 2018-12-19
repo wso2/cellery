@@ -29,7 +29,7 @@ cellery:Component employee = {
     source: {
         image: "docker.io/wso2vick/sampleapp-employee"
     },
-    env: { SALARYSVC_URL: "employee--sallary--service" },
+    env: { SALARYSVC_URL: "" },
     ingresses: [
         {
             name: "employee",

@@ -25,6 +25,7 @@ import (
 	i "github.com/oxequa/interact"
 	"github.com/spf13/cobra"
 	"os"
+	"os/user"
 	"path/filepath"
 )
 
@@ -51,7 +52,13 @@ func runInit() error {
 	whitef := color.New(color.FgWhite)
 	faintWhite := whitef.Add(color.Faint).SprintFunc()
 
+	user, err := user.Current()
+	if err != nil {
+		panic(err)
+	}
+
 	prefix := cyan("?")
+	orgName := ""
 	projectName := ""
 	projectVersion := ""
 	projectPath := ""
@@ -65,11 +72,25 @@ func runInit() error {
 			{
 				Before: func(c i.Context) error {
 					c.SetPrfx(nil, cyan("?"))
+					c.SetDef(user.Username, faintWhite("["+user.Username+"]"))
+					return nil
+				},
+				Quest: i.Quest{
+					Msg: boldWhite("Organization name: "),
+				},
+				Action: func(c i.Context) interface{} {
+					orgName, _ = c.Ans().String()
+					return nil
+				},
+			},
+			{
+				Before: func(c i.Context) error {
+					c.SetPrfx(nil, cyan("?"))
 					c.SetDef("my-project", faintWhite("[my-project]"))
 					return nil
 				},
 				Quest: i.Quest{
-					Msg: boldWhite("Enter a project name"),
+					Msg: boldWhite("Project name: "),
 				},
 				Action: func(c i.Context) interface{} {
 					projectName, _ = c.Ans().String()
@@ -83,7 +104,7 @@ func runInit() error {
 					return nil
 				},
 				Quest: i.Quest{
-					Msg: boldWhite("Enter project version"),
+					Msg: boldWhite("Project version: "),
 				},
 				Action: func(c i.Context) interface{} {
 					projectVersion, _ = c.Ans().String()
@@ -136,27 +157,42 @@ func runInit() error {
 			"    }\n" +
 			"}\n"
 
+	tomlTemplate := "[project]\n" +
+		"org-name = \"" + orgName + "\"\n" +
+		"version = \"" + projectVersion + "\"\n"
+
 	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
 		fmt.Println("Error in getting current directory location: " + err.Error())
 		os.Exit(1)
 	}
 
-	if _, err := os.Stat(dir + "/" + projectName + "-" + projectVersion); os.IsNotExist(err) {
-		projectPath = dir + "/" + projectName + "-" + projectVersion
+	if _, err := os.Stat(dir + "/" + projectName); os.IsNotExist(err) {
+		projectPath = dir + "/" + projectName
 		os.Mkdir(projectPath, os.ModePerm)
 	}
 
-	file, err := os.Create(projectPath + "/" + projectName + "-" + projectVersion + ".bal")
+	balFile, err := os.Create(projectPath + "/" + projectName + ".bal")
 	if err != nil {
-		fmt.Println("Error in creating file: " + err.Error())
+		fmt.Println("Error in creating Ballerina File: " + err.Error())
 		os.Exit(1)
 	}
-	defer file.Close()
-	w := bufio.NewWriter(file)
-	w.WriteString(fmt.Sprintf("%s", cellTemplate))
-	w.Flush()
-	fmt.Println("Initialized cell project in dir: " + faintWhite(dir))
+	defer balFile.Close()
+	balW := bufio.NewWriter(balFile)
+	balW.WriteString(fmt.Sprintf("%s", cellTemplate))
+	balW.Flush()
+
+	tomlFile, err := os.Create(projectPath + "/" + projectName + ".toml")
+	if err != nil {
+		fmt.Println("Error in creating Toml File: " + err.Error())
+		os.Exit(1)
+	}
+	defer tomlFile.Close()
+	tomlW := bufio.NewWriter(tomlFile)
+	tomlW.WriteString(fmt.Sprintf("%s", tomlTemplate))
+	tomlW.Flush()
+
+	fmt.Println("Initialized cell project in dir: " + faintWhite(projectPath))
 
 	return nil
 }

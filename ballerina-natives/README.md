@@ -12,13 +12,12 @@ Cellery native function implementation
 ## How to run Sample
 
 1. Build and install native functions as per the instructions above.
-2. Navigate to `./ballerina-natives/samples` directory.
+2. Navigate to `./ballerina-natives/samples/HRApp` directory.
 3. Execute the lifeCycleBuild function.
 ```bash
-$> ballerina run mycell.bal:lifeCycleBuild
+$> ballerina run hr_app.bal:lifeCycleBuild
 Building Employee Cell ...
-Building MySQL Cell ...
-Building Stocks Cell ...
+Building Stock Cell ...
 Building HR Cell ...
 ```  
-4. Generated yaml files will be located at `./ballerina-natives/samples/target` directory.
+4. Generated yaml files will be located at `./ballerina-natives/samples/HRApp/target` directory.

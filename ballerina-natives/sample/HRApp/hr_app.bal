@@ -73,14 +73,14 @@ cellery:Component hr = {
     ]
 };
 
-//Employee Cell
+// Cell Intialization
 cellery:Cell employeeCell = new("EmployeeCell");
 cellery:Cell stockCell = new("StockCell");
 cellery:Cell hrCell = new("HRCell");
 
 public function lifeCycleBuild() {
 
-    //Set EmployeeCell build time parameters
+    // Build EmployeeCell
     io:println("Building Employee Cell ...");
     employeeCell.addComponent(employee);
     employeeCell.addComponent(salary);
@@ -105,6 +105,7 @@ public function lifeCycleBuild() {
     ];
     _ = cellery:build(stockCell);
 
+    // Build HR cell
     io:println("Building HR Cell ...");
     hrCell.addComponent(hr);
     hrCell.apis = [

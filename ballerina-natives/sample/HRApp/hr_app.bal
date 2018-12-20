@@ -1,6 +1,21 @@
 import ballerina/io;
 import celleryio/cellery;
 
+//Debug component
+cellery:Component debug = {
+    name: "debug",
+    source: {
+        image: "docker.io/mirage20/k8s-debug-tools"
+    },
+    ingresses: [
+        {
+            name: "employee",
+            port: "80:80"
+        }
+    ]
+};
+
+
 //Employee Component
 cellery:Component employee = {
     name: "employee",
@@ -84,6 +99,7 @@ public function lifeCycleBuild() {
     io:println("Building Employee Cell ...");
     employeeCell.addComponent(employee);
     employeeCell.addComponent(salary);
+    employeeCell.addComponent(debug);
     employeeCell.apis = [
         {
             parent:employee.name,
@@ -96,6 +112,7 @@ public function lifeCycleBuild() {
     //Build Stock Cell
     io:println("Building Stock Cell ...");
     stockCell.addComponent(stock);
+    stockCell.addComponent(debug);
     stockCell.apis = [
         {
             parent:stock.name,
@@ -108,6 +125,7 @@ public function lifeCycleBuild() {
     // Build HR cell
     io:println("Building HR Cell ...");
     hrCell.addComponent(hr);
+    hrCell.addComponent(debug);
     hrCell.apis = [
         {
             parent:hr.name,

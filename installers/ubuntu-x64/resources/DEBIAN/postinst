@@ -1,0 +1,8 @@
+#!/bin/sh
+if [ "$1" = configure ]; then
+    echo "Cellery is configured successfully."
+fi
+
+if [ "$1" = abort-upgrade ]; then
+	echo "Aborting the installation without upgrading."
+fi

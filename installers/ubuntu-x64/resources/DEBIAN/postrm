@@ -1,0 +1,14 @@
+#!/bin/sh
+
+if [ $1 = 'remove' ] && [ -L /usr/local/bin/cellery ]
+then
+  sudo rm /usr/local/bin/cellery
+fi
+
+if [ $1 = 'purge' ]  && [ -L /usr/local/bin/cellery ]
+then
+	echo "Remove configuration files."
+	sudo rm /usr/local/bin/cellery
+fi
+
+

@@ -19,15 +19,22 @@
 package main
 
 import (
+	"bufio"
+	"encoding/json"
 	"fmt"
 	"github.com/fatih/color"
-	"github.com/gosuri/uilive"
 	"github.com/manifoldco/promptui"
-	i "github.com/oxequa/interact"
 	"github.com/spf13/cobra"
-	"github.com/tj/go-spin"
-	"time"
+	"os"
+	"os/exec"
 )
+
+type Config struct {
+	Contexts []Context `json:"contexts"`
+}
+type Context struct {
+	Name string `json:"name"`
+}
 
 func newConfigureCommand() *cobra.Command {
 	cmd := &cobra.Command{
@@ -41,15 +48,11 @@ func newConfigureCommand() *cobra.Command {
 }
 
 func runConfigure() error {
-	// Define colors
 	yellow := color.New(color.FgYellow).SprintFunc()
 	faint := color.New(color.Faint).SprintFunc()
 	green := color.New(color.FgGreen).SprintFunc()
-	cyan := color.New(color.FgCyan).SprintFunc()
 	white := color.New(color.FgWhite)
 	boldWhite := white.Add(color.Bold).SprintFunc()
-	whitef := color.New(color.FgWhite)
-	faintWhite := whitef.Add(color.Faint).SprintFunc()
 
 	cellTemplate := &promptui.SelectTemplates{
 		Label:    "{{ . }}",
@@ -59,113 +62,83 @@ func runConfigure() error {
 		Help: faint("[Use arrow keys]"),
 	}
 
-	environmentTemplate := &promptui.SelectTemplates{
-		Label:    "{{ . }}",
-		Active:   "\U000027A4 {{ .| cyan }}",
-		Inactive: "  {{ . | white }}",
-		Selected: green("\U00002713 ") + boldWhite("cell environment: ") + "{{ .  | faint }}",
-		Help: faint("[Use arrow keys]"),
-	}
-
-
 	cellPrompt := promptui.Select{
-		Label: yellow("?") + " Select cellery cluster endpoint",
-		Items: []string{"Local", "GKE", "AWS"},
+		Label: yellow("?") + " Select a cell context",
+		Items: getContexts(),
 		Templates: cellTemplate,
 	}
-	environmentPrompt := promptui.Select{
-		Label: yellow("?") + " Select cellery environment",
-		Items: []string{"Dev", "Staging", "Test", "Prod"},
-		Templates: environmentTemplate,
-	}
-	_, _, err := cellPrompt.Run()
+	_, value, err := cellPrompt.Run()
 	if err != nil {
 		return fmt.Errorf("failed to select context: %v", err)
-
 	}
-	_, _, err = environmentPrompt.Run()
 
+	setContext(value)
+	fmt.Printf("\rCellery is configured succesfully \n")
+	return nil
+}
+
+func getContexts() []string {
+	contexts := []string{}
+	cmd := exec.Command("kubectl", "config", "view", "-o", "json")
+	stdoutReader, _ := cmd.StdoutPipe()
+	stdoutScanner := bufio.NewScanner(stdoutReader)
+	output := ""
+	go func() {
+		for stdoutScanner.Scan() {
+			output = output + stdoutScanner.Text()
+		}
+	}()
+	stderrReader, _ := cmd.StderrPipe()
+	stderrScanner := bufio.NewScanner(stderrReader)
+
+	execError := ""
+	go func() {
+		for stderrScanner.Scan() {
+			execError += stderrScanner.Text()
+		}
+	}()
+	err := cmd.Start()
 	if err != nil {
-		return fmt.Errorf("failed to select context: %v", err)
-
+		fmt.Printf("Error in executing cellery configure: %v \n", err)
+		os.Exit(1)
+	}
+	err = cmd.Wait()
+	if err != nil {
+		fmt.Printf("\x1b[31;1m Error occurred while configuring cellery: \x1b[0m %v \n", execError)
+		os.Exit(1)
+	}
+	jsonOutput := &Config{}
+	errJson := json.Unmarshal([]byte(output), jsonOutput)
+	if errJson!= nil{
+		fmt.Println(errJson)
 	}
 
-	prefix := cyan("?")
-	projectName := ""
-	projectVersion := ""
-
-	i.Run(&i.Interact{
-		Before: func(c i.Context) error{
-			c.SetPrfx(color.Output, prefix)
-			return nil
-		},
-		Questions: []*i.Question{
-			{
-				Before: func(c i.Context) error{
-					c.SetPrfx(nil, cyan("?"))
-					c.SetDef("", faintWhite("[press enter to use default]"))
-					return nil
-				},
-				Quest: i.Quest{
-					Msg:     boldWhite("Enter gateway URL"),
-				},
-				Action: func(c i.Context) interface{} {
-					projectName, _ = c.Ans().String()
-					return nil
-				},
-			},
-			{
-				Before: func(c i.Context) error{
-					c.SetPrfx(nil, cyan("?"))
-					c.SetDef("", faintWhite("[press enter to use default]"))
-					return nil
-				},
-				Quest: i.Quest{
-					Msg:     boldWhite("Enter STS URL"),
-				},
-				Action: func(c i.Context) interface{} {
-					projectVersion, _ = c.Ans().String()
-					return nil
-				},
-			},
-			{
-				Before: func(c i.Context) error{
-					c.SetPrfx(nil, cyan("?"))
-					c.SetDef("cellery.io", faintWhite("[cellery.io]"))
-					return nil
-				},
-				Quest: i.Quest{
-					Msg:     boldWhite("Enter docker registry"),
-				},
-				Action: func(c i.Context) interface{} {
-					projectVersion, _ = c.Ans().String()
-					return nil
-				},
-			},
-		},
-	})
-
-	// Define Spinner
-	s := spin.New()
-
-	// Define writers
-	writer := uilive.New()
-	writer2 := uilive.New()
-
-	// start listening for updates and render
-	writer.Start()
-	writer2.Start()
-
-	for {
-		fmt.Printf("\r\033[36m%s\033[m Configuring ...", s.Next())
-		fmt.Fprintf(writer, "Downloading.. (%d/) GB\n", 100)
-		fmt.Fprintf(writer, "Downloading 2.. (%d/) GB\n", 100)
-		time.Sleep(time.Second)
+	for i:=0; i<len(jsonOutput.Contexts); i++ {
+		contexts = append(contexts, jsonOutput.Contexts[i].Name)
 	}
+	return contexts
+}
 
-	fmt.Fprintln(writer, "Finished: Downloaded 100GB")
-	writer.Stop() // flush and stop rendering
+func setContext(context string) error {
+	cmd := exec.Command("kubectl", "config", "use-context", context)
+	stderrReader, _ := cmd.StderrPipe()
+	stderrScanner := bufio.NewScanner(stderrReader)
 
-	fmt.Printf("\rCellery is configured succesfully\n")
+	execError := ""
+	go func() {
+		for stderrScanner.Scan() {
+			execError += stderrScanner.Text()
+		}
+	}()
+	err := cmd.Start()
+	if err != nil {
+		fmt.Printf("Error in executing cellery apis: %v \n", err)
+		os.Exit(1)
+	}
+	err = cmd.Wait()
+	if err != nil {
+		fmt.Printf("\x1b[31;1m Error occurred while configuring cellery: \x1b[0m %v \n", execError)
+		os.Exit(1)
+	}
 	return nil
 }

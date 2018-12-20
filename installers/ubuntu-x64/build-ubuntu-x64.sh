@@ -117,7 +117,7 @@ buildCelleryCLI() {
 
 getProductSize() {
     CELLERY_SIZE=$(du -s ../../cellery | awk '{print $1}')
-    CELLERY_JAR_SIZE=$(du -s ../../ballerina-natives/target/cellery-0.0.0.jar | awk '{print $1}')
+    CELLERY_JAR_SIZE=$(du -s ../../ballerina-natives/target/cellery-*.jar | awk '{print $1}')
     CELLERY_REPO_SIZE=$(du -s ../../ballerina-natives/target/generated-balo/ | awk '{print $1}')
 
     BINARY_SIZE_KB=$((CELLERY_SIZE + CELLERY_JAR_SIZE + CELLERY_REPO_SIZE))
@@ -153,15 +153,6 @@ createInstaller() {
 #Pre-requisites
 command -v mvn -v >/dev/null 2>&1 || {
     log_warn "Apache Maven was not found. Please install Maven first."
-    exit 1
-}
-#Pre-requisites
-command -v git >/dev/null 2>&1 || {
-    log_warn "Git was not found. Please install git first."
-    exit 1
-}
-command -v docker >/dev/null 2>&1 || {
-    log_warn "Docker was not found. Please install docker first."
     exit 1
 }
 command -v ballerina >/dev/null 2>&1 || {

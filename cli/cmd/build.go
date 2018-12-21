@@ -102,6 +102,14 @@ func runBuild(tag string, fileName string) error {
 	}
 	go spinner(tag)
 
+	//first clean target directory if exists
+	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	if err != nil {
+		fmt.Println("Error in getting current directory location: " + err.Error())
+		os.Exit(1)
+	}
+	_ = os.RemoveAll(filepath.Join(dir, "target"))
+
 	cmd := exec.Command("ballerina", "run", fileName+":lifeCycleBuild")
 	execError := ""
 	stderrReader, _ := cmd.StderrPipe()
@@ -114,7 +122,7 @@ func runBuild(tag string, fileName string) error {
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
-	err := cmd.Start()
+	err = cmd.Start()
 	if err != nil {
 		fmt.Printf("Error in executing cell build: %v \n", err)
 		errStr := string(stderr.Bytes())
@@ -123,34 +131,32 @@ func runBuild(tag string, fileName string) error {
 	}
 	err = cmd.Wait()
 	if err != nil {
-		fmt.Printf("\x1b[31;1m\nError occurred while building cell image:\x1b[0m %v \n", execError)
+		fmt.Println()
+		fmt.Printf("\x1b[31;1m\nBuild Failed.\x1b[0m %v \n", execError)
+		fmt.Println("\x1b[31;1m======================\x1b[0m")
 		errStr := string(stderr.Bytes())
-		fmt.Printf("\x1b[31;1m\n  %s\x1b[0m\n", errStr)
+		fmt.Printf("\x1b[31;1m%s\x1b[0m", errStr)
 		os.Exit(1)
 	}
 
 	outStr := string(stdout.Bytes())
 	fmt.Printf("\n\033[36m%s\033[m\n", outStr)
 
-	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
-	if err != nil {
-		fmt.Println("Error in getting current directory location: " + err.Error())
-		os.Exit(1)
-	}
-	folderCopyError := util.CopyDir(dir+"/target", dir+"/artifacts") // copy directory
+	folderCopyError := util.CopyDir(filepath.Join(dir, "target"), filepath.Join(dir, "artifacts"))
 	if folderCopyError != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	folders := []string{"./artifacts"}
+	folders := []string{"artifacts"}
 	files := []string{fileName}
 	output := fileNameSuffix + ".zip"
 	err = util.RecursiveZip(files, folders, output)
-	_ = os.RemoveAll(dir + "/artifacts")
 	if err != nil {
 		fmt.Printf("\x1b[31;1mCell build finished with error: \x1b[0m %v \n", err)
 		os.Exit(1)
 	}
+
+	_ = os.RemoveAll(filepath.Join(dir, "artifacts"))
 
 	repoLocation := filepath.Join(util.UserHomeDir(), ".cellery", "repo", organization, fileNameSuffix, projectVersion)
 	repoCreateErr := util.CreateDir(repoLocation)
@@ -161,7 +167,7 @@ func runBuild(tag string, fileName string) error {
 
 	zipSrc := filepath.Join(dir, output)
 	zipDst := filepath.Join(repoLocation, output)
-	zipCopyError := util.CopyFile(zipSrc, zipDst) // copy directory
+	zipCopyError := util.CopyFile(zipSrc, zipDst)
 	if zipCopyError != nil {
 		fmt.Println("Error while saving image: " + zipCopyError.Error())
 		os.Exit(1)

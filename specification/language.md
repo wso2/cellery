@@ -1,7 +1,7 @@
 # Cellery Language Syntax
 
-The Cellery Language is a subset of [Ballerina](http://ballerina.io) and Ballerina extensions. Therefore language syntax 
-of Cellery, resembles with normal Ballerina language syntax. 
+The Cellery Language is a subset of [Ballerina](http://ballerina.io) and Ballerina extensions. Therefore the language syntax 
+of Cellery resembles with normal Ballerina language syntax. 
 
 ## Cell
 A cell is a collection of [components](#component), [APIs](#api) and [Egresses](#egress). A Cell object is initialized 

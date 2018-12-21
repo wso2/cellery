@@ -17,8 +17,8 @@ Components inside the cell can communicate with each other using supported trans
 External communication must happen through the edge-gateway or proxy, which provides APIs, events, or streams via 
 governed network endpoints using standard network protocols.
 
-A cell can have 1:n components grouped. Components inside the cells are reusable and can instantiate in multiple cells. 
-The cell should document its offers. The capabilities of a cell must be network accessible endpoints. In addition, if 
+A cell can have 1:n components grouped. Components inside the cells are reusable and can be instantiated in multiple cells. 
+The cell should document its offers. The capabilities of a cell must be provided by network accessible endpoints. In addition, if 
 the cell needs access to external dependencies, then these must also be exposed as network endpoints through a cell-gateway. 
 These endpoints can expose APIs, events, or streams. Any interfaces that the microservices or serverless components 
 offer that are not made available by the control point should be inaccessible from outside the cell. Every component 
@@ -26,7 +26,7 @@ within the cell should be versioned. The cell should have a name and a version i
 when the cell’s requirements and/or offers change.
 
 #### Component
-A component represents a process or business logic running in a container, serverless environment, or an existing runtime. 
+A component represents business logic running in a container, serverless environment, or an existing runtime. 
 This can then be categorized into many subtypes based on the functional capabilities. A component is designed based on 
 a specific scope, which can be independently run and reused at the runtime. Runtime requirements and the behavior of 
 the component vary based on the component type and the functional capabilities. The user may decide to build and run 

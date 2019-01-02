@@ -25,6 +25,7 @@ import (
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 	"github.com/wso2/cellery/cli/constants"
+	"github.com/wso2/cellery/cli/util"
 	"os"
 	"os/exec"
 	"strconv"
@@ -82,7 +83,7 @@ func components(cellName string) error {
 		os.Exit(1)
 	}
 
-	jsonOutput := &Service{}
+	jsonOutput := &util.Service{}
 
 	errJson := json.Unmarshal([]byte(output), jsonOutput)
 	if errJson!= nil{
@@ -97,7 +98,7 @@ func components(cellName string) error {
 	return nil
 }
 
-func displayComponentsTable(componentArray []ServiceItem, cellName string) error {
+func displayComponentsTable(componentArray []util.ServiceItem, cellName string) error {
 	tableData := [][]string{}
 
 	for i := 0; i < len(componentArray); i++ {

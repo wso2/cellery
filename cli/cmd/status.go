@@ -87,7 +87,7 @@ func status(cellName string) error {
 	}
 
 	output = string(outputByteArray)
-	jsonOutput := &CellPods{}
+	jsonOutput := &util.CellPods{}
 	errJson := json.Unmarshal([]byte(output), jsonOutput)
 	if errJson!= nil{
 		fmt.Println(errJson)
@@ -134,7 +134,7 @@ func getCellSummary(cellName string) (cellCreationTime, cellStatus string) {
 		os.Exit(1)
 	}
 
-	jsonOutput := &Cell{}
+	jsonOutput := &util.Cell{}
 
 	errJson := json.Unmarshal([]byte(output), jsonOutput)
 	if errJson!= nil{
@@ -169,7 +169,7 @@ func displayStatusSummaryTable(cellCreationTime, cellStatus string) error {
 	return nil
 }
 
-func displayStatusDetailedTable(podItems []Pod, cellName string) error {
+func displayStatusDetailedTable(podItems []util.Pod, cellName string) error {
 	tableData := [][]string{}
 
 	for i := 0; i < len(podItems); i++ {

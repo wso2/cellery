@@ -25,6 +25,7 @@ import (
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 	"github.com/wso2/cellery/cli/constants"
+	"github.com/wso2/cellery/cli/util"
 	"os"
 	"os/exec"
 	"strings"
@@ -83,7 +84,7 @@ func apis(cellName string) error {
 		os.Exit(1)
 	}
 
-	jsonOutput := &Gateway{}
+	jsonOutput := &util.Gateway{}
 
 	errJson := json.Unmarshal([]byte(output), jsonOutput)
 	if errJson!= nil{
@@ -94,7 +95,7 @@ func apis(cellName string) error {
 	return nil
 }
 
-func displayApisTable(apiArray []GatewayApi) error {
+func displayApisTable(apiArray []util.GatewayApi) error {
 	tableData := [][]string{}
 
 	for i := 0; i < len(apiArray); i++ {
@@ -137,7 +138,7 @@ func displayApisTable(apiArray []GatewayApi) error {
 	return nil
 }
 
-func getApiMethodsArray(definitions []GatewayDefinition) []string {
+func getApiMethodsArray(definitions []util.GatewayDefinition) []string {
 	methodArray := make([]string, 5)
 
 	for i := 0; i < len(definitions) ; i++ {

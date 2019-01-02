@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package main
+package util
 
 type Cell struct {
 	CellMetaData CellMetaData `json:"metadata"`

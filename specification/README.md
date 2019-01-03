@@ -12,4 +12,3 @@ agile development teams to easily create a composable enterprise in a technology
 - [Language Syntax](language.md)
 - [Modularity & Versioning](modularity.md)
 - [Command Line Interface](cli.md)
-- [Samples](samples.md)

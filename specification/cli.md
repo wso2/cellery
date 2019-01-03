@@ -43,5 +43,3 @@ Following are the main commands available in the tool;
 | `cellery ingress-rules`	| Retrieve ingress rules                                            |
 
 ##  
-
-**Next:** [Samples](samples.md)

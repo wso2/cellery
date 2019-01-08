@@ -36,8 +36,6 @@ import (
 
 var isSpinning = true
 var isFirstPrint = true
-var white = color.New(color.FgWhite)
-var boldWhite = white.Add(color.Bold).SprintFunc()
 var tag string
 var fileName string
 
@@ -78,7 +76,7 @@ func spinner(tag string) {
 	s := spin.New()
 	for {
 		if isSpinning {
-			fmt.Printf("\r\033[36m%s\033[m Building %s %s", s.Next(), "image", boldWhite(tag))
+			fmt.Printf("\r\033[36m%s\033[m Building %s %s", s.Next(), "image", bold(tag))
 			time.Sleep(100 * time.Millisecond)
 		}
 	}
@@ -191,9 +189,9 @@ func runBuild(tag string, fileName string) error {
 		tag = organization + "/" + tag
 	}
 
-	fmt.Printf("Successfully built cell image: %s\n", boldWhite(tag))
+	fmt.Printf("Successfully built cell image: %s\n", bold(tag))
 	fmt.Println()
-	fmt.Println(boldWhite("Whats next ?"))
+	fmt.Println(bold("Whats next ?"))
 	fmt.Println("======================")
 	fmt.Println("Execute the following command to run the project: ")
 	fmt.Println("  $ cellery run " + tag)

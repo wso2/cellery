@@ -59,7 +59,7 @@ func run(cellImageTag string) error {
 		return fmt.Errorf("please specify the cell image")
 	}
 
-	fmt.Printf("Running cell image: %s ...\n", boldWhite(cellImageTag))
+	fmt.Printf("Running cell image: %s ...\n", util.Bold(cellImageTag))
 
 	userVar, err := user.Current()
 	if err != nil {
@@ -131,9 +131,9 @@ func run(cellImageTag string) error {
 		os.Exit(1)
 	}
 
-	fmt.Printf("\nSuccessfully deployed cell image: %s\n", boldWhite(cellImageTag))
+	fmt.Printf("\nSuccessfully deployed cell image: %s\n", util.Bold(cellImageTag))
 	fmt.Println()
-	fmt.Println(boldWhite("Whats next ?"))
+	fmt.Println(util.Bold("Whats next ?"))
 	fmt.Println("======================")
 	fmt.Println("Execute the following command to view the running cells: ")
 	fmt.Println("  $ cellery ps ")

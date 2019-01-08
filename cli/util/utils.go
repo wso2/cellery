@@ -23,6 +23,7 @@ import (
 	"bytes"
 	"crypto/tls"
 	"fmt"
+	"github.com/fatih/color"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
@@ -35,6 +36,15 @@ import (
 	"strings"
 	"time"
 )
+
+var Cyan = color.New(color.FgCyan)
+var CyanBold = Cyan.Add(color.Bold).SprintFunc()
+var Bold = color.New(color.Bold).SprintFunc()
+var Faint = color.New(color.Faint).SprintFunc()
+var Green = color.New(color.FgGreen)
+var GreenBold = Green.Add(color.Bold).SprintFunc()
+var Yellow = color.New(color.FgYellow)
+var YellowBold = Yellow.Add(color.FgYellow).SprintFunc()
 
 //func CopyFile(oldFile string, newFile string) {
 //	input, err := os.Open(oldFile)

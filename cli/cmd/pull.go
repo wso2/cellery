@@ -32,7 +32,7 @@ func newPullCommand() *cobra.Command {
 		Use:   "pull [CELL IMAGE]",
 		Short: "pull cell image from the remote repository",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if (len(args) == 0) {
+			if len(args) == 0 {
 				cmd.Help()
 				return nil
 			}
@@ -57,10 +57,10 @@ func runPull(cellImage string) error {
 
 	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
-		fmt.Println("Error in getting current directory location: " + err.Error());
+		fmt.Println("Error in getting current directory location: " + err.Error())
 		os.Exit(1)
 	}
-	response, downloadError := util.DownloadFile(dir + "/" + cellImage, url)
+	response, downloadError := util.DownloadFile(dir+"/"+cellImage, url)
 
 	if downloadError != nil {
 		fmt.Printf("\x1b[31;1m Error occurred while pulling the cell image: \x1b[0m %v \n", err)
@@ -68,7 +68,7 @@ func runPull(cellImage string) error {
 	}
 
 	if response.StatusCode == 200 {
-		fmt.Printf("\r\033[32m Successfully pulled cell image \033[m %s \n", boldWhite(cellImage))
+		fmt.Printf("\r\033[32m Successfully pulled cell image \033[m %s \n", util.Bold(cellImage))
 	}
 	if response.StatusCode == 404 {
 		fmt.Printf("\x1b[31;1m Error occurred while running cell image:\x1b[0m %v not found in registry\n", cellImage)

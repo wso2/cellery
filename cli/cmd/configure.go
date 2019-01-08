@@ -25,6 +25,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
+	"github.com/wso2/cellery/cli/util"
 	"os"
 	"os/exec"
 )
@@ -49,12 +50,6 @@ func newConfigureCommand() *cobra.Command {
 
 func runConfigure() error {
 	bold := color.New(color.Bold).SprintFunc()
-	yellow := color.New(color.FgYellow)
-	yellowBold := yellow.Add(color.FgYellow).SprintFunc()
-	faint := color.New(color.Faint).SprintFunc()
-	green := color.New(color.FgGreen)
-	greenBold := green.Add(color.Bold).SprintFunc()
-
 	cellTemplate := &promptui.SelectTemplates{
 		Label:    "{{ . }}",
 		Active:   "\U000027A4 {{ .| bold }}",
@@ -64,7 +59,7 @@ func runConfigure() error {
 	}
 
 	cellPrompt := promptui.Select{
-		Label:     yellowBold("?") + " Select a VICK Installed Kubernetes Cluster",
+		Label:     util.YellowBold("?") + " Select a VICK Installed Kubernetes Cluster",
 		Items:     getContexts(),
 		Templates: cellTemplate,
 	}

@@ -41,6 +41,13 @@ var boldWhite = white.Add(color.Bold).SprintFunc()
 var tag string
 var fileName string
 
+var cyan = color.New(color.FgCyan)
+var cyanBold = cyan.Add(color.Bold).SprintFunc()
+var bold = color.New(color.Bold).SprintFunc()
+var faint = color.New(color.Faint).SprintFunc()
+var green = color.New(color.FgGreen)
+var greenBold = green.Add(color.Bold).SprintFunc()
+
 func newBuildCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "build [OPTIONS]",

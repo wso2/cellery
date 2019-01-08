@@ -48,32 +48,38 @@ func newConfigureCommand() *cobra.Command {
 }
 
 func runConfigure() error {
-	yellow := color.New(color.FgYellow).SprintFunc()
+	bold := color.New(color.Bold).SprintFunc()
+	yellow := color.New(color.FgYellow)
+	yellowBold := yellow.Add(color.FgYellow).SprintFunc()
 	faint := color.New(color.Faint).SprintFunc()
-	green := color.New(color.FgGreen).SprintFunc()
-	white := color.New(color.FgWhite)
-	boldWhite := white.Add(color.Bold).SprintFunc()
+	green := color.New(color.FgGreen)
+	greenBold := green.Add(color.Bold).SprintFunc()
 
 	cellTemplate := &promptui.SelectTemplates{
 		Label:    "{{ . }}",
-		Active:   "\U000027A4 {{ .| cyan }}",
-		Inactive: "  {{ . | white }}",
-		Selected: green("\U00002713 ") + boldWhite("cell context: ") + "{{ .  | faint }}",
-		Help: faint("[Use arrow keys]"),
+		Active:   "\U000027A4 {{ .| bold }}",
+		Inactive: "  {{ . | faint }}",
+		Selected: bold("Selected cluster: ") + "{{ . }}",
+		Help:     faint("[Use arrow keys]"),
 	}
 
 	cellPrompt := promptui.Select{
-		Label: yellow("?") + " Select a cell context",
-		Items: getContexts(),
+		Label:     yellowBold("?") + " Select a VICK Installed Kubernetes Cluster",
+		Items:     getContexts(),
 		Templates: cellTemplate,
 	}
 	_, value, err := cellPrompt.Run()
 	if err != nil {
-		return fmt.Errorf("failed to select context: %v", err)
+		return fmt.Errorf("failed to select cluster: %v", err)
 	}
 
 	setContext(value)
-	fmt.Printf("\rCellery is configured succesfully \n")
+	fmt.Printf(greenBold("\n\U00002713") + " Successfully configured Cellery.\n")
+	fmt.Println()
+	fmt.Println(bold("Whats next ?"))
+	fmt.Println("======================")
+	fmt.Println("To create your first project, execute the command: ")
+	fmt.Println("  $ cellery init ")
 	return nil
 }
 
@@ -109,11 +115,11 @@ func getContexts() []string {
 	}
 	jsonOutput := &Config{}
 	errJson := json.Unmarshal([]byte(output), jsonOutput)
-	if errJson!= nil{
+	if errJson != nil {
 		fmt.Println(errJson)
 	}
 
-	for i:=0; i<len(jsonOutput.Contexts); i++ {
+	for i := 0; i < len(jsonOutput.Contexts); i++ {
 		contexts = append(contexts, jsonOutput.Contexts[i].Name)
 	}
 	return contexts

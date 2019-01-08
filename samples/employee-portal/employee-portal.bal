@@ -80,9 +80,9 @@ cellery:Component hr = {
 };
 
 // Cell Intialization
-cellery:Cell employeeCell = new("Employee");
-cellery:Cell stockCell = new("Stock-Options");
-cellery:Cell hrCell = new("HR");
+cellery:CellImage employeeCell = new("Employee");
+cellery:CellImage stockCell = new("Stock-Options");
+cellery:CellImage hrCell = new("HR");
 
 public function celleryBuild() {
 

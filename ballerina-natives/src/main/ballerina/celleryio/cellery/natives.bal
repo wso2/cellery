@@ -92,7 +92,7 @@ public type Ingress record{
     !...
 };
 
-public type Cell object {
+public type CellImage object {
     public string name;
     public Component[] components = [];
     public API?[] apis = [];
@@ -112,4 +112,4 @@ public type Cell object {
 #
 # + cell - The cell
 # + return - true/false
-public extern function build(Cell cell) returns (boolean|error);
+public extern function build(CellImage cell) returns (boolean|error);

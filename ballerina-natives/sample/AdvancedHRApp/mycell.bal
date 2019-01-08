@@ -112,10 +112,10 @@ cellery:Component hr = {
 };
 
 // Cells
-cellery:Cell hrCell = new("HRCell");
-cellery:Cell employeeCell = new("EmployeeCell");
-cellery:Cell stocksCell = new("StocksCell");
-cellery:Cell mysqlCell = new("MySQLCell");
+cellery:CellImage hrCell = new("HRCell");
+cellery:CellImage employeeCell = new("EmployeeCell");
+cellery:CellImage stocksCell = new("StocksCell");
+cellery:CellImage mysqlCell = new("MySQLCell");
 
 // Build Function
 public function celleryBuild() {

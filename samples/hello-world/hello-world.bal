@@ -21,7 +21,7 @@ cellery:Component helloWorldComp = {
     ]
 };
 
-cellery:Cell helloCell = new("Hello-World");
+cellery:CellImage helloCell = new("Hello-World");
 
 public function celleryBuild() {
     helloCell.addComponent(helloWorldComp);

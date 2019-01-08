@@ -7,7 +7,7 @@ of Cellery resembles with normal Ballerina language syntax.
 A cell is a collection of [components](#component), [APIs](#api) and [Egresses](#egress). A Cell object is initialized 
 as follows;
 ```ballerina
-cellery:Cell cellObj = new ("CellName");
+cellery:CellImage cellObj = new ("CellName");
 ```
 
 Components can be added to a cell by calling `addComponent(Component comp)` method.

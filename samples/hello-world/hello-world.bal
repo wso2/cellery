@@ -28,7 +28,7 @@ public function celleryBuild() {
 
     helloCell.apis = [
         {
-            parent:helloWorldComp.name,
+            targetComponent:helloWorldComp.name,
             context: helloWorldComp.ingresses[0],
             global: true
         }

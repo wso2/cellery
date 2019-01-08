@@ -146,7 +146,7 @@ func runInit() error {
 			"\n" +
 			"    helloCell.apis = [\n" +
 			"        {\n" +
-			"            parent:helloWorldComp.name,\n" +
+			"            targetComponent:helloWorldComp.name,\n" +
 			"            context: helloWorldComp.ingresses[0],\n" +
 			"            global: true\n" +
 			"        }\n" +

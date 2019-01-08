@@ -39,7 +39,7 @@ public type Definition record{
 
 public type API record{
     string name?;
-    string parent;
+    string targetComponent;
     string|Ingress context;
     boolean global;
     Ingress|Definition[] definitions?;
@@ -47,7 +47,7 @@ public type API record{
 };
 
 public type Egress record{
-    string parent?;
+    string targetComponent?;
     string targetCell?;
     Ingress ingress;
     string envVar?;

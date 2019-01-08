@@ -46,7 +46,7 @@ public function lifeCycleBuild() {
     employeeCell.addComponent(salary);
     employeeCell.apis = [
     {
-            parent: employee.name,
+            targetComponent: employee.name,
             context: employee.ingresses[0],
             global: false
     }

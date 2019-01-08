@@ -63,7 +63,7 @@ cellery:Component componentB = {
     ],
     egresses: [
         {
-            parent: componentA.name,
+            targetComponent: componentA.name,
             ingress: componentA.ingresses[0],
             envVar: "ENV1",
             resiliency: {
@@ -93,7 +93,7 @@ public function celleryBuild() {
 
     cellB.egresses = [
         {
-            parent: componentA.name,
+            targetComponent: componentA.name,
             ingress: componentA.ingresses[0],
             envVar: "ENV1"
         }
@@ -101,7 +101,7 @@ public function celleryBuild() {
 
     cellB.apis = [
         {
-            parent: componentB.name,
+            targetComponent: componentB.name,
             context:componentB.ingresses[0],
             global: true
         }

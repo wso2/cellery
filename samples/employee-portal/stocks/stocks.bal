@@ -32,7 +32,7 @@ public function lifeCycleBuild() {
     stockCell.addComponent(stock);
     stockCell.apis = [
     {
-            parent: stock.name,
+            targetComponent: stock.name,
             context: stock.ingresses[0],
             global: false
     }

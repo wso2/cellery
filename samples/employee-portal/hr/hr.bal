@@ -37,7 +37,7 @@ public function lifeCycleBuild() {
     hrCell.addComponent(hr);
     hrCell.apis = [
     {
-            parent: hr.name,
+            targetComponent: hr.name,
             context: hr.ingresses[0],
             global: true
     }

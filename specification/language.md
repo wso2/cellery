@@ -19,14 +19,14 @@ Parameters of the Cell object can be assigned/modified as follows;
 ```ballerina
 cellObj.egresses = [
     {
-        parent: component.name,
+        targetComponent: component.name,
         ingress: component.ingresses[0],
         envVar: "ENV1"
     }
 ];
 cellObj.apis = [
     {
-        parent: componentB.name,
+        targetComponent: componentB.name,
         context:componentB.ingresses[0],
         global: true
     }
@@ -104,7 +104,7 @@ cellery:Component componentA = {
     ],
     egresses: [
         {
-            parent: componentB.name,
+            targetComponent: componentB.name,
             ingress: componentB.ingresses[0],
             envVar: "ENV1",
             resiliency: {
@@ -155,7 +155,7 @@ cellery:Ingress ingressA = {
 };
 
 cellery:Egress egressA = {
-    parent: componentB.name,
+    targetComponent: componentB.name,
     ingress: componentB.ingresses[0],
     envVar: "ENV1",
     resiliency: resiliency
@@ -212,7 +212,7 @@ cellery:Definition definition = {
 An Egress represents an external communication from a Cell or Component. An `egress` is defined as follows:
 ```ballerina
 cellery:Egress egress = {
-    parent: string "component name"
+    targetComponent: string "component name"
     ingress: Ingress,
     envVar?: string,
     resiliency?: Resiliency,
@@ -222,7 +222,7 @@ cellery:Egress egress = {
 A sample egress instance would be as follows;
 ```ballerina
 cellery:Egress egressA = {
-    parent: componentB.name,
+    targetComponent: componentB.name,
     ingress: componentB.ingresses[0],
     envVar: "ENV1",
     resiliency: {
@@ -272,7 +272,7 @@ as resources (i.e ingresses). An `API` is defined as follows;
 ```ballerina
 cellery:API api = {
     name?: string
-    parent: string "component name"
+    targetComponent: string "component name"
     context: string|Ingress,
     global: boolean,
     definitions?: ingress|Definition[]
@@ -283,7 +283,7 @@ A sample API instance would be as follows;
 ```ballerina
 cellery:API api = {
     name: "FooAPI,
-    parent: componentA.name,
+    targetComponent: componentA.name,
     ingress: componentA.ingresses[0],
     context: "/foo",
     global: true,

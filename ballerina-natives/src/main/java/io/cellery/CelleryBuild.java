@@ -169,8 +169,8 @@ public class CelleryBuild extends BlockingNativeCallableUnit {
                 Object key = entry.getKey();
                 BValue value = (BValue) entry.getValue();
                 switch (key.toString()) {
-                    case "parent":
-                        egress.setParent(value.toString());
+                    case "targetComponent":
+                        egress.setTargetComponent(value.toString());
                         break;
                     case "envVar":
                         egress.setEnvVar(value.toString());
@@ -228,7 +228,7 @@ public class CelleryBuild extends BlockingNativeCallableUnit {
                     case "global":
                         api.setGlobal(Boolean.parseBoolean(value.toString()));
                         break;
-                    case "parent":
+                    case "targetComponent":
                         componentName = value.toString();
                         break;
                     case "context":
@@ -253,7 +253,7 @@ public class CelleryBuild extends BlockingNativeCallableUnit {
             if (componentName != null) {
                 componentHolder.addAPI(componentName, api);
             } else {
-                throw new BallerinaException("Undefined parent component");
+                throw new BallerinaException("Undefined targetComponent component");
             }
         }
     }
@@ -308,11 +308,11 @@ public class CelleryBuild extends BlockingNativeCallableUnit {
                 if (isEmpty(egress.getCellName())) {
                     //Inter cell mapping
                     Component targetComponent =
-                            componentHolder.getComponentNameToComponentMap().get(egress.getParent());
+                            componentHolder.getComponentNameToComponentMap().get(egress.getTargetComponent());
                     if (targetComponent == null) {
                         throw new BallerinaException("Invalid component egress. " +
-                                "Components " + component.getName() + " and " + egress.getParent() + " are not " +
-                                "defined in the same cell.");
+                                "Components " + component.getName() + " and " + egress.getTargetComponent() + " are " +
+                                "not defined in the same cell.");
                     }
                     // Generate service name => cellName--serviceName-service
                     serviceName = getValidName(name) + "--" +

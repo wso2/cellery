@@ -45,7 +45,7 @@ cellery:Component employee = {
     ],
     egresses: [
         {
-            parent:salary.name,
+            targetComponent:salary.name,
             ingress: salary.ingresses[0],
             envVar: "SALARYSVC_URL"
         }
@@ -128,7 +128,7 @@ public function celleryBuild() {
     employeeCell.addComponent(salary);
     employeeCell.apis = [
         {
-            parent:employee.name,
+            targetComponent:employee.name,
             context: employee.ingresses[0],
             global: false
         }
@@ -149,7 +149,7 @@ public function celleryBuild() {
     stocksCell.addComponent(stocks);
     stocksCell.apis = [
         {
-            parent:stocks.name,
+            targetComponent:stocks.name,
             context: stocks.ingresses[0],
             global: false
         }
@@ -168,7 +168,7 @@ public function celleryBuild() {
     hrCell.addComponent(hr);
     hrCell.apis = [
         {
-            parent:hr.name,
+            targetComponent:hr.name,
             context: hr.ingresses[0],
             global: true
         }

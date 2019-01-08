@@ -102,7 +102,7 @@ public function celleryBuild() {
     employeeCell.addComponent(debug);
     employeeCell.apis = [
         {
-            parent:employee.name,
+            targetComponent:employee.name,
             context: employee.ingresses[0],
             global: false
         }
@@ -115,7 +115,7 @@ public function celleryBuild() {
     stockCell.addComponent(debug);
     stockCell.apis = [
         {
-            parent:stock.name,
+            targetComponent:stock.name,
             context: stock.ingresses[0],
             global: false
         }
@@ -128,11 +128,12 @@ public function celleryBuild() {
     hrCell.addComponent(debug);
     hrCell.apis = [
         {
-            parent:hr.name,
+            targetComponent:hr.name,
             context: hr.ingresses[0],
             global: true
         }
     ];
+
     hrCell.egresses = [
         {
             targetCell:employeeCell.name,

@@ -152,7 +152,7 @@ func runInit() error {
 			"        }\n" +
 			"    ];\n" +
 			"\n" +
-			"    var out = cellery:build(helloCell);\n" +
+			"    var out = cellery:createImage(helloCell);\n" +
 			"    if(out is boolean) {\n" +
 			"        io:println(\"Hello Cell Built successfully.\");\n" +
 			"    }\n" +

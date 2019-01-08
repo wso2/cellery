@@ -112,4 +112,4 @@ public type CellImage object {
 #
 # + cell - The cell
 # + return - true/false
-public extern function build(CellImage cell) returns (boolean|error);
+public extern function createImage(CellImage cellImage) returns (boolean|error);

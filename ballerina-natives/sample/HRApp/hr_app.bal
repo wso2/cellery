@@ -107,7 +107,7 @@ public function celleryBuild() {
             global: false
         }
     ];
-    _ = cellery:build(employeeCell);
+    _ = cellery:createImage(employeeCell);
 
     //Build Stock Cell
     io:println("Building Stock Cell ...");
@@ -120,7 +120,7 @@ public function celleryBuild() {
             global: false
         }
     ];
-    _ = cellery:build(stockCell);
+    _ = cellery:createImage(stockCell);
 
     // Build HR cell
     io:println("Building HR Cell ...");
@@ -145,6 +145,6 @@ public function celleryBuild() {
             envVar: "stockgw_url"
         }
     ];
-    _ = cellery:build(hrCell);
+    _ = cellery:createImage(hrCell);
 
 }

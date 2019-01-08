@@ -72,8 +72,8 @@ import static org.apache.commons.lang3.StringUtils.removePattern;
  */
 @BallerinaFunction(
         orgName = "celleryio", packageName = "cellery:0.0.0",
-        functionName = "build",
-        args = {@Argument(name = "cell", type = TypeKind.OBJECT)},
+        functionName = "createImage",
+        args = {@Argument(name = "cellImage", type = TypeKind.OBJECT)},
         returnType = {@ReturnType(type = TypeKind.STRING)},
         isPublic = true
 )

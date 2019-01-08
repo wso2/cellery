@@ -133,13 +133,13 @@ public function celleryBuild() {
             global: false
         }
     ];
-    _ = cellery:build(employeeCell);
+    _ = cellery:createImage(employeeCell);
 
     //MySQL cell
     io:println("Building MySQL Cell ...");
     mysql.env["MYSQL_ROOT_PASSWORD"] = config:getAsString("mysql.MYSQL_ROOT_PASSWORD");
     mysqlCell.addComponent(mysql);
-    _ = cellery:build(mysqlCell);
+    _ = cellery:createImage(mysqlCell);
 
     //Stocks Cell
     io:println("Building Stocks Cell ...");
@@ -161,7 +161,7 @@ public function celleryBuild() {
             envVar: "MYSQL_HOST"
         }
     ];
-    _ = cellery:build(stocksCell);
+    _ = cellery:createImage(stocksCell);
 
     io:println("Building HR Cell ...");
     hr.replicas = config:getAsInt("hr.HR_REPLICAS");
@@ -201,6 +201,6 @@ public function celleryBuild() {
             }
         }
     ];
-    _ = cellery:build(hrCell);
+    _ = cellery:createImage(hrCell);
 
 }

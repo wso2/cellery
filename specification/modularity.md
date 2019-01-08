@@ -107,7 +107,7 @@ public function celleryBuild() {
         }
     ];
 
-    _ = cellery:build(cellA);
+    _ = cellery:createImage(cellA);
 }
 ```
 

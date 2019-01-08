@@ -110,7 +110,7 @@ func runBuild(tag string, fileName string) error {
 	}
 	_ = os.RemoveAll(filepath.Join(dir, "target"))
 
-	cmd := exec.Command("ballerina", "run", fileName+":lifeCycleBuild")
+	cmd := exec.Command("ballerina", "run", fileName+":celleryBuild")
 	execError := ""
 	stderrReader, _ := cmd.StderrPipe()
 	stderrScanner := bufio.NewScanner(stderrReader)

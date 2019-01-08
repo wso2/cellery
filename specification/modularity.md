@@ -11,7 +11,7 @@ import celleryio/cellery;
 
 (ComponentDefinition | CellInitialization)+
 
-lifeCycleBuild()
+celleryBuild()
 ```
 
 A sample file would be as follows;
@@ -83,7 +83,7 @@ cellery:Cell cellA = new ("CellA");
 cellery:Cell cellB = new ("CellB");
 
 //Build Function
-public function lifeCycleBuild() {
+public function celleryBuild() {
     componentA.env["ENV1"] = "2VALUE1";
     componentA.env["ENV2"] = "2VALUE2";
     cellA.addComponent(componentA);

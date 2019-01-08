@@ -140,7 +140,7 @@ func runInit() error {
 			"\n" +
 			"cellery:Cell helloCell = new(\"HelloCell\");\n" +
 			"\n" +
-			"public function lifeCycleBuild() {\n" +
+			"public function celleryBuild() {\n" +
 			"    helloCell.addComponent(helloWorldComp);\n" +
 			"\n" +
 			"    helloCell.apis = [\n" +

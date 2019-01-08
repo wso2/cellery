@@ -118,7 +118,7 @@ cellery:Cell stocksCell = new("StocksCell");
 cellery:Cell mysqlCell = new("MySQLCell");
 
 // Build Function
-public function lifeCycleBuild() {
+public function celleryBuild() {
 
     //Employee Cell
     io:println("Building Employee Cell ...");

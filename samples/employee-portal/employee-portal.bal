@@ -84,7 +84,7 @@ cellery:Cell employeeCell = new("Employee");
 cellery:Cell stockCell = new("Stock-Options");
 cellery:Cell hrCell = new("HR");
 
-public function lifeCycleBuild() {
+public function celleryBuild() {
 
     // Build EmployeeCell
     io:println("Building Employee Cell ...");

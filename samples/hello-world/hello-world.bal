@@ -23,7 +23,7 @@ cellery:Component helloWorldComp = {
 
 cellery:Cell helloCell = new("Hello-World");
 
-public function lifeCycleBuild() {
+public function celleryBuild() {
     helloCell.addComponent(helloWorldComp);
 
     helloCell.apis = [

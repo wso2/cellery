@@ -7,8 +7,8 @@ cellery:Component employee = {
     source: {
         image: "docker.io/wso2vick/sampleapp-employee"
     },
-    ingresses: [
-        {
+    ingresses: {
+        employee: {
             name: "employee",
             port: "8080:80",
             context: "employee",
@@ -19,7 +19,7 @@ cellery:Component employee = {
                 }
             ]
         }
-    ]
+    }
 };
 
 //Salary Component
@@ -28,28 +28,23 @@ cellery:Component salary = {
     source: {
         image: "docker.io/wso2vick/sampleapp-salary"
     },
-    ingresses: [
-        {
-            name: "stock",
+    ingresses: {
+        salaryAPI: {
+            name: "salary",
             port: "8080:80"
         }
-    ]
+    }
 };
 
-public cellery:Cell employeeCell = new("Employee");
+public cellery:CellImage employeeCell = new("Employee");
 
-public function lifeCycleBuild() {
+public function celleryBuild() {
 
     // Build EmployeeCell
     io:println("Building Employee Cell ...");
     employeeCell.addComponent(employee);
     employeeCell.addComponent(salary);
-    employeeCell.apis = [
-    {
-            targetComponent: employee.name,
-            context: employee.ingresses[0],
-            global: false
-    }
-    ];
-    _ = cellery:build(employeeCell);
+    //Expose API from Cell Gateway
+    employeeCell.exposeAPIsFrom(employee);
+    _ = cellery:createImage(employeeCell);
 }

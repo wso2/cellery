@@ -9,8 +9,8 @@ cellery:Component hr = {
         image: "docker.io/wso2vick/sampleapp-hr"
     },
     env: { employeegw_url: "", stockgw_url: "" },
-    ingresses: [
-        {
+    ingresses: {
+        "hr": {
             name: "hr",
             port: "8080:80",
             context: "info",
@@ -21,59 +21,27 @@ cellery:Component hr = {
                 }
             ]
         }
-    ]
+    }
+
 };
 
 // Cell Intialization
-cellery:Cell hrCell = new("HR");
-cellery:CellStub employeeCell = new("Employee");
-cellery:Cell stocksCell = new("Stock-Options");
+cellery:CellImage hrCell = new("HR");
+cellery:CellImage employeeCell = new("Employee");
+cellery:CellImage stocksCell = new("Stock-Options");
 
-public function lifeCycleBuild() {
-    _ = cellery:build(employeeCell);
-    _ = cellery:build(stocksCell);
+public function celleryBuild() {
+    _ = cellery:createImage(employeeCell);
+    _ = cellery:createImage(stocksCell);
+
     // Build HR cell
     io:println("Building HR Cell ...");
     hrCell.addComponent(hr);
-    hrCell.apis = [
-    {
-            targetComponent: hr.name,
-            context: hr.ingresses[0],
-            global: true
-    }
-    ];
-    hrCell.egresses = [
-    {
-            targetCell: "Employee",
-            ingress: {
-                name: "employee",
-                port: "8080:80",
-                context: "employee",
-                definitions: [
-                    {
-                        path: "/",
-                        method: "GET"
-                    }
-                ]
-            },
-            envVar: "employeegw_url"
-    },
-    {
-            targetCell: "Stock-Options",
-            ingress: {
-                name: "stock",
-                port: "8080:80",
-                context: "stock",
-                definitions: [
-                    {
-                        path: "/",
-                        method: "GET"
-                    }
-                ]
-            },
-            envVar: "stockgw_url"
-    }
-    ];
-    _ = cellery:build(hrCell);
+
+    // Expose API from Cell Gateway & Global Gateway
+    hrCell.exposeGlobalAPI(hr);
+    hrCell.declareEgress(employeeCell.name, "employeegw_url");
+    hrCell.declareEgress(stocksCell.name, "stockgw_url");
+    _ = cellery:createImage(hrCell);
 
 }

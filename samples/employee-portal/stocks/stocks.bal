@@ -7,8 +7,8 @@ cellery:Component stock = {
     source: {
         image: "docker.io/wso2vick/sampleapp-stock"
     },
-    ingresses: [
-        {
+    ingresses: {
+        stock: {
             name: "stock",
             port: "8080:80",
             context: "stock",
@@ -19,23 +19,16 @@ cellery:Component stock = {
                 }
             ]
         }
-    ]
+    }
 };
 
-cellery:Cell stockCell = new("Stock-Options");
+cellery:CellImage stockCell = new("Stock-Options");
 
-public function lifeCycleBuild() {
-
-
+public function celleryBuild() {
     //Build Stock Cell
     io:println("Building Stock Cell ...");
     stockCell.addComponent(stock);
-    stockCell.apis = [
-    {
-            targetComponent: stock.name,
-            context: stock.ingresses[0],
-            global: false
-    }
-    ];
-    _ = cellery:build(stockCell);
+    //Expose API from Cell Gateway
+    stockCell.exposeAPIsFrom(stock);
+    _ = cellery:createImage(stockCell);
 }

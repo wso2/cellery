@@ -138,6 +138,9 @@ public class CelleryBuild extends BlockingNativeCallableUnit {
                     case "replicas":
                         component.setReplicas(Integer.parseInt(value.toString()));
                         break;
+                    case "isStub":
+                        component.setIsStub(Boolean.parseBoolean(value.toString()));
+                        break;
                     case "source":
                         component.setSource(Collections.
                                 singletonList(((BMap) value).getMap()).get(0).values().toArray()[0].toString());
@@ -191,6 +194,9 @@ public class CelleryBuild extends BlockingNativeCallableUnit {
      * @param component  current component
      */
     private void processIngressPort(LinkedHashMap<?, ?> ingressMap, Component component) {
+        if (ingressMap.size() == 0) {
+            return;
+        }
         int preMapSize = component.getContainerPortToServicePortMap().size();
         ingressMap.forEach((name, entry) -> ((BMap<?, ?>) entry).getMap().forEach((key, value) -> {
             switch (key.toString()) {
@@ -294,6 +300,9 @@ public class CelleryBuild extends BlockingNativeCallableUnit {
         GatewaySpec spec = new GatewaySpec();
         List<ServiceTemplate> serviceTemplateList = new ArrayList<>();
         for (Component component : components) {
+            if (component.getIsStub()) {
+                continue;
+            }
             spec.setApis(component.getApis());
             ServiceTemplateSpec templateSpec = new ServiceTemplateSpec();
             templateSpec.setReplicas(component.getReplicas());
@@ -314,12 +323,13 @@ public class CelleryBuild extends BlockingNativeCallableUnit {
                             + "-service";
                 } else {
                     //Intra cell mapping
-                    if (CellCache.getInstance().getCellNameToComponentMap().containsKey(egress.getCellName())) {
-                        // Generate service name => cellName--gateway-service
-                        serviceName = getValidName(egress.getCellName()) + "--gateway-service";
-                    } else {
-                        throw new BallerinaException("Invalid cell reference " + egress.getCellName() + " in egress.");
-                    }
+//                    if (CellCache.getInstance().getCellNameToComponentMap().containsKey(egress.getCellName())) {
+                    // Generate service name => cellName--gateway-service
+                    serviceName = getValidName(egress.getCellName()) + "--gateway-service";
+//                    } else {
+//                        throw new BallerinaException("Invalid cell reference " + egress.getCellName() + " in egress
+// .");
+//                    }
                 }
                 component.addEnv(egress.getEnvVar(), serviceName);
 

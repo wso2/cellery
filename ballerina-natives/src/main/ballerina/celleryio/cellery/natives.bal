@@ -81,13 +81,16 @@ public type Component record{
     map<string> env?;
     map<Ingress> ingresses?;
     Egress[] egresses?;
+    boolean isStub = false;
     !...
 };
 
-public type CellStub record{
-    string name;
-    map<Ingress> ingresses?;
-    !...
+public type CellStub object {
+    public string name;
+    map<Ingress> ingresses = {};
+    public function __init(string name) {
+        self.name = name;
+    }
 };
 
 public type Ingress record{
@@ -141,6 +144,18 @@ public type CellImage object {
             targetCell: cellName,
             envVar: envVarName
         };
+    }
+
+    public function addStub(CellStub stub) {
+        Component temp = {
+            name: stub.name,
+            source: {
+                image: ""
+            },
+            ingresses: stub.ingresses,
+            isStub: true
+        };
+        self.addComponent(temp);
     }
 
     public function __init(string name) {

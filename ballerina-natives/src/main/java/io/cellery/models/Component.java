@@ -21,6 +21,7 @@ public class Component {
     Set<Egress> egresses;
     String source;
     String service;
+    Boolean isStub;
     Map<Integer, Integer> containerPortToServicePortMap;
 
     public Component() {
@@ -29,6 +30,7 @@ public class Component {
         egresses = new HashSet<>();
         containerPortToServicePortMap = new HashMap<>();
         replicas = 1;
+        isStub = false;
     }
 
     void addApi(API api) {

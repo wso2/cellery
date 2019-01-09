@@ -27,16 +27,16 @@ cellery:Component hr = {
 
 // Cell Intialization
 cellery:CellImage hrCell = new("HR");
-cellery:CellImage employeeCell = new("Employee");
-cellery:CellImage stocksCell = new("Stock-Options");
+cellery:CellStub employeeCell = new("Employee");
+cellery:CellStub stocksCell = new("Stock-Options");
 
 public function celleryBuild() {
-    _ = cellery:createImage(employeeCell);
-    _ = cellery:createImage(stocksCell);
-
+    
     // Build HR cell
     io:println("Building HR Cell ...");
     hrCell.addComponent(hr);
+    hrCell.addStub(employeeCell);
+    hrCell.addStub(stocksCell);
 
     // Expose API from Cell Gateway & Global Gateway
     hrCell.exposeGlobalAPI(hr);

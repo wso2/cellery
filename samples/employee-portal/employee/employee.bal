@@ -9,7 +9,6 @@ cellery:Component employee = {
     },
     ingresses: {
         employee: {
-            name: "employee",
             port: "8080:80",
             context: "employee",
             definitions: [
@@ -30,7 +29,6 @@ cellery:Component salary = {
     },
     ingresses: {
         salaryAPI: {
-            name: "salary",
             port: "8080:80"
         }
     }

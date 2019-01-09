@@ -9,7 +9,6 @@ cellery:Component debug = {
     },
     ingresses: {
         "debug": {
-            name: "debug",
             port: "80:80"
         }
     }
@@ -24,7 +23,6 @@ cellery:Component employee = {
     },
     ingresses: {
         "employee": {
-            name: "employee",
             port: "8080:80",
             context: "employee",
             definitions: [
@@ -53,7 +51,6 @@ cellery:Component stock = {
     },
     ingresses: {
         "stock": {
-            name: "stock",
             port: "8080:80",
             context: "stock",
             definitions: [
@@ -75,7 +72,6 @@ cellery:Component hr = {
     env: { employeegw_url: "", stockgw_url: "" },
     ingresses: {
         "hr": {
-            name: "hr",
             port: "8080:80",
             context: "info",
             definitions: [

@@ -94,7 +94,6 @@ public type CellStub object {
 };
 
 public type Ingress record{
-    string name;
     string port;
     string context?;
     Definition[] definitions?;

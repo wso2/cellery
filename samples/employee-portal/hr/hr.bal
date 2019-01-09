@@ -11,7 +11,6 @@ cellery:Component hr = {
     env: { employeegw_url: "", stockgw_url: "" },
     ingresses: {
         "hr": {
-            name: "hr",
             port: "8080:80",
             context: "info",
             definitions: [
@@ -31,7 +30,6 @@ cellery:CellStub employeeCell = new("Employee");
 cellery:CellStub stocksCell = new("Stock-Options");
 
 public function celleryBuild() {
-    
     // Build HR cell
     io:println("Building HR Cell ...");
     hrCell.addComponent(hr);

@@ -40,7 +40,7 @@ public type Definition record{
 public type API record{
     string name?;
     string targetComponent;
-    string|Ingress context;
+    string|Ingress? context;
     boolean global;
     Ingress|Definition[] definitions?;
     !...
@@ -49,7 +49,7 @@ public type API record{
 public type Egress record{
     string targetComponent?;
     string targetCell?;
-    Ingress ingress;
+    Ingress ingress?;
     string envVar?;
     Resiliency resiliency?;
     !...
@@ -79,8 +79,14 @@ public type Component record{
     ImageSource source;
     int replicas = 1;
     map<string> env?;
-    Ingress[] ingresses?;
+    map<Ingress> ingresses?;
     Egress[] egresses?;
+    !...
+};
+
+public type CellStub record{
+    string name;
+    map<Ingress> ingresses?;
     !...
 };
 
@@ -99,8 +105,42 @@ public type CellImage object {
     public Egress?[] egresses = [];
 
     public function addComponent(Component component) {
-        int size = self.components.length();
-        self.components[size] = component;
+        self.components[self.components.length()] = component;
+    }
+
+    public function exposeAPIsFrom(Component component) {
+        foreach var (name, ingress) in component.ingresses {
+            self.apis[self.apis.length()] = {
+                targetComponent: component.name,
+                context: ingress,
+                global: false
+            };
+        }
+    }
+
+    public function exposeAPIFrom(Component component, string ingressName) {
+        self.apis[self.apis.length()] = {
+            targetComponent: component.name,
+            context: component.ingresses[ingressName],
+            global: false
+        };
+    }
+
+    public function exposeGlobalAPI(Component component) {
+        foreach var (name, ingress) in component.ingresses {
+            self.apis[self.apis.length()] = {
+                targetComponent: component.name,
+                context: ingress,
+                global: true
+            };
+        }
+    }
+
+    public function declareEgress(string cellName, string envVarName) {
+        self.egresses[self.egresses.length()] = {
+            targetCell: cellName,
+            envVar: envVarName
+        };
     }
 
     public function __init(string name) {
@@ -110,6 +150,6 @@ public type CellImage object {
 
 # Build the cell aritifacts
 #
-# + cell - The cell
+# + cellImage - The cell image definition
 # + return - true/false
 public extern function createImage(CellImage cellImage) returns (boolean|error);

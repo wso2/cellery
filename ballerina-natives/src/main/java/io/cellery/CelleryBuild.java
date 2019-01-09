@@ -31,6 +31,7 @@ import io.cellery.models.GatewayTemplate;
 import io.cellery.models.ServiceTemplate;
 import io.cellery.models.ServiceTemplateSpec;
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
+import io.fabric8.kubernetes.api.model.ContainerPort;
 import io.fabric8.kubernetes.api.model.ContainerPortBuilder;
 import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.EnvVarBuilder;
@@ -59,6 +60,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -79,6 +81,7 @@ import static org.apache.commons.lang3.StringUtils.removePattern;
 )
 public class CelleryBuild extends BlockingNativeCallableUnit {
 
+    private int gatewayPort = 80;
     private ComponentHolder componentHolder;
     private PrintStream out = System.out;
 
@@ -140,9 +143,7 @@ public class CelleryBuild extends BlockingNativeCallableUnit {
                                 singletonList(((BMap) value).getMap()).get(0).values().toArray()[0].toString());
                         break;
                     case "ingresses":
-                        String portString = processIngressPort(((BValueArray) value).getValues());
-                        component.setServicePort(Integer.parseInt(portString.substring(portString.indexOf(":") + 1)));
-                        component.setContainerPort(Integer.parseInt(portString.substring(0, portString.indexOf(":"))));
+                        processIngressPort(((BMap<?, ?>) value).getMap(), component);
                         break;
                     case "egresses":
                         processEgress(((BValueArray) value).getValues(), component);
@@ -186,32 +187,26 @@ public class CelleryBuild extends BlockingNativeCallableUnit {
     /**
      * Extract the ingress port.
      *
-     * @param ingressMap list of ingressee defined
-     * @return A string with container port and Service port
+     * @param ingressMap list of ingresses defined
+     * @param component  current component
      */
-    private String processIngressPort(BRefType<?>[] ingressMap) {
-        String portString = null;
-        for (BRefType ingressDefinition : ingressMap) {
-            if (ingressDefinition == null) {
-                continue;
+    private void processIngressPort(LinkedHashMap<?, ?> ingressMap, Component component) {
+        int preMapSize = component.getContainerPortToServicePortMap().size();
+        ingressMap.forEach((name, entry) -> ((BMap<?, ?>) entry).getMap().forEach((key, value) -> {
+            switch (key.toString()) {
+                case "port":
+                    String portString = value.toString();
+                    component.addPorts(Integer.parseInt(portString.substring(0, portString.indexOf(":"))),
+                            Integer.parseInt(portString.substring(portString.indexOf(":") + 1)));
+                    break;
+                default:
+                    break;
             }
+        }));
 
-            for (Map.Entry<?, ?> entry : ((BMap<?, ?>) ingressDefinition).getMap().entrySet()) {
-                Object key = entry.getKey();
-                BValue value = (BValue) entry.getValue();
-                switch (key.toString()) {
-                    case "port":
-                        portString = value.toString();
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-        if (portString == null) {
+        if (preMapSize == component.getContainerPortToServicePortMap().size()) {
             throw new BallerinaException("Ingress port is not defined");
         }
-        return portString;
     }
 
     private void processAPIs(BRefType<?>[] apiMap) {
@@ -302,7 +297,6 @@ public class CelleryBuild extends BlockingNativeCallableUnit {
             spec.setApis(component.getApis());
             ServiceTemplateSpec templateSpec = new ServiceTemplateSpec();
             templateSpec.setReplicas(component.getReplicas());
-            templateSpec.setServicePort(component.getServicePort());
             component.getEgresses().forEach((egress) -> {
                 String serviceName;
                 if (isEmpty(egress.getCellName())) {
@@ -337,11 +331,14 @@ public class CelleryBuild extends BlockingNativeCallableUnit {
                 }
                 envVarList.add(new EnvVarBuilder().withName(key).withValue(value).build());
             });
+            //TODO:Fix service port
+            templateSpec.setServicePort(gatewayPort);
+            List<ContainerPort> ports = new ArrayList<>();
+            component.getContainerPortToServicePortMap().forEach((containerPort, servicePort) ->
+                    ports.add(new ContainerPortBuilder().withContainerPort(containerPort).build()));
             templateSpec.setContainer(new ContainerBuilder()
                     .withImage(component.getSource())
-                    .withPorts(new ContainerPortBuilder().
-                            withContainerPort(component.getContainerPort())
-                            .build())
+                    .withPorts(ports)
                     .withEnv(envVarList)
                     .build());
             ServiceTemplate serviceTemplate = new ServiceTemplate();

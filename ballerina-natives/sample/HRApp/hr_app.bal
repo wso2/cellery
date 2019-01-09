@@ -7,12 +7,12 @@ cellery:Component debug = {
     source: {
         image: "docker.io/mirage20/k8s-debug-tools"
     },
-    ingresses: [
-        {
-            name: "employee",
+    ingresses: {
+        "debug": {
+            name: "debug",
             port: "80:80"
         }
-    ]
+    }
 };
 
 
@@ -22,8 +22,8 @@ cellery:Component employee = {
     source: {
         image: "docker.io/wso2vick/sampleapp-employee"
     },
-    ingresses: [
-        {
+    ingresses: {
+        "employee": {
             name: "employee",
             port: "8080:80",
             context: "employee",
@@ -34,7 +34,7 @@ cellery:Component employee = {
                 }
             ]
         }
-    ]
+    }
 };
 
 //Salary Component
@@ -51,8 +51,8 @@ cellery:Component stock = {
     source: {
         image: "docker.io/wso2vick/sampleapp-stock"
     },
-    ingresses: [
-        {
+    ingresses: {
+        "stock": {
             name: "stock",
             port: "8080:80",
             context: "stock",
@@ -63,7 +63,7 @@ cellery:Component stock = {
                 }
             ]
         }
-    ]
+    }
 };
 
 //HR component
@@ -73,8 +73,8 @@ cellery:Component hr = {
         image: "docker.io/wso2vick/sampleapp-hr"
     },
     env: { employeegw_url: "", stockgw_url: "" },
-    ingresses: [
-        {
+    ingresses: {
+        "hr": {
             name: "hr",
             port: "8080:80",
             context: "info",
@@ -85,7 +85,8 @@ cellery:Component hr = {
                 }
             ]
         }
-    ]
+    }
+
 };
 
 // Cell Intialization
@@ -100,52 +101,27 @@ public function celleryBuild() {
     employeeCell.addComponent(employee);
     employeeCell.addComponent(salary);
     employeeCell.addComponent(debug);
-    employeeCell.apis = [
-        {
-            targetComponent:employee.name,
-            context: employee.ingresses[0],
-            global: false
-        }
-    ];
+    //Expose API from Cell Gateway
+    employeeCell.exposeAPIsFrom(employee);
     _ = cellery:createImage(employeeCell);
 
     //Build Stock Cell
     io:println("Building Stock Cell ...");
     stockCell.addComponent(stock);
     stockCell.addComponent(debug);
-    stockCell.apis = [
-        {
-            targetComponent:stock.name,
-            context: stock.ingresses[0],
-            global: false
-        }
-    ];
+    //Expose API from Cell Gateway
+    stockCell.exposeAPIsFrom(stock);
     _ = cellery:createImage(stockCell);
 
     // Build HR cell
     io:println("Building HR Cell ...");
     hrCell.addComponent(hr);
     hrCell.addComponent(debug);
-    hrCell.apis = [
-        {
-            targetComponent:hr.name,
-            context: hr.ingresses[0],
-            global: true
-        }
-    ];
 
-    hrCell.egresses = [
-        {
-            targetCell:employeeCell.name,
-            ingress: employee.ingresses[0],
-            envVar: "employeegw_url"
-        },
-        {
-            targetCell: stockCell.name,
-            ingress: stock.ingresses[0],
-            envVar: "stockgw_url"
-        }
-    ];
+    // Expose API from Cell Gateway & Global Gateway
+    hrCell.exposeGlobalAPI(hr);
+    hrCell.declareEgress(employeeCell.name, "employeegw_url");
+    hrCell.declareEgress(stockCell.name, "stockgw_url");
     _ = cellery:createImage(hrCell);
 
 }

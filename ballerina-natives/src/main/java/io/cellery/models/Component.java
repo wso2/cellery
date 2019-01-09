@@ -21,18 +21,22 @@ public class Component {
     Set<Egress> egresses;
     String source;
     String service;
-    int containerPort;
-    int servicePort;
+    Map<Integer, Integer> containerPortToServicePortMap;
 
     public Component() {
         envVars = new HashMap<>();
         apis = new ArrayList<>();
         egresses = new HashSet<>();
+        containerPortToServicePortMap = new HashMap<>();
         replicas = 1;
     }
 
-    public void addApi(API api) {
+    void addApi(API api) {
         this.apis.add(api);
+    }
+
+    public void addPorts(int containerMap, int servicePort) {
+        this.containerPortToServicePortMap.put(containerMap, servicePort);
     }
 
     public void addEgress(Egress egress) {

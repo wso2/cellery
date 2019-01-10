@@ -6,9 +6,8 @@ cellery:Component helloWorldComp = {
     source: {
         image: "sumedhassk/hello-world:1.0.0"
     },
-    ingresses: [
-        {
-            name: "hello",
+    ingresses: {
+        "hello": {
             port: "9090:80",
             context: "hello",
             definitions: [
@@ -18,7 +17,7 @@ cellery:Component helloWorldComp = {
                 }
             ]
         }
-    ]
+    }
 };
 
 cellery:CellImage helloCell = new("Hello-World");
@@ -26,13 +25,7 @@ cellery:CellImage helloCell = new("Hello-World");
 public function celleryBuild() {
     helloCell.addComponent(helloWorldComp);
 
-    helloCell.apis = [
-        {
-            targetComponent:helloWorldComp.name,
-            context: helloWorldComp.ingresses[0],
-            global: true
-        }
-    ];
+    helloCell.exposeGlobalAPI(helloWorldComp);
 
     var out = cellery:createImage(helloCell);
     if(out is boolean) {

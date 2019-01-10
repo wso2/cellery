@@ -124,9 +124,8 @@ func runInit() error {
 			"    source: {\n" +
 			"        image: \"sumedhassk/hello-world:1.0.0\" \n" +
 			"    },\n" +
-			"    ingresses: [\n" +
-			"        {\n" +
-			"            name: \"hello\",\n" +
+			"    ingresses: {\n" +
+			"        \"hello\": {\n" +
 			"            port: \"9090:80\",\n" +
 			"            context: \"hello\",\n" +
 			"            definitions: [\n" +
@@ -136,22 +135,19 @@ func runInit() error {
 			"                }\n" +
 			"            ]\n" +
 			"        }\n" +
-			"    ]\n" +
+			"    }\n" +
 			"};\n" +
 			"\n" +
 			"cellery:CellImage helloCell = new(\"HelloCell\");\n" +
 			"\n" +
 			"public function celleryBuild() {\n" +
+			"    // Adding HelloWorld component\n" +
 			"    helloCell.addComponent(helloWorldComp);\n" +
 			"\n" +
-			"    helloCell.apis = [\n" +
-			"        {\n" +
-			"            targetComponent:helloWorldComp.name,\n" +
-			"            context: helloWorldComp.ingresses[0],\n" +
-			"            global: true\n" +
-			"        }\n" +
-			"    ];\n" +
+			"    // Exposing the ingress of HelloWorld component as an API\n" +
+			"    helloCell.exposeGlobalAPI(helloWorldComp);\n" +
 			"\n" +
+			"    // Create Cell Image\n" +
 			"    var out = cellery:createImage(helloCell);\n" +
 			"    if(out is boolean) {\n" +
 			"        io:println(\"Hello Cell Built successfully.\");\n" +

@@ -34,23 +34,53 @@ VICK installed Kubernetes Cluster by using following command and selecting the p
 $ cellery configure
 ``` 
 
-## Building the sample
-To build the sample, execute the following command.
-```
-$ cellery build employee-portal.bal
-``` 
+## Building and Running the sample
+Each cell need to be build and run individually. 
 
-## Running the sample
-To run the sample, execute the following command.
-```
-$ cellery run wso2/employee-portal:1.0.0
-``` 
-The above will deploy the above three cells in the default namespace. To check the cell status run the following command,
+* Employee Cell
+
+    To build employee cell, execute the following commands
+    ```
+    $ cd employee
+    $ cellery build employee.bal
+    ``` 
+
+    To run employee cell, execute the following command.
+    ```
+    $ cellery run wso2/employee:1.0.0
+    ```
+* Stocks Cell
+
+    To build employee cell, execute the following commands
+    ```
+    $ cd stocks
+    $ cellery build stocks.bal
+    ``` 
+
+    To run stocks cell, execute the following command.
+    ```
+    $ cellery run wso2/stocks:1.0.0
+    ```  
+* HR Cell
+
+    To build HR cell, execute the following commands
+    ```
+    $ cd hr
+    $ cellery build hr.bal
+    ``` 
+
+    To run HR cell, execute the following command.
+    ```
+    $ cellery run wso2/hr:1.0.0
+    ```       
+    
+
+Above commands will deploy the above three cells in the default namespace. To check the cell status run the following command,
 ```
 $ cellery ps
 ``` 
 
-Above command will output the following result if all the cells are ready;
+It will output the following result if all the cells are ready;
 
 | NAME  | STATUS | GATEWAY |   SERVICES | AGE |
 | ------ | ------  | ------ | ------ | ------ |

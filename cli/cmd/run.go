@@ -99,7 +99,7 @@ func run(cellImageTag string) error {
 		panic(err)
 	}
 
-	kubeYamlDir := filepath.Join(tmpPath, "artifacts", "kubernetes")
+	kubeYamlDir := filepath.Join(tmpPath, "artifacts", "cellery")
 
 	cmd := exec.Command("kubectl", "apply", "-f", kubeYamlDir)
 	execError := ""

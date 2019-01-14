@@ -28,9 +28,13 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/user"
+	"path/filepath"
+	"strings"
 )
 
 var cellImage string
+var cellImageTag string
 
 type Response struct {
 	Message string
@@ -52,8 +56,8 @@ func newPushCommand() *cobra.Command {
 				cmd.Help()
 				return nil
 			}
-			cellImage = args[0]
-			err := runPush(cellImage)
+			cellImageTag = args[0]
+			err := runPush(cellImageTag)
 			if err != nil {
 				cmd.Help()
 				return err
@@ -65,16 +69,32 @@ func newPushCommand() *cobra.Command {
 	return cmd
 }
 
-func runPush(cellImage string) error {
-	var url string = constants.REGISTRY_URL + "/" + constants.REGISTRY_ORGANIZATION + "/" + cellImage + "/2.0.0-m1"
-	if cellImage == "" {
-		return fmt.Errorf("no cell image specified")
+func runPush(cellImageTag string) error {
+	tags := []string{}
+	if cellImageTag == "" {
+		return fmt.Errorf("please specify the cell image")
 	}
 
-	path, _ := os.Getwd()
-	path += "/" + cellImage
+	userVar, err := user.Current()
+	if err != nil {
+		panic(err)
+	}
 
-	request, err := util.FileUploadRequest(url, nil, "file", path, false)
+	repoLocation := filepath.Join(util.UserHomeDir(), ".cellery", "repo")
+
+	zipLocation := ""
+	if !strings.Contains(cellImageTag, "/") {
+		tags = strings.Split(cellImageTag, ":")
+		zipLocation = filepath.Join(repoLocation, userVar.Username, tags[0], tags[1], tags[0]+".zip")
+	} else {
+		orgName := strings.Split(cellImageTag, "/")[0]
+		tags = strings.Split(strings.Split(cellImageTag, "/")[1], ":")
+		zipLocation = filepath.Join(repoLocation, orgName, tags[0], tags[1], tags[0]+".zip")
+	}
+	cellImage = tags[0]+".zip"
+
+	var url = constants.REGISTRY_URL + "/" + constants.REGISTRY_ORGANIZATION + "/" + cellImage + "/2.0.0-m1"
+	request, err := util.FileUploadRequest(url, nil, "file", zipLocation, false)
 	if err != nil {
 		fmt.Printf("\x1b[31;1m Error occurred while pushing the cell image: \x1b[0m %v \n", err)
 		os.Exit(1)

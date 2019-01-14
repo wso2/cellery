@@ -26,6 +26,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/tj/go-spin"
+	"github.com/wso2/cellery/cli/constants"
 	"github.com/wso2/cellery/cli/util"
 	"os"
 	"os/exec"
@@ -153,7 +154,7 @@ func runBuild(tag string, fileName string) error {
 		os.Exit(1)
 	}
 	folders := []string{"artifacts"}
-	files := []string{fileName}
+	files := []string{constants.CONFIG_FILE}
 	output := fileNameSuffix + ".zip"
 	err = util.RecursiveZip(files, folders, output)
 	if err != nil {

@@ -21,10 +21,12 @@ package main
 import (
 	"fmt"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"github.com/wso2/cellery/cli/constants"
 	"github.com/wso2/cellery/cli/util"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 func newPullCommand() *cobra.Command {
@@ -73,5 +75,41 @@ func runPull(cellImage string) error {
 	if response.StatusCode == 404 {
 		fmt.Printf("\x1b[31;1m Error occurred while running cell image:\x1b[0m %v not found in registry\n", cellImage)
 	}
+
+	err = util.Unzip(filepath.Join(dir, cellImage), dir)
+	if err != nil {
+		panic(err)
+	}
+
+	viper.SetConfigName("Cellery") // name of config file (without extension)
+	viper.SetConfigType("toml")
+	viper.AddConfigPath(".")        // optionally look for config in the working directory
+	confErr := viper.ReadInConfig() // Find and read the config file
+
+	if confErr != nil { // Handle errors reading the config file
+		fmt.Printf("\x1b[31;1m\nError while readng toml file: %s \x1b[0m\n", confErr)
+		os.Exit(1)
+	}
+
+	organization := viper.GetString("project.organization")
+	projectName := strings.Split(cellImage, ".")[0]
+	projectVersion := viper.GetString("project.version")
+
+	repoLocation := filepath.Join(util.UserHomeDir(), ".cellery", "repo", organization, projectName, projectVersion)
+	repoCreateErr := util.CreateDir(repoLocation)
+	if repoCreateErr != nil {
+		fmt.Println("Error while creating image location: " + repoCreateErr.Error())
+		os.Exit(1)
+	}
+
+	zipSrc := filepath.Join(dir, cellImage)
+	zipDst := filepath.Join(repoLocation, cellImage)
+	zipCopyError := util.CopyFile(zipSrc, zipDst)
+	if zipCopyError != nil {
+		fmt.Println("Error while saving image: " + zipCopyError.Error())
+		os.Exit(1)
+	}
+
+	_ = os.Remove(zipSrc)
 	return nil
 }

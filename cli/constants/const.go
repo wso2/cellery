@@ -23,6 +23,7 @@ const BASE_API_URL = "http://localhost:8080"
 const REGISTRY_URL = "https://localhost:9090/registry/0.0.1/images"
 const EMPTY_STRING  = ""
 const REGISTRY_ORGANIZATION  = "wso2"
+const CONFIG_FILE = "Cellery.toml"
 
 const HTTP_METHOD_GET = "GET"
 const HTTP_METHOD_POST = "POST"

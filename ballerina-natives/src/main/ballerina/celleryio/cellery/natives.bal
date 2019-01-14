@@ -191,8 +191,12 @@ public function getHost(CellImage cellImage, Component component) returns (strin
     return getValidName(cellImage.name) + "--" + getValidName(component.name) + "-service";
 }
 
-public function getContext(CellImage cellImage, HTTP httpIngress) returns (string) {
-    return httpIngress.context;
+public function getContext(TCP|HTTP? httpIngress) returns (string) {
+    if (httpIngress is HTTP) {
+        return httpIngress.context;
+    }
+    error err = error("Unable to extract context from ingress");
+    panic err;
 }
 
 function getValidName(string name) returns string {

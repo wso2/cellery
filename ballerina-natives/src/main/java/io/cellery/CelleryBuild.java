@@ -66,6 +66,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import static io.cellery.CelleryConstants.ENV_VAR;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.removePattern;
 
@@ -155,6 +156,15 @@ public class CelleryBuild extends BlockingNativeCallableUnit {
                         ((BMap<?, ?>) value).getMap().forEach((envKey, envValue) ->
                                 component.addEnv(envKey.toString(), envValue.toString()));
                         break;
+                    case "parameters":
+                        ((BMap<?, ?>) value).getMap().forEach((k, v) -> {
+                            if (ENV_VAR.equals(((BMap) v).getMap().get("paramType").toString())) {
+                                component.addEnv(k.toString(), ((BMap) v).getMap().get("value").toString());
+                            }
+                            //TODO:Handle secrets
+                        });
+                        break;
+
                     default:
                         break;
                 }
@@ -194,25 +204,15 @@ public class CelleryBuild extends BlockingNativeCallableUnit {
      * @param component  current component
      */
     private void processIngressPort(LinkedHashMap<?, ?> ingressMap, Component component) {
-        if (ingressMap.size() == 0) {
-            return;
-        }
-        int preMapSize = component.getContainerPortToServicePortMap().size();
         ingressMap.forEach((name, entry) -> ((BMap<?, ?>) entry).getMap().forEach((key, value) -> {
             switch (key.toString()) {
                 case "port":
-                    String portString = value.toString();
-                    component.addPorts(Integer.parseInt(portString.substring(0, portString.indexOf(":"))),
-                            Integer.parseInt(portString.substring(portString.indexOf(":") + 1)));
+                    component.addPorts(Integer.parseInt(value.toString()), gatewayPort);
                     break;
                 default:
                     break;
             }
         }));
-
-        if (preMapSize == component.getContainerPortToServicePortMap().size()) {
-            throw new BallerinaException("Ingress port is not defined");
-        }
     }
 
     private void processAPIs(BRefType<?>[] apiMap) {
@@ -254,7 +254,7 @@ public class CelleryBuild extends BlockingNativeCallableUnit {
             if (componentName != null) {
                 componentHolder.addAPI(componentName, api);
             } else {
-                throw new BallerinaException("Undefined targetComponent component");
+                throw new BallerinaException("Undefined target component.");
             }
         }
     }

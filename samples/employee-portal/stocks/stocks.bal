@@ -9,7 +9,7 @@ cellery:Component stock = {
     },
     ingresses: {
         stock: {
-            port: "8080:80",
+            port: 8080,
             context: "stock",
             definitions: [
                 {

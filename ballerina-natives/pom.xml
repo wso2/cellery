@@ -30,6 +30,18 @@
         </dependency>
         <dependency>
             <groupId>org.ballerinalang</groupId>
+            <version>${ballerina.version}</version>
+            <artifactId>ballerina-log-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.ballerinalang</groupId>
+            <artifactId>ballerina-log-api</artifactId>
+            <type>zip</type>
+            <classifier>ballerina-binary-repo</classifier>
+            <version>${ballerina.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ballerinalang</groupId>
             <artifactId>ballerina-builtin</artifactId>
             <version>${ballerina.version}</version>
             <type>zip</type>

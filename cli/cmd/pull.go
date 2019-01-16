@@ -40,7 +40,7 @@ func newPullCommand() *cobra.Command {
 				return nil
 			}
 			cellImage = args[0]
-			err := runPull(cellImage)
+			err := runPull(cellImage, false)
 			if err != nil {
 				cmd.Help()
 				return err
@@ -65,7 +65,7 @@ func pullSpinner(tag string) {
 	}
 }
 
-func runPull(cellImage string) error {
+func runPull(cellImage string, silent bool) error {
 
 	if cellImage == "" {
 		return fmt.Errorf("no cell image specified")
@@ -98,7 +98,9 @@ func runPull(cellImage string) error {
 		util.ExitWithImageFormatError()
 	}
 
-	go pullSpinner(cellImage)
+	if !silent {
+		go pullSpinner(cellImage)
+	}
 
 	var url = "http://" + registryHost + constants.REGISTRY_BASE_PATH + "/images/" + organization + "/" +
 		imageName + "/" + imageVersion
@@ -124,10 +126,12 @@ func runPull(cellImage string) error {
 		fmt.Println()
 		fmt.Printf(util.GreenBold("\U00002714")+" Successfully pulled cell image: %s\n", util.Bold(cellImage))
 		fmt.Println()
-		fmt.Println(util.Bold("Whats next ?"))
-		fmt.Println("======================")
-		fmt.Println("Execute the following command to run the image: ")
-		fmt.Println("  $ cellery run " + cellImage)
+		if !silent {
+			fmt.Println(util.Bold("Whats next ?"))
+			fmt.Println("======================")
+			fmt.Println("Execute the following command to run the image: ")
+			fmt.Println("  $ cellery run " + cellImage)
+		}
 	}
 	if response.StatusCode == 404 {
 		fmt.Println()

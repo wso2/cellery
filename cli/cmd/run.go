@@ -92,10 +92,9 @@ func run(cellImageTag string) error {
 	zipLocation := filepath.Join(repoLocation, imageName+constants.CELL_IMAGE_EXT)
 
 	if _, err := os.Stat(zipLocation); os.IsNotExist(err) {
-		// TODO need to pull from registry if not present, consider for next iteration
-		fmt.Printf("\x1b[31;1m\n Error occurred while running cell image:\x1b[0m%v. Image does not exist\n",
-			cellImageTag)
-		os.Exit(1)
+		fmt.Printf("\nUnable to find image %s locally.", cellImageTag)
+		fmt.Printf("\nPulling image: %s ...", cellImageTag)
+		_ = runPull(cellImageTag, true)
 	}
 
 	//create tmp directory

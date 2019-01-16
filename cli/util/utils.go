@@ -45,7 +45,7 @@ var Faint = color.New(color.Faint).SprintFunc()
 var Green = color.New(color.FgGreen)
 var GreenBold = Green.Add(color.Bold).SprintFunc()
 var Yellow = color.New(color.FgYellow)
-var YellowBold = Yellow.Add(color.FgYellow).SprintFunc()
+var YellowBold = Yellow.Add(color.Bold).SprintFunc()
 
 func ExitWithImageFormatError() {
 	fmt.Printf("\x1b[31;1mIncorrect tag name. Tag name should be [REPOSITORY]/ORGANIZATION/IMAGE_NAME:VERSION \x1b[0m\n")

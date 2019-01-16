@@ -7,16 +7,14 @@ cellery:Component helloWorldComp = {
         image: "sumedhassk/hello-world:1.0.0"
     },
     ingresses: {
-        "hello": {
-            port: "9090:80",
-            context: "hello",
-            definitions: [
+        "hello": new cellery:HTTPIngress(9090, "hello",
+            [
                 {
                     path: "/",
                     method: "GET"
                 }
             ]
-        }
+        )
     }
 };
 
@@ -28,7 +26,7 @@ public function build() {
     helloCell.exposeGlobalAPI(helloWorldComp);
 
     var out = cellery:createImage(helloCell);
-    if(out is boolean) {
+    if (out is boolean) {
         io:println("Hello Cell Built successfully.");
     }
 }

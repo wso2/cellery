@@ -110,44 +110,39 @@ func runInit() error {
 		},
 	})
 
-	cellTemplate :=
-		"import ballerina/io;\n" +
-			"import celleryio/cellery;\n" +
-			"\n" +
-			"cellery:Component helloWorldComp = {\n" +
-			"    name: \"HelloWorld\",\n" +
-			"    source: {\n" +
-			"        image: \"sumedhassk/hello-world:1.0.0\" \n" +
-			"    },\n" +
-			"    ingresses: {\n" +
-			"        \"hello\": {\n" +
-			"            port: \"9090:80\",\n" +
-			"            context: \"hello\",\n" +
-			"            definitions: [\n" +
-			"                {\n" +
-			"                    path: \"/\",\n" +
-			"                    method: \"GET\"\n" +
-			"                }\n" +
-			"            ]\n" +
-			"        }\n" +
-			"    }\n" +
-			"};\n" +
-			"\n" +
-			"cellery:CellImage helloCell = new(\"HelloCell\");\n" +
-			"\n" +
-			"public function build() {\n" +
-			"    // Adding HelloWorld component\n" +
-			"    helloCell.addComponent(helloWorldComp);\n" +
-			"\n" +
-			"    // Exposing the ingress of HelloWorld component as an API\n" +
-			"    helloCell.exposeGlobalAPI(helloWorldComp);\n" +
-			"\n" +
-			"    // Create Cell Image\n" +
-			"    var out = cellery:createImage(helloCell);\n" +
-			"    if(out is boolean) {\n" +
-			"        io:println(\"Hello Cell Built successfully.\");\n" +
-			"    }\n" +
-			"}\n"
+	cellTemplate := "import ballerina/io;\n" +
+		"import celleryio/cellery;\n" +
+		"\n" +
+		"cellery:Component helloWorldComp = {\n" +
+		"    name: \"HelloWorld\",\n" +
+		"    source: {\n" +
+		"        image: \"sumedhassk/hello-world:1.0.0\"\n" +
+		"    },\n" +
+		"    ingresses: {\n" +
+		"        \"hello\": new cellery:HTTPIngress(9090, \"hello\",\n" +
+		"            [\n" +
+		"                {\n" +
+		"                    path: \"/\",\n" +
+		"                    method: \"GET\"\n" +
+		"                }\n" +
+		"            ]\n" +
+		"        )\n" +
+		"    }\n" +
+		"};\n" +
+		"\n" +
+		"cellery:CellImage helloCell = new(\"Hello-World\");\n" +
+		"\n" +
+		"public function build() {\n" +
+		"    helloCell.addComponent(helloWorldComp);\n" +
+		"\n" +
+		"    helloCell.exposeGlobalAPI(helloWorldComp);\n" +
+		"\n" +
+		"    var out = cellery:createImage(helloCell);\n" +
+		"    if (out is boolean) {\n" +
+		"        io:println(\"Hello Cell Built successfully.\");\n" +
+		"    }\n" +
+		"}\n" +
+		"\n"
 
 	tomlTemplate := "[project]\n" +
 		"organization = \"" + orgName + "\"\n" +

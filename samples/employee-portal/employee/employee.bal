@@ -21,23 +21,9 @@ cellery:Component employeeComponent = {
         }
     },
     parameters: {
-        SALARY: {
-            paramType: "envVar",
-            required: true
-        },
-        PORT: {
-            paramType: "envVar",
-            required: true
-        },
-        CONTEXT: {
-            paramType: "envVar",
-            required: true
-        },
-        PASSWORD: {
-            paramType: "secret",
-            path: "/tmp/dbpsw",
-            required: false
-        }
+        SALARY: new cellery:Env(),
+        PORT: new cellery:Env(default = 8080),
+        CONTEXT: new cellery:Env()
     }
 };
 
@@ -68,11 +54,10 @@ public function celleryBuild() {
     // Build EmployeeCell
     io:println("Building Employee Cell ...");
 
-    //Map component dependecies
-    cellery:addParameter(employeeComponent.parameters["SALARY"], cellery:getHost(employeeCell, salaryComponent));
-    cellery:addParameter(employeeComponent.parameters["PORT"], 8080);
-    cellery:addParameter(employeeComponent.parameters["CONTEXT"], cellery:getContext(salaryComponent.ingresses[
-            "salaryAPI"]));
+    // Map component parameters
+    cellery:setParameter(employeeComponent.parameters["SALARY"], cellery:getHost(employeeCell, salaryComponent));
+    cellery:setParameter(employeeComponent.parameters["CONTEXT"],
+        cellery:getContext(salaryComponent.ingresses["salaryAPI"]));
 
     // Add components to Cell
     employeeCell.addComponent(employeeComponent);
@@ -81,6 +66,5 @@ public function celleryBuild() {
     //Expose API from Cell Gateway
     employeeCell.exposeAPIsFrom(employeeComponent);
 
-    //io:println(employeeCell);
     _ = cellery:createImage(employeeCell);
 }

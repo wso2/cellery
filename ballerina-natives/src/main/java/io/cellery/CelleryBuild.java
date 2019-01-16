@@ -66,7 +66,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import static io.cellery.CelleryConstants.ENV_VAR;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.removePattern;
 
@@ -158,7 +157,7 @@ public class CelleryBuild extends BlockingNativeCallableUnit {
                         break;
                     case "parameters":
                         ((BMap<?, ?>) value).getMap().forEach((k, v) -> {
-                            if (ENV_VAR.equals(((BMap) v).getMap().get("paramType").toString())) {
+                            if (!((BMap) v).getMap().get("value").toString().isEmpty()) {
                                 component.addEnv(k.toString(), ((BMap) v).getMap().get("value").toString());
                             }
                             //TODO:Handle secrets

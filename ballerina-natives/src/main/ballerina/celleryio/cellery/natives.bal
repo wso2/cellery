@@ -82,7 +82,7 @@ public type Component record{
     map<TCP|HTTP> ingresses;
     Egress[] egresses?;
     boolean isStub = false;
-    map<KeyValueInput|SecretInput> parameters?;
+    map<Env|Secret> parameters?;
     !...
 };
 
@@ -99,17 +99,39 @@ public type HTTP record{
     !...
 };
 
-public type KeyValueInput record{
-    string paramType;
-    any value?;
-    boolean required;
-    !...
+public type Env object {
+    public string|int|boolean|float? value;
+
+    public function __init(string|int|boolean|float? default = ()) {
+        self.value = default;
+    }
+
+    //public function __init() {
+    //    self.value = "";
+    //}
+
+    public function setValue(string|int|boolean|float value) {
+        self.value = value;
+    }
 };
 
-public type SecretInput record{
-    *KeyValueInput;
-    string path;
-    !...
+public type Secret object {
+    public string path;
+    public string|int|boolean|float value;
+
+    public function __init(string path, string|int|boolean|float value) {
+        self.path = path;
+        self.value = value;
+    }
+
+    public function __init() {
+        self.path = "";
+        self.value = "";
+    }
+
+    public function setValue(string|int|boolean|float value) {
+        self.value = value;
+    }
 };
 
 public type CellStub object {
@@ -203,10 +225,10 @@ function getValidName(string name) returns string {
     return name.toLower().replace("_", "-").replace(".", "-");
 }
 
-public function addParameter(KeyValueInput|SecretInput? param, any value) {
-    if (param is (KeyValueInput)) {
+public function setParameter(Env|Secret? param, string|int|boolean|float value) {
+    if (param is (Env)) {
         param.value = value;
-    } else if (param is SecretInput) {
+    } else if (param is Secret) {
         param.value = value;
     } else {
         error err = error("Parameter not declared in the component.");

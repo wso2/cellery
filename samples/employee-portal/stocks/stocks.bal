@@ -23,7 +23,7 @@ cellery:Component stock = {
 
 cellery:CellImage stockCell = new("Stock-Options");
 
-public function celleryBuild() {
+public function build() {
     //Build Stock Cell
     io:println("Building Stock Cell ...");
     stockCell.addComponent(stock);

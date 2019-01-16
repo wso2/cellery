@@ -29,7 +29,7 @@ cellery:CellImage hrCell = new("HR");
 cellery:CellStub employeeStub = new("Employee");
 cellery:CellStub stocksStub = new("Stock-Options");
 
-public function celleryBuild() {
+public function build() {
     // Build HR cell
     io:println("Building HR Cell ...");
     hrCell.addComponent(hr);

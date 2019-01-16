@@ -118,7 +118,7 @@ cellery:CellImage stocksCell = new("StocksCell");
 cellery:CellImage mysqlCell = new("MySQLCell");
 
 // Build Function
-public function celleryBuild() {
+public function build() {
 
     //Employee Cell
     io:println("Building Employee Cell ...");

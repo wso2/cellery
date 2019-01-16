@@ -22,7 +22,7 @@ cellery:Component helloWorldComp = {
 
 cellery:CellImage helloCell = new("Hello-World");
 
-public function celleryBuild() {
+public function build() {
     helloCell.addComponent(helloWorldComp);
 
     helloCell.exposeGlobalAPI(helloWorldComp);

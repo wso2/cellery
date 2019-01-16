@@ -136,7 +136,7 @@ func runBuild(tag string, fileName string) error {
 	}
 	_ = os.RemoveAll(filepath.Join(dir, "target"))
 
-	cmd := exec.Command("ballerina", "run", fileName+":celleryBuild")
+	cmd := exec.Command("ballerina", "run", fileName+":build")
 	execError := ""
 	stderrReader, _ := cmd.StderrPipe()
 	stderrScanner := bufio.NewScanner(stderrReader)

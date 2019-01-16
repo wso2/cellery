@@ -135,7 +135,7 @@ func runInit() error {
 			"\n" +
 			"cellery:CellImage helloCell = new(\"HelloCell\");\n" +
 			"\n" +
-			"public function celleryBuild() {\n" +
+			"public function build() {\n" +
 			"    // Adding HelloWorld component\n" +
 			"    helloCell.addComponent(helloWorldComp);\n" +
 			"\n" +

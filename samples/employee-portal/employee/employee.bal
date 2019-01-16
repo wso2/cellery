@@ -49,7 +49,7 @@ cellery:Component salaryComponent = {
 
 public cellery:CellImage employeeCell = new("Employee");
 
-public function celleryBuild() {
+public function build() {
 
     // Build EmployeeCell
     io:println("Building Employee Cell ...");

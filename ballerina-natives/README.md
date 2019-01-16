@@ -13,9 +13,9 @@ Cellery native function implementation
 
 1. Build and install native functions as per the instructions above.
 2. Navigate to `./ballerina-natives/samples/HRApp` directory.
-3. Execute the celleryBuild function.
+3. Execute the build function.
 ```bash
-$> ballerina run hr_app.bal:celleryBuild
+$> ballerina run hr_app.bal:build
 Building Employee Cell ...
 Building Stock Cell ...
 Building HR Cell ...

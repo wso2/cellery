@@ -9,21 +9,21 @@ cellery:Component employeeComponent = {
         image: "docker.io/wso2vick/sampleapp-employee"
     },
     ingresses: {
-        employee: {
-            port: 8080,
-            context: "employee",
-            definitions: [
-                {
-                    path: "/",
-                    method: "GET"
-                }
-            ]
-        }
+        employee: new cellery:HTTPIngress(
+                      8080,
+                      "employee",
+                      [
+                          {
+                              path: "/",
+                              method: "GET"
+                          }
+                      ]
+        )
     },
     parameters: {
         SALARY: new cellery:Env(),
         PORT: new cellery:Env(default = 8080),
-        CONTEXT: new cellery:Env()
+        BASE_PATH: new cellery:Env()
     }
 };
 
@@ -34,16 +34,13 @@ cellery:Component salaryComponent = {
         image: "docker.io/wso2vick/sampleapp-salary"
     },
     ingresses: {
-        salaryAPI: {
-            context: "payroll",
-            port: 8080,
-            definitions: [
+        salaryAPI: new cellery:HTTPIngress(8080, "payroll",
+            [
                 {
                     path: "/salary",
                     method: "GET"
                 }
-            ]
-        }
+            ])
     }
 };
 
@@ -56,8 +53,8 @@ public function build() {
 
     // Map component parameters
     cellery:setParameter(employeeComponent.parameters["SALARY"], cellery:getHost(employeeCell, salaryComponent));
-    cellery:setParameter(employeeComponent.parameters["CONTEXT"],
-        cellery:getContext(salaryComponent.ingresses["salaryAPI"]));
+    cellery:setParameter(employeeComponent.parameters["BASE_PATH"],
+        cellery:getBasePath(salaryComponent.ingresses["salaryAPI"]));
 
     // Add components to Cell
     employeeCell.addComponent(employeeComponent);

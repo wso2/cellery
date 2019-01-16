@@ -8,16 +8,14 @@ cellery:Component stock = {
         image: "docker.io/wso2vick/sampleapp-stock"
     },
     ingresses: {
-        stock: {
-            port: 8080,
-            context: "stock",
-            definitions: [
+        stock: new cellery:HTTPIngress(8080, "stock",
+            [
                 {
                     path: "/",
                     method: "GET"
                 }
             ]
-        }
+        )
     }
 };
 

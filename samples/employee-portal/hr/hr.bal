@@ -10,16 +10,14 @@ cellery:Component hr = {
     },
     env: { employeegw_url: "", stockgw_url: "" },
     ingresses: {
-        "hr": {
-            port: "8080:80",
-            context: "info",
-            definitions: [
+        "hr": new cellery:HTTPIngress(8080, "info",
+            [
                 {
                     path: "/",
                     method: "GET"
                 }
             ]
-        }
+        )
     }
 
 };

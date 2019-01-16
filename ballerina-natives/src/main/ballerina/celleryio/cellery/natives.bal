@@ -42,14 +42,14 @@ public type API record{
     string name?;
     string targetComponent;
     boolean global;
-    TCP|HTTP ingress;
+    TCPIngress|HTTPIngress ingress;
     !...
 };
 
 public type Egress record{
     string targetComponent?;
     string targetCell?;
-    TCP|HTTP ingress?;
+    TCPIngress|HTTPIngress ingress?;
     string envVar?;
     Resiliency resiliency?;
     !...
@@ -79,24 +79,30 @@ public type Component record{
     ImageSource source;
     int replicas = 1;
     map<string> env?;
-    map<TCP|HTTP> ingresses;
+    map<TCPIngress|HTTPIngress> ingresses;
     Egress[] egresses?;
     boolean isStub = false;
     map<Env|Secret> parameters?;
     !...
 };
 
-public type TCP record{
-    int port;
-    string host;
-    !...
+public type TCPIngress object {
+    public int port;
+    public function __init(int port) {
+        self.port = port;
+    }
 };
 
-public type HTTP record{
-    int port;
-    string context;
-    Definition[] definitions;
-    !...
+public type HTTPIngress object {
+    public int port;
+    public string basePath;
+    public Definition[] definitions;
+
+    public function __init(int port, string basePath, Definition[] definitions) {
+        self.port = port;
+        self.basePath = basePath;
+        self.definitions = definitions;
+    }
 };
 
 public type Env object {
@@ -105,10 +111,6 @@ public type Env object {
     public function __init(string|int|boolean|float? default = ()) {
         self.value = default;
     }
-
-    //public function __init() {
-    //    self.value = "";
-    //}
 
     public function setValue(string|int|boolean|float value) {
         self.value = value;
@@ -136,7 +138,7 @@ public type Secret object {
 
 public type CellStub object {
     public string name;
-    map<TCP|HTTP> ingresses = {};
+    map<TCPIngress|HTTPIngress> ingresses = {};
     map<string> context = {};
 
     public function __init(string name) {
@@ -175,8 +177,8 @@ public type CellImage object {
     }
 
     public function exposeAPIFrom(Component component, string ingressName) {
-        TCP|HTTP? ingress = component.ingresses[ingressName];
-        if (ingress is (TCP|HTTP)) {
+        TCPIngress|HTTPIngress? ingress = component.ingresses[ingressName];
+        if (ingress is (TCPIngress|HTTPIngress)) {
             self.apis[self.apis.length()] = {
                 targetComponent: component.name,
                 ingress: ingress,
@@ -213,11 +215,11 @@ public function getHost(CellImage cellImage, Component component) returns (strin
     return getValidName(cellImage.name) + "--" + getValidName(component.name) + "-service";
 }
 
-public function getContext(TCP|HTTP? httpIngress) returns (string) {
-    if (httpIngress is HTTP) {
-        return httpIngress.context;
+public function getBasePath(TCPIngress|HTTPIngress? httpIngress) returns (string) {
+    if (httpIngress is HTTPIngress) {
+        return httpIngress.basePath;
     }
-    error err = error("Unable to extract context from ingress");
+    error err = error("Unable to extract basePath from ingress");
     panic err;
 }
 

@@ -231,10 +231,10 @@ public class CelleryBuild extends BlockingNativeCallableUnit {
                     case "targetComponent":
                         componentName = value.toString();
                         break;
-                    case "context":
+                    case "ingress":
                         ((BMap<?, ?>) value).getMap().forEach((contextKey, contextValue) -> {
                             switch (contextKey.toString()) {
-                                case "context":
+                                case "basePath":
                                     api.setContext(contextValue.toString());
                                     break;
                                 case "definitions":

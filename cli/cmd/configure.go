@@ -55,7 +55,7 @@ func runConfigure() error {
 		Active:   "\U000027A4 {{ .| bold }}",
 		Inactive: "  {{ . | faint }}",
 		Selected: bold("Selected cluster: ") + "{{ . }}",
-		Help:     faint("[Use arrow keys]"),
+		Help:     util.Faint("[Use arrow keys]"),
 	}
 
 	cellPrompt := promptui.Select{
@@ -69,7 +69,7 @@ func runConfigure() error {
 	}
 
 	setContext(value)
-	fmt.Printf(greenBold("\n\U00002713") + " Successfully configured Cellery.\n")
+	fmt.Printf(util.GreenBold("\n\U00002714") + " Successfully configured Cellery.\n")
 	fmt.Println()
 	fmt.Println(bold("Whats next ?"))
 	fmt.Println("======================")

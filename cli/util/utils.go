@@ -38,6 +38,7 @@ import (
 )
 
 var Cyan = color.New(color.FgCyan)
+var CyanF = color.New(color.FgCyan).SprintFunc()
 var CyanBold = Cyan.Add(color.Bold).SprintFunc()
 var Bold = color.New(color.Bold).SprintFunc()
 var Faint = color.New(color.Faint).SprintFunc()
@@ -45,6 +46,11 @@ var Green = color.New(color.FgGreen)
 var GreenBold = Green.Add(color.Bold).SprintFunc()
 var Yellow = color.New(color.FgYellow)
 var YellowBold = Yellow.Add(color.FgYellow).SprintFunc()
+
+func ExitWithImageFormatError() {
+	fmt.Printf("\x1b[31;1mIncorrect tag name. Tag name should be [REPOSITORY]/ORGANIZATION/IMAGE_NAME:VERSION \x1b[0m\n")
+	os.Exit(1)
+}
 
 //func CopyFile(oldFile string, newFile string) {
 //	input, err := os.Open(oldFile)

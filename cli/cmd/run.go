@@ -22,10 +22,10 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/spf13/cobra"
+	"github.com/wso2/cellery/cli/constants"
 	"github.com/wso2/cellery/cli/util"
 	"os"
 	"os/exec"
-	"os/user"
 	"path/filepath"
 	"strings"
 	"time"
@@ -59,24 +59,37 @@ func run(cellImageTag string) error {
 		return fmt.Errorf("please specify the cell image")
 	}
 
-	fmt.Printf("Running cell image: %s ...\n", util.Bold(cellImageTag))
+	registryHost := constants.CENTRAL_REGISTRY_HOST
+	organization := ""
+	imageName := ""
+	imageVersion := ""
 
-	userVar, err := user.Current()
-	if err != nil {
-		panic(err)
-	}
-
-	repoLocation := filepath.Join(util.UserHomeDir(), ".cellery", "repo")
-
-	zipLocation := ""
-	if !strings.Contains(cellImageTag, "/") {
-		tags := strings.Split(cellImageTag, ":")
-		zipLocation = filepath.Join(repoLocation, userVar.Username, tags[0], tags[1], tags[0]+".zip")
+	strArr := strings.Split(cellImageTag, "/")
+	if len(strArr) == 3 {
+		registryHost = strArr[0]
+		organization = strArr[1]
+		imageTag := strings.Split(strArr[2], ":")
+		if len(imageTag) != 2 {
+			util.ExitWithImageFormatError()
+		}
+		imageName = imageTag[0]
+		imageVersion = imageTag[1]
+	} else if len(strArr) == 2 {
+		organization = strArr[0]
+		imageTag := strings.Split(strArr[1], ":")
+		if len(imageTag) != 2 {
+			util.ExitWithImageFormatError()
+		}
+		imageName = imageTag[0]
+		imageVersion = imageTag[1]
 	} else {
-		orgName := strings.Split(cellImageTag, "/")[0]
-		tags := strings.Split(strings.Split(cellImageTag, "/")[1], ":")
-		zipLocation = filepath.Join(repoLocation, orgName, tags[0], tags[1], tags[0]+".zip")
+		util.ExitWithImageFormatError()
 	}
+
+	repoLocation := filepath.Join(util.UserHomeDir(), ".cellery", "repos", registryHost, organization, imageName,
+		imageVersion)
+	fmt.Printf("Running cell image: %s ...\n", util.Bold(cellImageTag))
+	zipLocation := filepath.Join(repoLocation, imageName+constants.CELL_IMAGE_EXT)
 
 	if _, err := os.Stat(zipLocation); os.IsNotExist(err) {
 		// TODO need to pull from registry if not present, consider for next iteration
@@ -89,7 +102,7 @@ func run(cellImageTag string) error {
 	currentTIme := time.Now()
 	timstamp := currentTIme.Format("20060102150405")
 	tmpPath := filepath.Join(util.UserHomeDir(), ".cellery", "tmp", timstamp)
-	err = util.CreateDir(tmpPath)
+	err := util.CreateDir(tmpPath)
 	if err != nil {
 		panic(err)
 	}
@@ -124,14 +137,15 @@ func run(cellImageTag string) error {
 	}
 	err = cmd.Wait()
 
-	//_ = os.RemoveAll(tmpPath)
+	_ = os.RemoveAll(tmpPath)
 
 	if err != nil {
 		fmt.Printf("\x1b[31;1m\n Error occurred while running cell image:\x1b[0m %v \n", execError)
 		os.Exit(1)
 	}
 
-	fmt.Printf("\nSuccessfully deployed cell image: %s\n", util.Bold(cellImageTag))
+	fmt.Println()
+	fmt.Printf(util.GreenBold("\U00002714")+" Successfully deployed cell image: %s\n", util.Bold(cellImageTag))
 	fmt.Println()
 	fmt.Println(util.Bold("Whats next ?"))
 	fmt.Println("======================")

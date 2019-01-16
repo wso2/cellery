@@ -23,18 +23,18 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/spf13/cobra"
+	"github.com/tj/go-spin"
 	"github.com/wso2/cellery/cli/constants"
 	"github.com/wso2/cellery/cli/util"
 	"log"
 	"net/http"
 	"os"
-	"os/user"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 var cellImage string
-var cellImageTag string
 
 type Response struct {
 	Message string
@@ -52,51 +52,80 @@ func newPushCommand() *cobra.Command {
 		Use:   "push [CELL IMAGE]",
 		Short: "push cell image to the remote repository",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if (len(args) == 0) {
+			if len(args) == 0 {
 				cmd.Help()
 				return nil
 			}
-			cellImageTag = args[0]
-			err := runPush(cellImageTag)
+			cellImage = args[0]
+			err := runPush(cellImage)
 			if err != nil {
 				cmd.Help()
 				return err
 			}
 			return nil
 		},
-		Example: "  cellery push mycellery.org/hello:v1",
+		Example: "  cellery push wso2/hello-world:1.0.0\n  cellery push registry.foo.com/foo/hello-world:1.0.0",
 	}
 	return cmd
 }
 
-func runPush(cellImageTag string) error {
-	tags := []string{}
-	if cellImageTag == "" {
-		return fmt.Errorf("please specify the cell image")
+/**
+Spinner
+*/
+func pushSpinner(tag string) {
+	s := spin.New()
+	for {
+		if isSpinning {
+			fmt.Printf("\r\033[36m%s\033[m Pushing %s %s", s.Next(), "image", util.Bold(tag))
+			time.Sleep(100 * time.Millisecond)
+		}
+	}
+}
+
+func runPush(cellImage string) error {
+
+	if cellImage == "" {
+		return fmt.Errorf("no cell image specified")
 	}
 
-	userVar, err := user.Current()
-	if err != nil {
-		panic(err)
-	}
+	registryHost := constants.CENTRAL_REGISTRY_HOST
+	organization := ""
+	imageName := ""
+	imageVersion := ""
 
-	repoLocation := filepath.Join(util.UserHomeDir(), ".cellery", "repo")
-
-	zipLocation := ""
-	if !strings.Contains(cellImageTag, "/") {
-		tags = strings.Split(cellImageTag, ":")
-		zipLocation = filepath.Join(repoLocation, userVar.Username, tags[0], tags[1], tags[0]+".zip")
+	strArr := strings.Split(cellImage, "/")
+	if len(strArr) == 3 {
+		registryHost = strArr[0]
+		organization = strArr[1]
+		imageTag := strings.Split(strArr[2], ":")
+		if len(imageTag) != 2 {
+			util.ExitWithImageFormatError()
+		}
+		imageName = imageTag[0]
+		imageVersion = imageTag[1]
+	} else if len(strArr) == 2 {
+		organization = strArr[0]
+		imageTag := strings.Split(strArr[1], ":")
+		if len(imageTag) != 2 {
+			util.ExitWithImageFormatError()
+		}
+		imageName = imageTag[0]
+		imageVersion = imageTag[1]
 	} else {
-		orgName := strings.Split(cellImageTag, "/")[0]
-		tags = strings.Split(strings.Split(cellImageTag, "/")[1], ":")
-		zipLocation = filepath.Join(repoLocation, orgName, tags[0], tags[1], tags[0]+".zip")
+		util.ExitWithImageFormatError()
 	}
-	cellImage = tags[0]+".zip"
 
-	var url = constants.REGISTRY_URL + "/" + constants.REGISTRY_ORGANIZATION + "/" + cellImage + "/2.0.0-m1"
-	request, err := util.FileUploadRequest(url, nil, "file", zipLocation, false)
+	go pushSpinner(cellImage)
+
+	var url = "http://" + registryHost + constants.REGISTRY_BASE_PATH + "/images/" + organization +
+		"/" + imageName + "/" + imageVersion
+
+	path := filepath.Join(util.UserHomeDir(), ".cellery", "repos", registryHost, organization, imageName, imageVersion,
+		imageName+constants.CELL_IMAGE_EXT)
+
+	request, err := util.FileUploadRequest(url, nil, "file", path, true)
 	if err != nil {
-		fmt.Printf("\x1b[31;1m Error occurred while pushing the cell image: \x1b[0m %v \n", err)
+		fmt.Printf("\x1b[31;1m\nError occurred while pushing the cell image: \x1b[0m %v \n", err)
 		os.Exit(1)
 	}
 	client := &http.Client{}
@@ -115,23 +144,21 @@ func runPush(cellImageTag string) error {
 		resp.Body.Close()
 	}
 
-	if (resp.StatusCode == 200) {
+	if resp.StatusCode == 200 {
 		var response Response
-		json.Unmarshal([]byte(responseBody), &response)
-		data := map[string]string{
-			"ImageRevision": response.Image.ImageRevision,
-			"ImageVersion":  response.Image.ImageVersion,
-			"Name":          response.Image.Name,
-			"Organization":  response.Image.Organization,
-		}
-
-		json, err := json.MarshalIndent(data, " ", " ")
+		err := json.Unmarshal([]byte(responseBody), &response)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		fmt.Println(string(json))
-		fmt.Printf("\r\033[32mSuccessfully pushed cell image \033[m\n")
+		fmt.Println()
+		fmt.Printf(util.GreenBold("\n\U00002714")+" Successfully pushed cell image: %s\n", util.Bold(cellImage))
+		fmt.Println("Digest : " + util.Bold(response.Image.ImageRevision))
+		fmt.Println()
+		fmt.Println(util.Bold("Whats next ?"))
+		fmt.Println("======================")
+		fmt.Println("Execute the following command to pull the image: ")
+		fmt.Println("  $ cellery pull " + cellImage)
 	} else {
 		fmt.Printf("\x1b[31;1mError occurred while pushing the cell image: \x1b[0m %v \n", err)
 		os.Exit(1)

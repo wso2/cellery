@@ -21,12 +21,13 @@ package main
 import (
 	"fmt"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
+	"github.com/tj/go-spin"
 	"github.com/wso2/cellery/cli/constants"
 	"github.com/wso2/cellery/cli/util"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 func newPullCommand() *cobra.Command {
@@ -51,65 +52,88 @@ func newPullCommand() *cobra.Command {
 	return cmd
 }
 
+/**
+Spinner
+*/
+func pullSpinner(tag string) {
+	s := spin.New()
+	for {
+		if isSpinning {
+			fmt.Printf("\r\033[36m%s\033[m Pulling %s %s", s.Next(), "image", util.Bold(tag))
+			time.Sleep(100 * time.Millisecond)
+		}
+	}
+}
+
 func runPull(cellImage string) error {
-	url := constants.REGISTRY_URL + "/" + constants.REGISTRY_ORGANIZATION + "/" + cellImage + "/2.0.0-m1"
+
 	if cellImage == "" {
 		return fmt.Errorf("no cell image specified")
 	}
 
-	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
-	if err != nil {
-		fmt.Println("Error in getting current directory location: " + err.Error())
-		os.Exit(1)
-	}
-	response, downloadError := util.DownloadFile(dir+"/"+cellImage, url)
+	registryHost := constants.CENTRAL_REGISTRY_HOST
+	organization := ""
+	imageName := ""
+	imageVersion := ""
 
-	if downloadError != nil {
-		fmt.Printf("\x1b[31;1m Error occurred while pulling the cell image: \x1b[0m %v \n", err)
-		os.Exit(1)
-	}
-
-	if response.StatusCode == 200 {
-		fmt.Printf("\r\033[32m Successfully pulled cell image \033[m %s \n", util.Bold(cellImage))
-	}
-	if response.StatusCode == 404 {
-		fmt.Printf("\x1b[31;1m Error occurred while running cell image:\x1b[0m %v not found in registry\n", cellImage)
-	}
-
-	err = util.Unzip(filepath.Join(dir, cellImage), dir)
-	if err != nil {
-		panic(err)
-	}
-
-	viper.SetConfigName("Cellery") // name of config file (without extension)
-	viper.SetConfigType("toml")
-	viper.AddConfigPath(".")        // optionally look for config in the working directory
-	confErr := viper.ReadInConfig() // Find and read the config file
-
-	if confErr != nil { // Handle errors reading the config file
-		fmt.Printf("\x1b[31;1m\nError while readng toml file: %s \x1b[0m\n", confErr)
-		os.Exit(1)
+	strArr := strings.Split(cellImage, "/")
+	if len(strArr) == 3 {
+		registryHost = strArr[0]
+		organization = strArr[1]
+		imageTag := strings.Split(strArr[2], ":")
+		if len(imageTag) != 2 {
+			util.ExitWithImageFormatError()
+		}
+		imageName = imageTag[0]
+		imageVersion = imageTag[1]
+	} else if len(strArr) == 2 {
+		organization = strArr[0]
+		imageTag := strings.Split(strArr[1], ":")
+		if len(imageTag) != 2 {
+			util.ExitWithImageFormatError()
+		}
+		imageName = imageTag[0]
+		imageVersion = imageTag[1]
+	} else {
+		util.ExitWithImageFormatError()
 	}
 
-	organization := viper.GetString("project.organization")
-	projectName := strings.Split(cellImage, ".")[0]
-	projectVersion := viper.GetString("project.version")
+	go pullSpinner(cellImage)
 
-	repoLocation := filepath.Join(util.UserHomeDir(), ".cellery", "repo", organization, projectName, projectVersion)
+	var url = "http://" + registryHost + constants.REGISTRY_BASE_PATH + "/images/" + organization + "/" +
+		imageName + "/" + imageVersion
+
+	repoLocation := filepath.Join(util.UserHomeDir(), ".cellery", "repos", registryHost, organization, imageName,
+		imageVersion)
+
 	repoCreateErr := util.CreateDir(repoLocation)
 	if repoCreateErr != nil {
 		fmt.Println("Error while creating image location: " + repoCreateErr.Error())
 		os.Exit(1)
 	}
 
-	zipSrc := filepath.Join(dir, cellImage)
-	zipDst := filepath.Join(repoLocation, cellImage)
-	zipCopyError := util.CopyFile(zipSrc, zipDst)
-	if zipCopyError != nil {
-		fmt.Println("Error while saving image: " + zipCopyError.Error())
+	zipLocation := filepath.Join(repoLocation, imageName+constants.CELL_IMAGE_EXT)
+	response, downloadError := util.DownloadFile(zipLocation, url)
+
+	if downloadError != nil {
+		fmt.Printf("\x1b[31;1m Error occurred while pulling the cell image: \x1b[0m %v \n", downloadError)
 		os.Exit(1)
 	}
 
-	_ = os.Remove(zipSrc)
+	if response.StatusCode == 200 {
+		fmt.Println()
+		fmt.Printf(util.GreenBold("\U00002714")+" Successfully pulled cell image: %s\n", util.Bold(cellImage))
+		fmt.Println()
+		fmt.Println(util.Bold("Whats next ?"))
+		fmt.Println("======================")
+		fmt.Println("Execute the following command to run the image: ")
+		fmt.Println("  $ cellery run " + cellImage)
+	}
+	if response.StatusCode == 404 {
+		fmt.Println()
+		fmt.Printf("\x1b[31;1mError occurred while pulling cell image:\x1b[0m %v. "+
+			"Repository does not exist or may require authorization\n", cellImage)
+		os.Exit(1)
+	}
 	return nil
 }

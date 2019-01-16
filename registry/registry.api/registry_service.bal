@@ -23,13 +23,13 @@ import ballerina/mime;
 @final boolean initialized = initServer();
 
 endpoint http:Listener apiEndpoint {
-    port: API_SERVICE_PORT,
-    secureSocket: {
-        keyStore: {
-            path: KEYSTORE_FILE,
-            password: KEYSTORE_PASSWORD
-        }
-    }
+    port: API_SERVICE_PORT
+    //secureSocket: {
+    //    keyStore: {
+    //        path: KEYSTORE_FILE,
+    //        password: KEYSTORE_PASSWORD
+    //    }
+    //}
 };
 
 @http:ServiceConfig {

@@ -22,7 +22,6 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/tj/go-spin"
@@ -30,8 +29,8 @@ import (
 	"github.com/wso2/cellery/cli/util"
 	"os"
 	"os/exec"
-	"os/user"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -39,13 +38,6 @@ var isSpinning = true
 var isFirstPrint = true
 var tag string
 var fileName string
-
-var cyan = color.New(color.FgCyan)
-var cyanBold = cyan.Add(color.Bold).SprintFunc()
-var bold = color.New(color.Bold).SprintFunc()
-var faint = color.New(color.Faint).SprintFunc()
-var green = color.New(color.FgGreen)
-var greenBold = green.Add(color.Bold).SprintFunc()
 
 func newBuildCommand() *cobra.Command {
 	cmd := &cobra.Command{
@@ -73,11 +65,11 @@ func newBuildCommand() *cobra.Command {
 /**
 Spinner
 */
-func spinner(tag string) {
+func buildSpinner(tag string) {
 	s := spin.New()
 	for {
 		if isSpinning {
-			fmt.Printf("\r\033[36m%s\033[m Building %s %s", s.Next(), "image", bold(tag))
+			fmt.Printf("\r\033[36m%s\033[m Building %s %s", s.Next(), "image", util.Bold(tag))
 			time.Sleep(100 * time.Millisecond)
 		}
 	}
@@ -87,6 +79,7 @@ func runBuild(tag string, fileName string) error {
 	if fileName == "" {
 		return fmt.Errorf("no file name specified")
 	}
+
 	var extension = filepath.Ext(fileName)
 	var fileNameSuffix = fileName[0 : len(fileName)-len(extension)]
 
@@ -100,13 +93,40 @@ func runBuild(tag string, fileName string) error {
 		os.Exit(1)
 	}
 
+	registryHost := constants.CENTRAL_REGISTRY_HOST
 	organization := viper.GetString("project.organization")
-	projectVersion := viper.GetString("project.version")
+	imageName := fileNameSuffix
+	imageVersion := viper.GetString("project.version")
 
 	if tag == "" {
-		tag = fileNameSuffix + ":" + projectVersion
+		tag = organization + "/" + fileNameSuffix + ":" + imageVersion
+	} else {
+		strArr := strings.Split(tag, "/")
+		if len(strArr) == 3 {
+			registryHost = strArr[0]
+			organization = strArr[1]
+			imageTag := strings.Split(strArr[2], ":")
+			if len(imageTag) != 2 {
+				util.ExitWithImageFormatError()
+			}
+			imageName = imageTag[0]
+			imageVersion = imageTag[1]
+		} else if len(strArr) == 2 {
+			organization = strArr[0]
+			imageTag := strings.Split(strArr[1], ":")
+			if len(imageTag) != 2 {
+				util.ExitWithImageFormatError()
+			}
+			imageName = imageTag[0]
+			imageVersion = imageTag[1]
+		} else {
+			util.ExitWithImageFormatError()
+		}
 	}
-	go spinner(tag)
+
+	repoLocation := filepath.Join(util.UserHomeDir(), ".cellery", "repos", registryHost, organization, imageName,
+		imageVersion)
+	go buildSpinner(tag)
 
 	//first clean target directory if exists
 	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
@@ -154,8 +174,8 @@ func runBuild(tag string, fileName string) error {
 		os.Exit(1)
 	}
 	folders := []string{"artifacts"}
-	files := []string{constants.CONFIG_FILE}
-	output := fileNameSuffix + ".zip"
+	files := []string{fileName, constants.CONFIG_FILE}
+	output := imageName + ".zip"
 	err = util.RecursiveZip(files, folders, output)
 	if err != nil {
 		fmt.Printf("\x1b[31;1mCell build finished with error: \x1b[0m %v \n", err)
@@ -164,7 +184,6 @@ func runBuild(tag string, fileName string) error {
 
 	_ = os.RemoveAll(filepath.Join(dir, "artifacts"))
 
-	repoLocation := filepath.Join(util.UserHomeDir(), ".cellery", "repo", organization, fileNameSuffix, projectVersion)
 	repoCreateErr := util.CreateDir(repoLocation)
 	if repoCreateErr != nil {
 		fmt.Println("Error while creating image location: " + repoCreateErr.Error())
@@ -181,18 +200,9 @@ func runBuild(tag string, fileName string) error {
 
 	_ = os.Remove(zipSrc)
 
-	userVar, err := user.Current()
-	if err != nil {
-		panic(err)
-	}
-
-	if organization != userVar.Username {
-		tag = organization + "/" + tag
-	}
-
-	fmt.Printf("Successfully built cell image: %s\n", bold(tag))
+	fmt.Printf(util.GreenBold("\U00002714")+" Successfully built cell image: %s\n", util.Bold(tag))
 	fmt.Println()
-	fmt.Println(bold("Whats next ?"))
+	fmt.Println(util.Bold("Whats next ?"))
 	fmt.Println("======================")
 	fmt.Println("Execute the following command to run the project: ")
 	fmt.Println("  $ cellery run " + tag)

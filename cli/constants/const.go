@@ -20,9 +20,15 @@ package constants
 
 const GROUP_NAME = "vick.wso2.com"
 const BASE_API_URL = "http://localhost:8080"
-const REGISTRY_URL = "https://localhost:9090/registry/0.0.1/images"
-const EMPTY_STRING  = ""
-const REGISTRY_ORGANIZATION  = "wso2"
+
+const CELL_IMAGE_EXT = ".zip"
+
+// Registry
+const CENTRAL_REGISTRY_HOST = "registry.cellery.io"
+const REGISTRY_BASE_PATH = "/registry/0.0.1"
+
+const EMPTY_STRING = ""
+const REGISTRY_ORGANIZATION = "wso2"
 const CONFIG_FILE = "Cellery.toml"
 
 const HTTP_METHOD_GET = "GET"
@@ -30,4 +36,3 @@ const HTTP_METHOD_POST = "POST"
 const HTTP_METHOD_PATCH = "PATCH"
 const HTTP_METHOD_PUT = "PUT"
 const HTTP_METHOD_DELETE = "DELETE"
-

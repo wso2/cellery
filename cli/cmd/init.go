@@ -24,6 +24,7 @@ import (
 	"github.com/fatih/color"
 	i "github.com/oxequa/interact"
 	"github.com/spf13/cobra"
+	"github.com/wso2/cellery/cli/util"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -46,19 +47,13 @@ func newInitCommand() *cobra.Command {
 }
 
 func runInit() error {
-	cyan := color.New(color.FgCyan)
-	cyanBold := cyan.Add(color.Bold).SprintFunc()
-	bold := color.New(color.Bold).SprintFunc()
-	faint := color.New(color.Faint).SprintFunc()
-	green := color.New(color.FgGreen)
-	greenBold := green.Add(color.Bold).SprintFunc()
 
 	userVar, err := user.Current()
 	if err != nil {
 		panic(err)
 	}
 
-	prefix := cyanBold("?")
+	prefix := util.CyanBold("?")
 	orgName := ""
 	projectName := ""
 	projectVersion := ""
@@ -72,12 +67,12 @@ func runInit() error {
 		Questions: []*i.Question{
 			{
 				Before: func(c i.Context) error {
-					c.SetPrfx(nil, cyanBold("?"))
-					c.SetDef(userVar.Username, faint("["+userVar.Username+"]"))
+					c.SetPrfx(nil, util.CyanBold("?"))
+					c.SetDef(userVar.Username, util.Faint("["+userVar.Username+"]"))
 					return nil
 				},
 				Quest: i.Quest{
-					Msg: bold("Organization name: "),
+					Msg: util.Bold("Organization name: "),
 				},
 				Action: func(c i.Context) interface{} {
 					orgName, _ = c.Ans().String()
@@ -86,12 +81,12 @@ func runInit() error {
 			},
 			{
 				Before: func(c i.Context) error {
-					c.SetPrfx(nil, cyanBold("?"))
-					c.SetDef("my-project", faint("[my-project]"))
+					c.SetPrfx(nil, util.CyanBold("?"))
+					c.SetDef("my-project", util.Faint("[my-project]"))
 					return nil
 				},
 				Quest: i.Quest{
-					Msg: bold("Project name: "),
+					Msg: util.Bold("Project name: "),
 				},
 				Action: func(c i.Context) interface{} {
 					projectName, _ = c.Ans().String()
@@ -100,12 +95,12 @@ func runInit() error {
 			},
 			{
 				Before: func(c i.Context) error {
-					c.SetPrfx(nil, cyanBold("?"))
-					c.SetDef("1.0.0", faint("[1.0.0]"))
+					c.SetPrfx(nil, util.CyanBold("?"))
+					c.SetDef("1.0.0", util.Faint("[1.0.0]"))
 					return nil
 				},
 				Quest: i.Quest{
-					Msg: bold("Project version: "),
+					Msg: util.Bold("Project version: "),
 				},
 				Action: func(c i.Context) interface{} {
 					projectVersion, _ = c.Ans().String()
@@ -189,9 +184,9 @@ func runInit() error {
 	tomlW.WriteString(fmt.Sprintf("%s", tomlTemplate))
 	tomlW.Flush()
 
-	fmt.Println(greenBold("\n\U00002713") + " Initialized project in directory: " + faint(projectPath))
+	fmt.Println(util.GreenBold("\n\U00002714") + " Initialized project in directory: " + util.Faint(projectPath))
 	fmt.Println()
-	fmt.Println(bold("Whats next ?"))
+	fmt.Println(util.Bold("Whats next ?"))
 	fmt.Println("======================")
 	fmt.Println("To build the project, Go to the project directory and execute the following command: ")
 	fmt.Println("  $ cellery build " + projectName + ".bal")

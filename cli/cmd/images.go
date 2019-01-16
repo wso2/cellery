@@ -22,7 +22,11 @@ import (
 	"fmt"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
+	"github.com/wso2/cellery/cli/util"
+	"log"
 	"os"
+	"path/filepath"
+	"strconv"
 	"strings"
 )
 
@@ -48,13 +52,10 @@ func newImageCommand() *cobra.Command {
 }
 
 func runImage() error {
-	data := [][]string{
-		{"abc/hr_app_cell", "v1.0.0", "a70ad572a50f", "128MB"},
-		{"xyz/Hello_cell", "v1.0.0", "6efa497099d9", "150MB"},
-	}
+	data := getImagesArray()
 
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"CELL", "VERSION", "CELL-IMAGE-ID", "SIZE"})
+	table.SetHeader([]string{"CELL", "VERSION", "SIZE"})
 	table.SetBorders(tablewriter.Border{Left: false, Top: false, Right: false, Bottom: false})
 	table.SetAlignment(3)
 	table.SetRowSeparator("-")
@@ -63,12 +64,10 @@ func runImage() error {
 	table.SetHeaderColor(
 		tablewriter.Colors{tablewriter.Bold},
 		tablewriter.Colors{tablewriter.Bold},
-		tablewriter.Colors{tablewriter.Bold},
 		tablewriter.Colors{tablewriter.Bold})
 	table.SetColumnColor(
 		tablewriter.Colors{},
 		tablewriter.Colors{},
-		tablewriter.Colors{tablewriter.FgHiBlueColor},
 		tablewriter.Colors{})
 
 	table.AppendBulk(data)
@@ -160,4 +159,37 @@ func componentArrayToStringArray(components []Component) [][]string {
 
 func intArrayToString(intArray []int) string {
 	return strings.Trim(strings.Replace(fmt.Sprint(intArray), " ", ", ", -1), "[]")
+}
+
+func getImagesArray() [][]string {
+	images := [][]string{}
+	organizations, err := util.GetSubDirectoryNames(filepath.Join(util.UserHomeDir(), ".cellery", "repos" ,"registry.cellery.io"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, organization := range organizations {
+		projects, err := util.GetSubDirectoryNames(filepath.Join(util.UserHomeDir(), ".cellery", "repos" ,"registry.cellery.io", organization))
+		if err != nil {
+			log.Fatal(err)
+		}
+		for _, project := range projects {
+			versions, err := util.GetSubDirectoryNames(filepath.Join(util.UserHomeDir(), ".cellery", "repos" ,"registry.cellery.io", organization, project))
+			if err != nil {
+				log.Fatal(err)
+			}
+			for _, version := range versions {
+				size, err := util.GetFileSize(filepath.Join(util.UserHomeDir(), ".cellery", "repos" ,"registry.cellery.io", organization, project, version, project + ".zip"))
+				if err != nil {
+					log.Fatal(err)
+				}
+				if size > 1024 {
+					images = append(images, []string{organization + "/" + project, version, strconv.FormatFloat(float64(size/1024),'f', -1, 64) + "KB"})
+				} else {
+					images = append(images, []string{organization + "/" + project, version, strconv.FormatInt(size, 10) + "B"})
+				}
+
+			}
+		}
+	}
+	return images
 }

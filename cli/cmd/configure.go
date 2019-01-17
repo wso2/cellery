@@ -70,11 +70,7 @@ func runConfigure() error {
 
 	setContext(value)
 	fmt.Printf(util.GreenBold("\n\U00002714") + " Successfully configured Cellery.\n")
-	fmt.Println()
-	fmt.Println(bold("Whats next ?"))
-	fmt.Println("======================")
-	fmt.Println("To create your first project, execute the command: ")
-	fmt.Println("  $ cellery init ")
+	util.PrintWhatsNextMessage("cellery init")
 	return nil
 }
 

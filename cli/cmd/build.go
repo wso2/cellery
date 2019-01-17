@@ -201,10 +201,6 @@ func runBuild(tag string, fileName string) error {
 	_ = os.Remove(zipSrc)
 
 	fmt.Printf(util.GreenBold("\U00002714")+" Successfully built cell image: %s\n", util.Bold(tag))
-	fmt.Println()
-	fmt.Println(util.Bold("Whats next ?"))
-	fmt.Println("======================")
-	fmt.Println("Execute the following command to run the project: ")
-	fmt.Println("  $ cellery run " + tag)
+	util.PrintWhatsNextMessage("cellery run " + tag)
 	return nil
 }

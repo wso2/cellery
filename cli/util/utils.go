@@ -52,6 +52,15 @@ func ExitWithImageFormatError() {
 	os.Exit(1)
 }
 
+func PrintWhatsNextMessage(cmd string) {
+	fmt.Println()
+	fmt.Println(Bold("What's next?"))
+	fmt.Println("--------------------------------------------------------")
+	fmt.Println("Execute the following command to run the image: ")
+	fmt.Println("  $ " + cmd)
+	fmt.Println("--------------------------------------------------------")
+}
+
 //func CopyFile(oldFile string, newFile string) {
 //	input, err := os.Open(oldFile)
 //	if err != nil {

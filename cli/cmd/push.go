@@ -154,11 +154,7 @@ func runPush(cellImage string) error {
 		fmt.Println()
 		fmt.Printf(util.GreenBold("\n\U00002714")+" Successfully pushed cell image: %s\n", util.Bold(cellImage))
 		fmt.Println("Digest : " + util.Bold(response.Image.ImageRevision))
-		fmt.Println()
-		fmt.Println(util.Bold("Whats next ?"))
-		fmt.Println("======================")
-		fmt.Println("Execute the following command to pull the image: ")
-		fmt.Println("  $ cellery pull " + cellImage)
+		util.PrintWhatsNextMessage("cellery pull " + cellImage)
 	} else {
 		fmt.Printf("\x1b[31;1mError occurred while pushing the cell image: \x1b[0m %v \n", err)
 		os.Exit(1)

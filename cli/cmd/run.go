@@ -145,11 +145,7 @@ func run(cellImageTag string) error {
 
 	fmt.Println()
 	fmt.Printf(util.GreenBold("\U00002714")+" Successfully deployed cell image: %s\n", util.Bold(cellImageTag))
-	fmt.Println()
-	fmt.Println(util.Bold("Whats next ?"))
-	fmt.Println("======================")
-	fmt.Println("Execute the following command to view the running cells: ")
-	fmt.Println("  $ cellery ps ")
+	util.PrintWhatsNextMessage("cellery ps")
 
 	return nil
 }

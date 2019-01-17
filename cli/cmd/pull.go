@@ -124,13 +124,9 @@ func runPull(cellImage string, silent bool) error {
 
 	if response.StatusCode == 200 {
 		fmt.Println()
-		fmt.Printf(util.GreenBold("\U00002714")+" Successfully pulled cell image: %s\n", util.Bold(cellImage))
-		fmt.Println()
+		fmt.Printf(util.GreenBold("\n\U00002714")+" Successfully pulled cell image: %s\n", util.Bold(cellImage))
 		if !silent {
-			fmt.Println(util.Bold("Whats next ?"))
-			fmt.Println("======================")
-			fmt.Println("Execute the following command to run the image: ")
-			fmt.Println("  $ cellery run " + cellImage)
+			util.PrintWhatsNextMessage("cellery run " + cellImage)
 		}
 	}
 	if response.StatusCode == 404 {

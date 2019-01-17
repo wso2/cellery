@@ -180,10 +180,6 @@ func runInit() error {
 	tomlW.Flush()
 
 	fmt.Println(util.GreenBold("\n\U00002714") + " Initialized project in directory: " + util.Faint(projectPath))
-	fmt.Println()
-	fmt.Println(util.Bold("Whats next ?"))
-	fmt.Println("======================")
-	fmt.Println("To build the project, Go to the project directory and execute the following command: ")
-	fmt.Println("  $ cellery build " + projectName + ".bal")
+	util.PrintWhatsNextMessage("cellery build " + projectName + ".bal")
 	return nil
 }

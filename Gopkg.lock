@@ -26,14 +26,6 @@
   version = "v1.4.7"
 
 [[projects]]
-  branch = "master"
-  digest = "1:cde3502ff38bf880c3a783acc5b48754aa509c651c4902c68726d2769883e9de"
-  name = "github.com/gosuri/uilive"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "ac356e6e42cd31fcef8e6aec13ae9ed6fe87713e"
-
-[[projects]]
   digest = "1:c0d19ab64b32ce9fe5cf4ddceba78d5bc9807f0016db6b1183599da3dcc24d10"
   name = "github.com/hashicorp/hcl"
   packages = [
@@ -250,7 +242,6 @@
   analyzer-version = 1
   input-imports = [
     "github.com/fatih/color",
-    "github.com/gosuri/uilive",
     "github.com/manifoldco/promptui",
     "github.com/olekukonko/tablewriter",
     "github.com/oxequa/interact",

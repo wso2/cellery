@@ -7,7 +7,8 @@ Cellery native function implementation
 1. Download and install JDK 8 or later
 2. Run the Maven command ``mvn clean install`` from within the ``ballerina-natives`` directory.
 3. Copy `./ballerina-natives/target/cellery-<version>.jar` file to `$BALLERINA_HOME/bre/lib/` directory.
-4. Copy `./ballerina-natives/target/generated-balo/repo/celleryio` directory to `$BALLERINA_HOME/lib/repo/` directory.
+4. Copy `./ballerina-natives/target/generated-balo/repo/celleryio` directory to `$BALLERINA_HOME/lib/repo/` directory 
+and `$USER_HOME/.ballerina/repo/` directory.
 
 ## How to run Sample
 

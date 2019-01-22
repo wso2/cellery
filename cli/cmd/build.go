@@ -41,11 +41,12 @@ var fileName string
 
 func newBuildCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "build [OPTIONS]",
+		Use:   "build CELL_FILE_NAME",
 		Short: "Build an immutable cell image with required dependencies",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) == 0 {
-				cmd.Help()
+				fmt.Printf("'cellery build' requires exactly 1 argument.\n" +
+					"See 'cellery build --help' for more infomation.\n")
 				return nil
 			}
 			fileName = args[0]
@@ -56,7 +57,7 @@ func newBuildCommand() *cobra.Command {
 			}
 			return nil
 		},
-		Example: "  cellery build my-project.bal -t myproject:1.0.0",
+		Example: "  cellery build my-project.bal\n  cellery build my-project.bal -t myproject:1.0.0",
 	}
 	cmd.Flags().StringVarP(&tag, "tag", "t", "", "Name and optionally a tag in the 'name:tag' format")
 	return cmd
@@ -76,8 +77,11 @@ func buildSpinner(tag string) {
 }
 
 func runBuild(tag string, fileName string) error {
-	if fileName == "" {
-		return fmt.Errorf("no file name specified")
+
+	fileExist, err := util.FileExists(fileName)
+	if !fileExist {
+		fmt.Printf("Please check the filename. File '%s' does not exist.\n", fileName)
+		os.Exit(1)
 	}
 
 	var extension = filepath.Ext(fileName)
@@ -89,7 +93,7 @@ func runBuild(tag string, fileName string) error {
 	confErr := viper.ReadInConfig() // Find and read the config file
 
 	if confErr != nil { // Handle errors reading the config file
-		fmt.Printf("\x1b[31;1m\nError while readng toml file: %s \x1b[0m\n", confErr)
+		fmt.Printf("Error while readng toml file: %s\n", confErr)
 		os.Exit(1)
 	}
 

@@ -15,6 +15,14 @@
 // under the License.
 import ballerina/log;
 
+
+public const string TEAM = "TEAM";
+public const string OWNER = "OWNER";
+public const string MAINTAINER = "MAINTAINER";
+
+# Pre-defined labels for cellery components.
+public type Label "TEAM"|"OWNER"|"MAINTAINER";
+
 public type DockerSource record{
     string Dockerfile;
     string tag;
@@ -81,7 +89,7 @@ public type Component record{
     map<string> env?;
     map<TCPIngress|HTTPIngress> ingresses;
     Egress[] egresses?;
-    boolean isStub = false;
+    map<string> labels?;
     map<Env|Secret> parameters?;
     !...
 };

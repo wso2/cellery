@@ -163,6 +163,10 @@ public class CelleryBuild extends BlockingNativeCallableUnit {
                             //TODO:Handle secrets
                         });
                         break;
+                    case "labels":
+                        ((BMap<?, ?>) value).getMap().forEach((labelKey, labelValue) ->
+                                component.addLabel(labelKey.toString(), labelValue.toString()));
+                        break;
 
                     default:
                         break;
@@ -321,14 +325,7 @@ public class CelleryBuild extends BlockingNativeCallableUnit {
                             targetComponent.getService()
                             + "-service";
                 } else {
-                    //Intra cell mapping
-//                    if (CellCache.getInstance().getCellNameToComponentMap().containsKey(egress.getCellName())) {
-                    // Generate service name => cellName--gateway-service
                     serviceName = getValidName(egress.getCellName()) + "--gateway-service";
-//                    } else {
-//                        throw new BallerinaException("Invalid cell reference " + egress.getCellName() + " in egress
-// .");
-//                    }
                 }
                 component.addEnv(egress.getEnvVar(), serviceName);
 
@@ -351,7 +348,10 @@ public class CelleryBuild extends BlockingNativeCallableUnit {
                     .withEnv(envVarList)
                     .build());
             ServiceTemplate serviceTemplate = new ServiceTemplate();
-            serviceTemplate.setMetadata(new ObjectMetaBuilder().withName(component.getService()).build());
+            serviceTemplate.setMetadata(new ObjectMetaBuilder()
+                    .withName(component.getService())
+                    .withLabels(component.getLabels())
+                    .build());
             serviceTemplate.setSpec(templateSpec);
             serviceTemplateList.add(serviceTemplate);
         }

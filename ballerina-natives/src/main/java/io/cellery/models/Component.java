@@ -17,6 +17,7 @@ public class Component {
     String name;
     int replicas;
     Map<String, String> envVars;
+    Map<String, String> labels;
     List<API> apis;
     Set<Egress> egresses;
     String source;
@@ -26,6 +27,7 @@ public class Component {
 
     public Component() {
         envVars = new HashMap<>();
+        labels = new HashMap<>();
         apis = new ArrayList<>();
         egresses = new HashSet<>();
         containerPortToServicePortMap = new HashMap<>();
@@ -47,5 +49,9 @@ public class Component {
 
     public void addEnv(String key, String value) {
         this.envVars.put(key, value);
+    }
+
+    public void addLabel(String key, String value) {
+        this.labels.put(key, value);
     }
 }

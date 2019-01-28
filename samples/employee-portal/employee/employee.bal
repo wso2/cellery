@@ -24,6 +24,9 @@ cellery:Component employeeComponent = {
         SALARY: new cellery:Env(),
         PORT: new cellery:Env(default = 8080),
         BASE_PATH: new cellery:Env()
+    },
+    labels: {
+        cellery:TEAM:"HR"
     }
 };
 
@@ -41,6 +44,10 @@ cellery:Component salaryComponent = {
                     method: "GET"
                 }
             ])
+    },
+    labels: {
+        cellery:TEAM:"Finance",
+        cellery:OWNER:"Alice"
     }
 };
 

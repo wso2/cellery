@@ -17,5 +17,12 @@
 build-lang:
 	cd ./components/lang; \
 	mvn clean install;
+
 build-cli:
 	go build -o cellery ./components/cli/cmd/
+
+build-registry:
+	cd ./docker; \
+	bash build.sh;
+
+build-all: build-lang build-cli build-registry

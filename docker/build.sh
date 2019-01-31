@@ -51,6 +51,15 @@ function showErrorAndExit() {
     exit $2
 }
 
+function copyArtifacts() {
+    cp -a ${ARTIFACT_DIR}registry.api ${RESOURCE_DIR}
+    cp -a ${ARTIFACT_DIR}registry-natives ${RESOURCE_DIR}
+    cp ${ARTIFACT_DIR}registry-natives/target/cellery-registry-${BUILD_VERSION}.jar ${RESOURCE_DIR}
+    cp -a ${ARTIFACT_DIR}registry-natives/target/generated-balo/repo ${RESOURCE_DIR}
+    cp -a ${ARTIFACT_DIR}resources ${RESOURCE_DIR}
+    cp ${ARTIFACT_DIR}Ballerina.toml ${RESOURCE_DIR}
+}
+
 while getopts :v:h FLAG; do
   case ${FLAG} in
     v)
@@ -66,24 +75,27 @@ while getopts :v:h FLAG; do
 done
 
 if [[ -z "$BUILD_VERSION" ]]; then
-    echo "Build version is not specified. Default version (0.0.1) will be used."
-    BUILD_VERSION="0.0.1"
+    BUILD_VERSION="0.1.0-SNAPSHOT"
+    echo "Build version is not specified. Default version (${BUILD_VERSION}) will be used."
 fi
 
+ARTIFACT_DIR="../components/registry/"
+RESOURCE_DIR="./resources/"
 
 echo "Building Registry Ballerina Native module ..."
-pushd registry-natives >/dev/null 2>&1
+pushd ${ARTIFACT_DIR}registry-natives >/dev/null 2>&1
 mvn clean install
 popd >/dev/null 2>&1
- STATUS=$?
- if [[ ${STATUS} != 0 ]]; then
+STATUS=$?
+if [[ ${STATUS} != 0 ]]; then
     showErrorAndExit "Registry Ballerina Native module build failed." ${STATUS}
 fi
 
 echo
+copyArtifacts
 echo "Building Docker images ..."
 docker build -f Dockerfile -t cellery/cellery-registry:${BUILD_VERSION} .
-
+rm -r ${RESOURCE_DIR}/*
 STATUS=$?
 
 if [[ ${STATUS} != 0 ]]; then

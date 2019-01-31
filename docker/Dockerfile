@@ -19,12 +19,12 @@ FROM ballerina/ballerina:0.983.0 as builder
 ARG PROJECT_DIR=/workspace/
 WORKDIR /workspace
 
-COPY registry.api registry.api
-COPY registry-natives registry-natives
-COPY registry-natives/target/cellery-registry-0.0.0.jar /ballerina/runtime/bre/lib
-COPY registry-natives/target/generated-balo/repo /ballerina/runtime/lib/repo
-COPY resources resources
-COPY Ballerina.toml .
+COPY ./resources/registry.api registry.api
+COPY ./resources/registry-natives registry-natives
+COPY ./resources/registry-natives/target/cellery-registry-0.1.0-SNAPSHOT.jar /ballerina/runtime/bre/lib
+COPY ./resources/registry-natives/target/generated-balo/repo /ballerina/runtime/lib/repo
+COPY ./resources/resources resources
+COPY ./resources/Ballerina.toml .
 
 USER root
 RUN chown -R ballerina $PROJECT_DIR
@@ -40,10 +40,10 @@ WORKDIR ${WORK_DIR}
 
 COPY init-container.sh .
 COPY --from=builder /workspace/target/registry.api.balx .
-COPY registry.api/resources/registry.toml .
-COPY resources/security security/
-COPY registry-natives/target/cellery-registry-* /ballerina/runtime/bre/lib/
-COPY registry-natives/target/generated-balo/repo/ /ballerina/runtime/lib/repo/
+COPY ./resources/registry.api/resources/registry.toml .
+COPY ./resources/resources/security security/
+COPY ./resources/registry-natives/target/cellery-registry-* /ballerina/runtime/bre/lib/
+COPY ./resources/registry-natives/target/generated-balo/repo/ /ballerina/runtime/lib/repo/
 
 USER root
 

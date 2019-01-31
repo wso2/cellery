@@ -1,0 +1,10 @@
+#!/bin/sh
+
+if [ "$1" = upgrade ]; then
+	echo "Cellery has been installed previously. If you want to install cellery, please remove existing installed one and try again."
+	echo "To remove cellery run, '$ sudo apt-get remove cellery'"
+    exit 1
+fi
+if  [ "$1" = install ]; then
+    echo "Installing cellery..."
+fi

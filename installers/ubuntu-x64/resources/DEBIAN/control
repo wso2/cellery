@@ -1,0 +1,18 @@
+Package: cellery
+Architecture: amd64
+Version: 0.0.1
+Maintainer: WSO2 Inc. <admin@wso2.com>
+Installed-Size: __BINARY_SIZE__
+Description: Design, develop, build, run, manage your cells anywhere
+ Cellery is an architectural description language, runtime (tooling and extensions for popular cloud-native runtimes) that enables agile development teams to easily create a composite application (cell) in a technology neutral way. More info please refer Cellery Project.
+ .
+ Instructions (After Installation):
+ .
+ To run cellery cli commands, open new terminal and run:
+ .
+    $ cellery
+ .
+ To run cellery registry locally, open new terminal and run:
+ .
+    $ docker run -d -p 9090:9090 --name cellery-registry cellery/cellery-registry:0.0.1
+ .

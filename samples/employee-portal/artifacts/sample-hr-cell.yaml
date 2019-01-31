@@ -1,0 +1,36 @@
+apiVersion: mesh.cellery.io/v1alpha1
+kind: Cell
+metadata:
+  name: hr
+spec:
+  gatewayTemplate:
+    spec:
+      apis:
+      - context: info
+        definitions:
+        - path: /
+          method: GET
+        backend: hr
+        global: true
+  servicesTemplates:
+  - metadata:
+      name: hr
+    spec:
+      replicas: 1
+      container:
+        image: docker.io/wso2vick/sampleapp-hr
+        ports:
+        - containerPort: 8080
+        env:
+        - name: employeegw_url
+          value: employee--gateway-service
+        - name: stockgw_url
+          value: stock-options--gateway-service
+      servicePort: 80
+  - metadata:
+      name: debug
+    spec:
+      replicas: 1
+      container:
+        image: docker.io/mirage20/k8s-debug-tools
+      servicePort: 80

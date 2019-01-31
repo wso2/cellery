@@ -1,0 +1,31 @@
+apiVersion: mesh.cellery.io/v1alpha1
+kind: Cell
+metadata:
+  name: stock-options
+spec:
+  gatewayTemplate:
+    spec:
+      apis:
+      - context: stock
+        definitions:
+        - path: /
+          method: GET
+        backend: stock
+        global: false
+  servicesTemplates:
+  - metadata:
+      name: stock
+    spec:
+      replicas: 1
+      container:
+        image: docker.io/wso2vick/sampleapp-stock
+        ports:
+        - containerPort: 8080
+      servicePort: 80
+  - metadata:
+      name: debug
+    spec:
+      replicas: 1
+      container:
+        image: docker.io/mirage20/k8s-debug-tools
+      servicePort: 80

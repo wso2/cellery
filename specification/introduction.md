@@ -53,8 +53,7 @@ you to define Cells.
 - The Cellery compiler:  This validates and compiles Cellery into deployable artifacts. It also generates graphical 
 views of each cell definition. It works with…
 - The Cellery runtime extensions for Kubernetes: A set of extensions for K8s including CRDs and Admission Controllers, 
-observability plugins etc. This is basically a cut-down version of VICK, with extension points. The runtime extensions 
-also 
+observability plugins etc. 
 - Extensions for observability: ….
 - A repository for cell definitions (later): e.g. Cellery Central to allow push/pull of cell definitions. 
 

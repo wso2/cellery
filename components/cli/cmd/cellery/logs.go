@@ -22,7 +22,7 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/spf13/cobra"
-	"github.com/wso2/cellery/components/cli/pkg/constants"
+	"github.com/celleryio/sdk/components/cli/pkg/constants"
 	"os"
 	"os/exec"
 )

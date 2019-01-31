@@ -14,15 +14,19 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
+.PHONY: build-lang
 build-lang:
 	cd ./components/lang; \
 	mvn clean install;
 
+.PHONY: build-cli
 build-cli:
-	go build -o cellery ./components/cli/cmd/
+	go build -o cellery ./components/cli/cmd/cellery
 
+.PHONY: build-registry
 build-registry:
 	cd ./docker; \
 	bash build.sh;
 
+.PHONY: build-all
 build-all: build-lang build-cli build-registry

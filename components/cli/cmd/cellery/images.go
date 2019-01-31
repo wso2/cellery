@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
-	"github.com/wso2/cellery/components/cli/pkg/util"
+	"github.com/celleryio/sdk/components/cli/pkg/util"
 	"log"
 	"os"
 	"path/filepath"

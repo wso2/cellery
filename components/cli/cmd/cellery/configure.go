@@ -25,7 +25,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
-	"github.com/wso2/cellery/components/cli/pkg/util"
+	"github.com/celleryio/sdk/components/cli/pkg/util"
 	"os"
 	"os/exec"
 )

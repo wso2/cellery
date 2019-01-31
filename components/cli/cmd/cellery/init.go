@@ -24,7 +24,7 @@ import (
 	"github.com/fatih/color"
 	i "github.com/oxequa/interact"
 	"github.com/spf13/cobra"
-	"github.com/wso2/cellery/components/cli/pkg/util"
+	"github.com/celleryio/sdk/components/cli/pkg/util"
 	"os"
 	"os/user"
 	"path/filepath"

@@ -59,7 +59,7 @@ func runConfigure() error {
 	}
 
 	cellPrompt := promptui.Select{
-		Label:     util.YellowBold("?") + " Select a VICK Installed Kubernetes Cluster",
+		Label:     util.YellowBold("?") + " Select a Cellery Installed Kubernetes Cluster",
 		Items:     getContexts(),
 		Templates: cellTemplate,
 	}

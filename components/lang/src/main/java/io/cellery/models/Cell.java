@@ -35,7 +35,7 @@ public class Cell {
 
     public Cell(ObjectMeta metadata, CellSpec spec) {
         kind = "Cell";
-        apiVersion = "vick.wso2.com/v1alpha1";
+        apiVersion = "mesh.cellery.io/v1alpha1";
         this.metadata = metadata;
         this.spec = spec;
     }

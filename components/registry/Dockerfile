@@ -41,7 +41,7 @@ WORKDIR ${WORK_DIR}
 COPY init-container.sh .
 COPY --from=builder /workspace/target/registry.api.balx .
 COPY registry.api/resources/registry.toml .
-COPY resources/security/ security/
+COPY resources/security security/
 COPY registry-natives/target/cellery-registry-* /ballerina/runtime/bre/lib/
 COPY registry-natives/target/generated-balo/repo/ /ballerina/runtime/lib/repo/
 

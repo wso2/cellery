@@ -31,3 +31,4 @@ hs_err_pid*
 
 target
 ballerina-natives/dependency-reduced-pom.xml
+*dependency-reduced-pom.xml

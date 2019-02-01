@@ -5,7 +5,7 @@ import celleryio/cellery;
 cellery:Component stock = {
     name: "stock",
     source: {
-        image: "docker.io/wso2vick/sampleapp-stock"
+        image: "docker.io/celleryio/sampleapp-stock"
     },
     ingresses: {
         stock: new cellery:HTTPIngress(8080, "stock",

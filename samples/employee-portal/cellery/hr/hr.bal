@@ -6,7 +6,7 @@ import celleryio/cellery;
 cellery:Component hr = {
     name: "hr",
     source: {
-        image: "docker.io/wso2vick/sampleapp-hr"
+        image: "docker.io/celleryio/sampleapp-hr"
     },
     env: { employeegw_url: "", stockgw_url: "" },
     ingresses: {

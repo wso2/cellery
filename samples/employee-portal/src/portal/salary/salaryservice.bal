@@ -6,7 +6,7 @@ import ballerina/io;
 map<string> employeeSalaryMap = { "bob": "$1000", "alice": "$1500", "jack": "$2000", "peter": "$2500" };
 
 @docker:Config {
-registry:"wso2vick",
+registry:"celleryio",
 name:"sampleapp-salary",
 tag:"v1.0"
 }

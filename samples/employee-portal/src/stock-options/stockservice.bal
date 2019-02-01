@@ -14,7 +14,7 @@ StockRecord stockRecord4 = {total: 75, vestedAmount: 55};
 map stockOptionMap = { "bob" : stockRecord1 , "alice": stockRecord2, "jack": stockRecord3, "peter": stockRecord4 };
 
 @docker:Config {
-registry:"wso2vick",
+registry:"celleryio",
 name:"sampleapp-stock",
 tag:"v1.0"
 }

@@ -8,7 +8,7 @@ map<string> employeeIdMap = { "bob": "0639", "alice": "0410", "jack": "0231", "p
 map<string> employeeDesignationMap = { "bob": "Software Engineer", "alice": "Senior Software Engineer", "jack": "Tech Lead", "peter": "Senior Tech Lead" };
 
 @docker:Config {
-    registry:"wso2vick",
+    registry:"celleryio",
     name:"sampleapp-employee",
     tag:"v1.0"
 }

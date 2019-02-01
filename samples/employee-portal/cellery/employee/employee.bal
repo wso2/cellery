@@ -6,7 +6,7 @@ import celleryio/cellery;
 cellery:Component employeeComponent = {
     name: "employee",
     source: {
-        image: "docker.io/wso2vick/sampleapp-employee"
+        image: "docker.io/celleryio/sampleapp-employee"
     },
     ingresses: {
         employee: new cellery:HTTPIngress(
@@ -34,7 +34,7 @@ cellery:Component employeeComponent = {
 cellery:Component salaryComponent = {
     name: "salary",
     source: {
-        image: "docker.io/wso2vick/sampleapp-salary"
+        image: "docker.io/celleryio/sampleapp-salary"
     },
     ingresses: {
         SalaryAPI: new cellery:HTTPIngress(8080, "payroll",

@@ -24,7 +24,7 @@ import celleryio/cellery;
 cellery:Component componentA = {
     name: "ComponentA",
     source: {
-        image: "docker.io/wso2vick/component-a:v1"
+        image: "docker.io/celleryio/component-a:v1"
     },
     env: { ENV1: "", ENV2: "" },
     ingresses: [
@@ -45,7 +45,7 @@ cellery:Component componentA = {
 cellery:Component componentB = {
     name: "ComponentB",
     source: {
-        image: "docker.io/wso2vick/component-b:v1"
+        image: "docker.io/celleryio/component-b:v1"
     },
     env: { ENV1: "", ENV2: "" },
     ingresses: [

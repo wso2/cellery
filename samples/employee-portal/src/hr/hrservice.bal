@@ -27,7 +27,7 @@ endpoint http:Client stockOptionsEp {
 }
 
 @docker:Config {
-    registry:"wso2vick",
+    registry:"celleryio",
     name:"sampleapp-hr",
     tag:"v1.0"
 }

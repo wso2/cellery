@@ -86,7 +86,7 @@ A sample component with inline definitions would be as follows;
 cellery:Component componentA = {
     name: "ComponentA",
     source: {
-        image: "docker.io/wso2vick/component-a:v1"
+        image: "docker.io/celleryio/component-a:v1"
     },
     env: { ENV1: "", ENV2: "" },
     ingresses: [

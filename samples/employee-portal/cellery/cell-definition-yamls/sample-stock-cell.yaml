@@ -18,7 +18,7 @@ spec:
     spec:
       replicas: 1
       container:
-        image: docker.io/wso2vick/sampleapp-stock
+        image: docker.io/celleryio/sampleapp-stock
         ports:
         - containerPort: 8080
       servicePort: 80

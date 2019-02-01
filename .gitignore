@@ -30,7 +30,6 @@ hs_err_pid*
 *.DS_Store
 
 # Generated Artifacts
-target
+*target
 *dependency-reduced-pom.xml
-*cellery
 components/build

@@ -36,3 +36,23 @@ const HTTP_METHOD_POST = "POST"
 const HTTP_METHOD_PATCH = "PATCH"
 const HTTP_METHOD_PUT = "PUT"
 const HTTP_METHOD_DELETE = "DELETE"
+
+const CELLERY_SETUP_MANAGE  = "Manage"
+const CELLERY_SETUP_CREATE  = "Create"
+const CELLERY_SETUP_SWITCH  = "Switch"
+
+const CELLERY_CREATE_LOCAL = "Local"
+const CELLERY_CREATE_KUBEADM = "kubeadm"
+const CELLERY_CREATE_GCP = "GCP"
+
+const CELLERY_MANAGE_STOP  = "stop"
+const CELLERY_MANAGE_CLEANUP  = "cleanup"
+
+const CELLERY_VM_URL = "http://localhost:8080/ubuntu/Ubuntu.vdi"
+const AWS_S3_BUCKET  = "cellery-runtime-installation"
+const AWS_S3_ITEM_VM  = "madhuka_harith.tar.gz"
+const AWS_S3_ITEM_CONFIG  = "config"
+const AWS_REGION = "ap-south-1"
+
+const VM_NAME  = "cellery-runtime-local"
+const VM_FILE_NAME  = "Ubuntu.vdi"

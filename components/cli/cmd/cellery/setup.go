@@ -16,23 +16,20 @@
  * under the License.
  */
 
-package constants
+package main
 
-const GROUP_NAME = "mesh.cellery.io"
-const BASE_API_URL = "http://localhost:8080"
+import (
+	"github.com/spf13/cobra"
+	"github.com/celleryio/sdk/components/cli/pkg/commands"
+)
 
-const CELL_IMAGE_EXT = ".zip"
-
-// Registry
-const CENTRAL_REGISTRY_HOST = "registry.cellery.io"
-const REGISTRY_BASE_PATH = "/registry/0.0.1"
-
-const EMPTY_STRING = ""
-const REGISTRY_ORGANIZATION = "wso2"
-const CONFIG_FILE = "Cellery.toml"
-
-const HTTP_METHOD_GET = "GET"
-const HTTP_METHOD_POST = "POST"
-const HTTP_METHOD_PATCH = "PATCH"
-const HTTP_METHOD_PUT = "PUT"
-const HTTP_METHOD_DELETE = "DELETE"
+func newSetupCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "setup",
+		Short: "setup cellery runtime",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return commands.RunSetup()
+		},
+	}
+	return cmd
+}

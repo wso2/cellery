@@ -28,7 +28,7 @@ import (
 
 	"github.com/olekukonko/tablewriter"
 
-	"github.com/celleryio/sdk/components/cli/constants"
+	"github.com/celleryio/sdk/components/cli/pkg/constants"
 	"github.com/celleryio/sdk/components/cli/pkg/util"
 )
 

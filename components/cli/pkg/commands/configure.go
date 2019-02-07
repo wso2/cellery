@@ -19,12 +19,7 @@
 package commands
 
 import (
-	"bufio"
-	"encoding/json"
 	"fmt"
-	"os"
-	"os/exec"
-
 	"github.com/fatih/color"
 	"github.com/manifoldco/promptui"
 
@@ -61,71 +56,5 @@ func RunConfigure() error {
 	setContext(value)
 	fmt.Printf(util.GreenBold("\n\U00002714") + " Successfully configured Cellery.\n")
 	util.PrintWhatsNextMessage("cellery init")
-	return nil
-}
-
-func getContexts() []string {
-	contexts := []string{}
-	cmd := exec.Command("kubectl", "config", "view", "-o", "json")
-	stdoutReader, _ := cmd.StdoutPipe()
-	stdoutScanner := bufio.NewScanner(stdoutReader)
-	output := ""
-	go func() {
-		for stdoutScanner.Scan() {
-			output = output + stdoutScanner.Text()
-		}
-	}()
-	stderrReader, _ := cmd.StderrPipe()
-	stderrScanner := bufio.NewScanner(stderrReader)
-
-	execError := ""
-	go func() {
-		for stderrScanner.Scan() {
-			execError += stderrScanner.Text()
-		}
-	}()
-	err := cmd.Start()
-	if err != nil {
-		fmt.Printf("Error in executing cellery configure: %v \n", err)
-		os.Exit(1)
-	}
-	err = cmd.Wait()
-	if err != nil {
-		fmt.Printf("\x1b[31;1m Error occurred while configuring cellery: \x1b[0m %v \n", execError)
-		os.Exit(1)
-	}
-	jsonOutput := &Config{}
-	errJson := json.Unmarshal([]byte(output), jsonOutput)
-	if errJson != nil {
-		fmt.Println(errJson)
-	}
-
-	for i := 0; i < len(jsonOutput.Contexts); i++ {
-		contexts = append(contexts, jsonOutput.Contexts[i].Name)
-	}
-	return contexts
-}
-
-func setContext(context string) error {
-	cmd := exec.Command("kubectl", "config", "use-context", context)
-	stderrReader, _ := cmd.StderrPipe()
-	stderrScanner := bufio.NewScanner(stderrReader)
-
-	execError := ""
-	go func() {
-		for stderrScanner.Scan() {
-			execError += stderrScanner.Text()
-		}
-	}()
-	err := cmd.Start()
-	if err != nil {
-		fmt.Printf("Error in executing cellery apis: %v \n", err)
-		os.Exit(1)
-	}
-	err = cmd.Wait()
-	if err != nil {
-		fmt.Printf("\x1b[31;1m Error occurred while configuring cellery: \x1b[0m %v \n", execError)
-		os.Exit(1)
-	}
 	return nil
 }

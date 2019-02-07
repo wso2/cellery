@@ -20,14 +20,22 @@ package util
 
 import (
 	"archive/zip"
+	"bufio"
 	"bytes"
 	"crypto/tls"
 	"fmt"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/celleryio/sdk/components/cli/pkg/constants"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
 	"runtime"
@@ -513,4 +521,87 @@ func GetFileSize(path string) (int64, error) {
 	}
 
 	return file.Size(), nil
+}
+
+func RenameFile(oldName, newName string) error {
+	err := os.Rename(oldName, newName)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func ReplaceFile(fileToBeReplaced, fileToReplace string) error {
+	errRename := RenameFile(fileToBeReplaced, fileToBeReplaced + "-old")
+	if errRename != nil {
+		return errRename
+	}
+	errCopy := CopyFile(fileToReplace, fileToBeReplaced)
+	if errCopy != nil {
+		return errCopy
+	}
+	return nil
+}
+
+func ExecuteCommand(cmd *exec.Cmd, errorMessage string) error {
+	stderrReader, _ := cmd.StderrPipe()
+	stderrScanner := bufio.NewScanner(stderrReader)
+
+	go func() {
+		for stderrScanner.Scan() {
+			fmt.Println(stderrScanner.Text())
+		}
+	}()
+	err := cmd.Start()
+	if err != nil {
+		fmt.Printf("cellery : %v: %v \n", errorMessage, err)
+		os.Exit(1)
+	}
+	err = cmd.Wait()
+	if err != nil {
+		fmt.Printf("cellery : %v: %v \n", errorMessage, err)
+		os.Exit(1)
+	}
+	return nil
+}
+
+func DownloadFromS3Bucket(bucket, item, path string) {
+	file, err := os.Create(filepath.Join(path, item))
+	if err != nil {
+		fmt.Printf("Error in downloading from file: %v \n", err)
+		os.Exit(1)
+	}
+
+	defer file.Close()
+
+	sess, _ := session.NewSession(&aws.Config{
+		Region: aws.String(constants.AWS_REGION), Credentials: credentials.AnonymousCredentials},
+	)
+
+	// Create a downloader with the session and custom options
+	downloader := s3manager.NewDownloader(sess, func(d *s3manager.Downloader) {
+		d.PartSize = 64 * 1024 * 1024 // 64MB per part
+		d.Concurrency = 6
+	})
+
+	numBytes, err := downloader.Download(file,
+		&s3.GetObjectInput{
+			Bucket: aws.String(bucket),
+			Key:    aws.String(item),
+		})
+	if err != nil {
+		fmt.Printf("Error in downloading from file: %v \n", err)
+		os.Exit(1)
+	}
+
+	fmt.Println("Download completed", file.Name(), numBytes, "bytes")
+}
+
+func ExtractTarGzFile(extractTo, archive_name string) error {
+	cmd := exec.Command("tar", "-zxvf", archive_name)
+	cmd.Dir = extractTo
+
+	ExecuteCommand(cmd, "Error occured in extracting file :" + archive_name)
+
+	return nil
 }

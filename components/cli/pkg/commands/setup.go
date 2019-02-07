@@ -29,6 +29,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 )
 
 func RunSetup() error {
@@ -173,7 +174,7 @@ func createEnvironment() error {
 
 	cellPrompt := promptui.Select{
 		Label:     util.YellowBold("?") + " Select an environment to be installed",
-		Items:     []string{constants.CELLERY_CREATE_LOCAL, constants.CELLERY_CREATE_KUBEADM, constants.CELLERY_CREATE_GCP},
+		Items:     []string{constants.CELLERY_CREATE_LOCAL, constants.CELLERY_CREATE_KUBEADM, constants.CELLERY_CREATE_GCP, constants.CELLERY_SETUP_BACK},
 		Templates: cellTemplate,
 	}
 	_, value, err := cellPrompt.Run()
@@ -193,12 +194,15 @@ func createEnvironment() error {
 			util.ExtractTarGzFile(vmLocation, filepath.Join(util.UserHomeDir(), ".cellery", "vm", constants.AWS_S3_ITEM_VM))
 			util.DownloadFromS3Bucket(constants.AWS_S3_BUCKET, constants.AWS_S3_ITEM_CONFIG, vmLocation)
 			installVM()
-	}
+		}
 		case constants.CELLERY_CREATE_KUBEADM: {
 			fmt.Println("Installing kubeadm")
 		}
-		default: {
+		case constants.CELLERY_CREATE_GCP: {
 			fmt.Println("Installing GCP")
+		}
+		default: {
+			RunSetup()
 		}
 	}
 
@@ -235,7 +239,7 @@ func manageEnvironment() error {
 
 	cellPrompt := promptui.Select{
 		Label:     util.YellowBold("?") + " Select an environment to be installed",
-		Items:     []string{constants.CELLERY_MANAGE_STOP, constants.CELLERY_MANAGE_CLEANUP},
+		Items:     getManageEnvOptions(),
 		Templates: cellTemplate,
 	}
 	_, value, err := cellPrompt.Run()
@@ -245,11 +249,51 @@ func manageEnvironment() error {
 
 	switch value {
 		case constants.CELLERY_MANAGE_STOP : {
-			util.ExecuteCommand(exec.Command("VBoxManage", "controlvm", constants.VM_NAME, "acpipowerbutton"), "Error stopping VM")
+			util.ExecuteCommand(exec.Command("VBoxManage", "controlvm", constants.VM_NAME, "poweroff"), "Error stopping VM")
+		}
+		case constants.CELLERY_MANAGE_START : {
+			util.ExecuteCommand(exec.Command("VBoxManage", "startvm", constants.VM_NAME, "--type", "headless"), "Error starting VM")
+		}
+		case constants.CELLERY_MANAGE_CLEANUP : {
+			fmt.Println("Cleaning up")
 		}
 		default: {
-			fmt.Println("Cleaning up")
+			RunSetup()
 		}
 	}
 	return nil
+}
+
+func isVmRuning() bool {
+	cmd := exec.Command("vboxmanage", "showvminfo", constants.VM_NAME)
+	stdoutReader, _ := cmd.StdoutPipe()
+	stdoutScanner := bufio.NewScanner(stdoutReader)
+	output := ""
+	go func() {
+		for stdoutScanner.Scan() {
+			output = output + stdoutScanner.Text()
+		}
+	}()
+	err := cmd.Start()
+	if err != nil {
+		fmt.Printf("Error occurred while checking VM status: %v \n", err)
+		os.Exit(1)
+	}
+	err = cmd.Wait()
+	if err != nil {
+		fmt.Printf("\x1b[31;1m Error occurred while checking VM status \x1b[0m %v \n", err)
+		os.Exit(1)
+	}
+
+	if strings.Contains(output, "running (since") {
+		return true
+	}
+	return false
+}
+
+func getManageEnvOptions() []string {
+	if isVmRuning() {
+		return []string{constants.CELLERY_MANAGE_STOP, constants.CELLERY_MANAGE_CLEANUP, constants.CELLERY_SETUP_BACK}
+	}
+	return []string{constants.CELLERY_MANAGE_START, constants.CELLERY_MANAGE_CLEANUP, constants.CELLERY_SETUP_BACK}
 }

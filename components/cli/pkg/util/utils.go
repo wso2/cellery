@@ -25,6 +25,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
@@ -565,9 +566,6 @@ func ExecuteCommand(cmd *exec.Cmd, errorMessage string) error {
 }
 
 func DownloadFromS3Bucket(bucket, item, path string) {
-	os.Setenv("AWS_ACCESS_KEY_ID", "test")
-	os.Setenv("AWS_SECRET_ACCESS_KEY", "test")
-
 	file, err := os.Create(filepath.Join(path, item))
 	if err != nil {
 		fmt.Printf("Error in downloading from file: %v \n", err)
@@ -577,7 +575,7 @@ func DownloadFromS3Bucket(bucket, item, path string) {
 	defer file.Close()
 
 	sess, _ := session.NewSession(&aws.Config{
-		Region: aws.String(constants.AWS_REGION)},
+		Region: aws.String(constants.AWS_REGION), Credentials: credentials.AnonymousCredentials},
 	)
 
 	// Create a downloader with the session and custom options

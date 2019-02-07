@@ -29,7 +29,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-	"github.com/celleryio/sdk/components/cli/pkg/constants"
+	"github.com/cellery-io/sdk/components/cli/pkg/constants"
 	"io"
 	"io/ioutil"
 	"mime/multipart"

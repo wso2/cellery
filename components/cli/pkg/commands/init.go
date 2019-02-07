@@ -28,7 +28,7 @@ import (
 	"github.com/fatih/color"
 	i "github.com/oxequa/interact"
 
-	"github.com/celleryio/sdk/components/cli/pkg/util"
+	"github.com/cellery-io/sdk/components/cli/pkg/util"
 )
 
 func RunInit() error {

@@ -31,8 +31,8 @@ import (
 	"github.com/spf13/viper"
 	"github.com/tj/go-spin"
 
-	"github.com/celleryio/sdk/components/cli/pkg/constants"
-	"github.com/celleryio/sdk/components/cli/pkg/util"
+	"github.com/cellery-io/sdk/components/cli/pkg/constants"
+	"github.com/cellery-io/sdk/components/cli/pkg/util"
 )
 
 var isSpinning = true

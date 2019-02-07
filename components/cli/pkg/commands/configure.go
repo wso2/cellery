@@ -23,7 +23,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/manifoldco/promptui"
 
-	"github.com/celleryio/sdk/components/cli/pkg/util"
+	"github.com/cellery-io/sdk/components/cli/pkg/util"
 )
 
 type Config struct {

@@ -49,7 +49,7 @@ func RunSetup() error {
 	}
 	_, value, err := cellPrompt.Run()
 	if err != nil {
-		return fmt.Errorf("failed to select an option: %v", err)
+		return fmt.Errorf("Failed to select an option: %v", err)
 	}
 
 	switch value {
@@ -89,7 +89,7 @@ func selectEnvironment() error {
 	setContext(value)
 	fmt.Printf(util.GreenBold("\n\U00002714") + " Successfully configured Cellery.\n")
 	fmt.Println()
-	fmt.Println(bold("Whats next ?"))
+	fmt.Println(bold("What's next ?"))
 	fmt.Println("======================")
 	fmt.Println("To create your first project, execute the command: ")
 	fmt.Println("  $ cellery init ")
@@ -179,7 +179,7 @@ func createEnvironment() error {
 	}
 	_, value, err := cellPrompt.Run()
 	if err != nil {
-		return fmt.Errorf("failed to install environment: %v", err)
+		return fmt.Errorf("Failed to install environment: %v", err)
 	}
 
 	switch value {
@@ -208,7 +208,7 @@ func createEnvironment() error {
 
 	fmt.Printf(util.GreenBold("\n\U00002714") + " Successfully installed Cellery runtime.\n")
 	fmt.Println()
-	fmt.Println(bold("Whats next ?"))
+	fmt.Println(bold("What's next ?"))
 	fmt.Println("======================")
 	fmt.Println("To create your first project, execute the command: ")
 	fmt.Println("  $ cellery init ")
@@ -244,7 +244,7 @@ func manageEnvironment() error {
 	}
 	_, value, err := cellPrompt.Run()
 	if err != nil {
-		return fmt.Errorf("failed to install environment: %v", err)
+		return fmt.Errorf("Failed to install environment: %v", err)
 	}
 
 	switch value {

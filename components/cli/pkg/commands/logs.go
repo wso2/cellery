@@ -24,7 +24,7 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/celleryio/sdk/components/cli/pkg/constants"
+	"github.com/cellery-io/sdk/components/cli/pkg/constants"
 )
 
 func RunComponentLogs(cellName, componentName string) error {

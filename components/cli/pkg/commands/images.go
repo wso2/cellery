@@ -28,7 +28,7 @@ import (
 
 	"github.com/olekukonko/tablewriter"
 
-	"github.com/celleryio/sdk/components/cli/pkg/util"
+	"github.com/cellery-io/sdk/components/cli/pkg/util"
 )
 
 type Component struct {

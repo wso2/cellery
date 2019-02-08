@@ -20,7 +20,7 @@ package main
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/celleryio/sdk/components/cli/pkg/commands"
+	"github.com/cellery-io/sdk/components/cli/pkg/commands"
 )
 
 func newSetupCommand() *cobra.Command {

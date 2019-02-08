@@ -33,11 +33,11 @@ var fileName string
 
 func newBuildCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "build CELL_FILE_NAME",
+		Use:   "build CELL_FILE_NAME -t [REPOSITORY]/ORGANIZATION/IMAGE_NAME:VERSION",
 		Short: "Build an immutable cell image with required dependencies",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) == 0 {
-				fmt.Printf("'cellery build' requires exactly 1 argument.\n" +
+				fmt.Printf("'cellery build' requires exactly 2 arguments.\n" +
 					"See 'cellery build --help' for more infomation.\n")
 				return nil
 			}
@@ -49,8 +49,8 @@ func newBuildCommand() *cobra.Command {
 			}
 			return nil
 		},
-		Example: "  cellery build my-project.bal\n  cellery build my-project.bal -t myproject:1.0.0",
+		Example: "  cellery build my-project.bal -t [repo]/org/myproject:1.0.0",
 	}
-	cmd.Flags().StringVarP(&tag, "tag", "t", "", "Name and optionally a tag in the 'name:tag' format")
+	cmd.Flags().StringVarP(&tag, "tag", "t", "", "[repository]/organization/image_name:version")
 	return cmd
 }

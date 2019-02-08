@@ -28,7 +28,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/spf13/viper"
 	"github.com/tj/go-spin"
 
 	"github.com/cellery-io/sdk/components/cli/pkg/constants"
@@ -54,6 +53,8 @@ func buildSpinner(tag string) {
 }
 
 func RunBuild(tag string, fileName string) error {
+	var organization string
+	var imageVersion  string
 
 	fileExist, err := util.FileExists(fileName)
 	if !fileExist {
@@ -64,23 +65,12 @@ func RunBuild(tag string, fileName string) error {
 	var extension = filepath.Ext(fileName)
 	var fileNameSuffix = fileName[0 : len(fileName)-len(extension)]
 
-	viper.SetConfigName("Cellery") // name of config file (without extension)
-	viper.SetConfigType("toml")
-	viper.AddConfigPath(".")        // optionally look for config in the working directory
-	confErr := viper.ReadInConfig() // Find and read the config file
-
-	if confErr != nil { // Handle errors reading the config file
-		fmt.Printf("Error while readng toml file: %s\n", confErr)
-		os.Exit(1)
-	}
-
 	registryHost := constants.CENTRAL_REGISTRY_HOST
-	organization := viper.GetString("project.organization")
 	imageName := fileNameSuffix
-	imageVersion := viper.GetString("project.version")
+
 
 	if tag == "" {
-		tag = organization + "/" + fileNameSuffix + ":" + imageVersion
+		util.ExitWithImageFormatError()
 	} else {
 		strArr := strings.Split(tag, "/")
 		if len(strArr) == 3 {
@@ -155,7 +145,7 @@ func RunBuild(tag string, fileName string) error {
 		os.Exit(1)
 	}
 	folders := []string{"artifacts"}
-	files := []string{fileName, constants.CONFIG_FILE}
+	files := []string{fileName}
 	output := imageName + ".zip"
 	err = util.RecursiveZip(files, folders, output)
 	if err != nil {

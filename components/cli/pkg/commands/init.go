@@ -22,7 +22,6 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"os/user"
 	"path/filepath"
 
 	"github.com/fatih/color"
@@ -32,16 +31,8 @@ import (
 )
 
 func RunInit() error {
-
-	userVar, err := user.Current()
-	if err != nil {
-		panic(err)
-	}
-
 	prefix := util.CyanBold("?")
-	orgName := ""
 	projectName := ""
-	projectVersion := ""
 	projectPath := ""
 
 	i.Run(&i.Interact{
@@ -53,20 +44,6 @@ func RunInit() error {
 			{
 				Before: func(c i.Context) error {
 					c.SetPrfx(nil, util.CyanBold("?"))
-					c.SetDef(userVar.Username, util.Faint("["+userVar.Username+"]"))
-					return nil
-				},
-				Quest: i.Quest{
-					Msg: util.Bold("Organization name: "),
-				},
-				Action: func(c i.Context) interface{} {
-					orgName, _ = c.Ans().String()
-					return nil
-				},
-			},
-			{
-				Before: func(c i.Context) error {
-					c.SetPrfx(nil, util.CyanBold("?"))
 					c.SetDef("my-project", util.Faint("[my-project]"))
 					return nil
 				},
@@ -75,20 +52,6 @@ func RunInit() error {
 				},
 				Action: func(c i.Context) interface{} {
 					projectName, _ = c.Ans().String()
-					return nil
-				},
-			},
-			{
-				Before: func(c i.Context) error {
-					c.SetPrfx(nil, util.CyanBold("?"))
-					c.SetDef("1.0.0", util.Faint("[1.0.0]"))
-					return nil
-				},
-				Quest: i.Quest{
-					Msg: util.Bold("Project version: "),
-				},
-				Action: func(c i.Context) interface{} {
-					projectVersion, _ = c.Ans().String()
 					return nil
 				},
 			},
@@ -129,10 +92,6 @@ func RunInit() error {
 		"}\n" +
 		"\n"
 
-	tomlTemplate := "[project]\n" +
-		"organization = \"" + orgName + "\"\n" +
-		"version = \"" + projectVersion + "\"\n"
-
 	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
 		fmt.Println("Error in getting current directory location: " + err.Error())
@@ -154,17 +113,7 @@ func RunInit() error {
 	balW.WriteString(fmt.Sprintf("%s", cellTemplate))
 	balW.Flush()
 
-	tomlFile, err := os.Create(projectPath + "/Cellery.toml")
-	if err != nil {
-		fmt.Println("Error in creating Toml File: " + err.Error())
-		os.Exit(1)
-	}
-	defer tomlFile.Close()
-	tomlW := bufio.NewWriter(tomlFile)
-	tomlW.WriteString(fmt.Sprintf("%s", tomlTemplate))
-	tomlW.Flush()
-
 	fmt.Println(util.GreenBold("\n\U00002714") + " Initialized project in directory: " + util.Faint(projectPath))
-	util.PrintWhatsNextMessage("cellery build " + projectName + ".bal")
+	util.PrintWhatsNextMessage("cellery build " + projectName + ".bal" + " -t [repo]/organization/image_name:version")
 	return nil
 }

@@ -18,6 +18,10 @@
 package io.cellery.impl;
 
 import com.esotericsoftware.yamlbeans.YamlWriter;
+import com.github.mustachejava.DefaultMustacheFactory;
+import com.github.mustachejava.Mustache;
+import com.github.mustachejava.MustacheFactory;
+import io.cellery.CelleryConstants;
 import io.cellery.models.API;
 import io.cellery.models.APIDefinition;
 import io.cellery.models.Cell;
@@ -59,12 +63,14 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.removePattern;
@@ -81,7 +87,13 @@ import static org.apache.commons.lang3.StringUtils.removePattern;
 )
 public class CreateImage extends BlockingNativeCallableUnit {
 
+    private static final MustacheFactory mustacheFactory = new DefaultMustacheFactory();
+    private static final String OUTPUT_DIRECTORY = System.getProperty("user.dir") + File.separator + "target";
+
+    private String cellVersion = "1.0.0";
     private int gatewayPort = 80;
+    private String gatewayProtocol = "http";
+
     private ComponentHolder componentHolder;
     private PrintStream out = System.out;
 
@@ -96,6 +108,7 @@ public class CreateImage extends BlockingNativeCallableUnit {
         cellCache.setCellNameToComponentMap(cellName, components);
         processCellEgress(((BValueArray) ((BMap) ctx.getNullableRefArgument(0)).getMap().get("egresses")).getValues());
         generateCell(cellName);
+        generateCellReference(cellName);
         ctx.setReturnValues(new BBoolean(true));
     }
 
@@ -361,12 +374,65 @@ public class CreateImage extends BlockingNativeCallableUnit {
         cellSpec.setGatewayTemplate(gatewayTemplate);
         cellSpec.setServicesTemplates(serviceTemplateList);
         Cell cell = new Cell(new ObjectMetaBuilder().withName(getValidName(name)).build(), cellSpec);
-        String targetPath = System.getProperty("user.dir") + File.separator + "target" + File.separator
-                + "cellery" + File.separator + name + ".yaml";
+        String targetPath = OUTPUT_DIRECTORY + File.separator + "cellery" + File.separator + name + ".yaml";
         try {
             writeToFile(toYaml(cell), targetPath);
         } catch (IOException e) {
             throw new BallerinaException(e.getMessage() + " " + targetPath);
+        }
+    }
+
+    /**
+     * Generate a Cell Reference that can be used by other cells.
+     *
+     * @param name The name of the Cell
+     */
+    private void generateCellReference(String name) {
+        String ballerinaPathName = name.replace("-", "_").toLowerCase(Locale.ENGLISH);
+
+        // Generating the context
+        Map<String, Object> context = new HashMap<>();
+        context.put(CelleryConstants.CELL_REFERENCE_TEMPLATE_CONTEXT_NAME, name);
+        context.put(CelleryConstants.CELL_REFERENCE_TEMPLATE_CONTEXT_VERSION, cellVersion);
+        context.put(CelleryConstants.CELL_REFERENCE_TEMPLATE_CONTEXT_GATEWAY_PORT, gatewayPort);
+        context.put(CelleryConstants.CELL_REFERENCE_TEMPLATE_CONTEXT_GATEWAY_PROTOCOL, gatewayProtocol);
+        context.put(CelleryConstants.CELL_REFERENCE_TEMPLATE_CONTEXT_COMPONENTS,
+                componentHolder.getComponentNameToComponentMap().values());
+        context.put(CelleryConstants.CELL_REFERENCE_TEMPLATE_CONTEXT_HANDLE_API_NAME,
+                (Function<Object, Object>) basePath -> {
+                    String basePathString = (String) basePath;
+                    return basePathString.replace("/", "");
+                });
+        context.put(CelleryConstants.CELL_REFERENCE_TEMPLATE_CONTEXT_HANDLE_TYPE_NAME,
+                (Function<Object, Object>) basePath -> {
+                    String basePathString = (String) basePath;
+                    return basePathString.replace("-", "");
+                });
+
+        // Writing the template to file
+        String targetFileNameWithPath = OUTPUT_DIRECTORY + File.separator + "bal" + File.separator + ballerinaPathName
+                + File.separator + ballerinaPathName + "_reference.bal";
+        writeMustacheTemplateToFile(CelleryConstants.CELL_REFERENCE_TEMPLATE_FILE, context, targetFileNameWithPath);
+    }
+
+    /**
+     * Write a mustache template to a file.
+     *
+     * @param mustacheTemplate       The mustache template to be used
+     * @param mustacheContext        The mustache context to be passed to the template
+     * @param targetFileNameWithPath The name of the target file name with path
+     */
+    private void writeMustacheTemplateToFile(String mustacheTemplate, Object mustacheContext,
+                                             String targetFileNameWithPath) {
+        Mustache mustache = mustacheFactory.compile(mustacheTemplate);
+
+        // Writing the template to the file
+        try {
+            StringWriter writer = new StringWriter();
+            mustache.execute(writer, mustacheContext).flush();
+            writeToFile(writer.toString(), targetFileNameWithPath);
+        } catch (IOException e) {
+            throw new BallerinaException(e.getMessage() + " " + targetFileNameWithPath);
         }
     }
 
@@ -414,7 +480,6 @@ public class CreateImage extends BlockingNativeCallableUnit {
         //a tag is a sequence of characters starting with ! and ending with whitespace
         return removePattern(string, " ![^\\s]*");
     }
-
 
 }
 

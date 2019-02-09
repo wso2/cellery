@@ -1,0 +1,69 @@
+# Reference to the {{cellName}} cell image instance which can be used to get details about the APIs
+# exposed by the the cell. This information is only relevant for calls within the cellery system.
+#
+# + alias - The alias of the instance of the cell image to be referred to
+public type {{#handleTypeName}}{{cellName}}{{/handleTypeName}}Reference object {
+    string cellName = "{{cellName}}";
+    string cellVersion = "{{cellVersion}}";
+    string alias = "";
+
+    public function __init(string alias = "") {
+        self.alias = alias;
+    }
+
+    # Get the Host name of the Cell Gateway. This hostname can be used when accessing the APIs.
+    #
+    # + return - The host name of the Cell Gateway
+    public function getHost() returns string {
+        if (self.alias.length() > 0) {
+            return self.cellName + "--" + self.cellVersion + "--" + self.alias + "--gateway-service";
+        }
+        return self.cellName + "--" + self.cellVersion + "--gateway-service";
+    }
+
+{{#components}}
+{{#apis}}
+    # Get the complete URL of the "{{context}}" API exposed by the cell gateway.
+    # This URL can be used when accessing the "{{context}}" API.
+    #
+    # + return - The URL of the "{{context}}" API
+    public function get{{#handleApiName}}{{context}}{{/handleApiName}}ApiUrl() returns string {
+{{#context}}
+        return self.get{{#handleApiName}}{{context}}{{/handleApiName}}ApiProtocol() + "://" + self.getHost() + ":"
+            + self.get{{#handleApiName}}{{context}}{{/handleApiName}}ApiPort()
+            + self.get{{#handleApiName}}{{context}}{{/handleApiName}}ApiBasePath();
+{{/context}}
+{{^context}}
+        return self.get{{#handleApiName}}{{context}}{{/handleApiName}}ApiProtocol() + "://" + self.getHost() + ":"
+            + self.get{{#handleApiName}}{{context}}{{/handleApiName}}ApiPort();
+{{/context}}
+    }
+
+    # Get the protocol of the "{{context}}" API exposed by the cell gateway.
+    # This protocol can be used when accessing the "{{context}}" API.
+    #
+    # + return - The protocol of the "{{context}}" API
+    public function get{{#handleApiName}}{{context}}{{/handleApiName}}ApiProtocol() returns string {
+        return "{{cellGatewayProtocol}}";
+    }
+
+    # Get the port which exposes the "{{context}}" API exposed by the cell gateway.
+    # This port can be used when accessing the "{{context}}" API.
+    #
+    # + return - The port which exposes the "{{context}}" API
+    public function get{{#handleApiName}}{{context}}{{/handleApiName}}ApiPort() returns int {
+        return {{cellGatewayPort}};
+    }
+
+{{#context}}
+    # Get the base path of the "{{context}}" API exposed by the cell gateway.
+    # This base path can be used when accessing the "{{context}}" API.
+    #
+    # + return - The base path of the "{{context}}" API
+    public function get{{#handleApiName}}{{context}}{{/handleApiName}}ApiBasePath() returns string {
+        return "{{context}}";
+    }
+{{/context}}
+{{/apis}}
+{{/components}}
+};

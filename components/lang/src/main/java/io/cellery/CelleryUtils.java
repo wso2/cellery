@@ -26,6 +26,7 @@ import java.nio.file.Paths;
  * Cellery Utility methods.
  */
 public class CelleryUtils {
+
     /**
      * Returns swagger file as a String.
      *
@@ -38,4 +39,5 @@ public class CelleryUtils {
         byte[] encoded = Files.readAllBytes(Paths.get(path));
         return new String(encoded, encoding);
     }
+
 }

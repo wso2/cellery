@@ -32,4 +32,8 @@ public class CelleryConstants {
     public static final String CELL_REFERENCE_TEMPLATE_CONTEXT_COMPONENTS = "components";
     public static final String CELL_REFERENCE_TEMPLATE_CONTEXT_HANDLE_API_NAME = "handleApiName";
     public static final String CELL_REFERENCE_TEMPLATE_CONTEXT_HANDLE_TYPE_NAME = "handleTypeName";
+
+    public static final String TARGET = "target";
+    public static final String RESOURCES = "resources";
+    public static final String GATEWAY_PROTOCOL = "http";
 }

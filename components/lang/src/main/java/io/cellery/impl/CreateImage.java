@@ -72,6 +72,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
+import static io.cellery.CelleryConstants.GATEWAY_PROTOCOL;
+import static io.cellery.CelleryConstants.TARGET;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.removePattern;
 
@@ -90,18 +92,16 @@ import static org.apache.commons.lang3.StringUtils.removePattern;
 public class CreateImage extends BlockingNativeCallableUnit {
 
     private static final MustacheFactory mustacheFactory = new DefaultMustacheFactory();
-    private static final String OUTPUT_DIRECTORY = System.getProperty("user.dir") + File.separator + "target";
+    private static final String OUTPUT_DIRECTORY = System.getProperty("user.dir") + File.separator + TARGET;
 
-    private String cellVersion = "1.0.0";
     private int gatewayPort = 80;
-    private String gatewayProtocol = "http";
-
     private ComponentHolder componentHolder;
     private PrintStream out = System.out;
 
     public void execute(Context ctx) {
         componentHolder = new ComponentHolder();
-        String cellName = (((BMap) ctx.getNullableRefArgument(0)).getMap()).get("name").toString();
+        String cellVersion = ctx.getNullableStringArgument(1);
+        String cellName = getValidName(ctx.getStringArgument(0));
         CellCache cellCache = CellCache.getInstance();
         processComponents(
                 ((BValueArray) ((BMap) ctx.getNullableRefArgument(0)).getMap().get("components")).getValues());
@@ -110,7 +110,7 @@ public class CreateImage extends BlockingNativeCallableUnit {
         cellCache.setCellNameToComponentMap(cellName, components);
         processCellEgress(((BValueArray) ((BMap) ctx.getNullableRefArgument(0)).getMap().get("egresses")).getValues());
         generateCell(cellName);
-        generateCellReference(cellName);
+        generateCellReference(cellName, cellVersion);
         ctx.setReturnValues(new BBoolean(true));
     }
 
@@ -223,12 +223,8 @@ public class CreateImage extends BlockingNativeCallableUnit {
      */
     private void processIngressPort(LinkedHashMap<?, ?> ingressMap, Component component) {
         ingressMap.forEach((name, entry) -> ((BMap<?, ?>) entry).getMap().forEach((key, value) -> {
-            switch (key.toString()) {
-                case "port":
-                    component.addPorts(Integer.parseInt(value.toString()), gatewayPort);
-                    break;
-                default:
-                    break;
+            if ("port".equals(key.toString())) {
+                component.addPorts(Integer.parseInt(value.toString()), gatewayPort);
             }
         }));
     }
@@ -389,7 +385,7 @@ public class CreateImage extends BlockingNativeCallableUnit {
      *
      * @param name The name of the Cell
      */
-    private void generateCellReference(String name) {
+    private void generateCellReference(String name, String cellVersion) {
         String ballerinaPathName = name.replace("-", "_").toLowerCase(Locale.ENGLISH);
 
         // Generating the context
@@ -397,7 +393,7 @@ public class CreateImage extends BlockingNativeCallableUnit {
         context.put(CelleryConstants.CELL_REFERENCE_TEMPLATE_CONTEXT_NAME, name);
         context.put(CelleryConstants.CELL_REFERENCE_TEMPLATE_CONTEXT_VERSION, cellVersion);
         context.put(CelleryConstants.CELL_REFERENCE_TEMPLATE_CONTEXT_GATEWAY_PORT, gatewayPort);
-        context.put(CelleryConstants.CELL_REFERENCE_TEMPLATE_CONTEXT_GATEWAY_PROTOCOL, gatewayProtocol);
+        context.put(CelleryConstants.CELL_REFERENCE_TEMPLATE_CONTEXT_GATEWAY_PROTOCOL, GATEWAY_PROTOCOL);
         context.put(CelleryConstants.CELL_REFERENCE_TEMPLATE_CONTEXT_COMPONENTS,
                 componentHolder.getComponentNameToComponentMap().values());
         context.put(CelleryConstants.CELL_REFERENCE_TEMPLATE_CONTEXT_HANDLE_API_NAME,
@@ -414,19 +410,17 @@ public class CreateImage extends BlockingNativeCallableUnit {
         // Writing the template to file
         String targetFileNameWithPath = OUTPUT_DIRECTORY + File.separator + "bal" + File.separator + ballerinaPathName
                 + File.separator + ballerinaPathName + "_reference.bal";
-        writeMustacheTemplateToFile(CelleryConstants.CELL_REFERENCE_TEMPLATE_FILE, context, targetFileNameWithPath);
+        writeMustacheTemplateToFile(context, targetFileNameWithPath);
     }
 
     /**
      * Write a mustache template to a file.
      *
-     * @param mustacheTemplate       The mustache template to be used
      * @param mustacheContext        The mustache context to be passed to the template
      * @param targetFileNameWithPath The name of the target file name with path
      */
-    private void writeMustacheTemplateToFile(String mustacheTemplate, Object mustacheContext,
-                                             String targetFileNameWithPath) {
-        Mustache mustache = mustacheFactory.compile(mustacheTemplate);
+    private void writeMustacheTemplateToFile(Object mustacheContext, String targetFileNameWithPath) {
+        Mustache mustache = mustacheFactory.compile(CelleryConstants.CELL_REFERENCE_TEMPLATE_FILE);
 
         // Writing the template to the file
         try {

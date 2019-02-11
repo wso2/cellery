@@ -22,14 +22,11 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"github.com/cellery-io/sdk/components/cli/pkg/util"
+	"github.com/olekukonko/tablewriter"
 	"os"
 	"os/exec"
 	"strings"
-
-	"github.com/olekukonko/tablewriter"
-
-	"github.com/cellery-io/sdk/components/cli/pkg/constants"
-	"github.com/cellery-io/sdk/components/cli/pkg/util"
 )
 
 func RunApis(cellName string) error {
@@ -69,25 +66,27 @@ func RunApis(cellName string) error {
 		fmt.Println(errJson)
 	}
 
-	displayApisTable(jsonOutput.GatewaySpec.Apis)
+	displayApisTable(jsonOutput.GatewaySpec.Apis, cellName)
 	return nil
 }
 
-func displayApisTable(apiArray []util.GatewayApi) error {
+func displayApisTable(apiArray []util.GatewayApi, cellName string) error {
 	tableData := [][]string{}
 
 	for i := 0; i < len(apiArray); i++ {
-		api := []string{strings.Split(apiArray[i].Backend, "/")[2], apiArray[i].Context}
-		paths := getApiMethodsArray(apiArray[i].Definitions)
+		for j := 0; j < len(apiArray[i].Definitions); j++ {
+			url := cellName + "/" + cellName + "-gateway-service" + "/" + apiArray[i].Context + "/" + strings.Split(apiArray[i].Backend, "/")[2]
 
-		for i := 0; i < len(paths); i++ {
-			api = append(api, paths[i])
+			if apiArray[i].Definitions[j].Path != "/" {
+				url = url + "/" + apiArray[i].Definitions[j].Path
+			}
+			tableRecord := []string{apiArray[i].Context, apiArray[i].Definitions[j].Method, url}
+			tableData = append(tableData, tableRecord)
 		}
-		tableData = append(tableData, api)
 	}
 
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"HOST NAME", "CONTEXT", "GET", "POST", "PATCH", "PUT", "DELETE"})
+	table.SetHeader([]string{"CONTEXT", "METHOD", "URL"})
 	table.SetBorders(tablewriter.Border{Left: false, Top: false, Right: false, Bottom: false})
 	table.SetAlignment(3)
 	table.SetRowSeparator("-")
@@ -96,16 +95,8 @@ func displayApisTable(apiArray []util.GatewayApi) error {
 	table.SetHeaderColor(
 		tablewriter.Colors{tablewriter.Bold},
 		tablewriter.Colors{tablewriter.Bold},
-		tablewriter.Colors{tablewriter.Bold},
-		tablewriter.Colors{tablewriter.Bold},
-		tablewriter.Colors{tablewriter.Bold},
-		tablewriter.Colors{tablewriter.Bold},
 		tablewriter.Colors{tablewriter.Bold})
 	table.SetColumnColor(
-		tablewriter.Colors{},
-		tablewriter.Colors{tablewriter.FgHiBlueColor},
-		tablewriter.Colors{},
-		tablewriter.Colors{},
 		tablewriter.Colors{},
 		tablewriter.Colors{},
 		tablewriter.Colors{})
@@ -114,28 +105,4 @@ func displayApisTable(apiArray []util.GatewayApi) error {
 	table.Render()
 
 	return nil
-}
-
-func getApiMethodsArray(definitions []util.GatewayDefinition) []string {
-	methodArray := make([]string, 5)
-
-	for i := 0; i < len(definitions); i++ {
-		if strings.EqualFold(definitions[i].Method, constants.HTTP_METHOD_GET) {
-			methodArray[0] = definitions[i].Path
-		}
-		if strings.EqualFold(definitions[i].Method, constants.HTTP_METHOD_POST) {
-			methodArray[1] = definitions[i].Path
-		}
-		if strings.EqualFold(definitions[i].Method, constants.HTTP_METHOD_PATCH) {
-			methodArray[2] = definitions[i].Path
-		}
-		if strings.EqualFold(definitions[i].Method, constants.HTTP_METHOD_PUT) {
-			methodArray[3] = definitions[i].Path
-		}
-		if strings.EqualFold(definitions[i].Method, constants.HTTP_METHOD_DELETE) {
-			methodArray[4] = definitions[i].Path
-		}
-	}
-
-	return methodArray
 }

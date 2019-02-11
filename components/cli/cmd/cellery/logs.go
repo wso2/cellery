@@ -24,8 +24,9 @@ import (
 	"github.com/cellery-io/sdk/components/cli/pkg/commands"
 )
 
+var cellName, component string
+
 func newLogsCommand() *cobra.Command {
-	var cellName, componentName string
 	cmd := &cobra.Command{
 		Use:   "logs [OPTIONS]",
 		Short: "Displays logs for either the cell instance, or a component of a running cell instance.",
@@ -34,24 +35,16 @@ func newLogsCommand() *cobra.Command {
 				cmd.Help()
 				return nil
 			}
-			cellName = args[0]
-			if len(args) > 1 {
-				componentName = args[1]
-				err := commands.RunComponentLogs(cellName, componentName)
-				if err != nil {
-					cmd.Help()
-					return err
-				}
-			} else {
-				err := commands.RunCellLogs(cellName)
-				if err != nil {
-					cmd.Help()
-					return err
-				}
+			cellName := args[0]
+			err := commands.RunLogs(cellName, component)
+			if err != nil {
+				cmd.Help()
+				return err
 			}
 			return nil
 		},
-		Example: "  cellery logs my-cell:v1.0  cell-component-v1.0.0",
+		Example: "  cellery logs my-cell\n  cellery logs my-cell -c component_name",
 	}
+	cmd.Flags().StringVarP(&component, "component", "c", "", "component of a cell")
 	return cmd
 }

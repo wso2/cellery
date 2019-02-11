@@ -35,5 +35,5 @@ public class CelleryConstants {
 
     public static final String TARGET = "target";
     public static final String RESOURCES = "resources";
-    public static final String GATEWAY_PROTOCOL = "http";
+    public static final String DEFAULT_GATEWAY_PROTOCOL = "http";
 }

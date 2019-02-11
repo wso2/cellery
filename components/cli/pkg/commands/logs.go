@@ -27,42 +27,18 @@ import (
 	"github.com/cellery-io/sdk/components/cli/pkg/constants"
 )
 
-func RunComponentLogs(cellName, componentName string) error {
-	cmd := exec.Command("kubectl", "logs", "-l", constants.GROUP_NAME+"/service="+cellName+"--"+componentName, "-c", componentName)
-	stdoutReader, _ := cmd.StdoutPipe()
-	stdoutScanner := bufio.NewScanner(stdoutReader)
-	output := ""
-	go func() {
-		for stdoutScanner.Scan() {
-			output += stdoutScanner.Text()
-			fmt.Println(stdoutScanner.Text())
-		}
-	}()
-	stderrReader, _ := cmd.StderrPipe()
-	stderrScanner := bufio.NewScanner(stderrReader)
-	go func() {
-		for stderrScanner.Scan() {
-			fmt.Println(stderrScanner.Text())
-		}
-	}()
-	err := cmd.Start()
-	if err != nil {
-		fmt.Printf("Error in executing cellery logs: %v \n", err)
-		os.Exit(1)
-	}
-	err = cmd.Wait()
-	if err != nil {
-		fmt.Printf("\x1b[31;1m Cellery logs finished with error: \x1b[0m %v \n", err)
-		os.Exit(1)
-	}
-	if output == "" {
-		fmt.Printf("Cannot find cell: %v \n", cellName)
+func RunLogs(cellName, componentName string) error {
+	if componentName == "" {
+		cmd := exec.Command("kubectl", "logs", "-l", constants.GROUP_NAME+"/cell="+cellName, "--all-containers=true")
+		executeLogsCommand(cmd, cellName, componentName)
+	} else {
+		cmd := exec.Command("kubectl", "logs", "-l", constants.GROUP_NAME+"/service="+cellName+"--"+componentName, "-c", componentName)
+		executeLogsCommand(cmd, cellName, componentName)
 	}
 	return nil
 }
 
-func RunCellLogs(cellName string) error {
-	cmd := exec.Command("kubectl", "logs", "-l", constants.GROUP_NAME+"/cell="+cellName, "--all-containers=true")
+func executeLogsCommand(cmd *exec.Cmd, cellName, componentName string) error {
 	stdoutReader, _ := cmd.StdoutPipe()
 	stdoutScanner := bufio.NewScanner(stdoutReader)
 	output := ""
@@ -81,16 +57,20 @@ func RunCellLogs(cellName string) error {
 	}()
 	err := cmd.Start()
 	if err != nil {
-		fmt.Printf("Error in executing cell ps: %v \n", err)
+		fmt.Printf("Error in executing cell logs: %v \n", err)
 		os.Exit(1)
 	}
 	err = cmd.Wait()
 	if err != nil {
-		fmt.Printf("\x1b[31;1m Cell ps finished with error: \x1b[0m %v \n", err)
+		fmt.Printf("\x1b[31;1m Cell logs finished with error: \x1b[0m %v \n", err)
 		os.Exit(1)
 	}
 	if output == "" {
-		fmt.Printf("Cannot find cell: %v \n", cellName)
+		if componentName == "" {
+			fmt.Printf("Cannot find cell: %v \n", cellName)
+		} else {
+			fmt.Printf("Cannot find component: %v of cell: %v \n", componentName, cellName)
+		}
 	}
 	return nil
 }

@@ -77,6 +77,7 @@ func RunStatus(cellName string) error {
 		cellCreationTime, cellStatus := getCellSummary(cellName)
 		displayStatusSummaryTable(cellCreationTime, cellStatus)
 		fmt.Println("\n")
+		fmt.Println("  -COMPONENTS-\n")
 		displayStatusDetailedTable(jsonOutput.Items, cellName)
 	}
 	return nil

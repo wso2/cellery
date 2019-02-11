@@ -20,6 +20,7 @@ package commands
 
 import (
 	"fmt"
+
 	"github.com/fatih/color"
 	"github.com/manifoldco/promptui"
 

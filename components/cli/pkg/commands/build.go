@@ -54,7 +54,7 @@ func buildSpinner(tag string) {
 
 func RunBuild(tag string, fileName string) error {
 	var organization string
-	var imageVersion  string
+	var imageVersion string
 
 	fileExist, err := util.FileExists(fileName)
 	if !fileExist {
@@ -67,7 +67,6 @@ func RunBuild(tag string, fileName string) error {
 
 	registryHost := constants.CENTRAL_REGISTRY_HOST
 	imageName := fileNameSuffix
-
 
 	if tag == "" {
 		util.ExitWithImageFormatError()
@@ -107,7 +106,7 @@ func RunBuild(tag string, fileName string) error {
 	}
 	_ = os.RemoveAll(filepath.Join(dir, "target"))
 
-	cmd := exec.Command("ballerina", "run", fileName+":build")
+	cmd := exec.Command("ballerina", "run", fileName+":build", imageName, imageVersion)
 	execError := ""
 	stderrReader, _ := cmd.StderrPipe()
 	stderrScanner := bufio.NewScanner(stderrReader)

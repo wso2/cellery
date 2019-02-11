@@ -22,14 +22,15 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"github.com/cellery-io/sdk/components/cli/pkg/constants"
-	"github.com/cellery-io/sdk/components/cli/pkg/util"
-	"github.com/fatih/color"
-	"github.com/manifoldco/promptui"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
+
+	"github.com/cellery-io/sdk/components/cli/pkg/constants"
+	"github.com/cellery-io/sdk/components/cli/pkg/util"
+	"github.com/fatih/color"
+	"github.com/manifoldco/promptui"
 )
 
 func RunSetup() error {
@@ -53,13 +54,16 @@ func RunSetup() error {
 	}
 
 	switch value {
-		case constants.CELLERY_SETUP_MANAGE : {
+	case constants.CELLERY_SETUP_MANAGE:
+		{
 			manageEnvironment()
 		}
-		case constants.CELLERY_SETUP_CREATE : {
+	case constants.CELLERY_SETUP_CREATE:
+		{
 			createEnvironment()
 		}
-		default: {
+	default:
+		{
 			selectEnvironment()
 		}
 	}
@@ -183,7 +187,8 @@ func createEnvironment() error {
 	}
 
 	switch value {
-		case constants.CELLERY_CREATE_LOCAL : {
+	case constants.CELLERY_CREATE_LOCAL:
+		{
 			vmLocation := filepath.Join(util.UserHomeDir(), ".cellery", "vm")
 			repoCreateErr := util.CreateDir(vmLocation)
 			if repoCreateErr != nil {
@@ -195,13 +200,16 @@ func createEnvironment() error {
 			util.DownloadFromS3Bucket(constants.AWS_S3_BUCKET, constants.AWS_S3_ITEM_CONFIG, vmLocation)
 			installVM()
 		}
-		case constants.CELLERY_CREATE_KUBEADM: {
+	case constants.CELLERY_CREATE_KUBEADM:
+		{
 			fmt.Println("Installing kubeadm")
 		}
-		case constants.CELLERY_CREATE_GCP: {
+	case constants.CELLERY_CREATE_GCP:
+		{
 			fmt.Println("Installing GCP")
 		}
-		default: {
+	default:
+		{
 			RunSetup()
 		}
 	}
@@ -248,16 +256,20 @@ func manageEnvironment() error {
 	}
 
 	switch value {
-		case constants.CELLERY_MANAGE_STOP : {
+	case constants.CELLERY_MANAGE_STOP:
+		{
 			util.ExecuteCommand(exec.Command("VBoxManage", "controlvm", constants.VM_NAME, "poweroff"), "Error stopping VM")
 		}
-		case constants.CELLERY_MANAGE_START : {
+	case constants.CELLERY_MANAGE_START:
+		{
 			util.ExecuteCommand(exec.Command("VBoxManage", "startvm", constants.VM_NAME, "--type", "headless"), "Error starting VM")
 		}
-		case constants.CELLERY_MANAGE_CLEANUP : {
+	case constants.CELLERY_MANAGE_CLEANUP:
+		{
 			fmt.Println("Cleaning up")
 		}
-		default: {
+	default:
+		{
 			RunSetup()
 		}
 	}

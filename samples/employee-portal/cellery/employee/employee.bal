@@ -32,14 +32,13 @@ cellery:Component salaryComponent = {
     ingresses: {
         SalaryAPI: new cellery:HTTPIngress(
                 8080,
-
                 {
-                          basePath: "payment",
-                          definitions:[{
-                              path: "/",
-                              method: "GET"
-                          }]
-                      }
+                  basePath: "payment",
+                  definitions:[{
+                      path: "/",
+                      method: "GET"
+                  }]
+                }
             )
     },
     labels: {

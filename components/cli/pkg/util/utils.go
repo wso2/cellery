@@ -24,12 +24,6 @@ import (
 	"bytes"
 	"crypto/tls"
 	"fmt"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-	"github.com/cellery-io/sdk/components/cli/pkg/constants"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
@@ -42,6 +36,13 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/cellery-io/sdk/components/cli/pkg/constants"
 
 	"github.com/fatih/color"
 )
@@ -532,7 +533,7 @@ func RenameFile(oldName, newName string) error {
 }
 
 func ReplaceFile(fileToBeReplaced, fileToReplace string) error {
-	errRename := RenameFile(fileToBeReplaced, fileToBeReplaced + "-old")
+	errRename := RenameFile(fileToBeReplaced, fileToBeReplaced+"-old")
 	if errRename != nil {
 		return errRename
 	}
@@ -601,7 +602,7 @@ func ExtractTarGzFile(extractTo, archive_name string) error {
 	cmd := exec.Command("tar", "-zxvf", archive_name)
 	cmd.Dir = extractTo
 
-	ExecuteCommand(cmd, "Error occured in extracting file :" + archive_name)
+	ExecuteCommand(cmd, "Error occured in extracting file :"+archive_name)
 
 	return nil
 }

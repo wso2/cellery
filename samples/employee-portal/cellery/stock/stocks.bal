@@ -8,24 +8,27 @@ cellery:Component stock = {
         image: "docker.io/celleryio/sampleapp-stock"
     },
     ingresses: {
-        stock: new cellery:HTTPIngress(8080, "stock",
-            [
-                {
-                    path: "/",
-                    method: "GET"
-                }
-            ]
+        stock: new cellery:HTTPIngress(8080,
+            {
+                basePath: "stock",
+                definitions: [
+                    {
+                        path: "/",
+                        method: "GET"
+                    }
+                ]
+            }
         )
     }
 };
 
-cellery:CellImage stockCell = new("Stock-Options");
+cellery:CellImage stockCell = new("stock-options");
 
-public function build() {
+public function build(string imageName, string imageVersion) {
     //Build Stock Cell
     io:println("Building Stock Cell ...");
     stockCell.addComponent(stock);
     //Expose API from Cell Gateway
     stockCell.exposeAPIsFrom(stock);
-    _ = cellery:createImage(stockCell);
+    _ = cellery:createImage(stockCell, imageName, imageVersion);
 }

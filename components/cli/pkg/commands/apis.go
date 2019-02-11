@@ -22,11 +22,12 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"github.com/cellery-io/sdk/components/cli/pkg/util"
-	"github.com/olekukonko/tablewriter"
 	"os"
 	"os/exec"
 	"strings"
+
+	"github.com/cellery-io/sdk/components/cli/pkg/util"
+	"github.com/olekukonko/tablewriter"
 )
 
 func RunApis(cellName string) error {

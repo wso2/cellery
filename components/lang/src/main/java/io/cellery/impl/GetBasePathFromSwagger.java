@@ -19,6 +19,7 @@ package io.cellery.impl;
 
 import io.swagger.models.Swagger;
 import io.swagger.parser.SwaggerParser;
+import org.apache.commons.io.FileUtils;
 import org.ballerinalang.bre.Context;
 import org.ballerinalang.bre.bvm.BlockingNativeCallableUnit;
 import org.ballerinalang.model.types.TypeKind;
@@ -28,9 +29,14 @@ import org.ballerinalang.natives.annotations.BallerinaFunction;
 import org.ballerinalang.natives.annotations.ReturnType;
 import org.ballerinalang.util.exceptions.BallerinaException;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
+import static io.cellery.CelleryConstants.RESOURCES;
+import static io.cellery.CelleryConstants.TARGET;
 import static io.cellery.CelleryUtils.readSwaggerFile;
 
 /**
@@ -57,6 +63,31 @@ public class GetBasePathFromSwagger extends BlockingNativeCallableUnit {
 
     private String extractBasePath(String swaggerFilePath) throws IOException {
         final Swagger swagger = new SwaggerParser().parse(readSwaggerFile(swaggerFilePath, Charset.defaultCharset()));
+        copyResourceToTarget(swaggerFilePath);
         return swagger.getBasePath();
+    }
+
+    /**
+     * Copy file target/resources directory.
+     *
+     * @param sourcePath source file/directory path
+     * @throws IOException if unable to copy file
+     */
+    private void copyResourceToTarget(String sourcePath) throws IOException {
+        File src = new File(sourcePath);
+        String targetPath = TARGET + File.separator + RESOURCES + File.separator + src.getName();
+        File dst = new File(targetPath);
+        // if source is file
+        if (Files.isRegularFile(Paths.get(sourcePath))) {
+            if (Files.isDirectory(dst.toPath())) {
+                // if destination is directory
+                FileUtils.copyFileToDirectory(src, dst);
+            } else {
+                // if destination is file
+                FileUtils.copyFile(src, dst);
+            }
+        } else if (Files.isDirectory(Paths.get(sourcePath))) {
+            FileUtils.copyDirectory(src, dst);
+        }
     }
 }

@@ -224,8 +224,10 @@ public type CellImage object {
 # Build the cell aritifacts
 #
 # + cellImage - The cell image definition
+# + imageName - The cell image name
+# + imageVersion - The cell image version
 # + return - true/false
-public extern function createImage(CellImage cellImage) returns (boolean|error);
+public extern function createImage(CellImage cellImage, string imageName, string imageVersion) returns (boolean|error);
 
 # Parse the swagger file and returns BasePath
 #

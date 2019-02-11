@@ -68,6 +68,11 @@
             <artifactId>swagger-parser</artifactId>
             <version>${swagger.parser.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.github.spullara.mustache.java</groupId>
+            <artifactId>compiler</artifactId>
+            <version>${mustache.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -200,6 +205,7 @@
                             <artifactSet>
                                 <includes>
                                     <include>io.swagger.parser.v3*</include>
+                                    <include>com.github.spullara.mustache.java*</include>
                                     <include>com.esotericsoftware.yamlbeans*</include>
                                     <include>commons-io:commons-io</include>
                                     <include>commons-codec:commons-codec</include>
@@ -287,6 +293,7 @@
         <lombok.version>1.18.4</lombok.version>
         <fabric8.kubernetes.client.version>3.1.10</fabric8.kubernetes.client.version>
         <yaml.beans.version>1.13</yaml.beans.version>
+        <mustache.version>0.9.4</mustache.version>
         <swagger.parser.version>2.0.8</swagger.parser.version>
         <shade.plugin.version>3.2.1</shade.plugin.version>
     </properties>

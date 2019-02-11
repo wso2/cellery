@@ -24,4 +24,12 @@ public class CelleryConstants {
     public static final String CELLERY_PACKAGE = "celleryio/cellery:0.0.0";
     public static final String RECORD_NAME_DEFINITION = "Definition";
 
+    public static final String CELL_REFERENCE_TEMPLATE_FILE = "cell_reference.bal.mustache";
+    public static final String CELL_REFERENCE_TEMPLATE_CONTEXT_NAME = "cellName";
+    public static final String CELL_REFERENCE_TEMPLATE_CONTEXT_VERSION = "cellVersion";
+    public static final String CELL_REFERENCE_TEMPLATE_CONTEXT_GATEWAY_PORT = "cellGatewayPort";
+    public static final String CELL_REFERENCE_TEMPLATE_CONTEXT_GATEWAY_PROTOCOL = "cellGatewayProtocol";
+    public static final String CELL_REFERENCE_TEMPLATE_CONTEXT_COMPONENTS = "components";
+    public static final String CELL_REFERENCE_TEMPLATE_CONTEXT_HANDLE_API_NAME = "handleApiName";
+    public static final String CELL_REFERENCE_TEMPLATE_CONTEXT_HANDLE_TYPE_NAME = "handleTypeName";
 }

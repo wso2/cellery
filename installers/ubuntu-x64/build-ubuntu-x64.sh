@@ -77,7 +77,7 @@ getBallerinaHome() {
 }
 
 buildBallerinaNatives() {
-    go_to_dir ../../ballerina-natives
+    go_to_dir ../../components/lang/
     mvn clean install
     popd >/dev/null 2>&1
 }
@@ -106,7 +106,7 @@ deleteInstallationDirectory() {
 
 buildCelleryCLI() {
     go_to_dir ../../
-    bash build.sh
+    make build-cli
 
     if [ $? != 0 ]; then
         log_error "Failed to build cellery CLI." $?
@@ -116,9 +116,9 @@ buildCelleryCLI() {
 }
 
 getProductSize() {
-    CELLERY_SIZE=$(du -s ../../cellery | awk '{print $1}')
-    CELLERY_JAR_SIZE=$(du -s ../../ballerina-natives/target/cellery-*.jar | awk '{print $1}')
-    CELLERY_REPO_SIZE=$(du -s ../../ballerina-natives/target/generated-balo/ | awk '{print $1}')
+    CELLERY_SIZE=$(du -s ../../components/build/cellery | awk '{print $1}')
+    CELLERY_JAR_SIZE=$(du -s ../../components/lang/target/cellery-*.jar | awk '{print $1}')
+    CELLERY_REPO_SIZE=$(du -s ../../components/lang/target/generated-balo/ | awk '{print $1}')
 
     BINARY_SIZE_KB=$((CELLERY_SIZE + CELLERY_JAR_SIZE + CELLERY_REPO_SIZE))
     BINARY_SIZE_MB=$((BINARY_SIZE_KB/1024))
@@ -139,11 +139,11 @@ copyBuildDirectories() {
     getBallerinaHome
     mkdir -p ${TARGET_DIRECTORY}/${INSTALLATION_DIRECTORY}/${HOME_BALLERINA}/bre/lib/
     mkdir -p ${TARGET_DIRECTORY}/${INSTALLATION_DIRECTORY}/${HOME_BALLERINA}/lib/repo
-    cp ../../ballerina-natives/target/cellery-*.jar ${TARGET_DIRECTORY}/${INSTALLATION_DIRECTORY}/${HOME_BALLERINA}/bre/lib/
-    cp -R ../../ballerina-natives/target/generated-balo/repo/celleryio ${TARGET_DIRECTORY}/${INSTALLATION_DIRECTORY}/${HOME_BALLERINA}/lib/repo
+    cp ../../components/lang/target/cellery-*.jar ${TARGET_DIRECTORY}/${INSTALLATION_DIRECTORY}/${HOME_BALLERINA}/bre/lib/
+    cp -R ../../components/lang/target/generated-balo/repo/celleryio ${TARGET_DIRECTORY}/${INSTALLATION_DIRECTORY}/${HOME_BALLERINA}/lib/repo
 
     mkdir -p ${TARGET_DIRECTORY}/${INSTALLATION_DIRECTORY}/usr/local/bin
-    cp ../../cellery ${TARGET_DIRECTORY}/${INSTALLATION_DIRECTORY}/usr/local/bin
+    cp ../../components/build/cellery ${TARGET_DIRECTORY}/${INSTALLATION_DIRECTORY}/usr/local/bin
 }
 
 createInstaller() {

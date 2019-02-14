@@ -33,6 +33,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
@@ -638,7 +639,7 @@ func StartNewSpinner(message string) *Spinner {
 	}
 	go func() {
 		for newSpinner.IsSpinning {
-			fmt.Printf("\r\033[36m%s\033[m %s", spinner.Next(), message)
+			fmt.Printf("\x1b[0;0H\x1b[2J%s\033[m %s", spinner.Next(), message)
 			time.Sleep(100 * time.Millisecond)
 		}
 	}()
@@ -685,6 +686,39 @@ func ParseImageTag(cellImageString string) (parsedCellImage *CellImage, err erro
 	}
 
 	return cellImage, nil
+}
+
+// ValidateImageTag validates the image tag (without the registry in it). This checks the version to be in the format
+// of semantic versioning
+func ValidateImageTag(imageTag string) error {
+	isValid, err := regexp.MatchString(fmt.Sprintf("^%s$", constants.CELL_IMAGE_PATTERN), imageTag)
+	if err != nil || !isValid {
+		isValid, err := regexp.MatchString(fmt.Sprintf("^.*%s$", constants.CELL_VERSION_PATTERN), imageTag)
+		if err != nil || !isValid {
+			return fmt.Errorf("expects the cell version to be in the format of Semantic Versioning "+
+				"(eg:- 1.0.0), received %s", imageTag)
+		} else {
+			return fmt.Errorf("expects <organization>/<cell-image>:<version> as cell-image, received %s", imageTag)
+		}
+	}
+	return nil
+}
+
+// ValidateImageTag validates the image tag (with the registry in it). The registry is an option element
+// in this validation. This checks the version to be in the format of semantic versioning
+func ValidateImageTagWithRegistry(imageTag string) error {
+	isValid, err := regexp.MatchString(fmt.Sprintf("^%s$", constants.CELL_IMAGE_WITH_REGISTRY_PATTERN), imageTag)
+	if err != nil || !isValid {
+		isValid, err := regexp.MatchString(fmt.Sprintf("^.*%s$", constants.CELL_VERSION_PATTERN), imageTag)
+		if err != nil || !isValid {
+			return fmt.Errorf("expects the cell version to be in the format of Semantic Versioning "+
+				"(eg:- 1.0.0), received %s", imageTag)
+		} else {
+			return fmt.Errorf("expects [<registry>/]<organization>/<cell-image>:<version> "+
+				"as cell-image, received %s", imageTag)
+		}
+	}
+	return nil
 }
 
 // AddImageToBalPath extracts the cell image in a temporary location and copies the relevant ballerina files to the
@@ -763,7 +797,7 @@ func AddImageToBalPath(cellImage *CellImage) {
 
 // ExitWithErrorMessage prints an error message and exits the command
 func ExitWithErrorMessage(message string, err error) {
-	fmt.Printf("\n \x1b[31;1m %s: \x1b[0m %v \n", message, err)
+	fmt.Printf("\n\x1b[31;1m%s: \x1b[0m %v \n", message, err)
 	os.Exit(1)
 }
 

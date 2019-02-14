@@ -31,11 +31,9 @@ import (
 
 func newCliCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:           "cellery [OPTIONS] COMMAND [ARG]",
-		Short:         "Manage immutable cell based applications",
-		SilenceUsage:  true,
-		SilenceErrors: true,
-		Version:       fmt.Sprintf("%s, build %s", "0.1.0", "c69f31c"),
+		Use:     "cellery <command>",
+		Short:   "Manage immutable cell based applications",
+		Version: fmt.Sprintf("%s, build %s", "0.1.0", "c69f31c"),
 	}
 
 	cmd.AddCommand(

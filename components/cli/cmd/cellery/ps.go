@@ -26,15 +26,11 @@ import (
 
 func newPsCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "ps [OPTIONS]",
-		Short: "list all running cells",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			err := commands.RunPs()
-			if err != nil {
-				cmd.Help()
-				return err
-			}
-			return nil
+		Use:   "ps",
+		Short: "List all running cells",
+		Args:  cobra.NoArgs,
+		Run: func(cmd *cobra.Command, args []string) {
+			commands.RunPs()
 		},
 		Example: "  cellery ps",
 	}

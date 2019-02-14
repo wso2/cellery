@@ -19,30 +19,34 @@
 package main
 
 import (
+	"fmt"
+	"regexp"
+
 	"github.com/spf13/cobra"
 
 	"github.com/cellery-io/sdk/components/cli/pkg/commands"
+	"github.com/cellery-io/sdk/components/cli/pkg/constants"
 )
 
 func newComponentsCommand() *cobra.Command {
-	var cellName string
 	cmd := &cobra.Command{
-		Use:   "components [OPTIONS]",
-		Short: "Lists the components which the cell encapsulates.",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			if len(args) == 0 {
-				cmd.Help()
-				return nil
-			}
-			cellName = args[0]
-			err := commands.RunComponents(cellName)
+		Use:   "components <cell-name>",
+		Short: "List the components which the cell encapsulates",
+		Args: func(cmd *cobra.Command, args []string) error {
+			err := cobra.ExactArgs(1)(cmd, args)
 			if err != nil {
-				cmd.Help()
 				return err
+			}
+			isCellValid, err := regexp.MatchString(fmt.Sprintf("^%s$", constants.CELLERY_ID_PATTERN), args[0])
+			if err != nil || !isCellValid {
+				return fmt.Errorf("expects a valid cell name, received %s", args[0])
 			}
 			return nil
 		},
-		Example: "  cellery components my-project:v1.0 -n myproject-v1.0.0",
+		Run: func(cmd *cobra.Command, args []string) {
+			commands.RunComponents(args[0])
+		},
+		Example: "  cellery components employee",
 	}
 	return cmd
 }

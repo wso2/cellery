@@ -24,23 +24,19 @@ import (
 	"github.com/cellery-io/sdk/components/cli/pkg/commands"
 )
 
-type Component struct {
-	name, dockerImage   string
-	ports               []int
-	deployment, service string
-}
-
 func newImageCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "images [OPTIONS]",
+		Use:   "images",
 		Short: "List cell images",
-		RunE: func(cmd *cobra.Command, args []string) error {
+		Args:  cobra.NoArgs,
+		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) == 0 {
-				return commands.RunImage()
+				commands.RunImage()
 			} else {
-				return commands.RunImageInformation(args[0])
+				commands.RunImageInformation(args[0])
 			}
 		},
+		Example: "  cellery images",
 	}
 	return cmd
 }

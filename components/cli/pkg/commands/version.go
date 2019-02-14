@@ -29,7 +29,7 @@ import (
 	"github.com/fatih/color"
 )
 
-func RunVersion() error {
+func RunVersion() {
 
 	type Version struct {
 		CelleryTool struct {
@@ -128,7 +128,7 @@ func RunVersion() error {
 	if err != nil {
 		fmt.Printf("\x1b[31;1m Error while getting Docker Server version, \x1b[0m%v\n",
 			strings.TrimSpace(string(dockerServerResult)))
-		return nil
+		return
 	} else {
 		dockerServerVersion := string(dockerServerResult)
 		fmt.Println(" Server Version:\t" + strings.TrimSpace(dockerServerVersion))
@@ -143,6 +143,4 @@ func RunVersion() error {
 		dockerClientVersion := string(dockerClientResult)
 		fmt.Println(" Client Version:\t" + strings.TrimSpace(dockerClientVersion))
 	}
-
-	return nil
 }

@@ -40,7 +40,7 @@ import (
 
 // RunPush parses the cell image name to recognize the Cellery Registry (A Docker Registry), Organization and version
 // and pushes to the Cellery Registry
-func RunPush(cellImage string) error {
+func RunPush(cellImage string) {
 	err := pushImage(cellImage, "", "")
 	if err != nil {
 		fmt.Println()
@@ -55,7 +55,6 @@ func RunPush(cellImage string) error {
 			util.ExitWithErrorMessage("Failed to push image", err)
 		}
 	}
-	return nil
 }
 
 func pushImage(cellImage string, username string, password string) error {

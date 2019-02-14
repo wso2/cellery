@@ -24,33 +24,37 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/cellery-io/sdk/components/cli/pkg/commands"
+	"github.com/cellery-io/sdk/components/cli/pkg/util"
 )
 
-var isSpinning = true
-var isFirstPrint = true
-var tag string
-var fileName string
-
+// newBuildCommand creates a cobra command which can be invoked to build a cell image from a cell file
 func newBuildCommand() *cobra.Command {
+	var tag string
 	cmd := &cobra.Command{
-		Use:   "build CELL_FILE_NAME -t [REPOSITORY]/ORGANIZATION/IMAGE_NAME:VERSION",
-		Short: "Build an immutable cell image with required dependencies",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			if len(args) == 0 {
-				fmt.Printf("'cellery build' requires exactly 2 arguments.\n" +
-					"See 'cellery build --help' for more infomation.\n")
-				return nil
-			}
-			fileName = args[0]
-			err := commands.RunBuild(tag, fileName)
+		Use:   "build <cell-file>",
+		Short: "Build an immutable cell image with the required dependencies",
+		Args: func(cmd *cobra.Command, args []string) error {
+			err := cobra.ExactArgs(1)(cmd, args)
 			if err != nil {
-				cmd.Help()
+				return err
+			}
+			isProperFile, err := util.FileExists(args[0])
+			if err != nil || !isProperFile {
+				return fmt.Errorf("expects a proper file as the cell-file, received %s", args[0])
+			}
+			err = util.ValidateImageTag(tag)
+			if err != nil {
 				return err
 			}
 			return nil
 		},
-		Example: "  cellery build my-project.bal -t [repo]/org/myproject:1.0.0",
+		Run: func(cmd *cobra.Command, args []string) {
+			commands.RunBuild(tag, args[0])
+		},
+		Example: "  cellery build employee.bal -t cellery-samples/employee:1.0.0",
 	}
-	cmd.Flags().StringVarP(&tag, "tag", "t", "", "[repository]/organization/image_name:version")
+	cmd.Flags().StringVarP(&tag, "tag", "t", "",
+		"Cell image in the format: <organization>/<cell-image>:<version>")
+	_ = cmd.MarkFlagRequired("tag")
 	return cmd
 }

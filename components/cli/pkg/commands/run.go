@@ -30,7 +30,7 @@ import (
 	"github.com/cellery-io/sdk/components/cli/pkg/util"
 )
 
-func RunRun(cellImageTag string) error {
+func RunRun(cellImageTag string) {
 	parsedCellImage, err := util.ParseImageTag(cellImageTag)
 	if err != nil {
 		util.ExitWithErrorMessage("Error occurred while parsing cell image", err)
@@ -44,7 +44,7 @@ func RunRun(cellImageTag string) error {
 	if _, err := os.Stat(zipLocation); os.IsNotExist(err) {
 		fmt.Printf("\nUnable to find image %s locally.", cellImageTag)
 		fmt.Printf("\nPulling image: %s", cellImageTag)
-		_ = RunPull(cellImageTag, true)
+		RunPull(cellImageTag, true)
 	}
 
 	// Create tmp directory
@@ -93,6 +93,4 @@ func RunRun(cellImageTag string) error {
 
 	util.PrintSuccessMessage(fmt.Sprintf("Successfully deployed cell image: %s", util.Bold(cellImageTag)))
 	util.PrintWhatsNextMessage("list running cells", "cellery ps")
-
-	return nil
 }

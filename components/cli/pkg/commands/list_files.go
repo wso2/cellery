@@ -31,7 +31,7 @@ import (
 )
 
 // RunListFiles extracts the cell image and lists the files in the cell image
-func RunListFiles(cellImage string) error {
+func RunListFiles(cellImage string) {
 	parsedCellImage, err := util.ParseImageTag(cellImage)
 	if err != nil {
 		util.ExitWithErrorMessage("Error occurred while parsing cell image", err)
@@ -68,8 +68,6 @@ func RunListFiles(cellImage string) error {
 		util.ExitWithErrorMessage("Error occurred while printing the cell image files", err)
 	}
 	fmt.Println()
-
-	return nil
 }
 
 func printCellImageDirectory(dir string, nestingLevel int, ancestorBranchPrintRequirement []bool) error {

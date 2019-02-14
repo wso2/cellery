@@ -34,7 +34,7 @@ import (
 
 // RunPull connects to the Cellery Registry and pulls the cell image and saves it in the local repository.
 // This also adds the relevant ballerina files to the ballerina repo directory.
-func RunPull(cellImage string, silent bool) error {
+func RunPull(cellImage string, silent bool) {
 	err := pullImage(cellImage, "", "", silent)
 	if err != nil {
 		fmt.Println()
@@ -49,7 +49,6 @@ func RunPull(cellImage string, silent bool) error {
 			util.ExitWithErrorMessage("Failed to pull image", err)
 		}
 	}
-	return nil
 }
 
 func pullImage(cellImage string, username string, password string, silent bool) error {

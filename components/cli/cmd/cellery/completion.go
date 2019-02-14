@@ -24,22 +24,39 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// newCompletionCommand creates a cobra command which can be invoked to generate completion scripts.
+// To properly use this command it should be sourced.
 func newCompletionCommand(root *cobra.Command) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "completion",
-		Short: "Generates bash completion scripts",
-		Long: `To load completion run
-
-. <(cellery completion)
-
-To configure your bash shell to load completions for each session add to your bashrc
-
-# ~/.bashrc or ~/.profile
-. <(cellery completion)
-`,
-		Run: func(cmd *cobra.Command, args []string) {
-			root.GenBashCompletion(os.Stdout)
+		Use:   "completion <type>",
+		Short: "Generate bash/zsh completion scripts",
+		Long: "This generates bash/zsh completion scripts. " +
+			"To load completion scripts run\n\n" +
+			". <(cellery completion bash)\n\n" +
+			"To configure your bash shell to load completions for each session add to your bashrc\n\n" +
+			"# ~/.bashrc or ~/.profile\n" +
+			". <(cellery completion bash)\n",
+		Args: func(cmd *cobra.Command, args []string) error {
+			err := cobra.ExactArgs(1)(cmd, args)
+			if err != nil {
+				return err
+			}
+			err = cobra.OnlyValidArgs(cmd, args)
+			if err != nil {
+				return err
+			}
+			return nil
 		},
+		ValidArgs: []string{"bash", "zsh"},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if args[0] == "bash" {
+				return root.GenBashCompletion(os.Stdout)
+			} else {
+				return root.GenZshCompletion(os.Stdout)
+			}
+		},
+		Example: "  cellery completion bash" +
+			"  cellery completion zsh",
 	}
 	return cmd
 }

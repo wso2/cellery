@@ -26,7 +26,7 @@ import (
 	"github.com/cellery-io/sdk/components/cli/pkg/util"
 )
 
-func RunDescribe(cellImage string) error {
+func RunDescribe(cellImage string) {
 	cmd := exec.Command("kubectl", "describe", "cells", cellImage)
 	stdoutReader, _ := cmd.StdoutPipe()
 	stdoutScanner := bufio.NewScanner(stdoutReader)
@@ -50,5 +50,4 @@ func RunDescribe(cellImage string) error {
 	if err != nil {
 		util.ExitWithErrorMessage("Error occurred while fetching cell details", err)
 	}
-	return nil
 }

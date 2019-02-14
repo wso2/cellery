@@ -34,7 +34,7 @@ type Context struct {
 	Name string `json:"name"`
 }
 
-func RunConfigure() error {
+func RunConfigure() {
 	bold := color.New(color.Bold).SprintFunc()
 	cellTemplate := &promptui.SelectTemplates{
 		Label:    "{{ . }}",
@@ -51,11 +51,10 @@ func RunConfigure() error {
 	}
 	_, value, err := cellPrompt.Run()
 	if err != nil {
-		return fmt.Errorf("failed to select cluster: %v", err)
+		util.ExitWithErrorMessage("Error occurred while selecting the cluster: %v", err)
 	}
 
-	setContext(value)
+	_ = setContext(value)
 	fmt.Printf(util.GreenBold("\n\U00002714") + " Successfully configured Cellery.\n")
 	util.PrintWhatsNextMessage("initialize a project", "cellery init")
-	return nil
 }

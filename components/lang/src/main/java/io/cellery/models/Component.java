@@ -22,6 +22,7 @@ public class Component {
     String service;
     Boolean isStub;
     Map<Integer, Integer> containerPortToServicePortMap;
+    AutoScaling autoScaling;
 
     public Component() {
         envVars = new HashMap<>();

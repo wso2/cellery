@@ -24,6 +24,10 @@ import com.github.mustachejava.MustacheFactory;
 import io.cellery.CelleryConstants;
 import io.cellery.models.API;
 import io.cellery.models.APIDefinition;
+import io.cellery.models.AutoScaling;
+import io.cellery.models.AutoScalingPolicy;
+import io.cellery.models.AutoScalingResourceMetric;
+import io.cellery.models.AutoScalingSpec;
 import io.cellery.models.Cell;
 import io.cellery.models.CellCache;
 import io.cellery.models.CellSpec;
@@ -39,12 +43,15 @@ import io.fabric8.kubernetes.api.model.ContainerPort;
 import io.fabric8.kubernetes.api.model.ContainerPortBuilder;
 import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.EnvVarBuilder;
+import io.fabric8.kubernetes.api.model.HorizontalPodAutoscalerSpecBuilder;
+import io.fabric8.kubernetes.api.model.MetricSpecBuilder;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.ballerinalang.bre.Context;
 import org.ballerinalang.bre.bvm.BlockingNativeCallableUnit;
 import org.ballerinalang.model.types.TypeKind;
 import org.ballerinalang.model.values.BBoolean;
+import org.ballerinalang.model.values.BInteger;
 import org.ballerinalang.model.values.BMap;
 import org.ballerinalang.model.values.BRefType;
 import org.ballerinalang.model.values.BValue;
@@ -62,7 +69,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -127,14 +133,13 @@ public class CreateImage extends BlockingNativeCallableUnit {
                         component.setService(getValidName(value.toString()));
                         break;
                     case "replicas":
-                        component.setReplicas(Integer.parseInt(value.toString()));
+                        component.setReplicas((int) ((BInteger) value).intValue());
                         break;
                     case "isStub":
-                        component.setIsStub(Boolean.parseBoolean(value.toString()));
+                        component.setIsStub(((BBoolean) value).booleanValue());
                         break;
                     case "source":
-                        component.setSource(Collections.
-                                singletonList(((BMap) value).getMap()).get(0).values().toArray()[0].toString());
+                        component.setSource(((BMap<?, ?>) value).getMap().get("image").toString());
                         break;
                     case "ingresses":
                         processIngressPort(((BMap<?, ?>) value).getMap(), component);
@@ -155,7 +160,9 @@ public class CreateImage extends BlockingNativeCallableUnit {
                         ((BMap<?, ?>) value).getMap().forEach((labelKey, labelValue) ->
                                 component.addLabel(labelKey.toString(), labelValue.toString()));
                         break;
-
+                    case "autoscaling":
+                        processAutoScalePolicy(((BMap<?, ?>) value).getMap(), component);
+                        break;
                     default:
                         break;
                 }
@@ -187,6 +194,46 @@ public class CreateImage extends BlockingNativeCallableUnit {
             //TCP ingress
             component.addPorts(containerPort.get(), containerPort.get());
         }
+    }
+
+    /**
+     * Extract the scale policy.
+     *
+     * @param scalePolicy Scale policy to be processed
+     * @param component current component
+     */
+    private void processAutoScalePolicy(LinkedHashMap<?, ?> scalePolicy, Component component) {
+        LinkedHashMap bScalePolicy = ((BMap) scalePolicy.get("policy")).getMap();
+        boolean bOverridable = ((BBoolean) scalePolicy.get("overridable")).booleanValue();
+
+        List<AutoScalingResourceMetric> autoScalingResourceMetrics = new ArrayList<>();
+        BValueArray metricsArray = ((BValueArray) bScalePolicy.get("metrics"));
+        for (int i = 0; i < metricsArray.size(); i++) {
+            BMap<?, ?> bMetric = (BMap<?, ?>) metricsArray.getRefValue(i);
+            LinkedHashMap<?, ?> metric = bMetric.getMap();
+            long percentage = ((BInteger) metric.get("percentage")).intValue();
+
+            String metricType = bMetric.getType().getName();
+            String resourceName = null;
+            if (CelleryConstants.AUTO_SCALING_METRIC_OBJECT_CPU_UTILIZATION_PERCENTAGE.equals(metricType)) {
+                resourceName = CelleryConstants.AUTO_SCALING_METRIC_RESOURCE_CPU;
+            } else {
+                out.println("Warning: Unknown Auto Scaling Policy Metric \"" + metricType + "\"");
+            }
+
+            if (resourceName != null) {
+                AutoScalingResourceMetric autoScalingResourceMetric
+                        = new AutoScalingResourceMetric(resourceName, (int) percentage);
+                autoScalingResourceMetrics.add(autoScalingResourceMetric);
+            }
+        }
+
+        AutoScalingPolicy autoScalingPolicy = new AutoScalingPolicy();
+        autoScalingPolicy.setMinReplicas(((BInteger) bScalePolicy.get("minReplicas")).intValue());
+        autoScalingPolicy.setMaxReplicas(((BInteger) bScalePolicy.get("maxReplicas")).intValue());
+        autoScalingPolicy.setMetrics(autoScalingResourceMetrics);
+
+        component.setAutoScaling(new AutoScaling(autoScalingPolicy, bOverridable));
     }
 
     private void processAPIs(BRefType<?>[] apiMap) {
@@ -314,6 +361,7 @@ public class CreateImage extends BlockingNativeCallableUnit {
                 new ArrayList<>(componentHolder.getComponentNameToComponentMap().values());
         GatewaySpec spec = new GatewaySpec();
         List<ServiceTemplate> serviceTemplateList = new ArrayList<>();
+
         for (Component component : components) {
             if (component.getIsStub()) {
                 continue;
@@ -322,6 +370,7 @@ public class CreateImage extends BlockingNativeCallableUnit {
             spec.setTcp(component.getTcpList());
             ServiceTemplateSpec templateSpec = new ServiceTemplateSpec();
             templateSpec.setReplicas(component.getReplicas());
+
             List<EnvVar> envVarList = new ArrayList<>();
             component.getEnvVars().forEach((key, value) -> {
                 if (StringUtils.isEmpty(value)) {
@@ -329,6 +378,7 @@ public class CreateImage extends BlockingNativeCallableUnit {
                 }
                 envVarList.add(new EnvVarBuilder().withName(key).withValue(value).build());
             });
+
             //TODO:Fix service port
             List<ContainerPort> ports = new ArrayList<>();
             component.getContainerPortToServicePortMap().forEach((containerPort, servicePort) -> {
@@ -340,6 +390,30 @@ public class CreateImage extends BlockingNativeCallableUnit {
                     .withPorts(ports)
                     .withEnv(envVarList)
                     .build());
+
+            AutoScaling autoScaling = component.getAutoScaling();
+            if (autoScaling != null) {
+                HorizontalPodAutoscalerSpecBuilder autoScaleSpecBuilder = new HorizontalPodAutoscalerSpecBuilder()
+                        .withMaxReplicas((int) autoScaling.getPolicy().getMaxReplicas())
+                        .withMinReplicas((int) autoScaling.getPolicy().getMinReplicas());
+
+                // Generating scale policy metrics config
+                for (AutoScalingResourceMetric metric : autoScaling.getPolicy().getMetrics()) {
+                    autoScaleSpecBuilder.addToMetrics(new MetricSpecBuilder()
+                            .withType(CelleryConstants.AUTO_SCALING_METRIC_RESOURCE)
+                            .withNewResource()
+                            .withName(metric.getName())
+                            .withTargetAverageUtilization(metric.getValue())
+                            .endResource()
+                            .build());
+                }
+
+                AutoScalingSpec autoScalingSpec = new AutoScalingSpec();
+                autoScalingSpec.setOverridable(autoScaling.isOverridable());
+                autoScalingSpec.setPolicy(autoScaleSpecBuilder.build());
+                templateSpec.setAutoscaling(autoScalingSpec);
+            }
+
             ServiceTemplate serviceTemplate = new ServiceTemplate();
             serviceTemplate.setMetadata(new ObjectMetaBuilder()
                     .withName(component.getService())
@@ -348,12 +422,15 @@ public class CreateImage extends BlockingNativeCallableUnit {
             serviceTemplate.setSpec(templateSpec);
             serviceTemplateList.add(serviceTemplate);
         }
+
         GatewayTemplate gatewayTemplate = new GatewayTemplate();
         gatewayTemplate.setSpec(spec);
+
         CellSpec cellSpec = new CellSpec();
         cellSpec.setGatewayTemplate(gatewayTemplate);
         cellSpec.setServicesTemplates(serviceTemplateList);
         Cell cell = new Cell(new ObjectMetaBuilder().withName(getValidName(name)).build(), cellSpec);
+
         String targetPath = OUTPUT_DIRECTORY + File.separator + "cellery" + File.separator + name + ".yaml";
         try {
             writeToFile(toYaml(cell), targetPath);

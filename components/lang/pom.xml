@@ -55,8 +55,8 @@
         </dependency>
         <dependency>
             <groupId>io.fabric8</groupId>
-            <artifactId>kubernetes-client</artifactId>
-            <version>${fabric8.kubernetes.client.version}</version>
+            <artifactId>kubernetes-model</artifactId>
+            <version>${fabric8.kubernetes.version}</version>
         </dependency>
         <dependency>
             <groupId>com.esotericsoftware.yamlbeans</groupId>
@@ -204,6 +204,8 @@
                             <minimizeJar>true</minimizeJar>
                             <artifactSet>
                                 <includes>
+                                    <!-- TODO Remove io.fabric8 once the Ballerina K8s is upgraded -->
+                                    <include>io.fabric8*</include>
                                     <include>io.swagger.parser.v3*</include>
                                     <include>com.github.spullara.mustache.java*</include>
                                     <include>com.esotericsoftware.yamlbeans*</include>
@@ -291,7 +293,7 @@
     <properties>
         <ballerina.version>0.990.0</ballerina.version>
         <lombok.version>1.18.4</lombok.version>
-        <fabric8.kubernetes.client.version>3.1.10</fabric8.kubernetes.client.version>
+        <fabric8.kubernetes.version>4.1.2</fabric8.kubernetes.version>
         <yaml.beans.version>1.13</yaml.beans.version>
         <mustache.version>0.9.4</mustache.version>
         <swagger.parser.version>2.0.8</swagger.parser.version>

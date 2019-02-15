@@ -78,6 +78,26 @@ public type FailoverConfig record {
     !...
 };
 
+public type AutoScaling record {
+    AutoScalingPolicy policy;
+    boolean overridable = true;
+    !...
+};
+
+public type AutoScalingPolicy record {
+    int minReplicas;
+    int maxReplicas;
+    CpuUtilizationPercentage[] metrics;
+    !...
+};
+
+public type CpuUtilizationPercentage object {
+    public int percentage;
+    public function __init(int percentage) {
+        self.percentage = percentage;
+    }
+};
+
 public type Component record {
     string name;
     ImageSource source;
@@ -86,6 +106,7 @@ public type Component record {
     map<TCPIngress|HTTPIngress> ingresses;
     map<string> labels?;
     map<Env|Secret> parameters?;
+    AutoScaling autoscaling?;
     !...
 };
 

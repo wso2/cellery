@@ -18,6 +18,12 @@
 
 package util
 
+import (
+	"sync"
+
+	"github.com/tj/go-spin"
+)
+
 type CellImage struct {
 	Registry     string
 	Organization string
@@ -104,6 +110,10 @@ type GatewayDefinition struct {
 }
 
 type Spinner struct {
-	Message    string
-	IsSpinning bool
+	mux            sync.Mutex
+	core           *spin.Spinner
+	action         string
+	previousAction string
+	isSpinning     bool
+	error          bool
 }

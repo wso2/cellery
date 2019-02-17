@@ -49,12 +49,13 @@ func RunBuild(tag string, fileName string) {
 
 	spinner := util.StartNewSpinner("Building image " + util.Bold(tag))
 	defer func() {
-		spinner.IsSpinning = false
+		spinner.Stop(true)
 	}()
 
 	// First clean target directory if exists
 	projectDir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
+		spinner.Stop(false)
 		util.ExitWithErrorMessage("Error in getting current directory location", err)
 	}
 	_ = os.RemoveAll(filepath.Join(projectDir, "target"))
@@ -75,12 +76,14 @@ func RunBuild(tag string, fileName string) {
 	cmd.Stderr = &stderr
 	err = cmd.Start()
 	if err != nil {
+		spinner.Stop(false)
 		errStr := string(stderr.Bytes())
 		fmt.Printf("%s\n", errStr)
 		util.ExitWithErrorMessage("Error occurred while building cell image", err)
 	}
 	err = cmd.Wait()
 	if err != nil {
+		spinner.Stop(false)
 		fmt.Println()
 		fmt.Printf("\x1b[31;1m\nBuild Failed.\x1b[0m %v \n", execError)
 		fmt.Println("\x1b[31;1m======================\x1b[0m")
@@ -90,7 +93,7 @@ func RunBuild(tag string, fileName string) {
 	}
 
 	outStr := string(stdout.Bytes())
-	fmt.Printf("\n\033[36m%s\033[m\n", outStr)
+	fmt.Printf("\r\x1b[2K\033[36m%s\033[m\n", outStr)
 
 	// Creating additional Ballerina.toml file for ballerina reference project
 	tomlTemplate := "[project]\n" +
@@ -98,26 +101,31 @@ func RunBuild(tag string, fileName string) {
 		"version = \"" + parsedCellImage.ImageVersion + "\"\n"
 	tomlFile, err := os.Create(filepath.Join(projectDir, "target", "bal", "Ballerina.toml"))
 	if err != nil {
+		spinner.Stop(false)
 		util.ExitWithErrorMessage("Error in creating Toml File", err)
 	}
 	defer func() {
 		err = tomlFile.Close()
 		if err != nil {
+			spinner.Stop(false)
 			util.ExitWithErrorMessage("Error occurred while cleaning up", err)
 		}
 	}()
 	writer := bufio.NewWriter(tomlFile)
 	_, err = writer.WriteString(tomlTemplate)
 	if err != nil {
+		spinner.Stop(false)
 		util.ExitWithErrorMessage("Error occurred while creating cell reference", err)
 	}
 	err = writer.Flush()
 	if err != nil {
+		spinner.Stop(false)
 		util.ExitWithErrorMessage("Error occurred creating cell reference", err)
 	}
 
 	folderCopyError := util.CopyDir(filepath.Join(projectDir, "target"), filepath.Join(projectDir, "artifacts"))
 	if folderCopyError != nil {
+		spinner.Stop(false)
 		util.ExitWithErrorMessage("Error occurred creating cell image", err)
 	}
 	folders := []string{"artifacts"}
@@ -125,6 +133,7 @@ func RunBuild(tag string, fileName string) {
 	output := parsedCellImage.ImageName + ".zip"
 	err = util.RecursiveZip(files, folders, output)
 	if err != nil {
+		spinner.Stop(false)
 		util.ExitWithErrorMessage("Error occurred while creating the cell image", err)
 	}
 
@@ -133,17 +142,22 @@ func RunBuild(tag string, fileName string) {
 	// Cleaning up the old image if it already exists
 	hasOldImage, err := util.FileExists(repoLocation)
 	if err != nil {
+		spinner.Stop(false)
 		util.ExitWithErrorMessage("Error occurred while removing the old cell image", err)
 	}
 	if hasOldImage {
+		spinner.SetNewAction("Removing old Image")
 		err = os.RemoveAll(repoLocation)
 		if err != nil {
+			spinner.Stop(false)
 			util.ExitWithErrorMessage("Error occurred while cleaning up", err)
 		}
 	}
 
+	spinner.SetNewAction("Saving new Image to the Local Repository")
 	repoCreateErr := util.CreateDir(repoLocation)
 	if repoCreateErr != nil {
+		spinner.Stop(false)
 		util.ExitWithErrorMessage("Error occurred while creating image location", err)
 	}
 
@@ -151,14 +165,19 @@ func RunBuild(tag string, fileName string) {
 	zipDst := filepath.Join(repoLocation, output)
 	zipCopyError := util.CopyFile(zipSrc, zipDst)
 	if zipCopyError != nil {
+		spinner.Stop(false)
 		util.ExitWithErrorMessage("Error occurred while saving cell image to local repo", err)
 	}
 
 	_ = os.Remove(zipSrc)
 
-	util.AddImageToBalPath(parsedCellImage)
+	err = util.AddImageToBalPath(parsedCellImage)
+	if err != nil {
+		spinner.Stop(false)
+		util.ExitWithErrorMessage("Error occurred while saving cell reference to the Local Repository", err)
+	}
 
-	spinner.IsSpinning = false
+	spinner.Stop(true)
 	util.PrintSuccessMessage(fmt.Sprintf("Successfully built cell image: %s", util.Bold(tag)))
 	util.PrintWhatsNextMessage("run the image", "cellery run "+tag)
 }

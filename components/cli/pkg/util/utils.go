@@ -51,15 +51,13 @@ import (
 	"github.com/cellery-io/sdk/components/cli/pkg/constants"
 )
 
-var Cyan = color.New(color.FgCyan)
-var CyanF = color.New(color.FgCyan).SprintFunc()
-var CyanBold = Cyan.Add(color.Bold).SprintFunc()
 var Bold = color.New(color.Bold).SprintFunc()
+var CyanBold = color.New(color.FgCyan).Add(color.Bold).SprintFunc()
 var Faint = color.New(color.Faint).SprintFunc()
-var Green = color.New(color.FgGreen)
-var GreenBold = Green.Add(color.Bold).SprintFunc()
-var Yellow = color.New(color.FgYellow)
-var YellowBold = Yellow.Add(color.Bold).SprintFunc()
+var Green = color.New(color.FgGreen).SprintfFunc()
+var GreenBold = color.New(color.FgGreen).Add(color.Bold).SprintFunc()
+var YellowBold = color.New(color.FgYellow).Add(color.Bold).SprintFunc()
+var Red = color.New(color.FgRed).Add(color.Bold).SprintFunc()
 
 func PrintWhatsNextMessage(action string, cmd string) {
 	fmt.Println()
@@ -631,19 +629,62 @@ func RequestCredentials() (string, string, error) {
 }
 
 // StartNewSpinner starts a new spinner with the provided message
-func StartNewSpinner(message string) *Spinner {
-	spinner := spin.New()
+func StartNewSpinner(action string) *Spinner {
 	newSpinner := &Spinner{
-		message,
-		true,
+		core:           spin.New(),
+		action:         action,
+		previousAction: action,
+		isSpinning:     true,
+		error:          false,
 	}
 	go func() {
-		for newSpinner.IsSpinning {
-			fmt.Printf("\x1b[0;0H\x1b[2J%s\033[m %s", spinner.Next(), message)
+		for newSpinner.isSpinning {
+			newSpinner.mux.Lock()
+			newSpinner.spin()
+			newSpinner.mux.Unlock()
 			time.Sleep(100 * time.Millisecond)
 		}
 	}()
 	return newSpinner
+}
+
+// SetNewAction sets the current action of a spinner
+func (s *Spinner) SetNewAction(action string) {
+	s.mux.Lock()
+	s.action = action
+	s.spin()
+	s.mux.Unlock()
+}
+
+// Stop causes the spinner to stop
+func (s *Spinner) Stop(isSuccess bool) {
+	s.mux.Lock()
+	s.error = !isSuccess
+	s.action = ""
+	s.spin()
+	s.isSpinning = false
+	s.mux.Unlock()
+}
+
+// spin causes the spinner to do one spin
+func (s *Spinner) spin() {
+	if s.isSpinning == true {
+		if s.action != s.previousAction {
+			var icon string
+			if s.error {
+				icon = Red("\U0000274C")
+			} else {
+				icon = Green("\U00002714")
+			}
+			fmt.Printf("\r\x1b[2K%s %s\n", icon, s.previousAction)
+			s.previousAction = s.action
+		}
+		if s.action == "" {
+			s.isSpinning = false
+		} else {
+			fmt.Printf("\r\x1b[2K\033[36m%s\033[m %s", s.core.Next(), s.action)
+		}
+	}
 }
 
 // ParseImageTag parses the given image name string and returns a CellImage struct with the relevant information.
@@ -723,7 +764,7 @@ func ValidateImageTagWithRegistry(imageTag string) error {
 
 // AddImageToBalPath extracts the cell image in a temporary location and copies the relevant ballerina files to the
 // ballerina repo directory. This expects the BALLERINA_HOME environment variable to be set in th developer machine.
-func AddImageToBalPath(cellImage *CellImage) {
+func AddImageToBalPath(cellImage *CellImage) error {
 	cellImageFile := filepath.Join(UserHomeDir(), ".cellery", "repo", cellImage.Organization, cellImage.ImageName,
 		cellImage.ImageVersion, cellImage.ImageName+constants.CELL_IMAGE_EXT)
 
@@ -733,7 +774,7 @@ func AddImageToBalPath(cellImage *CellImage) {
 	tempPath := filepath.Join(UserHomeDir(), ".cellery", "tmp", timestamp)
 	err := CreateDir(tempPath)
 	if err != nil {
-		ExitWithErrorMessage("Error while saving cell image to local repo", err)
+		return err
 	}
 	defer func() {
 		err = os.RemoveAll(tempPath)
@@ -745,7 +786,7 @@ func AddImageToBalPath(cellImage *CellImage) {
 	// Unzipping Cellery Image
 	err = Unzip(cellImageFile, tempPath)
 	if err != nil {
-		ExitWithErrorMessage("Error while saving cell image to local repo", err)
+		return err
 	}
 
 	balRepoDir := filepath.Join(UserHomeDir(), ".ballerina", "repo", cellImage.Organization, cellImage.ImageName,
@@ -754,19 +795,19 @@ func AddImageToBalPath(cellImage *CellImage) {
 	// Cleaning up the old image bal files if it already exists
 	hasOldImage, err := FileExists(balRepoDir)
 	if err != nil {
-		ExitWithErrorMessage("Error occurred while removing the old cell image", err)
+		return err
 	}
 	if hasOldImage {
 		err = os.RemoveAll(balRepoDir)
 		if err != nil {
-			ExitWithErrorMessage("Error while cleaning up", err)
+			return err
 		}
 	}
 
 	// Creating the .ballerina directory (ballerina cli fails when this directory is not present)
 	err = CreateDir(filepath.Join(tempPath, "artifacts", "bal", ".ballerina"))
 	if err != nil {
-		ExitWithErrorMessage("Error occurred while installing cell reference", err)
+		return err
 	}
 
 	// Installing the cell reference ballerina module
@@ -787,17 +828,18 @@ func AddImageToBalPath(cellImage *CellImage) {
 	if err != nil {
 		errStr := string(stderr.Bytes())
 		fmt.Printf("%s\n", errStr)
-		ExitWithErrorMessage("Error occurred while installing cell reference", err)
+		return err
 	}
 	err = cmd.Wait()
 	if err != nil {
-		ExitWithErrorMessage("Error occurred while installing cell reference", err)
+		return err
 	}
+	return nil
 }
 
 // ExitWithErrorMessage prints an error message and exits the command
 func ExitWithErrorMessage(message string, err error) {
-	fmt.Printf("\n\x1b[31;1m%s: \x1b[0m %v \n", message, err)
+	fmt.Printf("\n\n\x1b[31;1m%s:\x1b[0m %v\n\n", message, err)
 	os.Exit(1)
 }
 

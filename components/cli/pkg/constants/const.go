@@ -18,10 +18,11 @@
 
 package constants
 
+const DOMAIN_NAME_PATTERN = "[a-z0-9]+((-|.)[a-z0-9]+)*"
 const CELLERY_ID_PATTERN = "[a-z0-9]+(-[a-z0-9]+)*"
 const CELL_VERSION_PATTERN = "[0-9]+\\.[0-9]+\\.[0-9]+"
 const CELL_IMAGE_PATTERN = CELLERY_ID_PATTERN + "\\/" + CELLERY_ID_PATTERN + ":" + CELL_VERSION_PATTERN
-const CELL_IMAGE_WITH_REGISTRY_PATTERN = "(" + CELLERY_ID_PATTERN + "\\/)?" + CELL_IMAGE_PATTERN
+const CELL_IMAGE_WITH_REGISTRY_PATTERN = "(" + DOMAIN_NAME_PATTERN + "\\/)?" + CELL_IMAGE_PATTERN
 
 const GROUP_NAME = "mesh.cellery.io"
 const BASE_API_URL = "http://localhost:8080"

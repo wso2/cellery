@@ -69,6 +69,7 @@ func RunExtractResources(cellImage string, outputPath string) {
 		util.ExitWithErrorMessage("Error occurred while extracting the image resources", err)
 	}
 
-	fmt.Print("\nExtracted resources: " + util.Bold(filepath.Abs(outputPath)))
+	absOutputPath, _ := filepath.Abs(outputPath)
+	fmt.Printf("\nExtracted Resources: %s", util.Bold(absOutputPath))
 	util.PrintSuccessMessage(fmt.Sprintf("Successfully extracred cell image resources: %s", util.Bold(cellImage)))
 }

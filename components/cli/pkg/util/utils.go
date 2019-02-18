@@ -752,7 +752,7 @@ func ValidateImageTagWithRegistry(imageTag string) error {
 	if err != nil || !isValid {
 		isValid, err := regexp.MatchString(fmt.Sprintf("^.*%s$", constants.CELL_VERSION_PATTERN), imageTag)
 		if err != nil || !isValid {
-			return fmt.Errorf("expects the cell version to be in the format of Semantic Versioning "+
+			return fmt.Errorf("expects the cell image with version in the format of Semantic Versioning "+
 				"(eg:- 1.0.0), received %s", imageTag)
 		} else {
 			return fmt.Errorf("expects [<registry>/]<organization>/<cell-image>:<version> "+

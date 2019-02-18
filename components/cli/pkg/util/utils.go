@@ -732,33 +732,75 @@ func ParseImageTag(cellImageString string) (parsedCellImage *CellImage, err erro
 // ValidateImageTag validates the image tag (without the registry in it). This checks the version to be in the format
 // of semantic versioning
 func ValidateImageTag(imageTag string) error {
-	isValid, err := regexp.MatchString(fmt.Sprintf("^%s$", constants.CELL_IMAGE_PATTERN), imageTag)
-	if err != nil || !isValid {
-		isValid, err := regexp.MatchString(fmt.Sprintf("^.*%s$", constants.CELL_VERSION_PATTERN), imageTag)
-		if err != nil || !isValid {
-			return fmt.Errorf("expects the cell version to be in the format of Semantic Versioning "+
-				"(eg:- 1.0.0), received %s", imageTag)
-		} else {
-			return fmt.Errorf("expects <organization>/<cell-image>:<version> as cell-image, received %s", imageTag)
-		}
+	r := regexp.MustCompile("^([^/:]*)/([^/:]*):([^/:]*)$")
+	subMatch := r.FindStringSubmatch(imageTag)
+
+	if subMatch == nil {
+		return fmt.Errorf("expects <organization>/<cell-image>:<version> as the tag, received %s", imageTag)
 	}
+
+	organization := subMatch[1]
+	isValid, err := regexp.MatchString(fmt.Sprintf("^%s$", constants.CELLERY_ID_PATTERN), organization)
+	if err != nil || !isValid {
+		return fmt.Errorf("expects a valid organization name (lower case letters, numbers and dashes), "+
+			"received %s", organization)
+	}
+
+	imageName := subMatch[2]
+	isValid, err = regexp.MatchString(fmt.Sprintf("^%s$", constants.CELLERY_ID_PATTERN), imageName)
+	if err != nil || !isValid {
+		return fmt.Errorf("expects a valid image name (lower case letters, numbers and dashes), "+
+			"received %s", imageName)
+	}
+
+	imageVersion := subMatch[3]
+	isValid, err = regexp.MatchString(fmt.Sprintf("^%s$", constants.IMAGE_VERSION_PATTERN), imageVersion)
+	if err != nil || !isValid {
+		return fmt.Errorf("expects the image version to be in the format of Semantic Versioning "+
+			"(eg:- 1.0.0), received %s", imageVersion)
+	}
+
 	return nil
 }
 
 // ValidateImageTag validates the image tag (with the registry in it). The registry is an option element
 // in this validation. This checks the version to be in the format of semantic versioning
 func ValidateImageTagWithRegistry(imageTag string) error {
-	isValid, err := regexp.MatchString(fmt.Sprintf("^%s$", constants.CELL_IMAGE_WITH_REGISTRY_PATTERN), imageTag)
-	if err != nil || !isValid {
-		isValid, err := regexp.MatchString(fmt.Sprintf("^.*%s$", constants.CELL_VERSION_PATTERN), imageTag)
-		if err != nil || !isValid {
-			return fmt.Errorf("expects the cell image with version in the format of Semantic Versioning "+
-				"(eg:- 1.0.0), received %s", imageTag)
-		} else {
-			return fmt.Errorf("expects [<registry>/]<organization>/<cell-image>:<version> "+
-				"as cell-image, received %s", imageTag)
-		}
+	r := regexp.MustCompile("^(?:([^/:]*)/)?([^/:]*)/([^/:]*):([^/:]*)$")
+	subMatch := r.FindStringSubmatch(imageTag)
+
+	if subMatch == nil {
+		return fmt.Errorf("expects [<registry>]/<organization>/<cell-image>:<version> as the tag, received %s",
+			imageTag)
 	}
+
+	registry := subMatch[1]
+	isValid, err := regexp.MatchString(fmt.Sprintf("^%s$", constants.DOMAIN_NAME_PATTERN), registry)
+	if registry != "" && (err != nil || !isValid) {
+		return fmt.Errorf("expects a valid URL as the registry, received %s", registry)
+	}
+
+	organization := subMatch[2]
+	isValid, err = regexp.MatchString(fmt.Sprintf("^%s$", constants.CELLERY_ID_PATTERN), organization)
+	if err != nil || !isValid {
+		return fmt.Errorf("expects a valid organization name (lower case letters, numbers and dashes), "+
+			"received %s", organization)
+	}
+
+	imageName := subMatch[3]
+	isValid, err = regexp.MatchString(fmt.Sprintf("^%s$", constants.CELLERY_ID_PATTERN), imageName)
+	if err != nil || !isValid {
+		return fmt.Errorf("expects a valid image name (lower case letters, numbers and dashes), "+
+			"received %s", imageName)
+	}
+
+	imageVersion := subMatch[4]
+	isValid, err = regexp.MatchString(fmt.Sprintf("^%s$", constants.IMAGE_VERSION_PATTERN), imageVersion)
+	if err != nil || !isValid {
+		return fmt.Errorf("expects the image version to be in the format of Semantic Versioning "+
+			"(eg:- 1.0.0), received %s", imageVersion)
+	}
+
 	return nil
 }
 

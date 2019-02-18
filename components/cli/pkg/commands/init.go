@@ -32,9 +32,8 @@ import (
 
 func RunInit() {
 	prefix := util.CyanBold("?")
-	projectName := ""
-	projectPath := ""
 
+	projectName := ""
 	err := interact.Run(&interact.Interact{
 		Before: func(c interact.Context) error {
 			c.SetPrfx(color.Output, prefix)
@@ -65,47 +64,52 @@ func RunInit() {
 		"import celleryio/cellery;\n" +
 		"\n" +
 		"cellery:Component helloWorldComp = {\n" +
-		"    name: \"HelloWorld\",\n" +
+		"    name: \"hello-world\",\n" +
 		"    source: {\n" +
 		"        image: \"sumedhassk/hello-world:1.0.0\"\n" +
 		"    },\n" +
 		"    ingresses: {\n" +
-		"        \"hello\": new cellery:HTTPIngress(9090, \"hello\",\n" +
-		"            [\n" +
-		"                {\n" +
-		"                    path: \"/\",\n" +
-		"                    method: \"GET\"\n" +
-		"                }\n" +
-		"            ]\n" +
+		"        hello: new cellery:HTTPIngress(\n" +
+		"            8080,\n" +
+		"            {\n" +
+		"                basePath: \"hello\",\n" +
+		"                definitions: [\n" +
+		"                    {\n" +
+		"                        path: \"/\",\n" +
+		"                        method: \"GET\"\n" +
+		"                    }\n" +
+		"                ]\n" +
+		"            }\n" +
 		"        )\n" +
 		"    }\n" +
 		"};\n" +
 		"\n" +
-		"cellery:CellImage helloCell = new(\"Hello-World\");\n" +
+		"public cellery:CellImage helloCell = new();\n" +
 		"\n" +
-		"public function build() {\n" +
+		"public function build(string imageName, string imageVersion) {\n" +
 		"    helloCell.addComponent(helloWorldComp);\n" +
 		"\n" +
 		"    helloCell.exposeGlobalAPI(helloWorldComp);\n" +
 		"\n" +
-		"    var out = cellery:createImage(helloCell);\n" +
+		"    var out = cellery:createImage(helloCell, imageName, imageVersion);\n" +
 		"    if (out is boolean) {\n" +
-		"        io:println(\"Hello Cell Built successfully.\");\n" +
+		"        io:println(\"Hello World Cell Built successfully.\");\n" +
 		"    }\n" +
 		"}\n" +
 		"\n"
 
-	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	currentDir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
 		util.ExitWithErrorMessage("Error in getting current directory location", err)
 	}
 
-	err = util.CreateDir(filepath.Join(dir, projectName))
+	projectDir := filepath.Join(currentDir, projectName)
+	err = util.CreateDir(projectDir)
 	if err != nil {
 		util.ExitWithErrorMessage("Failed to initialize project", err)
 	}
 
-	balFile, err := os.Create(filepath.Join(projectPath, projectName+".bal"))
+	balFile, err := os.Create(filepath.Join(projectDir, projectName+".bal"))
 	if err != nil {
 		util.ExitWithErrorMessage("Error in creating Ballerina File", err)
 	}
@@ -125,7 +129,7 @@ func RunInit() {
 		util.ExitWithErrorMessage("Failed to create cell file", err)
 	}
 
-	util.PrintSuccessMessage(fmt.Sprintf("Initialized project in directory: %s", util.Faint(projectPath)))
+	util.PrintSuccessMessage(fmt.Sprintf("Initialized project in directory: %s", util.Faint(projectDir)))
 	util.PrintWhatsNextMessage("build the image",
 		"cellery build "+projectName+".bal"+" -t [repo/]organization/image_name:version")
 }

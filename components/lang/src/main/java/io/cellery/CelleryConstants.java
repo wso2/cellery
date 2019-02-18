@@ -33,6 +33,12 @@ public class CelleryConstants {
     public static final String CELL_REFERENCE_TEMPLATE_CONTEXT_HANDLE_API_NAME = "handleApiName";
     public static final String CELL_REFERENCE_TEMPLATE_CONTEXT_HANDLE_TYPE_NAME = "handleTypeName";
 
+    public static final String AUTO_SCALING_METRIC_RESOURCE = "Resource";
+    public static final String AUTO_SCALING_METRIC_RESOURCE_CPU = "cpu";
+
+    // These should match the Ballerina object names of the Auto Scaling Metrics Objects
+    public static final String AUTO_SCALING_METRIC_OBJECT_CPU_UTILIZATION_PERCENTAGE = "CpuUtilizationPercentage";
+
     public static final String TARGET = "target";
     public static final String RESOURCES = "resources";
     public static final String DEFAULT_GATEWAY_PROTOCOL = "http";

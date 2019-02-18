@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -15,22 +15,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package io.cellery.models;
 
-import io.fabric8.kubernetes.api.model.Container;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
- * Service Template Spec.
+ * Scale policy metrics model class for Resource type metric.
  */
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-public class ServiceTemplateSpec {
-    private int replicas;
-    private int servicePort;
-    private Container container;
-    private AutoScalingSpec autoscaling;
+public class AutoScalingResourceMetric {
+    String name;
+    Integer value;
 }

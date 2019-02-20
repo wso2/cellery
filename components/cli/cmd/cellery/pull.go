@@ -22,26 +22,29 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/cellery-io/sdk/components/cli/pkg/commands"
+	"github.com/cellery-io/sdk/components/cli/pkg/util"
 )
 
 func newPullCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "pull [CELL IMAGE]",
-		Short: "pull cell image from the remote repository",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			if len(args) == 0 {
-				cmd.Help()
-				return nil
-			}
-			cellImage = args[0]
-			err := commands.RunPull(cellImage, false)
+		Use:   "pull [<registry>/]<organization>/<cell-image>:<version>",
+		Short: "Pull cell image from the remote repository",
+		Args: func(cmd *cobra.Command, args []string) error {
+			err := cobra.ExactArgs(1)(cmd, args)
 			if err != nil {
-				cmd.Help()
+				return err
+			}
+			err = util.ValidateImageTagWithRegistry(args[0])
+			if err != nil {
 				return err
 			}
 			return nil
 		},
-		Example: "  cellery pull mycellery.org/hello:v1",
+		Run: func(cmd *cobra.Command, args []string) {
+			commands.RunPull(args[0], false)
+		},
+		Example: "  cellery pull cellery-samples/employee:1.0.0\n" +
+			"  cellery pull registry.foo.io/cellery-samples/employee:1.0.0",
 	}
 	return cmd
 }

@@ -27,7 +27,7 @@ import (
 	"github.com/cellery-io/sdk/components/cli/pkg/util"
 )
 
-func RunPs() error {
+func RunPs() {
 	cmd := exec.Command("kubectl", "get", "cells")
 	stdoutReader, _ := cmd.StdoutPipe()
 	stdoutScanner := bufio.NewScanner(stdoutReader)
@@ -54,5 +54,4 @@ func RunPs() error {
 	if err != nil {
 		util.ExitWithErrorMessage("Error occurred while fetching the running cell data", err)
 	}
-	return nil
 }

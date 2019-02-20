@@ -33,7 +33,7 @@ import (
 	"github.com/manifoldco/promptui"
 )
 
-func RunSetup() error {
+func RunSetup() {
 	bold := color.New(color.Bold).SprintFunc()
 	selectTemplate := &promptui.SelectTemplates{
 		Label:    "{{ . }}",
@@ -50,7 +50,7 @@ func RunSetup() error {
 	}
 	_, value, err := cellPrompt.Run()
 	if err != nil {
-		return fmt.Errorf("Failed to select an option: %v", err)
+		util.ExitWithErrorMessage("Failed to select an option: %v", err)
 	}
 
 	switch value {
@@ -67,7 +67,6 @@ func RunSetup() error {
 			selectEnvironment()
 		}
 	}
-	return nil
 }
 
 func selectEnvironment() error {

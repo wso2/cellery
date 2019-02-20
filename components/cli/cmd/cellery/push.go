@@ -22,39 +22,29 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/cellery-io/sdk/components/cli/pkg/commands"
+	"github.com/cellery-io/sdk/components/cli/pkg/util"
 )
-
-var cellImage string
-
-type Response struct {
-	Message string
-	Image   ResponseImage
-}
-type ResponseImage struct {
-	Organization  string
-	Name          string
-	ImageVersion  string
-	ImageRevision string
-}
 
 func newPushCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "push [CELL IMAGE]",
-		Short: "push cell image to the remote repository",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			if len(args) == 0 {
-				cmd.Help()
-				return nil
-			}
-			cellImage = args[0]
-			err := commands.RunPush(cellImage)
+		Use:   "push [<registry>/]<organization>/<cell-image>:<version>",
+		Short: "Push cell image to the remote repository",
+		Args: func(cmd *cobra.Command, args []string) error {
+			err := cobra.ExactArgs(1)(cmd, args)
 			if err != nil {
-				cmd.Help()
+				return err
+			}
+			err = util.ValidateImageTagWithRegistry(args[0])
+			if err != nil {
 				return err
 			}
 			return nil
 		},
-		Example: "  cellery push wso2/hello-world:1.0.0\n  cellery push registry.foo.com/foo/hello-world:1.0.0",
+		Run: func(cmd *cobra.Command, args []string) {
+			commands.RunPush(args[0])
+		},
+		Example: "  cellery push cellery-samples/employee:1.0.0\n" +
+			"  cellery push registry.foo.io/cellery-samples/employee:1.0.0",
 	}
 	return cmd
 }

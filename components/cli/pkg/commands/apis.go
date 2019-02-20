@@ -26,11 +26,12 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/cellery-io/sdk/components/cli/pkg/util"
 	"github.com/olekukonko/tablewriter"
+
+	"github.com/cellery-io/sdk/components/cli/pkg/util"
 )
 
-func RunApis(cellName string) error {
+func RunApis(cellName string) {
 	cmd := exec.Command("kubectl", "get", "gateways", cellName+"--gateway", "-o", "json")
 	stdoutReader, _ := cmd.StdoutPipe()
 	stdoutScanner := bufio.NewScanner(stdoutReader)
@@ -66,15 +67,15 @@ func RunApis(cellName string) error {
 	}
 
 	displayApisTable(jsonOutput.GatewaySpec.Apis, cellName)
-	return nil
 }
 
-func displayApisTable(apiArray []util.GatewayApi, cellName string) error {
-	tableData := [][]string{}
+func displayApisTable(apiArray []util.GatewayApi, cellName string) {
+	var tableData [][]string
 
 	for i := 0; i < len(apiArray); i++ {
 		for j := 0; j < len(apiArray[i].Definitions); j++ {
-			url := cellName + "/" + cellName + "-gateway-service" + "/" + apiArray[i].Context + "/" + strings.Split(apiArray[i].Backend, "/")[2]
+			url := cellName + "/" + cellName + "-gateway-service" + "/" + apiArray[i].Context + "/" +
+				strings.Split(apiArray[i].Backend, "/")[2]
 
 			if apiArray[i].Definitions[j].Path != "/" {
 				url = url + "/" + apiArray[i].Definitions[j].Path
@@ -102,6 +103,4 @@ func displayApisTable(apiArray []util.GatewayApi, cellName string) error {
 
 	table.AppendBulk(tableData)
 	table.Render()
-
-	return nil
 }

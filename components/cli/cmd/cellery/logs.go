@@ -19,32 +19,43 @@
 package main
 
 import (
+	"fmt"
+	"regexp"
+
 	"github.com/spf13/cobra"
 
 	"github.com/cellery-io/sdk/components/cli/pkg/commands"
+	"github.com/cellery-io/sdk/components/cli/pkg/constants"
 )
 
-var cellName, component string
-
 func newLogsCommand() *cobra.Command {
+	var component string
 	cmd := &cobra.Command{
-		Use:   "logs [OPTIONS]",
+		Use:   "logs <cell-name>",
 		Short: "Displays logs for either the cell instance, or a component of a running cell instance.",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			if len(args) == 0 {
-				cmd.Help()
-				return nil
-			}
-			cellName := args[0]
-			err := commands.RunLogs(cellName, component)
+		Args: func(cmd *cobra.Command, args []string) error {
+			err := cobra.ExactArgs(1)(cmd, args)
 			if err != nil {
-				cmd.Help()
 				return err
+			}
+			isCellValid, err := regexp.MatchString(fmt.Sprintf("^%s$", constants.CELLERY_ID_PATTERN), args[0])
+			if err != nil || !isCellValid {
+				return fmt.Errorf("expects a valid cell name, received %s", args[0])
+			}
+			if component != "" {
+				isComponentValid, err := regexp.MatchString(fmt.Sprintf("^%s$", constants.CELLERY_ID_PATTERN), component)
+				if err != nil || !isComponentValid {
+					return fmt.Errorf("expects a valid component name, received %s", args[0])
+				}
 			}
 			return nil
 		},
-		Example: "  cellery logs my-cell\n  cellery logs my-cell -c component_name",
+		Run: func(cmd *cobra.Command, args []string) {
+			commands.RunLogs(args[0], component)
+		},
+		Example: "  cellery logs employee\n" +
+			"  cellery logs employee -c salary",
 	}
-	cmd.Flags().StringVarP(&component, "component", "c", "", "component of a cell")
+	cmd.Flags().StringVarP(&component, "component", "c", "", "component of the cell")
 	return cmd
 }

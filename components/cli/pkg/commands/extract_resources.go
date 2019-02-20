@@ -29,7 +29,7 @@ import (
 )
 
 // RunExtractResources extracts the cell image zip file and copies the resources folder to the provided path
-func RunExtractResources(cellImage string, outputPath string) error {
+func RunExtractResources(cellImage string, outputPath string) {
 	parsedCellImage, err := util.ParseImageTag(cellImage)
 	if err != nil {
 		util.ExitWithErrorMessage("Error occurred while parsing cell image", err)
@@ -54,12 +54,6 @@ func RunExtractResources(cellImage string, outputPath string) error {
 		}
 	}()
 
-	// Creating the output path (This will do nothing if it already exists)
-	err = util.CreateDir(outputPath)
-	if err != nil {
-		util.ExitWithErrorMessage("Failed to create the output directory", err)
-	}
-
 	err = util.Unzip(imageLocation, tempPath)
 	if err != nil {
 		panic(err)
@@ -75,7 +69,7 @@ func RunExtractResources(cellImage string, outputPath string) error {
 		util.ExitWithErrorMessage("Error occurred while extracting the image resources", err)
 	}
 
-	fmt.Print("\nExtracted resources: " + util.Bold(filepath.Abs(outputPath)))
+	absOutputPath, _ := filepath.Abs(outputPath)
+	fmt.Printf("\nExtracted Resources: %s", util.Bold(absOutputPath))
 	util.PrintSuccessMessage(fmt.Sprintf("Successfully extracred cell image resources: %s", util.Bold(cellImage)))
-	return nil
 }

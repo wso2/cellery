@@ -24,20 +24,15 @@ import (
 	"github.com/cellery-io/sdk/components/cli/pkg/commands"
 )
 
-type Config struct {
-	Contexts []Context `json:"contexts"`
-}
-type Context struct {
-	Name string `json:"name"`
-}
-
 func newConfigureCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "configure",
-		Short: "configure the cellery installation",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return commands.RunConfigure()
+		Short: "Configure the CLI",
+		Args:  cobra.NoArgs,
+		Run: func(cmd *cobra.Command, args []string) {
+			commands.RunConfigure()
 		},
+		Example: "  cellery configure",
 	}
 	return cmd
 }

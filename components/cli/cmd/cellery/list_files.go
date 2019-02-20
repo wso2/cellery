@@ -19,30 +19,34 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
 
 	"github.com/cellery-io/sdk/components/cli/pkg/commands"
+	"github.com/cellery-io/sdk/components/cli/pkg/util"
 )
 
 // newListFilesCommand creates a command which can be invoked to list the files (directory structure) of a cell images.
 func newListFilesCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "list-files [CELL_IMAGE]",
+		Use:   "list-files <organization>/<cell-image>:<version>",
 		Short: "List the files in the cell image",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			if len(args) != 1 {
-				cmd.Help()
-				return nil
-			}
-			cellImage = args[0]
-			err := commands.RunListFiles(cellImage)
+		Args: func(cmd *cobra.Command, args []string) error {
+			err := cobra.ExactArgs(1)(cmd, args)
 			if err != nil {
-				cmd.Help()
 				return err
+			}
+			err = util.ValidateImageTag(args[0])
+			if err != nil {
+				return fmt.Errorf("expects <organization>/<cell-image>:<version> as cell-image, received %s", args[0])
 			}
 			return nil
 		},
-		Example: "  cellery list-files cellery-samples/hello-world:1.0.0",
+		Run: func(cmd *cobra.Command, args []string) {
+			commands.RunListFiles(args[0])
+		},
+		Example: "  cellery list-files cellery-samples/employee:1.0.0",
 	}
 	return cmd
 }

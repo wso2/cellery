@@ -19,30 +19,45 @@
 package main
 
 import (
+	"fmt"
+	"regexp"
+
 	"github.com/spf13/cobra"
 
 	"github.com/cellery-io/sdk/components/cli/pkg/commands"
+	"github.com/cellery-io/sdk/components/cli/pkg/constants"
+	"github.com/cellery-io/sdk/components/cli/pkg/util"
 )
 
 func newRunCommand() *cobra.Command {
-	var cellImage string
+	var name string
 	cmd := &cobra.Command{
-		Use:   "run [OPTIONS]",
+		Use:   "run [<registry>/]<organization>/<cell-image>:<version>",
 		Short: "Use a cell image to create a running instance",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			if len(args) == 0 {
-				cmd.Help()
-				return nil
-			}
-			cellImage = args[0]
-			err := commands.RunRun(cellImage)
+		Args: func(cmd *cobra.Command, args []string) error {
+			err := cobra.ExactArgs(1)(cmd, args)
 			if err != nil {
-				cmd.Help()
 				return err
+			}
+			err = util.ValidateImageTagWithRegistry(args[0])
+			if err != nil {
+				return err
+			}
+			if name != "" {
+				isCellValid, err := regexp.MatchString(fmt.Sprintf("^%s$", constants.CELLERY_ID_PATTERN), args[0])
+				if err != nil || !isCellValid {
+					return fmt.Errorf("expects a valid cell name, received %s", args[0])
+				}
 			}
 			return nil
 		},
-		Example: "  cellery run my-project:1.0.0 -n myproject-v1.0.0",
+		Run: func(cmd *cobra.Command, args []string) {
+			commands.RunRun(args[0])
+		},
+		Example: "  cellery run cellery-samples/employee:1.0.0 -n employee\n" +
+			"  cellery run registry.foo.io/cellery-samples/employee:1.0.0 -n employee" +
+			"  cellery run cellery-samples/employee:1.0.0",
 	}
+	cmd.Flags().StringVarP(&name, "name", "n", "", "Name of the cell instance")
 	return cmd
 }

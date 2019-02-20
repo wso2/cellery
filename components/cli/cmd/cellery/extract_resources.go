@@ -19,29 +19,39 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
 
 	"github.com/cellery-io/sdk/components/cli/pkg/commands"
+	"github.com/cellery-io/sdk/components/cli/pkg/util"
 )
 
 // newExtractResourcesCommand creates a command which can be invoked to extract the cell
 // image resources to a specific directory.
 func newExtractResourcesCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "extract-resources [CELL_IMAGE] [OUTPUT_DIR]",
+		Use:   "extract-resources <organization>/<cell-image>:<version> <output-directory>",
 		Short: "Extract the resource files of a pulled image to the provided location",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			if len(args) != 2 {
-				cmd.Help()
-				return nil
-			}
-			err := commands.RunExtractResources(args[0], args[1])
+		Args: func(cmd *cobra.Command, args []string) error {
+			err := cobra.ExactArgs(2)(cmd, args)
 			if err != nil {
-				cmd.Help()
 				return err
+			}
+			err = util.ValidateImageTag(args[0])
+			if err != nil {
+				return fmt.Errorf("expects <organization>/<cell-image>:<version> as cell-image, received %s", args[0])
+			}
+			err = util.CreateDir(args[1])
+			if err != nil {
+				return fmt.Errorf("expects valid directory as the output-directory, received %s", args[1])
 			}
 			return nil
 		},
+		Run: func(cmd *cobra.Command, args []string) {
+			commands.RunExtractResources(args[0], args[1])
+		},
+		Example: "  cellery extract-resources cellery-samples/employee:1.0.0 ./resources",
 	}
 	return cmd
 }

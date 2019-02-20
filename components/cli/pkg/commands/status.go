@@ -33,7 +33,7 @@ import (
 	"github.com/cellery-io/sdk/components/cli/pkg/util"
 )
 
-func RunStatus(cellName string) error {
+func RunStatus(cellName string) {
 	cmd := exec.Command("kubectl", "get", "pods", "-l", constants.GROUP_NAME+"/cell="+cellName, "-o", "json")
 	output := ""
 
@@ -76,7 +76,6 @@ func RunStatus(cellName string) error {
 		fmt.Println("  -COMPONENTS-\n")
 		displayStatusDetailedTable(jsonOutput.Items, cellName)
 	}
-	return nil
 }
 
 func getCellSummary(cellName string) (cellCreationTime, cellStatus string) {

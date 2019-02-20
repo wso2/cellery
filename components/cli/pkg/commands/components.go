@@ -33,7 +33,7 @@ import (
 	"github.com/cellery-io/sdk/components/cli/pkg/util"
 )
 
-func RunComponents(cellName string) error {
+func RunComponents(cellName string) {
 	cmd := exec.Command("kubectl", "get", "services", "-l", constants.GROUP_NAME+"/cell="+cellName, "-o", "json")
 	stdoutReader, _ := cmd.StdoutPipe()
 	stdoutScanner := bufio.NewScanner(stdoutReader)
@@ -71,11 +71,10 @@ func RunComponents(cellName string) error {
 	} else {
 		displayComponentsTable(jsonOutput.Items, cellName)
 	}
-	return nil
 }
 
-func displayComponentsTable(componentArray []util.ServiceItem, cellName string) error {
-	tableData := [][]string{}
+func displayComponentsTable(componentArray []util.ServiceItem, cellName string) {
+	var tableData [][]string
 
 	for i := 0; i < len(componentArray); i++ {
 		var name string
@@ -106,6 +105,4 @@ func displayComponentsTable(componentArray []util.ServiceItem, cellName string) 
 
 	table.AppendBulk(tableData)
 	table.Render()
-
-	return nil
 }

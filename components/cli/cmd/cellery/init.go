@@ -28,14 +28,11 @@ func newInitCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "init",
 		Short: "Initialize a cell project",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			err := commands.RunInit()
-			if err != nil {
-				cmd.Help()
-				return err
-			}
-			return nil
+		Args:  cobra.NoArgs,
+		Run: func(cmd *cobra.Command, args []string) {
+			commands.RunInit()
 		},
+		Example: "  cellery init",
 	}
 	return cmd
 }

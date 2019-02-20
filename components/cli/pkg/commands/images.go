@@ -37,7 +37,7 @@ type Component struct {
 	deployment, service string
 }
 
-func RunImage() error {
+func RunImage() {
 	data := getImagesArray()
 
 	table := tablewriter.NewWriter(os.Stdout)
@@ -58,11 +58,9 @@ func RunImage() error {
 
 	table.AppendBulk(data)
 	table.Render()
-
-	return nil
 }
 
-func RunImageInformation(input string) error {
+func RunImageInformation(input string) {
 	componentArrays := [][]Component{
 		{
 			{"API-GW", "cellery.io/micro-gw:v1.1", []int{443, 80}, "API_GW_deployment", "API_GW_service"},
@@ -104,8 +102,6 @@ func RunImageInformation(input string) error {
 		table.AppendBulk(componentArrayToStringArray(getComponentByUniqueId(input, componentArrays)))
 	}
 	table.Render()
-
-	return nil
 }
 
 func getComponentByNameAndVersion(nameAndVersion string, componentArrays [][]Component) []Component {

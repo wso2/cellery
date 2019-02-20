@@ -28,14 +28,11 @@ func newVersionCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "version",
 		Short: "Get cellery runtime version",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			err := commands.RunVersion()
-			if err != nil {
-				cmd.Help()
-				return err
-			}
-			return nil
+		Args:  cobra.NoArgs,
+		Run: func(cmd *cobra.Command, args []string) {
+			commands.RunVersion()
 		},
+		Example: "  cellery version",
 	}
 	return cmd
 }

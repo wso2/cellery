@@ -26,11 +26,7 @@ import (
 	"github.com/cellery-io/sdk/components/cli/pkg/util"
 )
 
-func RunStop(instanceName string) error {
-	if instanceName == "" {
-		return fmt.Errorf("no cell instance name specified")
-	}
-
+func RunStop(instanceName string) {
 	cmd := exec.Command("kubectl", "delete", "cell", instanceName)
 	stdoutReader, _ := cmd.StdoutPipe()
 	stdoutScanner := bufio.NewScanner(stdoutReader)
@@ -54,5 +50,4 @@ func RunStop(instanceName string) error {
 	if err != nil {
 		util.ExitWithErrorMessage("Error occurred while stopping the cell instance", err)
 	}
-	return nil
 }

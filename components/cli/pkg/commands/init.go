@@ -25,94 +25,111 @@ import (
 	"path/filepath"
 
 	"github.com/fatih/color"
-	i "github.com/oxequa/interact"
+	"github.com/oxequa/interact"
 
 	"github.com/cellery-io/sdk/components/cli/pkg/util"
 )
 
-func RunInit() error {
+func RunInit() {
 	prefix := util.CyanBold("?")
-	projectName := ""
-	projectPath := ""
 
-	i.Run(&i.Interact{
-		Before: func(c i.Context) error {
+	projectName := ""
+	err := interact.Run(&interact.Interact{
+		Before: func(c interact.Context) error {
 			c.SetPrfx(color.Output, prefix)
 			return nil
 		},
-		Questions: []*i.Question{
+		Questions: []*interact.Question{
 			{
-				Before: func(c i.Context) error {
+				Before: func(c interact.Context) error {
 					c.SetPrfx(nil, util.CyanBold("?"))
 					c.SetDef("my-project", util.Faint("[my-project]"))
 					return nil
 				},
-				Quest: i.Quest{
+				Quest: interact.Quest{
 					Msg: util.Bold("Project name: "),
 				},
-				Action: func(c i.Context) interface{} {
+				Action: func(c interact.Context) interface{} {
 					projectName, _ = c.Ans().String()
 					return nil
 				},
 			},
 		},
 	})
+	if err != nil {
+		util.ExitWithErrorMessage("Error occurred while initializing the project", err)
+	}
 
 	cellTemplate := "import ballerina/io;\n" +
 		"import celleryio/cellery;\n" +
 		"\n" +
 		"cellery:Component helloWorldComp = {\n" +
-		"    name: \"HelloWorld\",\n" +
+		"    name: \"hello-world\",\n" +
 		"    source: {\n" +
 		"        image: \"sumedhassk/hello-world:1.0.0\"\n" +
 		"    },\n" +
 		"    ingresses: {\n" +
-		"        \"hello\": new cellery:HTTPIngress(9090, \"hello\",\n" +
-		"            [\n" +
-		"                {\n" +
-		"                    path: \"/\",\n" +
-		"                    method: \"GET\"\n" +
-		"                }\n" +
-		"            ]\n" +
+		"        hello: new cellery:HTTPIngress(\n" +
+		"            8080,\n" +
+		"            {\n" +
+		"                basePath: \"hello\",\n" +
+		"                definitions: [\n" +
+		"                    {\n" +
+		"                        path: \"/\",\n" +
+		"                        method: \"GET\"\n" +
+		"                    }\n" +
+		"                ]\n" +
+		"            }\n" +
 		"        )\n" +
 		"    }\n" +
 		"};\n" +
 		"\n" +
-		"cellery:CellImage helloCell = new(\"Hello-World\");\n" +
+		"public cellery:CellImage helloCell = new();\n" +
 		"\n" +
-		"public function build() {\n" +
+		"public function build(string imageName, string imageVersion) {\n" +
 		"    helloCell.addComponent(helloWorldComp);\n" +
 		"\n" +
 		"    helloCell.exposeGlobalAPI(helloWorldComp);\n" +
 		"\n" +
-		"    var out = cellery:createImage(helloCell);\n" +
+		"    var out = cellery:createImage(helloCell, imageName, imageVersion);\n" +
 		"    if (out is boolean) {\n" +
-		"        io:println(\"Hello Cell Built successfully.\");\n" +
+		"        io:println(\"Hello World Cell Built successfully.\");\n" +
 		"    }\n" +
 		"}\n" +
 		"\n"
 
-	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	currentDir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
 		util.ExitWithErrorMessage("Error in getting current directory location", err)
 	}
 
-	if _, err := os.Stat(dir + "/" + projectName); os.IsNotExist(err) {
-		projectPath = dir + "/" + projectName
-		os.Mkdir(projectPath, os.ModePerm)
+	projectDir := filepath.Join(currentDir, projectName)
+	err = util.CreateDir(projectDir)
+	if err != nil {
+		util.ExitWithErrorMessage("Failed to initialize project", err)
 	}
 
-	balFile, err := os.Create(projectPath + "/" + projectName + ".bal")
+	balFile, err := os.Create(filepath.Join(projectDir, projectName+".bal"))
 	if err != nil {
 		util.ExitWithErrorMessage("Error in creating Ballerina File", err)
 	}
-	defer balFile.Close()
+	defer func() {
+		err = balFile.Close()
+		if err != nil {
+			util.ExitWithErrorMessage("Failed to clean up", err)
+		}
+	}()
 	balW := bufio.NewWriter(balFile)
-	balW.WriteString(fmt.Sprintf("%s", cellTemplate))
-	balW.Flush()
+	_, err = balW.WriteString(cellTemplate)
+	if err != nil {
+		util.ExitWithErrorMessage("Failed to create cell file", err)
+	}
+	_ = balW.Flush()
+	if err != nil {
+		util.ExitWithErrorMessage("Failed to create cell file", err)
+	}
 
-	fmt.Println(util.GreenBold("\n\U00002714") + " Initialized project in directory: " + util.Faint(projectPath))
+	util.PrintSuccessMessage(fmt.Sprintf("Initialized project in directory: %s", util.Faint(projectDir)))
 	util.PrintWhatsNextMessage("build the image",
 		"cellery build "+projectName+".bal"+" -t [repo/]organization/image_name:version")
-	return nil
 }

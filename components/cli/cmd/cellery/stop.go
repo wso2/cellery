@@ -19,30 +19,34 @@
 package main
 
 import (
+	"fmt"
+	"regexp"
+
 	"github.com/spf13/cobra"
 
 	"github.com/cellery-io/sdk/components/cli/pkg/commands"
+	"github.com/cellery-io/sdk/components/cli/pkg/constants"
 )
 
 func newStopCommand() *cobra.Command {
-	var instanceName string
 	cmd := &cobra.Command{
-		Use:   "stop [OPTIONS]",
+		Use:   "stop <cell-name>",
 		Short: "Stop a running cell instance",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			if len(args) == 0 {
-				cmd.Help()
-				return nil
-			}
-			instanceName = args[0]
-			err := commands.RunStop(instanceName)
+		Args: func(cmd *cobra.Command, args []string) error {
+			err := cobra.ExactArgs(1)(cmd, args)
 			if err != nil {
-				cmd.Help()
 				return err
+			}
+			isCellValid, err := regexp.MatchString(fmt.Sprintf("^%s$", constants.CELLERY_ID_PATTERN), args[0])
+			if err != nil || !isCellValid {
+				return fmt.Errorf("expects a valid cell name, received %s", args[0])
 			}
 			return nil
 		},
-		Example: "  cellery stop my-project:v1.0",
+		Run: func(cmd *cobra.Command, args []string) {
+			commands.RunStop(args[0])
+		},
+		Example: "  cellery stop employee",
 	}
 	return cmd
 }

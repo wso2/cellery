@@ -27,7 +27,7 @@ import (
 	"github.com/cellery-io/sdk/components/cli/pkg/util"
 )
 
-func RunLogs(cellName, componentName string) error {
+func RunLogs(cellName, componentName string) {
 	if componentName == "" {
 		cmd := exec.Command("kubectl", "logs", "-l", constants.GROUP_NAME+"/cell="+cellName, "--all-containers=true")
 		executeLogsCommand(cmd, cellName, componentName)
@@ -35,10 +35,9 @@ func RunLogs(cellName, componentName string) error {
 		cmd := exec.Command("kubectl", "logs", "-l", constants.GROUP_NAME+"/service="+cellName+"--"+componentName, "-c", componentName)
 		executeLogsCommand(cmd, cellName, componentName)
 	}
-	return nil
 }
 
-func executeLogsCommand(cmd *exec.Cmd, cellName, componentName string) error {
+func executeLogsCommand(cmd *exec.Cmd, cellName, componentName string) {
 	stdoutReader, _ := cmd.StdoutPipe()
 	stdoutScanner := bufio.NewScanner(stdoutReader)
 	output := ""
@@ -70,5 +69,4 @@ func executeLogsCommand(cmd *exec.Cmd, cellName, componentName string) error {
 			fmt.Printf("Cannot find component: %v of cell: %v \n", componentName, cellName)
 		}
 	}
-	return nil
 }

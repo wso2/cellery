@@ -95,10 +95,10 @@ type Gateway struct {
 }
 
 type GatewaySpec struct {
-	Apis []GatewayApi `json:"apis"`
+	HttpApis []GatewayHttpApi `json:"http"`
 }
 
-type GatewayApi struct {
+type GatewayHttpApi struct {
 	Backend     string              `json:"backend"`
 	Context     string              `json:"context"`
 	Definitions []GatewayDefinition `json:"definitions"`

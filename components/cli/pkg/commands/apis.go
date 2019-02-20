@@ -66,20 +66,30 @@ func RunApis(cellName string) {
 		fmt.Println(errJson)
 	}
 
-	displayApisTable(jsonOutput.GatewaySpec.Apis, cellName)
+	displayApisTable(jsonOutput.GatewaySpec.HttpApis, cellName)
 }
 
-func displayApisTable(apiArray []util.GatewayApi, cellName string) {
+func displayApisTable(apiArray []util.GatewayHttpApi, cellName string) {
 	var tableData [][]string
 
 	for i := 0; i < len(apiArray); i++ {
 		for j := 0; j < len(apiArray[i].Definitions); j++ {
-			url := cellName + "/" + cellName + "-gateway-service" + "/" + apiArray[i].Context + "/" +
-				strings.Split(apiArray[i].Backend, "/")[2]
+			url := cellName + "--gateway-service"
 
-			if apiArray[i].Definitions[j].Path != "/" {
-				url = url + "/" + apiArray[i].Definitions[j].Path
+			// Add the context of the Cell
+			if !strings.HasPrefix(apiArray[i].Context, "/") {
+				url += "/"
 			}
+			url += apiArray[i].Context
+
+			// Add the path of the API definition
+			if apiArray[i].Definitions[j].Path != "/" {
+				if !strings.HasPrefix(apiArray[i].Definitions[j].Path, "/") {
+					url += "/"
+				}
+				url += apiArray[i].Definitions[j].Path
+			}
+
 			tableRecord := []string{apiArray[i].Context, apiArray[i].Definitions[j].Method, url}
 			tableData = append(tableData, tableRecord)
 		}

@@ -5,7 +5,7 @@ metadata:
 spec:
   gatewayTemplate:
     spec:
-      apis:
+      http:
       - context: employee
         definitions:
         - path: /

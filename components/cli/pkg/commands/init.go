@@ -97,7 +97,8 @@ func RunInit() {
 		"    }\n" +
 		"}\n" +
 		"\n"
-	currentDir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+
+	currentDir, err := os.Getwd()
 	if err != nil {
 		util.ExitWithErrorMessage("Error in getting current directory location", err)
 	}

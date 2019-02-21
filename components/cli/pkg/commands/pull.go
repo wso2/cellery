@@ -38,7 +38,7 @@ import (
 func RunPull(cellImage string, silent bool) {
 	err := pullImage(cellImage, "", "", silent)
 	if err != nil {
-		if strings.Contains(err.Error(), "UNAUTHORIZED") {
+		if strings.Contains(err.Error(), "401") {
 			username, password, err := util.RequestCredentials()
 			if err != nil {
 				util.ExitWithErrorMessage("Failed to acquire credentials", err)

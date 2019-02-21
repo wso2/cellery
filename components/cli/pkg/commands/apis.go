@@ -84,8 +84,14 @@ func displayApisTable(apiArray []util.GatewayHttpApi, cellName string) {
 
 			// Add the path of the API definition
 			if apiArray[i].Definitions[j].Path != "/" {
-				if !strings.HasPrefix(apiArray[i].Definitions[j].Path, "/") {
-					url += "/"
+				if !strings.HasSuffix(url, "/") {
+					if !strings.HasPrefix(apiArray[i].Definitions[j].Path, "/") {
+						url += "/"
+					}
+				} else {
+					if strings.HasPrefix(apiArray[i].Definitions[j].Path, "/") {
+						url = strings.TrimSuffix(url, "/");
+					}
 				}
 				url += apiArray[i].Definitions[j].Path
 			}

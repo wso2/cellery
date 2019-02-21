@@ -31,6 +31,7 @@ import (
 
 func newRunCommand() *cobra.Command {
 	var name string
+	var dependencies string
 	cmd := &cobra.Command{
 		Use:   "run [<registry>/]<organization>/<cell-image>:<version>",
 		Short: "Use a cell image to create a running instance",
@@ -52,12 +53,14 @@ func newRunCommand() *cobra.Command {
 			return nil
 		},
 		Run: func(cmd *cobra.Command, args []string) {
-			commands.RunRun(args[0], name)
+			commands.RunRun(args[0], name, dependencies)
 		},
 		Example: "  cellery run cellery-samples/employee:1.0.0 -n employee\n" +
-			"  cellery run registry.foo.io/cellery-samples/employee:1.0.0 -n employee" +
-			"  cellery run cellery-samples/employee:1.0.0",
+			"  cellery run registry.foo.io/cellery-samples/employee:1.0.0 -n employee -l dep1:instance1 dep2:instance2" +
+			"  cellery run cellery-samples/employee:1.0.0 -l dep1:instance1 dep2:instance2",
 	}
 	cmd.Flags().StringVarP(&name, "name", "n", "", "Name of the cell instance")
+	cmd.Flags().StringVarP(&dependencies, "link", "l", "",
+		"fully qualified dependency instance names")
 	return cmd
 }

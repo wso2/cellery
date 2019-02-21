@@ -24,9 +24,11 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math/rand"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -393,9 +395,6 @@ func createGcp() error {
 	os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", filepath.Join(util.UserHomeDir(), ".cellery", "gcp", "vick-team-1abab5311d43.json"))
 	ctx := context.Background()
 
-	// See https://cloud.google.com/docs/authentication/.
-	// Use GOOGLE_APPLICATION_CREDENTIALS environment variable to specify
-	// a service account key file to authenticate to the API.
 	hc, err := google.DefaultClient(ctx, container.CloudPlatformScope)
 	if err != nil {
 		fmt.Printf("Could not get authenticated client: %v", err)
@@ -412,7 +411,6 @@ func createGcp() error {
 	}
 	updateKubeConfig()
 
-	// Create an http.Client that uses Application Default Credentials.
 	hc_sql, err := google.DefaultClient(ctx, sqladmin.CloudPlatformScope)
 
 	if err != nil {
@@ -420,7 +418,6 @@ func createGcp() error {
 	}
 	fmt.Print(hc_sql)
 
-	// Create the Google Cloud SQL service.
 	sqlService, err := sqladmin.New(hc_sql)
 	if err != nil {
 		fmt.Printf("Error creating sql service: %v", err)
@@ -428,7 +425,6 @@ func createGcp() error {
 
 	fmt.Print(sqlService)
 
-	//Create Sql instance
 	_, err = createSqlInstance(ctx, sqlService, constants.GCP_PROJECT_NAME, constants.GCP_REGION, constants.GCP_REGION, constants.GCP_DB_INSTANCE_NAME)
 	if err != nil {
 		log.Print(err)
@@ -476,7 +472,7 @@ func createGcpCluster(svc *container.Service) error {
 		spinner.Stop(true)
 	}()
 	var clusterStatus string
-	for i := 0; i < 30; i++ {
+	for i := 0; i < 50; i++ {
 		clusterStatus, err = getClusterState(svc, constants.GCP_PROJECT_NAME, constants.GCP_ZONE, constants.GCP_CLUSTER_NAME)
 		if err != nil {
 			fmt.Printf("Error creating cluster : %v", err)
@@ -536,14 +532,13 @@ func create(client *storage.Client, projectID, bucketName string) error {
 	if err := client.Bucket(bucketName).Create(ctx, projectID, nil); err != nil {
 		return err
 	}
-	// [END create_bucket]
 	return nil
 }
 
 func uploadSqlFile(client *storage.Client, bucket, object string) error {
 	ctx := context.Background()
 	util.ReplaceInFile(filepath.Join(util.UserHomeDir(), ".cellery", "gcp", "sql", "init.sql"), "DATABASE_USERNAME", constants.GCP_SQL_USER_NAME)
-	util.ReplaceInFile(filepath.Join(util.UserHomeDir(), ".cellery", "gcp", "sql", "init.sql"), "DATABASE_PASSWORD", constants.GCP_SQL_PASSWORD)
+	util.ReplaceInFile(filepath.Join(util.UserHomeDir(), ".cellery", "gcp", "sql", "init.sql"), "DATABASE_PASSWORD", constants.GCP_SQL_PASSWORD + strconv.Itoa(rand.Intn(1000)))
 	f, err := os.Open(filepath.Join(util.UserHomeDir(), ".cellery", "gcp", "sql", "init.sql"))
 	if err != nil {
 		return err
@@ -566,19 +561,10 @@ func updateKubeConfig() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	// Start command
 	if err = cmd.Start(); err != nil {
 		log.Fatal(err)
 	}
-
-	// prevent main() to exit before cmd completes
 	defer cmd.Wait()
 
-	// read cmd output and send it to stdout
-	// repalce os.Stderr as per your need
 	go io.Copy(os.Stdout, stderr)
-
-	fmt.Println("Standby to read...")
-	fmt.Println()
 }

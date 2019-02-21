@@ -29,9 +29,9 @@
   name = "github.com/fatih/color"
   version = "1.7.0"
 
-[[constraint]]
-  branch = "master"
-  name = "github.com/gosuri/uilive"
+#[[constraint]]
+#  branch = "master"
+#  name = "github.com/gosuri/uilive"
 
 [[constraint]]
   name = "github.com/manifoldco/promptui"

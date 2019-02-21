@@ -20,17 +20,19 @@ package commands
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/cellery-io/sdk/components/cli/pkg/constants"
 	"github.com/cellery-io/sdk/components/cli/pkg/util"
 )
 
-func RunRun(cellImageTag string, instanceName string) {
+func RunRun(cellImageTag string, instanceName string, dependencies string) {
 	parsedCellImage, err := util.ParseImageTag(cellImageTag)
 	if err != nil {
 		util.ExitWithErrorMessage("Error occurred while parsing cell image", err)
@@ -72,8 +74,18 @@ func RunRun(cellImageTag string, instanceName string) {
 			util.ExitWithErrorMessage("Error occurred while parsing cell image", err)
 		}
 		balFilePath = filepath.Join(tmpPath, balFilePath)
+		// if any dependency instance names are passed to the command, pass them to ballerina run
+		var depMap string
+		if len(dependencies) > 0 {
+			dependencyArr := strings.Fields(dependencies)
+			depMap = generateBalCompatibleMap(dependencyArr)
+			fmt.Println(depMap)
+		} else {
+			depMap = "{}"
+			fmt.Println(depMap)
+		}
 		cmd := exec.Command("ballerina", "run", balFilePath+":run",
-			parsedCellImage.Organization+"/"+parsedCellImage.ImageName, parsedCellImage.ImageVersion, instanceName)
+			parsedCellImage.Organization+"/"+parsedCellImage.ImageName, parsedCellImage.ImageVersion, instanceName, depMap)
 		execError := ""
 		stdoutReader, _ := cmd.StdoutPipe()
 		stdoutScanner := bufio.NewScanner(stdoutReader)
@@ -131,4 +143,24 @@ func RunRun(cellImageTag string, instanceName string) {
 
 	util.PrintSuccessMessage(fmt.Sprintf("Successfully deployed cell image: %s", util.Bold(cellImageTag)))
 	util.PrintWhatsNextMessage("list running cells", "cellery ps")
+}
+
+func generateBalCompatibleMap (depArr []string) string {
+	var strBuffer bytes.Buffer
+	strBuffer.WriteString("{")
+	for index, element := range depArr {
+		if index > 0 {
+			strBuffer.WriteString(",")
+		}
+		depElements := strings.Split(element, ":")
+		strBuffer.WriteString("\"")
+		strBuffer.WriteString(depElements[0])
+		strBuffer.WriteString("\"")
+		strBuffer.WriteString(":")
+		strBuffer.WriteString("\"")
+		strBuffer.WriteString(depElements[1])
+		strBuffer.WriteString("\"")
+	}
+	strBuffer.WriteString("}")
+	return strBuffer.String()
 }

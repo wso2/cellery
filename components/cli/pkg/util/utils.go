@@ -506,7 +506,9 @@ func GetSubDirectoryNames(path string) ([]string, error) {
 	}
 
 	for _, subdirectory := range subdirectories {
-		directoryNames = append(directoryNames, subdirectory.Name())
+		if subdirectory.IsDir() {
+			directoryNames = append(directoryNames, subdirectory.Name())
+		}
 	}
 	return directoryNames, nil
 }

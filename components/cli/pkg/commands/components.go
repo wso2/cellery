@@ -24,7 +24,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"strconv"
 	"strings"
 
 	"github.com/olekukonko/tablewriter"
@@ -81,27 +80,23 @@ func displayComponentsTable(componentArray []util.ServiceItem, cellName string) 
 		name = strings.Replace(componentArray[i].Metadata.Name, cellName+"--", "", -1)
 		name = strings.Replace(name, "-service", "", -1)
 
-		ports := strconv.Itoa(componentArray[i].Spec.Ports[0].Port)
-		for j := 1; j < len(componentArray[i].Spec.Ports); j++ {
-			ports = ports + "/" + strconv.Itoa(componentArray[i].Spec.Ports[j].Port)
-		}
-		component := []string{name, ports}
+		//ports := strconv.Itoa(componentArray[i].Spec.Ports[0].Port)
+		//for j := 1; j < len(componentArray[i].Spec.Ports); j++ {
+		//	ports = ports + "/" + strconv.Itoa(componentArray[i].Spec.Ports[j].Port)
+		//}
+		component := []string{name}
 		tableData = append(tableData, component)
 	}
 
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"NAME", "PORTS"})
+	table.SetHeader([]string{"COMPONENT NAME"})
 	table.SetBorders(tablewriter.Border{Left: false, Top: false, Right: false, Bottom: false})
 	table.SetAlignment(3)
 	table.SetRowSeparator("-")
 	table.SetCenterSeparator(" ")
 	table.SetColumnSeparator(" ")
-	table.SetHeaderColor(
-		tablewriter.Colors{tablewriter.Bold},
-		tablewriter.Colors{tablewriter.Bold})
-	table.SetColumnColor(
-		tablewriter.Colors{tablewriter.FgHiBlueColor},
-		tablewriter.Colors{})
+	table.SetHeaderColor(tablewriter.Colors{tablewriter.Bold})
+	table.SetColumnColor(tablewriter.Colors{tablewriter.FgHiBlueColor})
 
 	table.AppendBulk(tableData)
 	table.Render()

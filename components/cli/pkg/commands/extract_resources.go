@@ -64,12 +64,18 @@ func RunExtractResources(cellImage string, outputPath string) {
 	if err != nil {
 		util.ExitWithErrorMessage("Error occurred while extracting the image resources", err)
 	}
-	err = util.CopyDir(resourcesDir, outputPath)
-	if err != nil {
-		util.ExitWithErrorMessage("Error occurred while extracting the image resources", err)
-	}
 
-	absOutputPath, _ := filepath.Abs(outputPath)
-	fmt.Printf("\nExtracted Resources: %s", util.Bold(absOutputPath))
-	util.PrintSuccessMessage(fmt.Sprintf("Successfully extracred cell image resources: %s", util.Bold(cellImage)))
+	resourcesExists, _ := util.FileExists(resourcesDir)
+	if resourcesExists {
+		err = util.CopyDir(resourcesDir, outputPath)
+		if err != nil {
+			util.ExitWithErrorMessage("Error occurred while extracting the image resources", err)
+		}
+
+		absOutputPath, _ := filepath.Abs(outputPath)
+		fmt.Printf("\nExtracted Resources: %s", util.Bold(absOutputPath))
+		util.PrintSuccessMessage(fmt.Sprintf("Successfully extracred cell image resources: %s", util.Bold(cellImage)))
+	} else {
+		fmt.Printf("\n%s No resources available in %s\n", util.CyanBold("\U00002139"), util.Bold(cellImage))
+	}
 }

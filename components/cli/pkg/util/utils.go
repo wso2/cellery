@@ -857,26 +857,17 @@ func AddImageToBalPath(cellImage *CellImage) error {
 	// Installing the cell reference ballerina module
 	cmd := exec.Command("ballerina", "install", cellImage.ImageName)
 	cmd.Dir = filepath.Join(tempPath, "artifacts", "bal")
-	execError := ""
-	stderrReader, _ := cmd.StderrPipe()
-	stderrScanner := bufio.NewScanner(stderrReader)
-	go func() {
-		for stderrScanner.Scan() {
-			execError += stderrScanner.Text()
-		}
-	}()
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 	err = cmd.Start()
 	if err != nil {
-		errStr := string(stderr.Bytes())
-		fmt.Printf("%s\n", errStr)
 		return err
 	}
 	err = cmd.Wait()
 	if err != nil {
-		return err
+		errStr := string(stderr.Bytes())
+		return fmt.Errorf("%s: %v", errStr, err)
 	}
 	return nil
 }

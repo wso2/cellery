@@ -70,12 +70,12 @@ func RunInit() {
 		"    },\n" +
 		"    ingresses: {\n" +
 		"        hello: new cellery:HTTPIngress(\n" +
-		"                   8080,\n" +
+		"                   9090,\n" +
 		"\n" +
 		"                   \"hello\",\n" +
 		"                   [\n" +
 		"                       {\n" +
-		"                           path: \"/\",\n" +
+		"                           path: \"/*\",\n" +
 		"                           method: \"GET\"\n" +
 		"                       }\n" +
 		"                   ]\n" +

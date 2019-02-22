@@ -53,7 +53,7 @@ func RunBuild(tag string, fileName string) {
 	}()
 
 	// First clean target directory if exists
-	projectDir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	projectDir, err := os.Getwd()
 	if err != nil {
 		spinner.Stop(false)
 		util.ExitWithErrorMessage("Error in getting current directory location", err)

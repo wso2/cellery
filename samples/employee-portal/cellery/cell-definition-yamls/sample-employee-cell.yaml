@@ -8,7 +8,7 @@ spec:
       http:
       - context: employee
         definitions:
-        - path: /
+        - path: /details
           method: GET
         backend: employee
         global: false

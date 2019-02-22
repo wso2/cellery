@@ -8,7 +8,7 @@ spec:
       http:
       - context: stock
         definitions:
-        - path: /
+        - path: /options
           method: GET
         backend: stock
         global: false

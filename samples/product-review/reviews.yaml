@@ -35,7 +35,7 @@ spec:
         - name: CUSTOMERS_CONTEXT
           value: "customers-1"
         - name: RATINGS_HOST
-          value: "review--ratings-service"
+          value: "reviews--ratings-service"
         - name: RATINGS_PORT
           value: "80"
         - name: DATABASE_HOST

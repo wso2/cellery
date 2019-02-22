@@ -828,6 +828,9 @@ func AddImageToBalPath(cellImage *CellImage) error {
 	cellImageFile := filepath.Join(UserHomeDir(), ".cellery", "repo", cellImage.Organization, cellImage.ImageName,
 		cellImage.ImageVersion, cellImage.ImageName+constants.CELL_IMAGE_EXT)
 
+	ballerinaOrganizationName := strings.Replace(cellImage.Organization, "-", "_", -1)
+	ballerinaModuleName := strings.Replace(cellImage.ImageName, "-", "_", -1)
+
 	// Create temp directory
 	currentTime := time.Now()
 	timestamp := currentTime.Format("27065102350415")
@@ -849,7 +852,7 @@ func AddImageToBalPath(cellImage *CellImage) error {
 		return err
 	}
 
-	balRepoDir := filepath.Join(UserHomeDir(), ".ballerina", "repo", cellImage.Organization, cellImage.ImageName,
+	balRepoDir := filepath.Join(UserHomeDir(), ".ballerina", "repo", ballerinaOrganizationName, ballerinaModuleName,
 		cellImage.ImageVersion)
 
 	// Cleaning up the old image bal files if it already exists
@@ -871,7 +874,7 @@ func AddImageToBalPath(cellImage *CellImage) error {
 	}
 
 	// Installing the cell reference ballerina module
-	cmd := exec.Command("ballerina", "install", cellImage.ImageName)
+	cmd := exec.Command("ballerina", "install", ballerinaModuleName)
 	cmd.Dir = filepath.Join(tempPath, "artifacts", "bal")
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout

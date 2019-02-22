@@ -19,6 +19,7 @@
 package commands
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -38,6 +39,13 @@ func RunListFiles(cellImage string) {
 	}
 	cellImageFile := filepath.Join(util.UserHomeDir(), ".cellery", "repo", parsedCellImage.Organization,
 		parsedCellImage.ImageName, parsedCellImage.ImageVersion, parsedCellImage.ImageName+constants.CELL_IMAGE_EXT)
+
+	// Checking if the image is present in the local repo
+	isImagePresent, _ := util.FileExists(cellImageFile)
+	if !isImagePresent {
+		util.ExitWithErrorMessage(fmt.Sprintf("Failed to list files for image %s", util.Bold(cellImage)),
+			errors.New("Image not Found"))
+	}
 
 	// Create temp directory
 	currentTime := time.Now()

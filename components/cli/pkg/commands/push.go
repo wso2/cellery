@@ -22,6 +22,7 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -87,6 +88,15 @@ func pushImage(cellImage string, username string, password string) error {
 	// Reading the cell image
 	cellImageFilePath := filepath.Join(util.UserHomeDir(), ".cellery", "repo", parsedCellImage.Organization,
 		parsedCellImage.ImageName, parsedCellImage.ImageVersion, parsedCellImage.ImageName+constants.CELL_IMAGE_EXT)
+
+	// Checking if the image is present in the local repo
+	isImagePresent, _ := util.FileExists(cellImageFilePath)
+	if !isImagePresent {
+		spinner.Stop(false)
+		util.ExitWithErrorMessage(fmt.Sprintf("Failed to push image %s", util.Bold(cellImage)),
+			errors.New("Image not Found"))
+	}
+
 	cellImageFile, err := os.Open(cellImageFilePath)
 	if err != nil {
 		spinner.Stop(false)

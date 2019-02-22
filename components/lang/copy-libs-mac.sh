@@ -23,4 +23,6 @@ mvn clean install
 
 sudo cp target/cellery-0.1.0-SNAPSHOT.jar /Library/Ballerina/ballerina-${BALLERINA_VERSION}/bre/lib
 sudo cp -r target/generated-balo/repo/celleryio /Library/Ballerina/ballerina-${BALLERINA_VERSION}/lib/repo
-cp -r target/generated-balo/repo/celleryio ~/.ballerina/repo
+
+mkdir -p ~/.ballerina/repo/
+cp -r target/generated-balo/repo/celleryio ~/.ballerina/repo/

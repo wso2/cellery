@@ -26,6 +26,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"github.com/cellery-io/sdk/components/cli/pkg/constants"
 
@@ -45,6 +46,7 @@ func RunBuild(tag string, fileName string) {
 	if err != nil {
 		util.ExitWithErrorMessage("Error occurred while parsing cell image", err)
 	}
+	ballerinaOrganizationName := strings.Replace(parsedCellImage.Organization, "-", "_", -1)
 
 	repoLocation := filepath.Join(util.UserHomeDir(), ".cellery", "repo", parsedCellImage.Organization,
 		parsedCellImage.ImageName, parsedCellImage.ImageVersion)
@@ -99,7 +101,7 @@ func RunBuild(tag string, fileName string) {
 
 	// Creating additional Ballerina.toml file for ballerina reference project
 	tomlTemplate := "[project]\n" +
-		"org-name = \"" + parsedCellImage.Organization + "\"\n" +
+		"org-name = \"" + ballerinaOrganizationName + "\"\n" +
 		"version = \"" + parsedCellImage.ImageVersion + "\"\n"
 	tomlFile, err := os.Create(filepath.Join(projectDir, "target", "bal", "Ballerina.toml"))
 	if err != nil {

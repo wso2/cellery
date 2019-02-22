@@ -22,7 +22,6 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"golang.org/x/oauth2/google"
 	"io"
 	"log"
 	"math/rand"
@@ -33,12 +32,14 @@ import (
 	"strings"
 	"time"
 
+	"golang.org/x/oauth2/google"
+
 	"cloud.google.com/go/storage"
 	"github.com/cellery-io/sdk/components/cli/pkg/constants"
 	"github.com/cellery-io/sdk/components/cli/pkg/util"
 	"github.com/fatih/color"
 	"github.com/manifoldco/promptui"
-	"google.golang.org/api/sqladmin/v1beta4"
+	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 
 	"context"
 
@@ -431,7 +432,7 @@ func createGcp() error {
 
 	// Create GCP cluster
 	gcpSpinner.SetNewAction("Creating GCP cluster")
-	errCreate := createGcpCluster(gcpService, constants.GCP_CLUSTER_NAME + uniqueNumber)
+	errCreate := createGcpCluster(gcpService, constants.GCP_CLUSTER_NAME+uniqueNumber)
 	if errCreate != nil {
 		gcpSpinner.Stop(false)
 		fmt.Printf("Could not create cluster: %v", errCreate)
@@ -456,41 +457,41 @@ func createGcp() error {
 
 	//Create sql instance
 	gcpSpinner.SetNewAction("Creating sql instance")
-	_, err = createSqlInstance(ctx, sqlService, projectName, region, region, constants.GCP_DB_INSTANCE_NAME + uniqueNumber)
+	_, err = createSqlInstance(ctx, sqlService, projectName, region, region, constants.GCP_DB_INSTANCE_NAME+uniqueNumber)
 	if err != nil {
 		gcpSpinner.Stop(false)
 		fmt.Printf("Error creating sql instance: %v", err)
 	}
 
-	sqlIpAddress, serviceAccountEmailAddress := getSqlServieAccount(ctx, sqlService, projectName, constants.GCP_DB_INSTANCE_NAME + uniqueNumber)
+	sqlIpAddress, serviceAccountEmailAddress := getSqlServieAccount(ctx, sqlService, projectName, constants.GCP_DB_INSTANCE_NAME+uniqueNumber)
 	fmt.Printf("Sql Ip address : %v", sqlIpAddress)
 
 	// Replace username in /global-apim/conf/datasources/master-datasources.xml
-	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), ".cellery", "gcp", "artifacts", "k8s-artefacts", "global-apim", "conf", "datasources", "master-datasources.xml"), "DATABASE_USERNAME", constants.GCP_SQL_USER_NAME + uniqueNumber,-1); err != nil {
+	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), ".cellery", "gcp", "artifacts", "k8s-artefacts", "global-apim", "conf", "datasources", "master-datasources.xml"), "DATABASE_USERNAME", constants.GCP_SQL_USER_NAME+uniqueNumber, -1); err != nil {
 		gcpSpinner.Stop(false)
 		fmt.Printf("Error replacing in file /global-apim/conf/datasources/master-datasources.xml: %v", err)
 	}
 	// Replace password in /global-apim/conf/datasources/master-datasources.xml
-	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), ".cellery", "gcp", "artifacts", "k8s-artefacts", "global-apim", "conf", "datasources", "master-datasources.xml"), "DATABASE_PASSWORD", constants.GCP_SQL_PASSWORD + uniqueNumber,-1); err != nil {
+	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), ".cellery", "gcp", "artifacts", "k8s-artefacts", "global-apim", "conf", "datasources", "master-datasources.xml"), "DATABASE_PASSWORD", constants.GCP_SQL_PASSWORD+uniqueNumber, -1); err != nil {
 		gcpSpinner.Stop(false)
 		fmt.Printf("Error replacing in file /global-apim/conf/datasources/master-datasources.xml: %v", err)
 	}
 	// Replace host in /global-apim/conf/datasources/master-datasources.xml
-	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), ".cellery", "gcp", "artifacts", "k8s-artefacts", "global-apim", "conf", "datasources", "master-datasources.xml"), "MYSQL_DATABASE_HOST", sqlIpAddress,-1); err != nil {
+	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), ".cellery", "gcp", "artifacts", "k8s-artefacts", "global-apim", "conf", "datasources", "master-datasources.xml"), "MYSQL_DATABASE_HOST", sqlIpAddress, -1); err != nil {
 		gcpSpinner.Stop(false)
 		fmt.Printf("Error replacing in file /global-apim/conf/datasources/master-datasources.xml: %v", err)
 	}
 
 	// Replace username in /observability/sp/conf/deployment.yaml
-	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), ".cellery", "gcp", "artifacts", "k8s-artefacts", "observability", "sp", "conf", "deployment.yaml"), "DATABASE_USERNAME", constants.GCP_SQL_USER_NAME + uniqueNumber,-1); err != nil {
+	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), ".cellery", "gcp", "artifacts", "k8s-artefacts", "observability", "sp", "conf", "deployment.yaml"), "DATABASE_USERNAME", constants.GCP_SQL_USER_NAME+uniqueNumber, -1); err != nil {
 		gcpSpinner.Stop(false)
 		fmt.Printf("Error replacing in file /observability/sp/conf/deployment.yaml: %v", err)
 	}
-	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), ".cellery", "gcp", "artifacts", "k8s-artefacts", "observability", "sp", "conf", "deployment.yaml"), "DATABASE_PASSWORD", constants.GCP_SQL_PASSWORD + uniqueNumber,-1); err != nil {
+	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), ".cellery", "gcp", "artifacts", "k8s-artefacts", "observability", "sp", "conf", "deployment.yaml"), "DATABASE_PASSWORD", constants.GCP_SQL_PASSWORD+uniqueNumber, -1); err != nil {
 		gcpSpinner.Stop(false)
 		fmt.Printf("Error replacing in file /observability/sp/conf/deployment.yaml: %v", err)
 	}
-	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), ".cellery", "gcp", "artifacts", "k8s-artefacts", "observability", "sp", "conf", "deployment.yaml"), "MYSQL_DATABASE_HOST", sqlIpAddress,-1); err != nil {
+	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), ".cellery", "gcp", "artifacts", "k8s-artefacts", "observability", "sp", "conf", "deployment.yaml"), "MYSQL_DATABASE_HOST", sqlIpAddress, -1); err != nil {
 		gcpSpinner.Stop(false)
 		fmt.Printf("Error replacing in file /observability/sp/conf/deployment.yaml: %v", err)
 	}
@@ -525,7 +526,7 @@ func createGcp() error {
 	// Import sql script
 	gcpSpinner.SetNewAction("Importing sql script")
 	var uri = "gs://" + gcpBucketName + "/init.sql"
-	if err := importSqlScript(sqlService, projectName, constants.GCP_DB_INSTANCE_NAME + uniqueNumber, uri); err != nil {
+	if err := importSqlScript(sqlService, projectName, constants.GCP_DB_INSTANCE_NAME+uniqueNumber, uri); err != nil {
 		gcpSpinner.Stop(false)
 		fmt.Printf("Error Updating bucket permission: %v", err)
 	}
@@ -533,7 +534,7 @@ func createGcp() error {
 
 	// Update sql instance
 	gcpSpinner.SetNewAction("Updating sql instance")
-	if err := updateInstance(sqlService, projectName, constants.GCP_DB_INSTANCE_NAME + uniqueNumber); err != nil {
+	if err := updateInstance(sqlService, projectName, constants.GCP_DB_INSTANCE_NAME+uniqueNumber); err != nil {
 		gcpSpinner.Stop(false)
 		fmt.Printf("Error Updating sql instance: %v", err)
 	}
@@ -564,16 +565,15 @@ func createGcp() error {
 		fmt.Printf("Error getting NFS server IP address: %v", errIp)
 	}
 
-	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), ".cellery", "gcp", "artifacts", "k8s-artefacts", "global-apim", "artifacts-persistent-volume.yaml"), "NFS_SERVER_IP", nfsIpAddress,-1); err != nil {
+	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), ".cellery", "gcp", "artifacts", "k8s-artefacts", "global-apim", "artifacts-persistent-volume.yaml"), "NFS_SERVER_IP", nfsIpAddress, -1); err != nil {
 		gcpSpinner.Stop(false)
 		fmt.Printf("Error replacing in file artifacts-persistent-volume.yaml: %v", err)
 	}
 
-	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), ".cellery", "gcp", "artifacts", "k8s-artefacts", "global-apim", "artifacts-persistent-volume.yaml"), "NFS_SHARE_LOCATION", "/data",-1); err != nil {
+	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), ".cellery", "gcp", "artifacts", "k8s-artefacts", "global-apim", "artifacts-persistent-volume.yaml"), "NFS_SHARE_LOCATION", "/data", -1); err != nil {
 		gcpSpinner.Stop(false)
 		fmt.Printf("Error replacing in file artifacts-persistent-volume.yaml: %v", err)
 	}
-
 
 	// Deploy cellery runtime
 	gcpSpinner.SetNewAction("Deploying Cellery runtime")
@@ -654,7 +654,7 @@ func createGcpCluster(gcpService *container.Service, clusterName string) error {
 	k8sCluster, err := gcpService.Projects.Zones.Clusters.Create(projectName, zone, createClusterRequest).Do()
 	var clusterStatus string
 	for i := 0; i < 40; i++ {
-		clusterStatus, err = getClusterState(gcpService, projectName, zone, constants.GCP_CLUSTER_NAME + uniqueNumber)
+		clusterStatus, err = getClusterState(gcpService, projectName, zone, constants.GCP_CLUSTER_NAME+uniqueNumber)
 		if err != nil {
 			fmt.Printf("Error creating cluster : %v", err)
 			break
@@ -715,8 +715,8 @@ func create(client *storage.Client, projectID, bucketName string) error {
 
 func uploadSqlFile(client *storage.Client, bucket, object string) error {
 	ctx := context.Background()
-	err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), ".cellery", "gcp", "artifacts", "k8s-artefacts", "mysql", "dbscripts", "init.sql"), "DATABASE_USERNAME", constants.GCP_SQL_USER_NAME + uniqueNumber, -1)
-	err = util.ReplaceInFile(filepath.Join(util.UserHomeDir(), ".cellery", "gcp", "artifacts", "k8s-artefacts", "mysql", "dbscripts", "init.sql"), "DATABASE_PASSWORD", constants.GCP_SQL_PASSWORD + uniqueNumber, -1)
+	err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), ".cellery", "gcp", "artifacts", "k8s-artefacts", "mysql", "dbscripts", "init.sql"), "DATABASE_USERNAME", constants.GCP_SQL_USER_NAME+uniqueNumber, -1)
+	err = util.ReplaceInFile(filepath.Join(util.UserHomeDir(), ".cellery", "gcp", "artifacts", "k8s-artefacts", "mysql", "dbscripts", "init.sql"), "DATABASE_PASSWORD", constants.GCP_SQL_PASSWORD+uniqueNumber, -1)
 	f, err := os.Open(filepath.Join(util.UserHomeDir(), ".cellery", "gcp", "artifacts", "k8s-artefacts", "mysql", "dbscripts", "init.sql"))
 	if err != nil {
 		return err
@@ -734,7 +734,7 @@ func uploadSqlFile(client *storage.Client, bucket, object string) error {
 }
 
 func updateKubeConfig() {
-	cmd := exec.Command("bash", "-c", "gcloud container clusters get-credentials "+constants.GCP_CLUSTER_NAME + uniqueNumber+" --zone "+zone+" --project "+projectName)
+	cmd := exec.Command("bash", "-c", "gcloud container clusters get-credentials "+constants.GCP_CLUSTER_NAME+uniqueNumber+" --zone "+zone+" --project "+projectName)
 	stderr, err := cmd.StderrPipe()
 	if err != nil {
 		log.Fatal(err)
@@ -747,9 +747,9 @@ func updateKubeConfig() {
 	go io.Copy(os.Stdout, stderr)
 }
 
-func createNfsServer(nfsService *file.Service) error{
+func createNfsServer(nfsService *file.Service) error {
 	fileShare := &file.FileShareConfig{
-		Name: constants.GCP_NFS_CONFIG_NAME,
+		Name:       constants.GCP_NFS_CONFIG_NAME,
 		CapacityGb: constants.GCP_NFS_CONFIG_CAPACITY,
 	}
 
@@ -759,15 +759,15 @@ func createNfsServer(nfsService *file.Service) error{
 		Network: "default",
 	}
 
-	networks := append([]*file.NetworkConfig{},network)
+	networks := append([]*file.NetworkConfig{}, network)
 
 	nfsInstance := &file.Instance{
 		FileShares: fileShares,
-		Networks: networks,
-		Tier: "STANDARD",
+		Networks:   networks,
+		Tier:       "STANDARD",
 	}
 
-	if _, err := nfsService.Projects.Locations.Instances.Create("projects/" + projectName + "/locations/" + zone, nfsInstance).InstanceId(constants.GCP_NFS_SERVER_INSTANCE + uniqueNumber).Do(); err != nil {
+	if _, err := nfsService.Projects.Locations.Instances.Create("projects/"+projectName+"/locations/"+zone, nfsInstance).InstanceId(constants.GCP_NFS_SERVER_INSTANCE + uniqueNumber).Do(); err != nil {
 		return err
 	}
 	return nil
@@ -791,7 +791,7 @@ func getNfsServerIp(nfsService *file.Service) (string, error) {
 	return serverIp, nil
 }
 
-func getSqlServieAccount(ctx context.Context, gcpService *sqladmin.Service, projectId string, instanceName string ) (string, string){
+func getSqlServieAccount(ctx context.Context, gcpService *sqladmin.Service, projectId string, instanceName string) (string, string) {
 	for i := 0; i < 30; i++ {
 		resp, err := gcpService.Instances.Get(projectId, instanceName).Context(ctx).Do()
 		if err != nil {
@@ -822,31 +822,31 @@ func updateBucketPermission(bucketName string, svcAccount string) (err error) {
 		return err
 	}
 
-	policy.Add(strings.Join([]string{"serviceAccount:", svcAccount}, ""),"roles/storage.objectViewer")
+	policy.Add(strings.Join([]string{"serviceAccount:", svcAccount}, ""), "roles/storage.objectViewer")
 	if err := bucket.IAM().SetPolicy(ctx, policy); err != nil {
 		return err
 	}
 	return nil
 }
 
-func importSqlScript (service *sqladmin.Service, projectId string, instanceName string, uri string) (error){
+func importSqlScript(service *sqladmin.Service, projectId string, instanceName string, uri string) error {
 	ic := &sqladmin.ImportContext{
-		FileType:"SQL",
-		Uri:uri,
+		FileType: "SQL",
+		Uri:      uri,
 	}
 
 	iIR := &sqladmin.InstancesImportRequest{
 		ImportContext: ic,
 	}
 
-	_, err:= service.Instances.Import(projectId, instanceName, iIR).Do()
+	_, err := service.Instances.Import(projectId, instanceName, iIR).Do()
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func updateInstance(service *sqladmin.Service, projectId string, instanceName string) (error){
+func updateInstance(service *sqladmin.Service, projectId string, instanceName string) error {
 	aclEntry := &sqladmin.AclEntry{
 		Value: "0.0.0.0/0",
 	}
@@ -859,11 +859,11 @@ func updateInstance(service *sqladmin.Service, projectId string, instanceName st
 	}
 
 	newSettings := &sqladmin.Settings{
-		IpConfiguration:ipConfigs,
+		IpConfiguration: ipConfigs,
 	}
 
 	newDbInstance := &sqladmin.DatabaseInstance{
-		Settings:newSettings,
+		Settings: newSettings,
 	}
 
 	_, err := service.Instances.Patch(projectId, instanceName, newDbInstance).Do()
@@ -881,77 +881,77 @@ func deployCelleryRuntime() error {
 	util.ExecuteCommand(exec.Command("kubectl", "create", "clusterrolebinding", "cluster-admin-binding", "--clusterrole", "cluster-admin", "--user", accountName), errorDeployingCelleryRuntime)
 
 	// Setup Celley namespace, create service account and the docker registry credentials
-	util.ExecuteCommand(exec.Command("kubectl", "apply", "-f", artifactPath + "/k8s-artefacts/system/ns-init.yaml"), errorDeployingCelleryRuntime)
+	util.ExecuteCommand(exec.Command("kubectl", "apply", "-f", artifactPath+"/k8s-artefacts/system/ns-init.yaml"), errorDeployingCelleryRuntime)
 
 	// Create apim NFS volumes and volume claims
-	util.ExecuteCommand(exec.Command("kubectl", "apply", "-f", artifactPath + "/k8s-artefacts/global-apim/artifacts-persistent-volume.yaml", "-n", "cellery-system"), errorDeployingCelleryRuntime)
-	util.ExecuteCommand(exec.Command("kubectl", "apply", "-f", artifactPath + "/k8s-artefacts/global-apim/artifacts-persistent-volume-claim.yaml", "-n", "cellery-system"), errorDeployingCelleryRuntime)
+	util.ExecuteCommand(exec.Command("kubectl", "apply", "-f", artifactPath+"/k8s-artefacts/global-apim/artifacts-persistent-volume.yaml", "-n", "cellery-system"), errorDeployingCelleryRuntime)
+	util.ExecuteCommand(exec.Command("kubectl", "apply", "-f", artifactPath+"/k8s-artefacts/global-apim/artifacts-persistent-volume-claim.yaml", "-n", "cellery-system"), errorDeployingCelleryRuntime)
 
 	// Create the gw config maps
-	util.ExecuteCommand(exec.Command("kubectl", "create", "configmap", "gw-conf", "--from-file", artifactPath + "/k8s-artefacts/global-apim/conf", "-n", "cellery-system"), errorDeployingCelleryRuntime)
-	util.ExecuteCommand(exec.Command("kubectl", "create", "configmap", "gw-conf-datasources", "--from-file", artifactPath + "/k8s-artefacts/global-apim/conf/datasources/", "-n", "cellery-system"), errorDeployingCelleryRuntime)
+	util.ExecuteCommand(exec.Command("kubectl", "create", "configmap", "gw-conf", "--from-file", artifactPath+"/k8s-artefacts/global-apim/conf", "-n", "cellery-system"), errorDeployingCelleryRuntime)
+	util.ExecuteCommand(exec.Command("kubectl", "create", "configmap", "gw-conf-datasources", "--from-file", artifactPath+"/k8s-artefacts/global-apim/conf/datasources/", "-n", "cellery-system"), errorDeployingCelleryRuntime)
 
 	// Create KM config maps
-	util.ExecuteCommand(exec.Command("kubectl", "create", "configmap", "conf-identity", "--from-file", artifactPath + "/k8s-artefacts/global-apim/conf/identity", "-n", "cellery-system"), errorDeployingCelleryRuntime)
-	util.ExecuteCommand(exec.Command("kubectl", "create", "configmap", "apim-template", "--from-file", artifactPath + "/k8s-artefacts/global-apim/conf/resources/api_templates", "-n", "cellery-system"), errorDeployingCelleryRuntime)
-	util.ExecuteCommand(exec.Command("kubectl", "create", "configmap", "apim-tomcat", "--from-file", artifactPath + "/k8s-artefacts/global-apim/conf/tomcat", "-n", "cellery-system"), errorDeployingCelleryRuntime)
-	util.ExecuteCommand(exec.Command("kubectl", "create", "configmap", "apim-security", "--from-file", artifactPath + "/k8s-artefacts/global-apim/conf/security", "-n", "cellery-system"), errorDeployingCelleryRuntime)
+	util.ExecuteCommand(exec.Command("kubectl", "create", "configmap", "conf-identity", "--from-file", artifactPath+"/k8s-artefacts/global-apim/conf/identity", "-n", "cellery-system"), errorDeployingCelleryRuntime)
+	util.ExecuteCommand(exec.Command("kubectl", "create", "configmap", "apim-template", "--from-file", artifactPath+"/k8s-artefacts/global-apim/conf/resources/api_templates", "-n", "cellery-system"), errorDeployingCelleryRuntime)
+	util.ExecuteCommand(exec.Command("kubectl", "create", "configmap", "apim-tomcat", "--from-file", artifactPath+"/k8s-artefacts/global-apim/conf/tomcat", "-n", "cellery-system"), errorDeployingCelleryRuntime)
+	util.ExecuteCommand(exec.Command("kubectl", "create", "configmap", "apim-security", "--from-file", artifactPath+"/k8s-artefacts/global-apim/conf/security", "-n", "cellery-system"), errorDeployingCelleryRuntime)
 
 	//Create gateway deployment and the service
-	util.ExecuteCommand(exec.Command("kubectl", "apply", "-f", artifactPath + "/k8s-artefacts/global-apim/global-apim.yaml", "-n", "cellery-system"), errorDeployingCelleryRuntime)
+	util.ExecuteCommand(exec.Command("kubectl", "apply", "-f", artifactPath+"/k8s-artefacts/global-apim/global-apim.yaml", "-n", "cellery-system"), errorDeployingCelleryRuntime)
 
 	// Wait till the gateway deployment availability
 	//util.ExecuteCommand(exec.Command("kubectl", "wait", "deployment.apps/gateway", "--for", "condition available", "--timeout", "6000s", "-n", "cellery-system"), errorDeployingCelleryRuntime)
 
 	// Create SP worker configmaps
-	util.ExecuteCommand(exec.Command("kubectl", "create", "configmap", "sp-worker-siddhi", "--from-file", artifactPath + "/k8s-artefacts/global-apim/conf/identity", "-n", "cellery-system"), errorDeployingCelleryRuntime)
-	util.ExecuteCommand(exec.Command("kubectl", "create", "configmap", "sp-worker-conf", "--from-file", artifactPath + "/k8s-artefacts/observability/sp/conf", "-n", "cellery-system"), errorDeployingCelleryRuntime)
+	util.ExecuteCommand(exec.Command("kubectl", "create", "configmap", "sp-worker-siddhi", "--from-file", artifactPath+"/k8s-artefacts/global-apim/conf/identity", "-n", "cellery-system"), errorDeployingCelleryRuntime)
+	util.ExecuteCommand(exec.Command("kubectl", "create", "configmap", "sp-worker-conf", "--from-file", artifactPath+"/k8s-artefacts/observability/sp/conf", "-n", "cellery-system"), errorDeployingCelleryRuntime)
 
 	// Create SP worker deployment
-	util.ExecuteCommand(exec.Command("kubectl", "apply", "-f", artifactPath + "/k8s-artefacts/observability/sp/sp-worker.yaml", "-n", "cellery-system"), errorDeployingCelleryRuntime)
+	util.ExecuteCommand(exec.Command("kubectl", "apply", "-f", artifactPath+"/k8s-artefacts/observability/sp/sp-worker.yaml", "-n", "cellery-system"), errorDeployingCelleryRuntime)
 
 	// Create observability portal deployment, service and ingress.
-	util.ExecuteCommand(exec.Command("kubectl", "create", "configmap", "observability-portal-config", "--from-file", artifactPath + "/observability/node-server/config", "-n", "cellery-system"), errorDeployingCelleryRuntime)
-	util.ExecuteCommand(exec.Command("kubectl", "apply", "-f", artifactPath + "/k8s-artefacts/observability/portal/observability-portal.yaml", "-n", "cellery-system"), errorDeployingCelleryRuntime)
+	util.ExecuteCommand(exec.Command("kubectl", "create", "configmap", "observability-portal-config", "--from-file", artifactPath+"/observability/node-server/config", "-n", "cellery-system"), errorDeployingCelleryRuntime)
+	util.ExecuteCommand(exec.Command("kubectl", "apply", "-f", artifactPath+"/k8s-artefacts/observability/portal/observability-portal.yaml", "-n", "cellery-system"), errorDeployingCelleryRuntime)
 
 	// Create K8s Metrics Config-maps
-	util.ExecuteCommand(exec.Command("kubectl", "create", "configmap", "k8s-metrics-prometheus-conf", "--from-file", artifactPath + "/k8s-artefacts/observability/prometheus/config", "-n", "cellery-system"), errorDeployingCelleryRuntime)
-	util.ExecuteCommand(exec.Command("kubectl", "create", "configmap", "k8s-metrics-grafana-conf", "--from-file", artifactPath + "/k8s-artefacts/observability/grafana/config", "-n", "cellery-system"), errorDeployingCelleryRuntime)
-	util.ExecuteCommand(exec.Command("kubectl", "create", "configmap", "k8s-metrics-grafana-datasources", "--from-file", artifactPath + "/k8s-artefacts/observability/grafana/datasources", "-n", "cellery-system"), errorDeployingCelleryRuntime)
-	util.ExecuteCommand(exec.Command("kubectl", "create", "configmap", "k8s-metrics-grafana-dashboards", "--from-file", artifactPath + "/k8s-artefacts/observability/grafana/dashboards", "-n", "cellery-system"), errorDeployingCelleryRuntime)
-	util.ExecuteCommand(exec.Command("kubectl", "create", "configmap", "k8s-metrics-grafana-dashboards-default", "--from-file", artifactPath + "/k8s-artefacts/observability/grafana/dashboards/default", "-n", "cellery-system"), errorDeployingCelleryRuntime)
+	util.ExecuteCommand(exec.Command("kubectl", "create", "configmap", "k8s-metrics-prometheus-conf", "--from-file", artifactPath+"/k8s-artefacts/observability/prometheus/config", "-n", "cellery-system"), errorDeployingCelleryRuntime)
+	util.ExecuteCommand(exec.Command("kubectl", "create", "configmap", "k8s-metrics-grafana-conf", "--from-file", artifactPath+"/k8s-artefacts/observability/grafana/config", "-n", "cellery-system"), errorDeployingCelleryRuntime)
+	util.ExecuteCommand(exec.Command("kubectl", "create", "configmap", "k8s-metrics-grafana-datasources", "--from-file", artifactPath+"/k8s-artefacts/observability/grafana/datasources", "-n", "cellery-system"), errorDeployingCelleryRuntime)
+	util.ExecuteCommand(exec.Command("kubectl", "create", "configmap", "k8s-metrics-grafana-dashboards", "--from-file", artifactPath+"/k8s-artefacts/observability/grafana/dashboards", "-n", "cellery-system"), errorDeployingCelleryRuntime)
+	util.ExecuteCommand(exec.Command("kubectl", "create", "configmap", "k8s-metrics-grafana-dashboards-default", "--from-file", artifactPath+"/k8s-artefacts/observability/grafana/dashboards/default", "-n", "cellery-system"), errorDeployingCelleryRuntime)
 
 	// Create K8s Metrics deployment, service and ingress.
-	util.ExecuteCommand(exec.Command("kubectl", "apply", "-f", artifactPath + "/k8s-artefacts/observability/prometheus/k8s-metrics-prometheus.yaml", "-n", "cellery-system"), errorDeployingCelleryRuntime)
-	util.ExecuteCommand(exec.Command("kubectl", "apply", "-f", artifactPath + "/k8s-artefacts/observability/grafana/k8s-metrics-grafana.yaml", "-n", "cellery-system"), errorDeployingCelleryRuntime)
+	util.ExecuteCommand(exec.Command("kubectl", "apply", "-f", artifactPath+"/k8s-artefacts/observability/prometheus/k8s-metrics-prometheus.yaml", "-n", "cellery-system"), errorDeployingCelleryRuntime)
+	util.ExecuteCommand(exec.Command("kubectl", "apply", "-f", artifactPath+"/k8s-artefacts/observability/grafana/k8s-metrics-grafana.yaml", "-n", "cellery-system"), errorDeployingCelleryRuntime)
 
 	// Setup Celley namespace, create service account and the docker registry credentials
-	util.ExecuteCommand(exec.Command("kubectl", "apply", "-f", artifactPath + "/k8s-artefacts/system/ns-init.yaml"), errorDeployingCelleryRuntime)
+	util.ExecuteCommand(exec.Command("kubectl", "apply", "-f", artifactPath+"/k8s-artefacts/system/ns-init.yaml"), errorDeployingCelleryRuntime)
 
 	// Istio
-	util.ExecuteCommand(exec.Command("kubectl", "apply", "-f", artifactPath + "/k8s-artefacts/system/istio-crds.yaml"), errorDeployingCelleryRuntime)
+	util.ExecuteCommand(exec.Command("kubectl", "apply", "-f", artifactPath+"/k8s-artefacts/system/istio-crds.yaml"), errorDeployingCelleryRuntime)
 
 	// Enabling Istio injection
 	util.ExecuteCommand(exec.Command("kubectl", "label", "namespace", "default", "istio-injection=enabled"), errorDeployingCelleryRuntime)
 
 	// Without security
-	util.ExecuteCommand(exec.Command("kubectl", "apply", "-f", artifactPath + "/k8s-artefacts/system/istio-demo-cellery.yaml"), errorDeployingCelleryRuntime)
-	util.ExecuteCommand(exec.Command("kubectl", "apply", "-f", artifactPath + "/k8s-artefacts/system/istio-gateway.yaml"), errorDeployingCelleryRuntime)
+	util.ExecuteCommand(exec.Command("kubectl", "apply", "-f", artifactPath+"/k8s-artefacts/system/istio-demo-cellery.yaml"), errorDeployingCelleryRuntime)
+	util.ExecuteCommand(exec.Command("kubectl", "apply", "-f", artifactPath+"/k8s-artefacts/system/istio-gateway.yaml"), errorDeployingCelleryRuntime)
 
 	// Install Cellery crds
-	util.ExecuteCommand(exec.Command("kubectl", "apply", "-f", artifactPath + "/k8s-artefacts/controller/01-cluster-role.yaml"), errorDeployingCelleryRuntime)
-	util.ExecuteCommand(exec.Command("kubectl", "apply", "-f", artifactPath + "/k8s-artefacts/controller/02-service-account.yaml"), errorDeployingCelleryRuntime)
-	util.ExecuteCommand(exec.Command("kubectl", "apply", "-f", artifactPath + "/k8s-artefacts/controller/03-cluster-role-binding.yaml"), errorDeployingCelleryRuntime)
-	util.ExecuteCommand(exec.Command("kubectl", "apply", "-f", artifactPath + "/k8s-artefacts/controller/04-crd-cell.yaml"), errorDeployingCelleryRuntime)
-	util.ExecuteCommand(exec.Command("kubectl", "apply", "-f", artifactPath + "/k8s-artefacts/controller/05-crd-gateway.yaml"), errorDeployingCelleryRuntime)
-	util.ExecuteCommand(exec.Command("kubectl", "apply", "-f", artifactPath + "/k8s-artefacts/controller/06-crd-token-service.yaml"), errorDeployingCelleryRuntime)
-	util.ExecuteCommand(exec.Command("kubectl", "apply", "-f", artifactPath + "/k8s-artefacts/controller/07-crd-service.yaml"), errorDeployingCelleryRuntime)
-	util.ExecuteCommand(exec.Command("kubectl", "apply", "-f", artifactPath + "/k8s-artefacts/controller/08-config.yaml"), errorDeployingCelleryRuntime)
-	util.ExecuteCommand(exec.Command("kubectl", "apply", "-f", artifactPath + "/k8s-artefacts/controller/09-controller.yaml"), errorDeployingCelleryRuntime)
+	util.ExecuteCommand(exec.Command("kubectl", "apply", "-f", artifactPath+"/k8s-artefacts/controller/01-cluster-role.yaml"), errorDeployingCelleryRuntime)
+	util.ExecuteCommand(exec.Command("kubectl", "apply", "-f", artifactPath+"/k8s-artefacts/controller/02-service-account.yaml"), errorDeployingCelleryRuntime)
+	util.ExecuteCommand(exec.Command("kubectl", "apply", "-f", artifactPath+"/k8s-artefacts/controller/03-cluster-role-binding.yaml"), errorDeployingCelleryRuntime)
+	util.ExecuteCommand(exec.Command("kubectl", "apply", "-f", artifactPath+"/k8s-artefacts/controller/04-crd-cell.yaml"), errorDeployingCelleryRuntime)
+	util.ExecuteCommand(exec.Command("kubectl", "apply", "-f", artifactPath+"/k8s-artefacts/controller/05-crd-gateway.yaml"), errorDeployingCelleryRuntime)
+	util.ExecuteCommand(exec.Command("kubectl", "apply", "-f", artifactPath+"/k8s-artefacts/controller/06-crd-token-service.yaml"), errorDeployingCelleryRuntime)
+	util.ExecuteCommand(exec.Command("kubectl", "apply", "-f", artifactPath+"/k8s-artefacts/controller/07-crd-service.yaml"), errorDeployingCelleryRuntime)
+	util.ExecuteCommand(exec.Command("kubectl", "apply", "-f", artifactPath+"/k8s-artefacts/controller/08-config.yaml"), errorDeployingCelleryRuntime)
+	util.ExecuteCommand(exec.Command("kubectl", "apply", "-f", artifactPath+"/k8s-artefacts/controller/09-controller.yaml"), errorDeployingCelleryRuntime)
 
 	// Install nginx-ingress for control plane ingress
-	util.ExecuteCommand(exec.Command("kubectl", "apply", "-f", artifactPath + "/k8s-artefacts/system/mandatory.yaml"), errorDeployingCelleryRuntime)
-	util.ExecuteCommand(exec.Command("kubectl", "apply", "-f", artifactPath + "/k8s-artefacts/system/cloud-generic.yaml"), errorDeployingCelleryRuntime)
+	util.ExecuteCommand(exec.Command("kubectl", "apply", "-f", artifactPath+"/k8s-artefacts/system/mandatory.yaml"), errorDeployingCelleryRuntime)
+	util.ExecuteCommand(exec.Command("kubectl", "apply", "-f", artifactPath+"/k8s-artefacts/system/cloud-generic.yaml"), errorDeployingCelleryRuntime)
 
 	return nil
 }

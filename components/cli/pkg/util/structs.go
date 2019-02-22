@@ -120,12 +120,12 @@ type Spinner struct {
 
 type Gcp struct {
 	Compute GcpCompute `json:"compute"`
-	Core GcpCore `json:"core"`
+	Core    GcpCore    `json:"core"`
 }
 
 type GcpCompute struct {
 	Region string `json:"region"`
-	Zone string `json:"zone"`
+	Zone   string `json:"zone"`
 }
 
 type GcpCore struct {

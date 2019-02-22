@@ -70,15 +70,15 @@ const GCP_DB_INSTANCE_NAME = "cellery-sql"
 const GCP_BUCKET_NAME = "cellery-gcp-bucket"
 const GCP_SQL_USER_NAME = "cellery-sql-user"
 const GCP_SQL_PASSWORD = "cellery-sql-user"
-const GCP_NFS_SERVER_INSTANCE  = "nfs-server"
+const GCP_NFS_SERVER_INSTANCE = "nfs-server"
 
-const GCP_NFS_CONFIG_NAME  = "data"
-const GCP_NFS_CONFIG_CAPACITY  = 1024
-const GCP_CLUSTER_IMAGE_TYPE  = "cos_containerd"
-const GCP_CLUSTER_MACHINE_TYPE  = "n1-standard-4"
-const GCP_CLUSTER_DISK_SIZE_GB  = 100
-const GCP_SQL_TIER  = "db-n1-standard-1"
-const GCP_SQL_DISK_SIZE_GB  = 20
+const GCP_NFS_CONFIG_NAME = "data"
+const GCP_NFS_CONFIG_CAPACITY = 1024
+const GCP_CLUSTER_IMAGE_TYPE = "cos_containerd"
+const GCP_CLUSTER_MACHINE_TYPE = "n1-standard-4"
+const GCP_CLUSTER_DISK_SIZE_GB = 100
+const GCP_SQL_TIER = "db-n1-standard-1"
+const GCP_SQL_DISK_SIZE_GB = 20
 
 const ZIP_BALLERINA_SOURCE = "src"
 const ZIP_ARTIFACTS = "artifacts"

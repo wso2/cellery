@@ -39,7 +39,7 @@ import (
 	"github.com/cellery-io/sdk/components/cli/pkg/util"
 	"github.com/fatih/color"
 	"github.com/manifoldco/promptui"
-	"google.golang.org/api/sqladmin/v1beta4"
+	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 
 	"context"
 

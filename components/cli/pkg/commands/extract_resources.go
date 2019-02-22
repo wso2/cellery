@@ -19,6 +19,7 @@
 package commands
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -38,6 +39,13 @@ func RunExtractResources(cellImage string, outputPath string) {
 	repoLocation := filepath.Join(util.UserHomeDir(), ".cellery", "repo", parsedCellImage.Organization,
 		parsedCellImage.ImageName, parsedCellImage.ImageVersion)
 	imageLocation := filepath.Join(repoLocation, parsedCellImage.ImageName+constants.CELL_IMAGE_EXT)
+
+	// Checking if the image is present in the local repo
+	isImagePresent, _ := util.FileExists(imageLocation)
+	if !isImagePresent {
+		util.ExitWithErrorMessage(fmt.Sprintf("Failed to extract resources for image %s", util.Bold(cellImage)),
+			errors.New("Image not Found"))
+	}
 
 	// Create temp directory
 	currentTIme := time.Now()

@@ -343,71 +343,72 @@ this sample focuses on the former and hence is written to artificially hog cpu f
 
 ## Cellery Commands
 ### Init
-Initializes a cellery project
-Usage : `cellery init`
+Initializes a cellery project.  
+Usage : `cellery init`  
 In the command prompt, provide the project name.
 
 ### Build
-Build an immutable cell image with required dependencies.
-Usage : `cellery build <BAL_FILE_NAME> -t <ORGANIZATION_NAME>/<IMAGE_NAME>:<VERSION>`
+Build an immutable cell image with required dependencies.  
+Usage : `cellery build <BAL_FILE_NAME> -t <ORGANIZATION_NAME>/<IMAGE_NAME>:<VERSION>`  
 Example : `cellery build my-project.bal -t wso2/my-cell:1.0.0`
 
 ### Run
-Use a cellery image to create a  running instance.
-Usage : `cellery run <ORGANIZATION_NAME>/<IMAGE_NAME>:<VERSION>`
+Use a cellery image to create a  running instance.  
+Usage : `cellery run <ORGANIZATION_NAME>/<IMAGE_NAME>:<VERSION>`  
 Example : `cellery run wso2/my-cell:1.0.0`
 
 ### Ps
-List all running cells.
+List all running cells.  
 Usage : `cellery ps`
-Push
-Push cell image to the remote repository.
-Usage : `cellery push <ORGANIZATION_NAME>/<IMAGE_NAME>:<VERSION>`
+
+### Push
+Push cell image to the remote repository.  
+Usage : `cellery push <ORGANIZATION_NAME>/<IMAGE_NAME>:<VERSION>`  
 Example : `cellery push wso2/my-cell:1.0.0`
 
 ### Pull 
-Pulls cell image from the remote repository.
-Usage : `cellery pull <ORGANIZATION_NAME>/<IMAGE_NAME>:<VERSION>`
+Pulls cell image from the remote repository.  
+Usage : `cellery pull <ORGANIZATION_NAME>/<IMAGE_NAME>:<VERSION>`  
 Example : `cellery pull wso2/my-cell:1.0.0`
 
 ### Images
-List cell images that was pulled and built in the current machine.
+List cell images that was pulled and built in the current machine.  
 Usage : `cellery images`
 
 ### Stop
-Stop a running cell instance.
-Usage : `cellery stop <CELL_NAME>`
+Stop a running cell instance.  
+Usage : `cellery stop <CELL_NAME>`  
 Example : `cellery stop hello-cell`
 
 ### Status 
-Performs a health check of a cell.
-Usage : `cellery status <CELL_NAME>`
+Performs a health check of a cell.  
+Usage : `cellery status <CELL_NAME>`  
 Example : `cellery status hello-cell`
 
 ### Apis 
-List the exposed APIs of a cell instance.
-Usage : `cellery apis <CELL_NAME>`
+List the exposed APIs of a cell instance.  
+Usage : `cellery apis <CELL_NAME>`  
 Example : `cellery apis hello-cell`
 
 ### Logs 
-Displays logs for either the cell instance, or a component of a running cell instance.
-Usage : `cellery logs <CELL_NAME> / cellery logs <CELL_NAME> -c <COMPONENT_NAME>`
+Displays logs for either the cell instance, or a component of a running cell instance.  
+Usage : `cellery logs <CELL_NAME> / cellery logs <CELL_NAME> -c <COMPONENT_NAME>`  
 Example: `cellery logs hello-cell / cellery logs hello-cell -c my-component`
 
 ### Components
-Lists the components which the cell encapsulates.
-Usage : `cellery components <CELL_NAME>`
+Lists the components which the cell encapsulates.  
+Usage : `cellery components <CELL_NAME>`  
 Example : `cellery components hello-cell`
 
 ### List-files
-List the files (directory structure) of a cell images.
-Usage : `cellery list-files <ORGANIZATION_NAME>/<IMAGE_NAME>:<VERSION>`
+List the files (directory structure) of a cell images.  
+Usage : `cellery list-files <ORGANIZATION_NAME>/<IMAGE_NAME>:<VERSION>`  
 Example : `cellery list-files wso2/my-cell:1.0.0`
 
 ### Extract-resources
 Extract the resource files of a pulled image to the provided location. This is useful when cells are packaged with 
-swagger files, therefore any components or micro services that uses the cell can generate the code from the swagger.
-Usage : `cellery extract-resources <ORGANIZATION_NAME>/<IMAGE_NAME>:<VERSION> ./resources`
+swagger files, therefore any components or micro services that uses the cell can generate the code from the swagger.  
+Usage : `cellery extract-resources <ORGANIZATION_NAME>/<IMAGE_NAME>:<VERSION> ./resources`  
 Example : `cellery extract-resources cellery-samples/employee:1.0.0 ./resources`
 
 5. Contribute to Cellery

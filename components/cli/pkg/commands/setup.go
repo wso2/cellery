@@ -502,7 +502,7 @@ func createGcp() error {
 	fmt.Printf("Sql Ip address : %v", sqlIpAddress)
 
 	// Replace username in /global-apim/conf/datasources/master-datasources.xml
-	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), ".cellery", "gcp", "artifacts", "k8s-artefacts", "global-apim", "conf", "datasources", "master-datasources.xml"), "DATABASE_USERNAME", constants.GCP_SQL_USER_NAME+uniqueNumber, -1); err != nil {
+	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), ".cellery", "gcp", "artifacts", "k8s-artefacts", "global-apim", "conf", "datasources", "master-datasources.xml"), "DATABASE_USERNAME", constants.GCP_SQL_USER_NAME, -1); err != nil {
 		gcpSpinner.Stop(false)
 		fmt.Printf("Error replacing in file /global-apim/conf/datasources/master-datasources.xml: %v", err)
 	}
@@ -518,7 +518,7 @@ func createGcp() error {
 	}
 
 	// Replace username in /observability/sp/conf/deployment.yaml
-	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), ".cellery", "gcp", "artifacts", "k8s-artefacts", "observability", "sp", "conf", "deployment.yaml"), "DATABASE_USERNAME", constants.GCP_SQL_USER_NAME+uniqueNumber, -1); err != nil {
+	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), ".cellery", "gcp", "artifacts", "k8s-artefacts", "observability", "sp", "conf", "deployment.yaml"), "DATABASE_USERNAME", constants.GCP_SQL_USER_NAME, -1); err != nil {
 		gcpSpinner.Stop(false)
 		fmt.Printf("Error replacing in file /observability/sp/conf/deployment.yaml: %v", err)
 	}

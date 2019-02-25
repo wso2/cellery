@@ -417,13 +417,38 @@ func getCreateEnvironmentList() []string {
 
 func createGcp() error {
 	// Backup artifacts folder
+	artiFactsBackupExist, errBackupDir := util.FileExists(filepath.Join(util.UserHomeDir(), ".cellery", "gcp", "artifacts-old"))
+	if errBackupDir == nil {
+		if  artiFactsBackupExist{
+			if err := os.RemoveAll(filepath.Join(util.UserHomeDir(), ".cellery", "gcp", "artifacts")); err != nil {
+				fmt.Printf("Error replacing artifacts filel: %v", err)
+			}
+			if err := os.Rename(filepath.Join(util.UserHomeDir(), ".cellery", "gcp", "artifacts-old"), filepath.Join(util.UserHomeDir(), ".cellery", "gcp", "artifacts")); err != nil {
+				fmt.Printf("Error replacing artifacts filel: %v", err)
+			}
+		}
+	}
+
 	util.CopyDir(filepath.Join(util.UserHomeDir(), ".cellery", "gcp", "artifacts"), filepath.Join(util.UserHomeDir(), ".cellery", "gcp", "artifacts-old"))
+
+	validateGcpConfigFile([]string{filepath.Join(util.UserHomeDir(), ".cellery", "gcp", "artifacts", "k8s-artefacts", "global-apim", "conf", "datasources", "master-datasources.xml"),
+	 							   filepath.Join(util.UserHomeDir(), ".cellery", "gcp", "artifacts", "k8s-artefacts", "observability", "sp", "conf", "deployment.yaml"),
+								   filepath.Join(util.UserHomeDir(), ".cellery", "gcp", "artifacts", "k8s-artefacts", "global-apim", "artifacts-persistent-volume.yaml"),
+								   filepath.Join(util.UserHomeDir(), ".cellery", "gcp", "artifacts", "k8s-artefacts", "mysql", "dbscripts", "init.sql")})
 
 	// Get the GCP cluster data
 	projectName, accountName, region, zone = getGcpData()
 
 	var gcpBucketName = constants.GCP_BUCKET_NAME + uniqueNumber
-	os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", filepath.Join(util.UserHomeDir(), ".cellery", "gcp", "vick-team-1abab5311d43.json"))
+
+	jsonAuthFile := util.FindInDirectory(filepath.Join(util.UserHomeDir(), ".cellery", "gcp"), ".json")
+
+	if len(jsonAuthFile) > 0 {
+		os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", jsonAuthFile[0])
+	} else {
+		fmt.Printf("Could not find authentication json file in : %v", filepath.Join(util.UserHomeDir(), ".cellery", "gcp"))
+		os.Exit(1)
+	}
 	ctx := context.Background()
 
 	// Create a GKE client
@@ -589,16 +614,6 @@ func createGcp() error {
 	gcpSpinner.SetNewAction("Deploying Cellery runtime")
 	deployCelleryRuntime()
 
-	// Restore artifact files
-	if err := os.RemoveAll(filepath.Join(util.UserHomeDir(), ".cellery", "gcp", "artifacts")); err != nil {
-		gcpSpinner.Stop(false)
-		fmt.Printf("Error replacing artifacts filel: %v", err)
-	}
-	if err := os.Rename(filepath.Join(util.UserHomeDir(), ".cellery", "gcp", "artifacts-old"), filepath.Join(util.UserHomeDir(), ".cellery", "gcp", "artifacts")); err != nil {
-		gcpSpinner.Stop(false)
-		fmt.Printf("Error replacing artifacts filel: %v", err)
-	}
-
 	gcpSpinner.Stop(true)
 	return nil
 }
@@ -662,35 +677,21 @@ func createGcpCluster(gcpService *container.Service, clusterName string) error {
 	}
 
 	k8sCluster, err := gcpService.Projects.Zones.Clusters.Create(projectName, zone, createClusterRequest).Do()
-	var clusterStatus string
-	for i := 0; i < 40; i++ {
-		clusterStatus, err = getClusterState(gcpService, projectName, zone, constants.GCP_CLUSTER_NAME+uniqueNumber)
+
+	// Loop until cluster status becomes RUNNING
+	for i := 0; i < 30; i++ {
+		resp, err := gcpService.Projects.Zones.Clusters.Get(projectName, zone, constants.GCP_CLUSTER_NAME+uniqueNumber).Do()
 		if err != nil {
-			fmt.Printf("Error creating cluster : %v", err)
-			break
+			time.Sleep(60 * time.Second)
 		} else {
-			if clusterStatus == "RUNNING" {
+			if resp.Status == "RUNNING" {
 				fmt.Printf("Cluster: %v created", k8sCluster.Name)
-				break
+				return nil
 			}
-			time.Sleep(10 * time.Second)
+			time.Sleep(15 * time.Second)
 		}
 	}
-	if err != nil {
-		return fmt.Errorf("failed to list clusters: %v", err)
-	}
-
-	return nil
-}
-
-func getClusterState(gcpService *container.Service, projectID, zone, clusterId string) (string, error) {
-	status := ""
-	rsp, err := gcpService.Projects.Zones.Clusters.Get(projectID, zone, clusterId).Do()
-	if err != nil {
-		status = rsp.Status
-	}
-
-	return status, err
+	return fmt.Errorf("failed to create clusters: %v", err)
 }
 
 func createSqlInstance(ctx context.Context, service *sqladmin.Service, projectId string, region string, zone string, instanceName string) ([]*sqladmin.DatabaseInstance, error) {
@@ -963,5 +964,16 @@ func deployCelleryRuntime() error {
 	util.ExecuteCommand(exec.Command("kubectl", "apply", "-f", artifactPath+"/k8s-artefacts/system/mandatory.yaml"), errorDeployingCelleryRuntime)
 	util.ExecuteCommand(exec.Command("kubectl", "apply", "-f", artifactPath+"/k8s-artefacts/system/cloud-generic.yaml"), errorDeployingCelleryRuntime)
 
+	return nil
+}
+
+func validateGcpConfigFile(configFiles []string) error {
+	for i := 0; i < len(configFiles) ; i++ {
+		fileExist, fileExistError := util.FileExists(configFiles[i])
+		if  fileExistError != nil || !fileExist {
+			fmt.Printf("Cannot find file : %v", configFiles[i])
+			os.Exit(1)
+		}
+	}
 	return nil
 }

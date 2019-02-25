@@ -1,4 +1,10 @@
 # Cellery
+[![Build Status](https://wso2.org/jenkins/view/cellery/job/cellery/job/mesh-observability/badge/icon)](https://wso2.org/jenkins/view/cellery/job/cellery/job/mesh-observability/)
+[![GitHub (pre-)release](https://img.shields.io/github/release/cellery-io/mesh-observability/all.svg)](https://github.com/cellery-io/mesh-observability/releases)
+[![GitHub (Pre-)Release Date](https://img.shields.io/github/release-date-pre/cellery-io/mesh-observability.svg)](https://github.com/cellery-io/mesh-observability/releases)
+[![GitHub last commit](https://img.shields.io/github/last-commit/cellery-io/mesh-observability.svg)](https://github.com/cellery-io/mesh-observability/commits/master)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
 The future is evolving to a modern day mainframe: a single virtual computer that runs everything for an organization. 
 Middleware no longer runs as a separate centralized system but has become distributed and virtualized. 
 Applications are no longer standalone monolithic systems but distributed across different boundaries, lifecycles and networks. 

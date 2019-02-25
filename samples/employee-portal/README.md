@@ -20,9 +20,7 @@ four microservices deployed across three different cells based on their responsi
 - This microservice returns the stock related data for the employee.
 - Exposes a cell level API, when invoked returns the response from stock microservice.
   
-<p align="center">
-  <img src="https://raw.githubusercontent.com/celleryio/sdk/master/samples/employee-portal/src/images/employee-portal-architecture-diagram.png">
-</p>
+![HR Application request flow and cells](../../docs/images/cellery-hr-app.png)
   
   
 ### Building and Running the sample

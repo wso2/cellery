@@ -312,240 +312,34 @@ Hello, World!
 ## Samples
 ### HR Application
 Employee Portal sample demonstrates an application which uses the cell-based architecture. This application contains 
-four microservices deployed across three different cells based on their responsibilities.
+four microservices deployed across three different cells based on their responsibilities, as explained below.
 
 **HR Cell**  
-Contains one microservice written in ballerina.
-This microservice invokes Employee cell and Stock cell to build the employee information and returns the result.
-Exposes an API at the global Gateway which can be consumed by any API consumer from outside Cellery.
+- Contains one microservice written in ballerina.
+- This microservice invokes Employee cell and Stock cell to build the employee information and returns the result.
+- Exposes an API at the global Gateway which can be consumed by any API consumer from outside Cellery.
 
 **Employee cell**  
-Contains two microservices (employee and salary) written in ballerina.
-Employee microservice returns employee details such as name, designation.
-Salary microservice returns employee salary details.
-Exposes a cell level API, when invoked returns the aggregated response from employee and salary response.
+- Contains two microservices (employee and salary) written in ballerina.
+- Employee microservice returns employee details such as name, designation.
+- Salary microservice returns employee salary details.
+- Exposes a cell level API, when invoked returns the aggregated response from employee and salary response.
 
 **Stock cell**  
-Contains one microservice written in ballerina.
-This microservice returns the stock related data for the employee.
-Exposes a cell level API, when invoked returns the response from stock microservice.
-Following diagram illustrates the sample application flow.
+- Contains one microservice written in ballerina.
+- This microservice returns the stock related data for the employee.
+- Exposes a cell level API, when invoked returns the response from stock microservice.
 
+The detailed steps to run this sample is available (samples/employee-portal)[https://github.com/cellery-io/sdk/tree/master/samples/employee-portal].
 
-#### Building and Running the sample
-1. Git clone the SDK repo, and go into the directory samples/employee-portal/cellery/.
-2. Go into the stock directory inside cellery directory, and build the Stocks Cell with `cellery build` command. Then 
-run the cell in the cellery mesh by executing `cellery run` command as shown below.
-```
-$ cellery build stocks.bal -t myorg/stock:1.0.0
-Building Stock Cell ...
+### Product Review Application
+A multi-cell application which demonstrates multiple protocol support. (See)[https://github.com/cellery-io/sdk/tree/master/samples/product-review] here for more information.
 
-✔ Building image myorg/stock:1.0.0
-✔ Saving new Image to the Local Repository
-
-
-✔ Successfully built cell image: myorg/stock:1.0.0
-
-What's next?
---------------------------------------------------------
-Execute the following command to run the image:
-  $ cellery run myorg/stock:1.0.0
---------------------------------------------------------
-
-$ cellery run myorg/stock:1.0.0
-Running cell image: myorg/stock:1.0.0
-cell.mesh.cellery.io/stock created
-
-
-✔ Successfully deployed cell image: myorg/helloworld:1.0.0
-
-What's next?
---------------------------------------------------------
-Execute the following command to list running cells:
-  $ cellery ps
---------------------------------------------------------
-```
-
-3. Go into employee directory inside cellery directory, and build th Employee Cell as same as stock cell with below 
-mentioned commands.
-```
-$ cd employee
-$ cellery build employee.bal -t myorg/employee:1.0.0
-Building Employee Cell ...
-
-✔ Building image myorg/employee:1.0.0
-✔ Saving new Image to the Local Repository
-
-
-✔ Successfully built cell image: myorg/employee:1.0.0
-
-What's next?
---------------------------------------------------------
-Execute the following command to run the image:
-  $ cellery run myorg/employee:1.0.0
---------------------------------------------------------
-
-$ cellery run myorg/employee:1.0.0
-Running cell image: myorg/employee:1.0.0
-cell.mesh.cellery.io/employee created
-
-
-✔ Successfully deployed cell image: myorg/employee:1.0.0
-
-What's next?
---------------------------------------------------------
-Execute the following command to list running cells:
-  $ cellery ps
---------------------------------------------------------
-```
-
-4. The HR cell depends on the stock and employee cell. Therefore, build the HR cell and Then pass -l parameter, which 
-specifies the names of the other cells which hr app depends on. Execute the commands provided below to build and runt the HR cells.
-```
-$ cd hr
-$ cellery build hr.bal -t myorg/hr:1.0.0
-Building HR Cell ...
-Warning: Value is empty for environment variable "employeegw_url"
-Warning: Value is empty for environment variable "stockgw_url”
-✔ Building image myorg/hr:1.0.0
-✔ Removing old Image
-✔ Saving new Image to the Local Repository
-✔ Successfully built cell image: myorg/hr:1.0.0
-What's next?
---------------------------------------------------------
-Execute the following command to run the image:
-  $ cellery run myorg/hr:1.0.0
---------------------------------------------------------
-     2. Execute the following command deploy hr cell. 
-$ cellery run myorg/hr:1.0.0  -l employee -l stock
-Above commands will deploy the above three cells in the default namespace. To check the cell status run the following command
-
-	$ cellery ps
-```
-5. Execute `cellery ps` and confirm all cells are in Ready state. 
-6. Next to invoke the HR application. Find your external cluster IP and the port by running the following command (Cellery currently uses nginx as the ingress controller),
- ```
- kubectl get svc -n ingress-nginx ingress-nginx
- ```
-7. Update the host entries to point the below hosts to the above IP
-  <External cluster IP>      wso2-apim-gateway
-  <External cluster IP>      wso2-apim
-8. Go to API Manager Store (https://wso2-apim:<port>/store) and click Sign Up and register a API 
-consumer named alice (i.e Username). Populate the other values accordingly.
-9. API in the HR Cell will be exposed via Global API manager. Therefore log into API Manager Store 
-(https://wso2-apim:<port>/store) as a Subscriber (i.e admin:admin in a default setup) and subscribe to the API 
-named hr_global_1_0_0_info. Get the Consumer Key and Consumer secret of the application used for subscribing.
-10. To generate an Access Token, execute the following curl command; Replace the <port> with the value you got from #1 above and <Base64 encoded consumer_key:consumer_secret> with the values you got from #4 above. Replace the password with value provided above.
- curl -k -d "grant_type=password&username=alice&password=<password>" -H "Authorization: Basic <Base64 encoded consumer_key:consumer_secret>" https://wso2-apim-gateway:<port>/token  
-To invoke the HR API, execute the following curl command; Replace the <port> with the value you got from #1 above and <Access_Token> with the access token value you got from #5 above.
-```
-curl -k -H "Authorization: Bearer <Access_Token>" https://wso2-apim-gateway:<port>/hr/hr-api/
-```
-Sample Response:
-```json
-{
-  "employee": {
-    "details": {
-      "id": "0410",
-      "designation": "Senior Software Engineer",
-      "salary": "$1500"
-    },
-    "stocks": {
-      "options": {
-        "total": 120,
-        "vestedAmount": 105
-      }
-    }
-  }
-}
-```
-11. Deploed cells can be cleaned by below commands
-Run following commands to undeploy application.
-```
-$ cellery stop employee
-$ cellery stop stock
-$ cellery stop hr
-```
-
-3.2.2. Product Review Application
-		A multi-cell application which demonstrates multiple protocol support. See [link https://github.com/cellery-io/sdk/tree/master/samples/product-review] for more information.
-
-[ following content should go to the README.md in samples/product-review directory]
-Deploying the application using kubectl
-
- Run the following command from the sdk root directory
-
-kubectl apply -f ./samples/product-review/
-
-      2. Wait until all the cells get into ‘Ready’ state
-kubectl get cells 
-
-Invoking the application from your local machine
-
-Make sure you configured the domains in  /etc/hosts following this[link] guide
-
-Login to the API Store (https://wso2-apim/store/) using admin: admin credentials 
-Click on ‘reviews_global_1_0_0_reviews_1 - 1.0.0‘ to create a subscription and generate a token. (See  https://docs.wso2.com/display/AM260/Subscribe+to+an+API )
-Invoke the API using 
-           # To retrieve data from memory
-curl  https://wso2-apim-gateway/reviews/reviews-1/reviews -H "Authorization: Bearer <access_token>" -k
-           # To retrieve data from database
-curl  https://wso2-apim-gateway/reviews/reviews-1/reviews?db=true -H "Authorization: Bearer <access_token>" -k
-
-Cleaning up
-
-kubectl delete -f ./samples/product-review/
-
-
-
-	3.2.3. Auto Scaling
-This is a single cell application which demonstrates the autoscaling of cell components. While Cellery is capable of using CPU, memory usage, etc. to autoscale cell components, this sample focuses on the former and hence is written to artificially hog cpu for demonstration purposes. 
-
-[ following content should go to the README.md in samples/pet-service directory]
-Deploying the application using kubectl
-
- Run the following command from the sdk root directory
-
-kubectl apply -f ./samples/pet-service/
-
-      2. Wait until all the cells get into ‘Ready’ state
-kubectl get cells 
-
-Invoking the application from your local machine
-
-Make sure you configured the domains in  /etc/hosts following this[link] guide
-
-Login to the API Store (https://wso2-apim/store/) using admin: admin credentials 
-Click on ‘pet_service_global_1_0_0_petsvc’ to create a subscription and generate a token. (See  https://docs.wso2.com/display/AM260/Subscribe+to+an+API )
-Invoke the API using 
-           # To retrieve data from memory with curl command
-curl  https://wso2-apim-gateway/pet-service/petsvc/pets/cats  -H "Authorization: Bearer <access_token>" -k
-or 
-curl  https://wso2-apim-gateway/pet-service/petsvc/pets/dogs  -H "Authorization: Bearer <access_token>" -k
-
-Simulating high CPU usage
-
-A special debug pod is included in the pet-service cell to induce the effect of high cpu usage. To simulate high CPU usage, first ssh in to this debug pod:
-
-kubectl exec -it <debug pod id> bash 
-
-Then do a curl command to start high cpu usage in the pet-service component:
-
-curl pet-service--pet-service-service/cpuhogger/start 
-
-This will start a CPU intensive operation in the pet-service component. As a result of this, the pet-service pod count will get increased. This can be noted by listing the pods in the default namespace, using the following command:
-
-kubectl get pods
-
-To stop the CPU intensive operation, issue the following command from the debug pod: 
-
-curl pet-service--pet-service-service/cpuhogger/stop
-
-This will result in the number of pods which belongs to the pet-store service being reduced to one gradually.  
-
-Cleaning up
-
-kubectl delete -f ./samples/product-review/
+### Auto Scaling
+This is a single cell application which demonstrates the autoscaling of cell components. 
+While Cellery is capable of using CPU, memory usage, etc. to autoscale cell components, 
+this sample focuses on the former and hence is written to artificially hog cpu for demonstration purposes. 
+(See)[https://github.com/cellery-io/sdk/tree/master/samples/pet-service]
 
 4. Cellery Commands
 Init

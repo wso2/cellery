@@ -108,12 +108,20 @@ enforce policies. The detailed information about the security of Cellery can be 
 
 ## Getting Started
 ### Pre requisites 
+1. kubectl 
+2. Google Cloud SDK (required to install cellery mesh in GCP)
+3. Ballerina version 0.990.3
+4. VirtualBox (for the local installer)
 
 ### How to Install
 
 #### Linux
-
+Download the [cellery-0.1.0.deb](https://github.com/cellery-io/sdk/releases) and install it using dpkg command as shown below.
+```
+dpkg -i cellery-0.1.0.deb
+```
 #### Mac OS
+Download [cellery-0.1.0.pkg](https://github.com/cellery-io/sdk/releases) and install it by following macOS package installation steps.
 
 ### Set up Cellery Runtime
 Once the cellery is installed, the users can install the cellery mesh runtime locally on your machine as an Virtual 
@@ -149,8 +157,17 @@ This will download and install a pre-configured cellery runtime. Once the instal
 users can start working on a cellery project.
 
 #### GCP
-First users will have to create a GCP project. Then run `cellery setup` command and select `create` then `GCP` from the 
-menu as mentioned in the 3rd step at Setup Runtime.
+First users will have to create a GCP project and enable relevant APIs. After that user needs to install GCloud SDK and 
+point the current project to the already configured GCP project.
+
+1. Use gloud init command to point the GCP project that should be used for cellery runtime installation.
+```
+gcloud init
+```
+2. After initializing the project user needs to create the GCP API credentials and copy the credential json file into 
+$HOME/.cellery/gcp folder.
+3. Then run `cellery setup` command and select `create` then `GCP` from the menu as mentioned in the 3rd step at Setup Runtime.
+
 ```
 cellery setup
 $ ✔ Create

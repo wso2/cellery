@@ -331,16 +331,16 @@ four microservices deployed across three different cells based on their responsi
 - This microservice returns the stock related data for the employee.
 - Exposes a cell level API, when invoked returns the response from stock microservice.
 
-The detailed steps to run this sample is available (samples/employee-portal)[https://github.com/cellery-io/sdk/tree/master/samples/employee-portal].
+The detailed steps to run this sample is available [samples/employee-portal](https://github.com/cellery-io/sdk/tree/master/samples/employee-portal).
 
 ### Product Review Application
-A multi-cell application which demonstrates multiple protocol support. (See)[https://github.com/cellery-io/sdk/tree/master/samples/product-review] here for more information.
+A multi-cell application which demonstrates multiple protocol support. [See](https://github.com/cellery-io/sdk/tree/master/samples/product-review) here for more information.
 
 ### Auto Scaling
 This is a single cell application which demonstrates the autoscaling of cell components. 
 While Cellery is capable of using CPU, memory usage, etc. to autoscale cell components, 
 this sample focuses on the former and hence is written to artificially hog cpu for demonstration purposes. 
-(See)[https://github.com/cellery-io/sdk/tree/master/samples/pet-service]
+[See](https://github.com/cellery-io/sdk/tree/master/samples/pet-service)
 
 ## Cellery Commands
 ### Init
@@ -415,15 +415,15 @@ Example : `cellery extract-resources cellery-samples/employee:1.0.0 ./resources`
 ## Contribute to Cellery
 The Cellery Team is pleased to welcome all contributors willing to join with us in our journey. 
 Cellery project is divided into few repositories as explained below. 
-(cellery-io/sdk)[https://github.com/cellery-io/sdk/] : This repository contains the cellery specification implementation, 
+[cellery-io/sdk](https://github.com/cellery-io/sdk/) : This repository contains the cellery specification implementation, 
 cli implementation, and installers for different operating systems.  
-(cellery-io/distribution)[https://github.com/cellery-io/distribution/]: This repository contains kubernetes artifacts 
+[cellery-io/distribution](https://github.com/cellery-io/distribution/): This repository contains kubernetes artifacts 
 for cellery mesh runtime, and docker image generation for Global and cell API Manager.   
-(cellery-io/mesh-controller)[https://github.com/cellery-io/mesh-controller/] : This repository includes the controller 
+[cellery-io/mesh-controller](https://github.com/cellery-io/mesh-controller/) : This repository includes the controller 
 for cell CRD in kubernetes.  
-(cellery-io/mesh-security)[https://github.com/cellery-io/mesh-security]: This includes cell based control plane 
+[cellery-io/mesh-security](https://github.com/cellery-io/mesh-security): This includes cell based control plane 
 components such as STS, and other related security functionality for overall cellery mesh.  
-(cellery-io/mesh-observability)[https://github.com/cellery-io/mesh-observability]: This repository includes the 
+[cellery-io/mesh-observability](https://github.com/cellery-io/mesh-observability): This repository includes the 
 observability related components such as WSO2 stream processor extensions, siddhi applications for tracing, telemetry 
 processing, dependency model generation, observability portal, etc, and docker images for observability control plane.  
 

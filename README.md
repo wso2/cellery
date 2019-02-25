@@ -66,7 +66,8 @@ As each cell is considered as a separate trust domain, each cell has a secure to
 tokens in order to securely communicate by workloads. Each STS has its own configurations which decides the behaviour of 
 token issuance and validations. Furthermore, each cell STS has an Open Policy Agent instance which is used to enforce 
 fine grained access control. Cell deployers can enforce authorization policies for inter cell communication as 
-well as intra cell communications. The detailed information about the security of Cellery can be found here.
+well as intra cell communications. The detailed information about the security of Cellery can be found in 
+[mesh-security](https://github.com/cellery-io/mesh-security)..
 
 ### Global Control Plane
 Global control plane controls the request flow from external systems, and also provide overall control of cells globally, 
@@ -101,7 +102,7 @@ uses Open Policy Agent to enforce fine grained access control within cell and in
 
 All these operations and checks are enforced through sidecars which are running along side workloads. Considering 
 security aspects of a service and passing user context or information will be out of component developers tasks and 
-will be managed by Cellery within the mesh.  Refer Mesh-security for more information on Cellery Security and how to 
+will be managed by Cellery within the mesh.  Refer [mesh-security](https://github.com/cellery-io/mesh-security). for more information on Cellery Security and how to 
 enforce policies. The detailed information about the security of Cellery can be found [mesh-security](https://github.com/cellery-io/mesh-security).
 
 
@@ -411,43 +412,64 @@ swagger files, therefore any components or micro services that uses the cell can
 Usage : `cellery extract-resources <ORGANIZATION_NAME>/<IMAGE_NAME>:<VERSION> ./resources`  
 Example : `cellery extract-resources cellery-samples/employee:1.0.0 ./resources`
 
-5. Contribute to Cellery
-The Cellery Team is pleased to welcome all contributors willing to join with us in our journey. Cellery project is divided into few repositories as explained below. 
-cellery-io/sdk : This repository contains the cellery specification implementation, cli implementation, and installers for different operating systems. The runtim
-cellery-io/distribution: This repository contains kubernetes artifacts for cellery mesh runtime, and docker image generation for Global and cell API Manager. 
-cellery-io/mesh-controller : This repository includes the controller for cell CRD in kubernetes. 
-cellery-io/mesh-security: This includes cell based control plane components such as STS, and other related security functionality for overall cellery mesh. 
-cellery-io/mesh-observability: This repository includes the observability related components such as WSO2 stream processor extensions, siddhi applications for tracing, telemetry processing, dependency model generation, observability portal, etc, and docker images for observability control plane.
-5.1. Build from Source
-5.1.1. Prerequisites 
+## Contribute to Cellery
+The Cellery Team is pleased to welcome all contributors willing to join with us in our journey. 
+Cellery project is divided into few repositories as explained below. 
+(cellery-io/sdk)[https://github.com/cellery-io/sdk/] : This repository contains the cellery specification implementation, 
+cli implementation, and installers for different operating systems.  
+(cellery-io/distribution)[https://github.com/cellery-io/distribution/]: This repository contains kubernetes artifacts 
+for cellery mesh runtime, and docker image generation for Global and cell API Manager.   
+(cellery-io/mesh-controller)[https://github.com/cellery-io/mesh-controller/] : This repository includes the controller 
+for cell CRD in kubernetes.  
+(cellery-io/mesh-security)[https://github.com/cellery-io/mesh-security]: This includes cell based control plane 
+components such as STS, and other related security functionality for overall cellery mesh.  
+(cellery-io/mesh-observability)[https://github.com/cellery-io/mesh-observability]: This repository includes the 
+observability related components such as WSO2 stream processor extensions, siddhi applications for tracing, telemetry 
+processing, dependency model generation, observability portal, etc, and docker images for observability control plane.  
+
+### Build from Source
+#### Prerequisites 
 JDK 1.8 
 Ballerina 0.990.3 
 Go 1.11.2 or higher
 Apache Maven 3.5.2 or higher
 Git
-5.1.2. Steps
-
-Clone the repository to GOPATH.
+#### Steps
+1. Clone the repository to GOPATH.
+```
 $ mkdir -p $GOPATH/src/github.com/cellery-io/
 $ cd $GOPATH/src/github.com/cellery-io/
 $ git clone https://github.com/celleryio/sdk.git
-
-
-Building and installing the Ballerina language extensions.
+```
+2. Building and installing the Ballerina language extensions.
+```
 $ cd $GOPATH/src/github.com/cellery-io/sdk
 $ make install-lang
-
-   3. Building and installing the Cellery CLI.
+```
+3. Building and installing the Cellery CLI.
+```
 $ cd $GOPATH/src/github.com/cellery-io/sdk
 $ make install-cli
+```
 
-5.2. Issue Management
-We use GitHub issues to track all of our bugs and feature requests. Please feel free to open an issue about any question, bug report or feature request that you have in mind. It will be ideal to report bugs in the relevant repository as mentioned in above, but if you are not sure about the repository, you can create issues to cellery-io/sdk repository, and we’ll analyze the issue and then move it to relevant repository. We also welcome any external contributors who are willing to contribute. You can join a conversation in any existing issue and even send PRs to contribute
+### Issue Management
+We use GitHub issues to track all of our bugs and feature requests. Please feel free to open an issue about any 
+question, bug report or feature request that you have in mind. It will be ideal to report bugs in the relevant 
+repository as mentioned in above, but if you are not sure about the repository, you can create issues to (cellery-io/sdk)
+[https://github.com/cellery-io/sdk/] repository, and we’ll analyze the issue and then move it to relevant repository. 
+We also welcome any external contributors who are willing to contribute. You can join a conversation in any existing issue and even send PRs to contribute
 Each issue we track has a variety of metadata which you can select with labels:
-Type: This represents the kind of the reported issues such as Bug, New Feature, Improvement, etc. 
-Priority: This represents the importance of the issue, and it can be scaled from High to Normal.
-Severity: This represents the impact of the issue in your current system. If the issue is blocking your system, and it’s having an catastrophic effect, then you can mark is ‘Blocker’. The ‘Blocker’ issues are given high priority as well when we are resolving the issues. 
-Additional to the information provided above, the issue template added to the repository will guide you to describe the issue in detail therefore we can analyze and work on the resolution towards it. Therefore we appreciate to fill the fields mostly as possible when you are creating the issue. We will evaluate issues, and based on the label provided details and labels, and will allocate to the Milestones. 
+
+- Type: This represents the kind of the reported issues such as Bug, New Feature, Improvement, etc. 
+- Priority: This represents the importance of the issue, and it can be scaled from High to Normal.
+- Severity: This represents the impact of the issue in your current system. If the issue is blocking your system, 
+and it’s having an catastrophic effect, then you can mark is ‘Blocker’. The ‘Blocker’ issues are given high priority 
+as well when we are resolving the issues. 
+
+Additional to the information provided above, the issue template added to the repository will guide you to describe 
+the issue in detail therefore we can analyze and work on the resolution towards it. Therefore we appreciate to fill the 
+fields mostly as possible when you are creating the issue. We will evaluate issues, and based on the label provided 
+details and labels, and will allocate to the Milestones. 
 . 
 
 

@@ -419,12 +419,17 @@ func createGcp() error {
 	// Backup artifacts folder
 	util.CopyDir(filepath.Join(util.UserHomeDir(), ".cellery", "gcp", "artifacts"), filepath.Join(util.UserHomeDir(), ".cellery", "gcp", "artifacts-old"))
 
+	validateGcpConfigFile([]string{filepath.Join(util.UserHomeDir(), ".cellery", "gcp", "artifacts", "k8s-artefacts", "global-apim", "conf", "datasources", "master-datasources.xml"),
+	 							   filepath.Join(util.UserHomeDir(), ".cellery", "gcp", "artifacts", "k8s-artefacts", "observability", "sp", "conf", "deployment.yaml"),
+								   filepath.Join(util.UserHomeDir(), ".cellery", "gcp", "artifacts", "k8s-artefacts", "global-apim", "artifacts-persistent-volume.yaml"),
+								   filepath.Join(util.UserHomeDir(), ".cellery", "gcp", "artifacts", "k8s-artefacts", "mysql", "dbscripts", "init.sql")})
+
 	// Get the GCP cluster data
 	projectName, accountName, region, zone = getGcpData()
 
 	var gcpBucketName = constants.GCP_BUCKET_NAME + uniqueNumber
 
-	jsonAuthFile := util.FindInDirectory(filepath.Join(util.UserHomeDir(), ".cellery", "gcp"), ".jsons")
+	jsonAuthFile := util.FindInDirectory(filepath.Join(util.UserHomeDir(), ".cellery", "gcp"), ".json")
 
 	if len(jsonAuthFile) > 0 {
 		os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", jsonAuthFile[0])
@@ -971,5 +976,16 @@ func deployCelleryRuntime() error {
 	util.ExecuteCommand(exec.Command("kubectl", "apply", "-f", artifactPath+"/k8s-artefacts/system/mandatory.yaml"), errorDeployingCelleryRuntime)
 	util.ExecuteCommand(exec.Command("kubectl", "apply", "-f", artifactPath+"/k8s-artefacts/system/cloud-generic.yaml"), errorDeployingCelleryRuntime)
 
+	return nil
+}
+
+func validateGcpConfigFile(configFiles []string) error {
+	for i := 0; i < len(configFiles) ; i++ {
+		fileExist, fileExistError := util.FileExists(configFiles[i])
+		if  fileExistError != nil || !fileExist {
+			fmt.Printf("Cannot find file : %v", configFiles[i])
+			os.Exit(1)
+		}
+	}
 	return nil
 }

@@ -373,8 +373,14 @@ In the command prompt, provide the project name.
 
 ### Build
 Build an immutable cell image with required dependencies.  
-Usage : `cellery build <BAL_FILE_NAME> -t <ORGANIZATION_NAME>/<IMAGE_NAME>:<VERSION>`  
-Example : `cellery build my-project.bal -t wso2/my-cell:1.0.0`
+Usage : 
+```
+cellery build <BAL_FILE_NAME> -t <ORGANIZATION_NAME>/<IMAGE_NAME>:<VERSION>
+``` 
+Example : 
+```
+cellery build my-project.bal -t wso2/my-cell:1.0.0
+```
 
 ### Run
 Use a cellery image to create a  running instance.You can also run the cell image with a name by passing -n parameter, 

@@ -368,9 +368,11 @@ this sample focuses on the former and hence is written to artificially hog cpu f
 
 ## Cellery Commands
 ### Init
-Initializes a cellery project.  
-Usage : `cellery init`  
-In the command prompt, provide the project name.
+Initializes a cellery project. In the command prompt, provide the project name.
+Usage : 
+```
+cellery init
+```
 
 ### Build
 Build an immutable cell image with required dependencies.  

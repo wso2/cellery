@@ -341,61 +341,74 @@ While Cellery is capable of using CPU, memory usage, etc. to autoscale cell comp
 this sample focuses on the former and hence is written to artificially hog cpu for demonstration purposes. 
 (See)[https://github.com/cellery-io/sdk/tree/master/samples/pet-service]
 
-4. Cellery Commands
-Init
+## Cellery Commands
+### Init
 Initializes a cellery project
-Usage : cellery init
+Usage : `cellery init`
 In the command prompt, provide the project name.
-Build
+
+### Build
 Build an immutable cell image with required dependencies.
-Usage : cellery build <BAL_FILE_NAME> -t <ORGANIZATION_NAME>/<IMAGE_NAME>:<VERSION>
-Example : cellery build my-project.bal -t wso2/my-cell:1.0.0
-Run
+Usage : `cellery build <BAL_FILE_NAME> -t <ORGANIZATION_NAME>/<IMAGE_NAME>:<VERSION>`
+Example : `cellery build my-project.bal -t wso2/my-cell:1.0.0`
+
+### Run
 Use a cellery image to create a  running instance.
-Usage : cellery run <ORGANIZATION_NAME>/<IMAGE_NAME>:<VERSION>
-Example : cellery run wso2/my-cell:1.0.0
-Ps
+Usage : `cellery run <ORGANIZATION_NAME>/<IMAGE_NAME>:<VERSION>`
+Example : `cellery run wso2/my-cell:1.0.0`
+
+### Ps
 List all running cells.
-Usage : cellery ps
+Usage : `cellery ps`
 Push
 Push cell image to the remote repository.
-Usage : cellery push <ORGANIZATION_NAME>/<IMAGE_NAME>:<VERSION>
-Example : cellery push wso2/my-cell:1.0.0
-Pull 
-Pull cell image from the remote repository.
-Usage : cellery pull <ORGANIZATION_NAME>/<IMAGE_NAME>:<VERSION>
-Example : cellery pull wso2/my-cell:1.0.0
-Images
-List cell images
-Usage : cellery images
-Stop
+Usage : `cellery push <ORGANIZATION_NAME>/<IMAGE_NAME>:<VERSION>`
+Example : `cellery push wso2/my-cell:1.0.0`
+
+### Pull 
+Pulls cell image from the remote repository.
+Usage : `cellery pull <ORGANIZATION_NAME>/<IMAGE_NAME>:<VERSION>`
+Example : `cellery pull wso2/my-cell:1.0.0`
+
+### Images
+List cell images that was pulled and built in the current machine.
+Usage : `cellery images`
+
+### Stop
 Stop a running cell instance.
-Usage : cellery stop <CELL_NAME>
-Example : cellery stop hello-cell
-Status 
+Usage : `cellery stop <CELL_NAME>`
+Example : `cellery stop hello-cell`
+
+### Status 
 Performs a health check of a cell.
-Usage : cellery status <CELL_NAME>
-Example : cellery status hello-cell
-Apis 
+Usage : `cellery status <CELL_NAME>`
+Example : `cellery status hello-cell`
+
+### Apis 
 List the exposed APIs of a cell instance.
-Usage : cellery apis <CELL_NAME>
-Example : cellery apis hello-cell
-Logs 
+Usage : `cellery apis <CELL_NAME>`
+Example : `cellery apis hello-cell`
+
+### Logs 
 Displays logs for either the cell instance, or a component of a running cell instance.
-Usage : cellery logs <CELL_NAME> / cellery logs <CELL_NAME> -c <COMPONENT_NAME>
-cellery logs hello-cell / cellery logs hello-cell -c my-component
-Components
+Usage : `cellery logs <CELL_NAME> / cellery logs <CELL_NAME> -c <COMPONENT_NAME>`
+Example: `cellery logs hello-cell / cellery logs hello-cell -c my-component`
+
+### Components
 Lists the components which the cell encapsulates.
-Usage : cellery components <CELL_NAME>
-Example : cellery components hello-cell
-List-files
+Usage : `cellery components <CELL_NAME>`
+Example : `cellery components hello-cell`
+
+### List-files
 List the files (directory structure) of a cell images.
-Usage : cellery list-files <ORGANIZATION_NAME>/<IMAGE_NAME>:<VERSION>
-Example : cellery list-files wso2/my-cell:1.0.0
-Extract-resources
-Extract the resource files of a pulled image to the provided location.
-Usage : cellery extract-resources <ORGANIZATION_NAME>/<IMAGE_NAME>:<VERSION> ./resources
-Example : cellery extract-resources cellery-samples/employee:1.0.0 ./resources
+Usage : `cellery list-files <ORGANIZATION_NAME>/<IMAGE_NAME>:<VERSION>`
+Example : `cellery list-files wso2/my-cell:1.0.0`
+
+### Extract-resources
+Extract the resource files of a pulled image to the provided location. This is useful when cells are packaged with 
+swagger files, therefore any components or micro services that uses the cell can generate the code from the swagger.
+Usage : `cellery extract-resources <ORGANIZATION_NAME>/<IMAGE_NAME>:<VERSION> ./resources`
+Example : `cellery extract-resources cellery-samples/employee:1.0.0 ./resources`
 
 5. Contribute to Cellery
 The Cellery Team is pleased to welcome all contributors willing to join with us in our journey. Cellery project is divided into few repositories as explained below. 

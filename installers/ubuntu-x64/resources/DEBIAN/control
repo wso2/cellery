@@ -12,7 +12,3 @@ Description: Design, develop, build, run, manage your cells anywhere
  .
     $ cellery
  .
- To run cellery registry locally, open new terminal and run:
- .
-    $ docker run -d -p 9090:9090 --name cellery-registry cellery/cellery-registry:0.1.0
- .

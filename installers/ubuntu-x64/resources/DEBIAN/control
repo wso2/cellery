@@ -1,6 +1,6 @@
 Package: cellery
 Architecture: amd64
-Version: 0.0.1
+Version: 0.1.0
 Maintainer: WSO2 Inc. <admin@wso2.com>
 Installed-Size: __BINARY_SIZE__
 Description: Design, develop, build, run, manage your cells anywhere
@@ -11,8 +11,4 @@ Description: Design, develop, build, run, manage your cells anywhere
  To run cellery cli commands, open new terminal and run:
  .
     $ cellery
- .
- To run cellery registry locally, open new terminal and run:
- .
-    $ docker run -d -p 9090:9090 --name cellery-registry cellery/cellery-registry:0.0.1
  .

@@ -428,12 +428,14 @@ observability related components such as WSO2 stream processor extensions, siddh
 processing, dependency model generation, observability portal, etc, and docker images for observability control plane.  
 
 ### Build from Source
+
 #### Prerequisites 
-JDK 1.8 
-Ballerina 0.990.3 
-Go 1.11.2 or higher
-Apache Maven 3.5.2 or higher
-Git
+- JDK 1.8 
+- Ballerina 0.990.3 
+- Go 1.11.2 or higher
+- Apache Maven 3.5.2 or higher
+- Git
+
 #### Steps
 1. Clone the repository to GOPATH.
 ```

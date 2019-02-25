@@ -377,9 +377,24 @@ Usage : `cellery build <BAL_FILE_NAME> -t <ORGANIZATION_NAME>/<IMAGE_NAME>:<VERS
 Example : `cellery build my-project.bal -t wso2/my-cell:1.0.0`
 
 ### Run
-Use a cellery image to create a  running instance.  
-Usage : `cellery run <ORGANIZATION_NAME>/<IMAGE_NAME>:<VERSION>`  
-Example : `cellery run wso2/my-cell:1.0.0`
+Use a cellery image to create a  running instance.You can also run the cell image with a name by passing -n parameter, 
+and this is an optional field. 
+Usage : 
+```
+cellery run <ORGANIZATION_NAME>/<IMAGE_NAME>:<VERSION>  
+cellery run <ORGANIZATION_NAME>/<IMAGE_NAME>:<VERSION> -n <NAME>
+``` 
+Example : 
+``` 
+cellery run wso2/my-cell:1.0.0 
+cellery run wso2/my-cell:1.0.0 -n my-cell-name1
+```
+
+### Run linking to dependencies
+Use a cellery image to create a running instance specifying an instance name
+Input the same instance name to establish the link between the running cell instance and another cell which depends on it
+Usage : `cellery run <ORGANIZATION_NAME>/<IMAGE_NAME>:<VERSION> -l <NAME-1>`
+Example : `cellery run wso2/cell2:1.0.1 -n mycell-2 -l mycell-1`
 
 ### Ps
 List all running cells.  

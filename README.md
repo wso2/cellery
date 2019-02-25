@@ -354,16 +354,16 @@ four microservices deployed across three different cells based on their responsi
 - This microservice returns the stock related data for the employee.
 - Exposes a cell level API, when invoked returns the response from stock microservice.
 
-The detailed steps to run this sample is available [samples/employee-portal](https://github.com/cellery-io/sdk/tree/master/samples/employee-portal).
+The detailed steps to run this sample is available [samples/employee-portal](samples/employee-portal/README.md).
 
 ### Product Review Application
-A multi-cell application which demonstrates multiple protocol support. [See](https://github.com/cellery-io/sdk/tree/master/samples/product-review) here for more information.
+A multi-cell application which demonstrates multiple protocol support. [See](samples/product-review/README.md) here for more information.
 
 ### Auto Scaling
 This is a single cell application which demonstrates the autoscaling of cell components. 
 While Cellery is capable of using CPU, memory usage, etc. to autoscale cell components, 
 this sample focuses on the former and hence is written to artificially hog cpu for demonstration purposes. 
-[See](https://github.com/cellery-io/sdk/tree/master/samples/pet-service)
+[See](samples/pet-service/README.md)
 
 ## Cellery Commands
 ### Init

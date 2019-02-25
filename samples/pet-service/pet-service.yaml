@@ -1,0 +1,42 @@
+apiVersion: mesh.cellery.io/v1alpha1
+kind: Cell
+metadata:
+  name: pet-service
+spec:
+  gatewayTemplate:
+    spec:
+      http:
+        - context: petsvc
+          definitions:
+            - path: /*
+              method: GET
+          backend: pets
+          global: true
+  servicesTemplates:
+    - metadata:
+        name: pets 
+      spec:
+        replicas: 1
+        container:
+          name: pet-service
+          image: docker.io/isurulucky/pet-service
+          ports:
+            - containerPort: 9090
+        servicePort: 80
+        autoscaling:
+          overridable: true
+          policy:
+            minReplicas: 1
+            maxReplicas: 10
+            metrics:
+              - type: Resource
+                resource:
+                  name: cpu
+                  targetAverageUtilization: 50
+    - metadata:
+        name: debug
+      spec:
+        replicas: 1
+        container:
+          image: docker.io/mirage20/k8s-debug-tools
+        servicePort: 80

@@ -44,7 +44,8 @@ and the interaction between those.
 A cell is an immutable application component that can be built, deployed and managed as a complete unit. 
 The cell consists of multiple services, managed APIs, ingress and egress policies (including routing, throttling, 
 access control), security trust domain, deployment policies, rolling update policies and external dependencies. 
-The cell definition captures all of these in a standard technology-neutral fashion. The detailed specification of the cell definition can be found here.
+The cell definition captures all of these in a standard technology-neutral fashion. The detailed specification of the 
+cell definition can be found [here](https://github.com/wso2/reference-architecture/blob/master/reference-architecture-cell-based.md).
 
 ### Data Plane 
 Data plane includes the pods, sidecars, services, etc that participate in dispatching the requests to cells, and the 
@@ -122,9 +123,9 @@ enforce policies. The detailed information about the security of Cellery can be 
 ### How to Install
 
 #### Linux
-Download the [cellery-0.1.0.deb](https://github.com/cellery-io/sdk/releases) and install it using dpkg command as shown below.
+Download the [cellery-ubuntu-x64-0.1.0.deb](https://github.com/cellery-io/sdk/releases) and install it using dpkg command as shown below.
 ```
-dpkg -i cellery-0.1.0.deb
+dpkg -i cellery-ubuntu-x64-0.1.0.deb
 ```
 #### Mac OS
 Download [cellery-0.1.0.pkg](https://github.com/cellery-io/sdk/releases) and install it by following macOS package installation steps.
@@ -363,7 +364,7 @@ A multi-cell application which demonstrates multiple protocol support. [See](sam
 This is a single cell application which demonstrates the autoscaling of cell components. 
 While Cellery is capable of using CPU, memory usage, etc. to autoscale cell components, 
 this sample focuses on the former and hence is written to artificially hog cpu for demonstration purposes. 
-[See](samples/pet-service/README.md)
+[See](samples/pet-service/README.md) here for more information.
 
 ## Cellery Commands
 ### Init

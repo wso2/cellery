@@ -423,7 +423,15 @@ func createGcp() error {
 	projectName, accountName, region, zone = getGcpData()
 
 	var gcpBucketName = constants.GCP_BUCKET_NAME + uniqueNumber
-	os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", filepath.Join(util.UserHomeDir(), ".cellery", "gcp", "vick-team-1abab5311d43.json"))
+
+	jsonAuthFile := util.FindInDirectory(filepath.Join(util.UserHomeDir(), ".cellery", "gcp"), ".jsons")
+
+	if len(jsonAuthFile) > 0 {
+		os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", jsonAuthFile[0])
+	} else {
+		fmt.Printf("Could not find authentication json file in : %v", filepath.Join(util.UserHomeDir(), ".cellery", "gcp"))
+		os.Exit(1)
+	}
 	ctx := context.Background()
 
 	// Create a GKE client

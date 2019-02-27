@@ -1,7 +1,7 @@
 # Cellery
-[![GitHub (pre-)release](https://img.shields.io/github/release/cellery-io/sdk/all.svg)](https://github.com/cellery-io/sdk/releases)
-[![GitHub (Pre-)Release Date](https://img.shields.io/github/release-date-pre/cellery-io/sdk.svg)](https://github.com/cellery-io/sdk/releases)
-[![GitHub last commit](https://img.shields.io/github/last-commit/cellery-io/sdk.svg)](https://github.com/cellery-io/sdk/commits/master)
+[![GitHub (pre-)release](https://img.shields.io/github/release/wso2-cellery/sdk/all.svg)](https://github.com/wso2-cellery/sdk/releases)
+[![GitHub (Pre-)Release Date](https://img.shields.io/github/release-date-pre/wso2-cellery/sdk.svg)](https://github.com/wso2-cellery/sdk/releases)
+[![GitHub last commit](https://img.shields.io/github/last-commit/wso2-cellery/sdk.svg)](https://github.com/wso2-cellery/sdk/commits/master)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 The future is evolving to a modern day mainframe: a single virtual computer that runs everything for an organization. 

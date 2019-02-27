@@ -73,7 +73,7 @@ tokens in order to securely communicate by workloads. Each STS has its own confi
 token issuance and validations. Furthermore, each cell STS has an Open Policy Agent instance which is used to enforce 
 fine grained access control. Cell deployers can enforce authorization policies for inter cell communication as 
 well as intra cell communications. The detailed information about the security of Cellery can be found in 
-[mesh-security](https://github.com/cellery-io/mesh-security)..
+[mesh-security](https://github.com/wso2-cellery/mesh-security)..
 
 ### Global Control Plane
 Global control plane controls the request flow from external systems, and also provide overall control of cells globally, 
@@ -108,8 +108,8 @@ uses Open Policy Agent to enforce fine grained access control within cell and in
 
 All these operations and checks are enforced through sidecars which are running along side workloads. Considering 
 security aspects of a service and passing user context or information will be out of component developers tasks and 
-will be managed by Cellery within the mesh.  Refer [mesh-security](https://github.com/cellery-io/mesh-security). for more information on Cellery Security and how to 
-enforce policies. The detailed information about the security of Cellery can be found [mesh-security](https://github.com/cellery-io/mesh-security).
+will be managed by Cellery within the mesh.  Refer [mesh-security](https://github.com/wso2-cellery/mesh-security). for more information on Cellery Security and how to 
+enforce policies. The detailed information about the security of Cellery can be found [mesh-security](https://github.com/wso2-cellery/mesh-security).
 
 
 ## Getting Started
@@ -122,12 +122,12 @@ enforce policies. The detailed information about the security of Cellery can be 
 ### How to Install
 
 #### Linux
-Download the [cellery-ubuntu-x64-0.1.0.deb](https://github.com/cellery-io/sdk/releases) and install it using dpkg command as shown below.
+Download the [cellery-ubuntu-x64-0.1.0.deb](https://github.com/wso2-cellery/sdk/releases) and install it using dpkg command as shown below.
 ```
 dpkg -i cellery-ubuntu-x64-0.1.0.deb
 ```
 #### Mac OS
-Download [cellery-0.1.0.pkg](https://github.com/cellery-io/sdk/releases) and install it by following macOS package installation steps.
+Download [cellery-0.1.0.pkg](https://github.com/wso2-cellery/sdk/releases) and install it by following macOS package installation steps.
 
 ### Set up Cellery Runtime
 Once the cellery is installed, the users can install the cellery mesh runtime locally on your machine as an Virtual 
@@ -526,15 +526,15 @@ cellery extract-resources cellery-samples/employee:1.0.0 ./resources
 ## Contribute to Cellery
 The Cellery Team is pleased to welcome all contributors willing to join with us in our journey. 
 Cellery project is divided into few repositories as explained below. 
-[cellery-io/sdk](https://github.com/cellery-io/sdk/) : This repository contains the cellery specification implementation, 
+[wso2-cellery/sdk](https://github.com/wso2-cellery/sdk/) : This repository contains the cellery specification implementation, 
 cli implementation, and installers for different operating systems.  
-[cellery-io/distribution](https://github.com/cellery-io/distribution/): This repository contains kubernetes artifacts 
+[wso2-cellery/distribution](https://github.com/wso2-cellery/distribution/): This repository contains kubernetes artifacts 
 for cellery mesh runtime, and docker image generation for Global and cell API Manager.   
-[cellery-io/mesh-controller](https://github.com/cellery-io/mesh-controller/) : This repository includes the controller 
+[wso2-cellery/mesh-controller](https://github.com/wso2-cellery/mesh-controller/) : This repository includes the controller 
 for cell CRD in kubernetes.  
-[cellery-io/mesh-security](https://github.com/cellery-io/mesh-security): This includes cell based control plane 
+[wso2-cellery/mesh-security](https://github.com/wso2-cellery/mesh-security): This includes cell based control plane 
 components such as STS, and other related security functionality for overall cellery mesh.  
-[cellery-io/mesh-observability](https://github.com/cellery-io/mesh-observability): This repository includes the 
+[wso2-cellery/mesh-observability](https://github.com/wso2-cellery/mesh-observability): This repository includes the 
 observability related components such as WSO2 stream processor extensions, siddhi applications for tracing, telemetry 
 processing, dependency model generation, observability portal, etc, and docker images for observability control plane.  
 
@@ -550,26 +550,26 @@ processing, dependency model generation, observability portal, etc, and docker i
 #### Steps
 1. Clone the repository to GOPATH.
 ```
-$ mkdir -p $GOPATH/src/github.com/cellery-io/
-$ cd $GOPATH/src/github.com/cellery-io/
+$ mkdir -p $GOPATH/src/github.com/wso2-cellery/
+$ cd $GOPATH/src/github.com/wso2-cellery/
 $ git clone https://github.com/celleryio/sdk.git
 ```
 2. Building and installing the Ballerina language extensions.
 ```
-$ cd $GOPATH/src/github.com/cellery-io/sdk
+$ cd $GOPATH/src/github.com/wso2-cellery/sdk
 $ make install-lang
 ```
 3. Building and installing the Cellery CLI.
 ```
-$ cd $GOPATH/src/github.com/cellery-io/sdk
+$ cd $GOPATH/src/github.com/wso2-cellery/sdk
 $ make install-cli
 ```
 
 ### Issue Management
 We use GitHub issues to track all of our bugs and feature requests. Please feel free to open an issue about any 
 question, bug report or feature request that you have in mind. It will be ideal to report bugs in the relevant 
-repository as mentioned in above, but if you are not sure about the repository, you can create issues to [cellery-io/sdk]
-(https://github.com/cellery-io/sdk/) repository, and we’ll analyze the issue and then move it to relevant repository. 
+repository as mentioned in above, but if you are not sure about the repository, you can create issues to [wso2-cellery/sdk]
+(https://github.com/wso2-cellery/sdk/) repository, and we’ll analyze the issue and then move it to relevant repository. 
 We also welcome any external contributors who are willing to contribute. You can join a conversation in any existing issue and even send PRs to contribute
 Each issue we track has a variety of metadata which you can select with labels:
 

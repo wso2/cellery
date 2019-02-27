@@ -32,3 +32,4 @@ While Cellery is capable of using CPU, memory usage, etc. to autoscale cell comp
 this sample focuses on the former and hence is written to artificially hog cpu for demonstration purposes. 
 
 See [pet-service](samples/pet-service/README.md) for more information.
+

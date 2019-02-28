@@ -24,7 +24,7 @@ ARG APP_DIR=/portal
 
 WORKDIR ${APP_DIR}
 
-COPY ./build/index.bundle.js ${APP_DIR}/
+COPY ./build/ ${APP_DIR}/
 
 ENV NODE_ENV=production
 ENV PORTAL_PORT=${PORTAL_PORT}

@@ -16,4 +16,4 @@
 
 # Docker build script for petstore controller
 
-docker build -t celleryio/petstore-controller:1.0.0 .
+docker build -t celleryio/samples-pet-store-controller .

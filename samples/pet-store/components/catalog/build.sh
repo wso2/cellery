@@ -16,5 +16,4 @@
 
 # Docker build script for petstore catalog
 
-docker build -t celleryio/petstore-catalog:1.0.0 .
-
+docker build -t celleryio/samples-pet-store-catalog .

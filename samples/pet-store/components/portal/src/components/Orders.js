@@ -17,10 +17,9 @@
  */
 
 import React from "react";
+import {Table, TableBody, TableCell, TableHead, TableRow, Typography} from "@material-ui/core";
 import classNames from "classnames";
 import {withStyles} from "@material-ui/core/styles";
-import Item from "./Item";
-import {Button, Grid, Typography} from "@material-ui/core";
 
 const styles = (theme) => ({
     titleUnit: {
@@ -43,37 +42,41 @@ const styles = (theme) => ({
             marginLeft: 'auto',
             marginRight: 'auto',
         },
-    },
-    cardGrid: {
-        padding: `${theme.spacing.unit * 8}px 0`,
     }
 });
 
-const Catalog = ({catalog, classes, history}) => (
+const Orders = ({classes, orders}) => (
     <div className={classes.titleUnit}>
         <div className={classes.titleContent}>
             <Typography component="h1" variant="h2" align="center" color="textPrimary" gutterBottom>
-                Pet Store
+                Orders
             </Typography>
-            <Typography variant="h6" align="center" color="textSecondary" paragraph>
-                Buy accessories for your Pets
-            </Typography>
-            <div className={classes.titleButtons}>
-                <Grid container spacing={16} justify="center">
-                    <Grid item>
-                        <Button variant="contained" color="primary" onClick={() => history.push("/orders")}>
-                            Check Orders
-                        </Button>
-                    </Grid>
-                </Grid>
-            </div>
         </div>
         <div className={classNames(classes.layout, classes.cardGrid)}>
-            <Grid container spacing={40}>
-                {[{name:"test", description: "description", price: 12}].map((item, index) => <Item key={index} data={item}/>)}
-            </Grid>
+            <Table className={classes.table}>
+                <TableHead>
+                    <TableRow>
+                        <TableCell align="left">Order ID</TableCell>
+                        <TableCell align="left">Price</TableCell>
+                        <TableCell align="left">Delivery Date</TableCell>
+                        <TableCell align="left">Delivery Address</TableCell>
+                    </TableRow>
+                </TableHead>
+                <TableBody>
+                    {
+                        orders.map((order, index) => (
+                            <TableRow key={index}>
+                                <TableCell align="left">{order.order_id}</TableCell>
+                                <TableCell align="left">{order.price}</TableCell>
+                                <TableCell align="left">{order.delivery_date}</TableCell>
+                                <TableCell align="left">{order.delivery_address}</TableCell>
+                            </TableRow>
+                        ))
+                    }
+                </TableBody>
+            </Table>
         </div>
     </div>
 );
 
-export default withStyles(styles)(Catalog);
+export default withStyles(styles)(Orders);

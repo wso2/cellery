@@ -16,8 +16,8 @@
  * under the License.
  */
 
-import Catalog from "./catalog";
-import Orders from "./orders";
+import Catalog from "./Catalog";
+import Orders from "./Orders";
 import React from "react";
 import {withStyles} from "@material-ui/core/styles";
 import {AppBar, Toolbar, Typography} from "@material-ui/core";
@@ -79,7 +79,7 @@ class App extends React.Component {
     }
 
     render() {
-        const {classes, location} = this.props;
+        const {classes, initialState, location} = this.props;
 
         const pages = [
             "/",
@@ -104,8 +104,8 @@ class App extends React.Component {
                 </AppBar>
                 <main>
                     <Switch>
-                        <Route exact path={pages[0]} component={Catalog}/>
-                        <Route exact path={pages[1]} component={Orders}/>
+                        <Route exact path={pages[0]} render={() => <Catalog catalog={initialState.catalog}/>}/>
+                        <Route exact path={pages[1]} render={() => <Orders orders={initialState.orders}/>}/>
                         <Redirect from={"*"} to={"/"}/>
                     </Switch>
                 </main>

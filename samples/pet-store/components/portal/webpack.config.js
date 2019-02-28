@@ -102,14 +102,10 @@ const serverConfig = {
         publicPath: "/"
     },
     watch: false,
+    target: "node",
     devtool: "source-map",
     resolve: {
-        extensions: [".js"]
-    },
-    optimization: {
-        splitChunks: {
-            chunks: "initial"
-        }
+        extensions: [".js", ".jsx"]
     },
     module: {
         rules: [
@@ -153,7 +149,9 @@ const serverConfig = {
         __dirname: false,
         process: false
     },
-    externals: [nodeExternals()],
+    externals: nodeExternals({
+        whitelist: [/.*/]
+    }),
 };
 
 module.exports = [appConfig, serverConfig];

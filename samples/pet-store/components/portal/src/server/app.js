@@ -22,12 +22,17 @@ import {JssProvider} from "react-jss";
 import React from "react";
 import ReactDOMServer from "react-dom/server";
 import {SheetsRegistry} from "jss";
-import {StaticRouter} from "react-router-dom";
-import {setDomain as setPetStoreCellDomain} from "../gen/petStoreApi";
+import {StaticRouter, matchPath} from "react-router-dom";
+import {setDomain as setPetStoreCellDomain, getCatalog, getOrders} from "../gen/petStoreApi";
 import {MuiThemeProvider, createGenerateClassName} from "@material-ui/core/styles";
 import {generateTheme, renderFullPage} from "../utils";
 import * as path from "path";
 import * as express from "express";
+
+const routes = [
+    "/",
+    "/orders"
+];
 
 const renderApp = (req, res, initialState) => {
     const sheetsRegistry = new SheetsRegistry();
@@ -56,6 +61,8 @@ const createServer = (port) => {
      * Serving the App
      */
     app.get("*", (req, res) => {
+        const match = routes.reduce((acc, route) => matchPath(req.url, {path: route, exact:true}) || acc, null);
+
         const initialState = {
             petStoreCell: process.env.PET_STORE_CELL_URL
         };
@@ -63,7 +70,31 @@ const createServer = (port) => {
         // Setting the Pet Store Cell URL for the Swagger Generated Client
         setPetStoreCellDomain(initialState.petStoreCell);
 
-        renderApp(req, res, initialState);
+        if (match) {
+            if (match.path === routes[0]) {
+                getCatalog()
+                    .then((response) => {
+                        initialState.catalog = response.data.catalog;
+                        renderApp(req, res, initialState);
+                    })
+                    .catch((e) => {
+                        console.log(e);
+                    });
+            } else if (match.path === routes[1]) {
+                getOrders()
+                    .then((response) => {
+                        initialState.orders = response.data;
+                        renderApp(req, res, initialState);
+                    })
+                    .catch((e) => {
+                        console.log(e);
+                    });
+            } else {
+                renderApp(req, res, initialState);
+            }
+        } else {
+            renderApp(req, res, initialState);
+        }
     });
 
     /*

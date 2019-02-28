@@ -5,7 +5,7 @@
   "license": "Apache-2.0",
   "scripts": {
     "clean": "rimraf ./build/",
-    "gen:swagger": "node src/gen-swagger.js",
+    "gen:swagger": "node src/genSwagger.js",
     "build": "npm run clean && NODE_ENV=production webpack-cli --config webpack.config.js --progress --colors -p"
   },
   "dependencies": {

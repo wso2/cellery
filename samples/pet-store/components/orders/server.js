@@ -7,7 +7,7 @@ const port = 80;
 
 let obj = null;
 fs.readFile(orderListFile, 'utf8', function (err, data) {
-    if(!err) {
+    if (!err) {
         obj = JSON.parse(data);
     }
     else {

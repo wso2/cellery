@@ -5,17 +5,19 @@ const customersFile = 'customerlist.json';
 const app = express();
 const port = 80;
 
-let obj = null;
-fs.readFile(customersFile, 'utf8', function (err, data) {
-    if(!err) {
-        obj = JSON.parse(data);
-    }
-    else {
-        obj = JSON.parse("{error detected:error}");
-    }
-});
+app.get('/getCustomers', function (req, res) {
+    fs.readFile(customersFile, 'utf8', function (err, data) {
+        let obj = null;
+        if (!err) {
+            obj = JSON.parse(data);
+        }
+        else {
+            obj = JSON.parse("{error detected:error}");
+        }
 
-app.get('/getCustomers', (req, res) => res.send(obj));
+        res.send(obj.customers);
+    });
+});
 
 app.listen(port, () => console.log(`Customer-service app listening on port ${port}!`));
 

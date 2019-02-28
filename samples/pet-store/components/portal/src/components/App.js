@@ -22,7 +22,7 @@ import React from "react";
 import {withStyles} from "@material-ui/core/styles";
 import {AppBar, Toolbar, Typography} from "@material-ui/core";
 import {Pets} from "@material-ui/icons";
-import {Switch, Route, withRouter} from "react-router-dom";
+import {Switch, Redirect, Route, withRouter} from "react-router-dom";
 
 const styles = (theme) => ({
     appBar: {
@@ -30,9 +30,6 @@ const styles = (theme) => ({
     },
     icon: {
         marginRight: theme.spacing.unit * 2,
-    },
-    heroUnit: {
-        backgroundColor: theme.palette.background.paper,
     },
     heroContent: {
         maxWidth: 600,
@@ -104,7 +101,8 @@ class App extends React.Component {
                 <main>
                     <Switch>
                         <Route exact path={pages[0]} component={Catalog}/>
-                        <Route path={pages[0]} component={Orders}/>
+                        <Route exact path={pages[0]} component={Orders}/>
+                        <Redirect from={"*"} to={"/"}/>
                     </Switch>
                 </main>
             </div>

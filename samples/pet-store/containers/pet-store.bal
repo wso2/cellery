@@ -6,14 +6,14 @@ import celleryio/cellery;
 cellery:Component ordersComponent = {
     name: "orders",
     source: {
-        image: "celleryio/samples-pet-store-orders"
+        image: "shai2426/order-web-service"
     },
     ingresses: {
         orders: new cellery:HTTPIngress(80,
             "orders-svc",
             [
                 {
-                    path: "/getOrders",
+                    path: "/orders",
                     method: "GET"
                 }
             ]
@@ -25,14 +25,14 @@ cellery:Component ordersComponent = {
 cellery:Component customersComponent = {
     name: "customers",
     source: {
-        image: "celleryio/samples-pet-store-customers"
+        image: "shai2426/customer-web-service"
     },
     ingresses: {
         customers: new cellery:HTTPIngress(80,
             "customers-svc",
             [
                 {
-                    path: "/getCustomers",
+                    path: "/customers",
                     method: "GET"
                 }
             ]
@@ -51,7 +51,7 @@ cellery:Component catalogComponent = {
             "catalog-svc",
             [
                 {
-                    path: "/getCustomers",
+                    path: "/catalog",
                     method: "GET"
                 }
             ]
@@ -69,16 +69,16 @@ cellery:Component controllerComponent = {
         employee: new cellery:HTTPIngress(
                       80,
                       "controller",
-                      "./resources/employee.swagger.json"
+                      "./resources/pet-store.swagger.json"
         )
     },
     parameters: {
         CATALOG_HOST: new cellery:Env(),
-        CATALOG_PORT: new cellery:Env(default=80),
+        CATALOG_PORT: new cellery:Env(),
         ORDER_HOST: new cellery:Env(),
-        ORDER_PORT: new cellery:Env(default=80),
+        ORDER_PORT: new cellery:Env(),
         CUSTOMER_HOST: new cellery:Env(),
-        CUSTOMER_PORT: new cellery:Env(default=80)
+        CUSTOMER_PORT: new cellery:Env()
     }
 };
 

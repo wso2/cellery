@@ -70,7 +70,7 @@ const Catalog = ({catalog, classes, history}) => (
         </div>
         <div className={classNames(classes.layout, classes.cardGrid)}>
             <Grid container spacing={40}>
-                {[1, 2 ,3].map((item, index) => <Item key={index} data={item}/>)}
+                {[{name:"test", description: "description", price: 12}].map((item, index) => <Item key={index} data={item}/>)}
             </Grid>
         </div>
     </div>

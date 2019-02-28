@@ -16,6 +16,7 @@
  * under the License.
  */
 
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 const nodeExternals = require("webpack-node-externals");
 const path = require("path");
 
@@ -40,6 +41,15 @@ const appConfig = {
             chunks: "initial"
         }
     },
+    plugins: [
+        new CopyWebpackPlugin([
+            {
+                from: "./assets",
+                to: "./assets",
+                toType: "dir"
+            },
+        ])
+    ],
     module: {
         rules: [
             {

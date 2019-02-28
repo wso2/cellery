@@ -25,6 +25,9 @@ import React from "react";
 import ReactDOM from "react-dom";
 import {generateTheme} from "./utils";
 
+const initialState = window.__INITIAL_STATE__;
+delete window.__INITIAL_STATE__;
+
 class Main extends React.Component {
     componentDidMount() {
         // Remove the server-side injected CSS.
@@ -35,7 +38,7 @@ class Main extends React.Component {
     }
 
     render() {
-        return <App />
+        return <App initialState={initialState}/>
     }
 }
 

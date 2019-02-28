@@ -23,10 +23,29 @@ import React from "react";
 import ReactDOMServer from "react-dom/server";
 import {SheetsRegistry} from "jss";
 import {StaticRouter} from "react-router-dom";
-import * as path from "path";
+import {setDomain as setPetStoreCellDomain} from "../gen/petStoreApi";
 import {MuiThemeProvider, createGenerateClassName} from "@material-ui/core/styles";
 import {generateTheme, renderFullPage} from "../utils";
+import * as path from "path";
 import * as express from "express";
+
+const renderApp = (req, res, initialState) => {
+    const sheetsRegistry = new SheetsRegistry();
+    const sheetsManager = new Map();
+    const context = {};
+    const app = (
+        <JssProvider registry={sheetsRegistry} generateClassName={createGenerateClassName()}>
+            <MuiThemeProvider theme={generateTheme()} sheetsManager={sheetsManager}>
+                <CssBaseline/>
+                <StaticRouter context={context} location={req.url}>
+                    <App initialState={initialState}/>
+                </StaticRouter>
+            </MuiThemeProvider>
+        </JssProvider>
+    );
+    const css = sheetsRegistry.toString();
+    res.send(renderFullPage(css, ReactDOMServer.renderToString(app), initialState));
+};
 
 const createServer = (port) => {
     const app = express();
@@ -37,21 +56,14 @@ const createServer = (port) => {
      * Serving the App
      */
     app.get("*", (req, res) => {
-        const sheetsRegistry = new SheetsRegistry();
-        const sheetsManager = new Map();
-        const context = {};
-        const app = (
-            <JssProvider registry={sheetsRegistry} generateClassName={createGenerateClassName()}>
-                <MuiThemeProvider theme={generateTheme()} sheetsManager={sheetsManager}>
-                    <CssBaseline/>
-                    <StaticRouter context={context} location={req.url}>
-                        <App/>
-                    </StaticRouter>
-                </MuiThemeProvider>
-            </JssProvider>
-        );
-        const css = sheetsRegistry.toString();
-        res.send(renderFullPage(css, ReactDOMServer.renderToString(app)));
+        const initialState = {
+            petStoreCell: process.env.PET_STORE_CELL_URL
+        };
+
+        // Setting the Pet Store Cell URL for the Swagger Generated Client
+        setPetStoreCellDomain(initialState.petStoreCell);
+
+        renderApp(req, res, initialState);
     });
 
     /*

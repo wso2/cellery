@@ -35,12 +35,13 @@ const generateTheme = () => createMuiTheme({
     }
 });
 
-const renderFullPage = (css, content) => (
+const renderFullPage = (css, content, initialState) => (
     "<!DOCTYPE html>" +
     "<html lang='en'>" +
     "<head>" +
     "<meta charset='utf-8'>" +
     "<title>Pet Store</title>" +
+    "<script>window.__INITIAL_STATE__=" + JSON.stringify(initialState) + "</script>" +
     `<style id='jss-server-side'>${css}</style>` +
     "</head>" +
     "<body>" +

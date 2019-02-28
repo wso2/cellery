@@ -70,9 +70,13 @@ const styles = (theme) => ({
 });
 
 class App extends React.Component {
-    state = {
-        open: false,
-    };
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            open: false,
+        };
+    }
 
     render() {
         const {classes, location} = this.props;
@@ -101,7 +105,7 @@ class App extends React.Component {
                 <main>
                     <Switch>
                         <Route exact path={pages[0]} component={Catalog}/>
-                        <Route exact path={pages[0]} component={Orders}/>
+                        <Route exact path={pages[1]} component={Orders}/>
                         <Redirect from={"*"} to={"/"}/>
                     </Switch>
                 </main>

@@ -2,7 +2,7 @@
 The Cellery Team is pleased to welcome all contributors willing to join with us in our journey. 
 Cellery project is divided into few repositories as explained below. 
 [wso2-cellery/sdk](https://github.com/wso2-cellery/sdk/) : This repository contains the cellery specification implementation, 
-cli implementation, and installers for different operating systems.  
+CLI implementation, and installers for different operating systems.  
 [wso2-cellery/distribution](https://github.com/wso2-cellery/distribution/): This repository contains kubernetes artifacts 
 for cellery mesh runtime, and docker image generation for Global and cell API Manager.   
 [wso2-cellery/mesh-controller](https://github.com/wso2-cellery/mesh-controller/) : This repository includes the controller 

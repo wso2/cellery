@@ -1,3 +1,17 @@
+
+//   Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+//   Licensed under the Apache License, Version 2.0 (the "License");
+//   you may not use this file except in compliance with the License.
+//   You may obtain a copy of the License at
+//   http://www.apache.org/licenses/LICENSE-2.0
+//   Unless required by applicable law or agreed to in writing, software
+//   distributed under the License is distributed on an "AS IS" BASIS,
+//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//   See the License for the specific language governing permissions and
+//   limitations under the License.
+
+// Cellery file for building backend Pet-store sample cell.
+
 import ballerina/io;
 import celleryio/cellery;
 
@@ -6,7 +20,7 @@ import celleryio/cellery;
 cellery:Component ordersComponent = {
     name: "orders",
     source: {
-        image: "shai2426/order-web-service"
+        image: "celleryio/samples-pet-store-orders"
     },
     ingresses: {
         orders: new cellery:HTTPIngress(80,
@@ -25,7 +39,7 @@ cellery:Component ordersComponent = {
 cellery:Component customersComponent = {
     name: "customers",
     source: {
-        image: "shai2426/customer-web-service"
+        image: "celleryio/samples-pet-store-customers"
     },
     ingresses: {
         customers: new cellery:HTTPIngress(80,
@@ -42,12 +56,12 @@ cellery:Component customersComponent = {
 
 // Catalog Component
 cellery:Component catalogComponent = {
-    name: "customers",
+    name: "catalog",
     source: {
         image: "celleryio/samples-pet-store-catalog"
     },
     ingresses: {
-        customers: new cellery:HTTPIngress(80,
+        catalog: new cellery:HTTPIngress(80,
             "catalog-svc",
             [
                 {
@@ -66,7 +80,7 @@ cellery:Component controllerComponent = {
         image: "celleryio/samples-pet-store-controller"
     },
     ingresses: {
-        employee: new cellery:HTTPIngress(
+        controller: new cellery:HTTPIngress(
                       80,
                       "controller",
                       "./resources/pet-store.swagger.json"
@@ -79,6 +93,7 @@ cellery:Component controllerComponent = {
         ORDER_PORT: new cellery:Env(),
         CUSTOMER_HOST: new cellery:Env(),
         CUSTOMER_PORT: new cellery:Env()
+
     }
 };
 
@@ -86,7 +101,7 @@ cellery:CellImage petStoreCell = new();
 
 public function build(string orgName, string imageName, string imageVersion) {
     //Build Pet-store Cell
-    io:println("Building Orders Cell ...");
+    io:println("Building Pet-store Cell ...");
 
     petStoreCell.addComponent(controllerComponent);
     petStoreCell.addComponent(ordersComponent);
@@ -94,16 +109,14 @@ public function build(string orgName, string imageName, string imageVersion) {
     petStoreCell.addComponent(customersComponent);
 
     cellery:setParameter(controllerComponent.parameters.CATALOG_HOST, cellery:getHost(imageName, catalogComponent));
+    cellery:setParameter(controllerComponent.parameters.CATALOG_PORT, 80);
     cellery:setParameter(controllerComponent.parameters.ORDER_HOST, cellery:getHost(imageName, ordersComponent));
+    cellery:setParameter(controllerComponent.parameters.ORDER_PORT, 80);
     cellery:setParameter(controllerComponent.parameters.CUSTOMER_HOST, cellery:getHost(imageName, customersComponent));
+    cellery:setParameter(controllerComponent.parameters.CUSTOMER_PORT, 80);
 
     //Expose API from Cell Gateway
     petStoreCell.exposeAPIsFrom(controllerComponent);
-    petStoreCell.exposeAPIsFrom(catalogComponent);
-    petStoreCell.exposeAPIsFrom(ordersComponent);
-    petStoreCell.exposeAPIsFrom(customersComponent);
 
-    //Expose API globally
-    petStoreCell.exposeGlobalAPI(controllerComponent);
     _ = cellery:createImage(petStoreCell, orgName, imageName, imageVersion);
 }

@@ -21,7 +21,7 @@ WORKDIR /src/app
 # A wildcard is used to ensure both package.json AND package-lock.json are copied
 # where available (npm@5+)
 COPY package*.json ./
-COPY customerlist.json ./
+COPY resources/customerlist.json resources/
 COPY server.js ./
 
 RUN npm install

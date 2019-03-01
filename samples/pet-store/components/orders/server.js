@@ -16,22 +16,19 @@
 
 var fs = require('fs');
 const express = require('express');
-const orderListFile = 'orderlist.json';
+const orderListFile = 'resources/orderlist.json';
 const app = express();
 const port = 80;
 
-let obj = null;
+let orderData = null;
 fs.readFile(orderListFile, 'utf8', function (err, data) {
     if (!err) {
-        obj = JSON.parse(data);
+        orderData = JSON.parse(data);
     }
     else {
-        obj = JSON.parse("{error detected:error}");
+        orderData = JSON.parse("{error: Error occured while reading file" + err + "}");
     }
-
 });
 
-app.get('/orders', (req, res) => res.send(obj));
+app.get('/orders', (req, res) => res.send(orderData.orders));
 app.listen(port, () => console.log(`Order-service app listening on port ${port}!`));
-
-

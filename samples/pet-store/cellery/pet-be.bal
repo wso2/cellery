@@ -16,6 +16,12 @@ import ballerina/io;
 import celleryio/cellery;
 
 // Pet-store Components
+
+int orderPort = 80;
+int customerPort = 80;
+int catalogPort = 80;
+int controllerPort = 80;
+
 // Orders Component
 cellery:Component ordersComponent = {
     name: "orders",
@@ -23,8 +29,8 @@ cellery:Component ordersComponent = {
         image: "celleryio/samples-pet-store-orders"
     },
     ingresses: {
-        orders: new cellery:HTTPIngress(80,
-            "orders-svc",
+        orders: new cellery:HTTPIngress(orderPort,
+            "orders",
             [
                 {
                     path: "/orders",
@@ -42,8 +48,8 @@ cellery:Component customersComponent = {
         image: "celleryio/samples-pet-store-customers"
     },
     ingresses: {
-        customers: new cellery:HTTPIngress(80,
-            "customers-svc",
+        customers: new cellery:HTTPIngress(customerPort,
+            "customers",
             [
                 {
                     path: "/customers",
@@ -61,8 +67,8 @@ cellery:Component catalogComponent = {
         image: "celleryio/samples-pet-store-catalog"
     },
     ingresses: {
-        catalog: new cellery:HTTPIngress(80,
-            "catalog-svc",
+        catalog: new cellery:HTTPIngress(catalogPort,
+            "catalog",
             [
                 {
                     path: "/catalog",
@@ -81,9 +87,9 @@ cellery:Component controllerComponent = {
     },
     ingresses: {
         controller: new cellery:HTTPIngress(
-                      80,
+                      controllerPort,
                       "controller",
-                      "./resources/pet-store.swagger.json"
+                      "../components/controller/resources/pet-store.swagger.json"
         )
     },
     parameters: {
@@ -109,11 +115,11 @@ public function build(string orgName, string imageName, string imageVersion) {
     petStoreCell.addComponent(customersComponent);
 
     cellery:setParameter(controllerComponent.parameters.CATALOG_HOST, cellery:getHost(imageName, catalogComponent));
-    cellery:setParameter(controllerComponent.parameters.CATALOG_PORT, 80);
+    cellery:setParameter(controllerComponent.parameters.CATALOG_PORT, catalogPort);
     cellery:setParameter(controllerComponent.parameters.ORDER_HOST, cellery:getHost(imageName, ordersComponent));
-    cellery:setParameter(controllerComponent.parameters.ORDER_PORT, 80);
+    cellery:setParameter(controllerComponent.parameters.ORDER_PORT, orderPort);
     cellery:setParameter(controllerComponent.parameters.CUSTOMER_HOST, cellery:getHost(imageName, customersComponent));
-    cellery:setParameter(controllerComponent.parameters.CUSTOMER_PORT, 80);
+    cellery:setParameter(controllerComponent.parameters.CUSTOMER_PORT, customerPort);
 
     //Expose API from Cell Gateway
     petStoreCell.exposeAPIsFrom(controllerComponent);

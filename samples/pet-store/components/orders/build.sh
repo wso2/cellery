@@ -14,6 +14,5 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-# Docker build script for petstore controller
-
-docker build -t celleryio/petstore-controller:1.0.0 .
+# Docker build script for petstore orders
+docker build -t celleryio/samples-pet-store-orders .

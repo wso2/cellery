@@ -1,4 +1,3 @@
-#!/bin/bash
 # ---------------------------------------------------------------------------
 #  Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 #
@@ -14,6 +13,20 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-# Docker build script for petstore controller
+FROM node:11.2.0-slim
 
-docker build -t celleryio/petstore-controller:1.0.0 .
+RUN mkdir -p /src/app
+WORKDIR /src/app
+# Install app dependencies
+# A wildcard is used to ensure both package.json AND package-lock.json are copied
+# where available (npm@5+)
+COPY package*.json ./
+COPY resources/customerlist.json resources/
+COPY server.js ./
+
+RUN npm install
+# If you are building your code for production
+# RUN npm ci --only=production
+
+EXPOSE 80
+CMD node server.js

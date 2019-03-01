@@ -89,7 +89,7 @@ cellery:Component controllerComponent = {
         controller: new cellery:HTTPIngress(
                       controllerPort,
                       "controller",
-                      "../components/controller/resources/pet-store.swagger.json"
+                      "./components/controller/resources/pet-store.swagger.json"
         )
     },
     parameters: {

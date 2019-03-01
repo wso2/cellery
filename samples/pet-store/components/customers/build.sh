@@ -15,4 +15,4 @@
 #  limitations under the License.
 
 # Docker build script for petstore customers
-docker build -t celleryio/sample-pet-store-customers .
+docker build -t celleryio/samples-pet-store-customers .

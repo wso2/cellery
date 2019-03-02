@@ -135,14 +135,14 @@ app.get('/orders/customer/:customer_id', function (req, res) {
 //Get all customers
 app.get('/customers', function (req, res) {
   getData(customerUrl).then((response) => {
-     res.send(response);
+     res.send(response.data);
   });
 })
 
 // Get customre by id
-app.get('/customers/:customer_id',  (req, res) => {
+app.get('/customers/:id',  (req, res) => {
 	getData(customerUrl).then((response) => {
-		customerObj = findCustomer(response, req.params.customer_id);
+		customerObj = findCustomer(response, req.params.id);
 		res.send(customerObj);
 	});
 });

@@ -1,0 +1,38 @@
+[
+  {
+    "username": "john",
+    "firstName": "John",
+    "lastName": "Smith",
+    "age": "40"
+  },
+  {
+    "username": "bill",
+    "firstName": "Bill",
+    "lastName": "Jones",
+    "age": "42"
+  },
+  {
+    "username": "peter",
+    "firstName": "Peter",
+    "lastName": "Parker",
+    "age": "35"
+  },
+  {
+    "username": "steve",
+    "firstName": "Steve",
+    "lastName": "Smith",
+    "age": "30"
+  },
+  {
+    "username": "johna",
+    "firstName": "John",
+    "lastName": "Anderson",
+    "age": "29"
+  },
+  {
+    "username": "stevew",
+    "firstName": "Steve",
+    "lastName": "Waugh",
+    "age": "39"
+  }
+]

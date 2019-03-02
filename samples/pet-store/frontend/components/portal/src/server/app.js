@@ -75,7 +75,10 @@ const createServer = (port) => {
             if (match.path === routes[0]) {
                 petStoreApi.getCatalog()
                     .then((response) => {
-                        initialState.catalog = response.data.catalog;
+                        let responseBody = response.data;
+                        initialState.catalog = {
+                            accessories: responseBody.data.accessories
+                        };
                         renderApp(req, res, initialState);
                     })
                     .catch((e) => {
@@ -84,7 +87,8 @@ const createServer = (port) => {
             } else if (match.path === routes[1]) {
                 petStoreApi.getOrders()
                     .then((response) => {
-                        initialState.orders = response.data;
+                        const responseBody = response.data;
+                        initialState.orders = responseBody.data.orders;
                         renderApp(req, res, initialState);
                     })
                     .catch((e) => {

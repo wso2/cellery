@@ -18,7 +18,7 @@ const express = require("express");
 const fs = require("fs");
 
 const service = express();
-const port = 80;
+const port = process.env.SERVICE_PORT || 3002;
 const customersDataFile = "data/customers.json";
 
 service.use(express.json());
@@ -189,5 +189,5 @@ const server = service.listen(port, () => {
     const host = server.address().address;
     const port = server.address().port;
 
-    console.log("[INFO] Pet Store Catalog Service listening at http://%s:%s", host, port);
+    console.log("[INFO] Pet Store Customers Service listening at http://%s:%s", host, port);
 });

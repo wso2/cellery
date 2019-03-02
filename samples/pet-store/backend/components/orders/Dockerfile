@@ -12,11 +12,13 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+#
+# ------------------------------------------------------------------------
 
 FROM node:11.2.0-slim
 MAINTAINER WSO2 Cellery Maintainers "dev@wso2.org"
 
-ARG PORTAL_PORT=80
+ARG SERVICE_PORT=80
 ARG APP_DIR=/service
 
 WORKDIR ${APP_DIR}
@@ -27,8 +29,8 @@ COPY ./data/ ${APP_DIR}/data/
 
 RUN npm ci
 
-ENV PORTAL_PORT=${PORTAL_PORT}
+ENV SERVICE_PORT=${SERVICE_PORT}
 
-EXPOSE ${PORTAL_PORT}
+EXPOSE ${SERVICE_PORT}
 
 ENTRYPOINT ["node", "serve.js"]

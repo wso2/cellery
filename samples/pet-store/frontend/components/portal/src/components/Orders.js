@@ -57,7 +57,6 @@ const Orders = ({classes, orders}) => (
                 <TableHead>
                     <TableRow>
                         <TableCell align="left">Order ID</TableCell>
-                        <TableCell align="left">Price</TableCell>
                         <TableCell align="left">Delivery Date</TableCell>
                         <TableCell align="left">Delivery Address</TableCell>
                     </TableRow>
@@ -67,7 +66,6 @@ const Orders = ({classes, orders}) => (
                         orders.map((order, index) => (
                             <TableRow key={index}>
                                 <TableCell align="left">{order.id}</TableCell>
-                                <TableCell align="left">{order.price}</TableCell>
                                 <TableCell align="left">{order.deliveryDate}</TableCell>
                                 <TableCell align="left">{order.deliveryAddress}</TableCell>
                             </TableRow>

@@ -18,7 +18,7 @@ const express = require("express");
 const fs = require("fs");
 
 const service = express();
-const port = 80;
+const port = process.env.SERVICE_PORT || 3001;
 const catalogDataFile = "data/catalog.json";
 
 service.use(express.json());

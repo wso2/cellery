@@ -3,36 +3,36 @@
     "username": "john",
     "firstName": "John",
     "lastName": "Smith",
-    "age": "40"
+    "pet": "cat"
   },
   {
     "username": "bill",
     "firstName": "Bill",
     "lastName": "Jones",
-    "age": "42"
+    "pet": "dog"
   },
   {
     "username": "peter",
     "firstName": "Peter",
     "lastName": "Parker",
-    "age": "35"
+    "pet": "cat"
   },
   {
     "username": "steve",
     "firstName": "Steve",
     "lastName": "Smith",
-    "age": "30"
+    "pet": "dog"
   },
   {
     "username": "johna",
     "firstName": "John",
     "lastName": "Anderson",
-    "age": "29"
+    "pet": "cat"
   },
   {
     "username": "stevew",
     "firstName": "Steve",
     "lastName": "Waugh",
-    "age": "39"
+    "pet": "dog"
   }
 ]

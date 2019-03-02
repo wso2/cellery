@@ -90,12 +90,12 @@ const Catalog = ({catalog, classes}) => (
         <div className={classNames(classes.layout, classes.cardGrid)}>
             <Grid container spacing={40}>
                 {
-                    catalog.map((item, index) => (
+                    catalog.accessories.map((item, index) => (
                         <Grid key={index} item sm={6} md={4} lg={3}>
                             <Card className={classes.card}>
                                 <CardMedia
                                     className={classes.cardMedia}
-                                    image={"./app/assets/award.svg"}
+                                    image={"./app/assets/default-accessory.svg"}
                                     title={item.item}
                                 />
                                 <CardContent className={classes.cardContent}>

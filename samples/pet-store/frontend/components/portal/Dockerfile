@@ -24,7 +24,10 @@ ARG APP_DIR=/portal
 
 WORKDIR ${APP_DIR}
 
+COPY package*.json ${APP_DIR}/
 COPY ./build/ ${APP_DIR}/
+
+RUN npm ci
 
 ENV NODE_ENV=production
 ENV PORTAL_PORT=${PORTAL_PORT}

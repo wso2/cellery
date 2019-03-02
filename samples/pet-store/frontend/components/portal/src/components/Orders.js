@@ -17,31 +17,31 @@
  */
 
 import React from "react";
-import {Table, TableBody, TableCell, TableHead, TableRow, Typography} from "@material-ui/core";
 import classNames from "classnames";
 import {withStyles} from "@material-ui/core/styles";
+import {Table, TableBody, TableCell, TableHead, TableRow, Typography} from "@material-ui/core";
 
 const styles = (theme) => ({
     titleUnit: {
-        backgroundColor: theme.palette.background.paper,
+        backgroundColor: theme.palette.background.paper
     },
     titleContent: {
         maxWidth: 600,
-        margin: '0 auto',
-        padding: `${theme.spacing.unit * 8}px 0 ${theme.spacing.unit * 6}px`,
+        margin: "0 auto",
+        padding: `${theme.spacing.unit * 8}px 0 ${theme.spacing.unit * 6}px`
     },
     titleButtons: {
-        marginTop: theme.spacing.unit * 4,
+        marginTop: theme.spacing.unit * 4
     },
     layout: {
-        width: 'auto',
+        width: "auto",
         marginLeft: theme.spacing.unit * 3,
         marginRight: theme.spacing.unit * 3,
-        [theme.breakpoints.up(1100 + theme.spacing.unit * 3 * 2)]: {
+        [theme.breakpoints.up(1100 + (theme.spacing.unit * 3 * 2))]: {
             width: 1100,
-            marginLeft: 'auto',
-            marginRight: 'auto',
-        },
+            marginLeft: "auto",
+            marginRight: "auto"
+        }
     }
 });
 

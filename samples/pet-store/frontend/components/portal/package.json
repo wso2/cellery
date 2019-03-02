@@ -2,6 +2,7 @@
   "name": "@pet-store-sample/portal",
   "version": "0.1.0",
   "description": "Pet Store Portal",
+  "author": "WSO2 Cellery Maintainers <dev@wso2.org>",
   "license": "Apache-2.0",
   "scripts": {
     "clean": "rimraf ./build/",

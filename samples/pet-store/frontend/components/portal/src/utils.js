@@ -55,4 +55,4 @@ const renderFullPage = (css, content, initialState) => (
 export {
     generateTheme,
     renderFullPage
-}
+};

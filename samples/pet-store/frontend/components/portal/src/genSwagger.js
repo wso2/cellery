@@ -16,15 +16,15 @@
  * under the License.
  */
 
-const swaggerGen = require('swagger-es6');
-const petStoreSwagger = require('../resources/pet-store.swagger');
-const fs = require('fs');
-const path = require('path');
+const swaggerGen = require("swagger-es6");
+const petStoreSwagger = require("../resources/pet-store.swagger");
+const fs = require("fs");
+const path = require("path");
 
 const codeResult = swaggerGen({
     swagger: petStoreSwagger,
-    moduleName: 'api',
-    className: 'api'
+    moduleName: "api",
+    className: "api"
 });
 
-fs.writeFileSync(path.join(__dirname, './gen/petStoreApi.js'), codeResult);
+fs.writeFileSync(path.join(__dirname, "./gen/petStoreApi.js"), codeResult);

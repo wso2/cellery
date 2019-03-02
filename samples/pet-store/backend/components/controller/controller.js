@@ -112,7 +112,7 @@ app.get('/catalog/:id',  (req, res) => {
 //Get all orders
 app.get('/orders', function (req, res) {
   getData(orderUrl).then((response) => {
-     res.send(response);
+     res.send(response.data);
   });
 })
 

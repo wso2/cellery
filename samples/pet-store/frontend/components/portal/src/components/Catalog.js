@@ -100,7 +100,7 @@ const Catalog = ({catalog, classes}) => (
                                 />
                                 <CardContent className={classes.cardContent}>
                                     <Typography gutterBottom variant="h5" component="h2">
-                                        {item.item}
+                                        {item.name}
                                     </Typography>
                                     <Typography>
                                         {item.description}

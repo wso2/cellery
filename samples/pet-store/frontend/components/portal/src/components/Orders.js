@@ -66,10 +66,10 @@ const Orders = ({classes, orders}) => (
                     {
                         orders.map((order, index) => (
                             <TableRow key={index}>
-                                <TableCell align="left">{order.order_id}</TableCell>
+                                <TableCell align="left">{order.id}</TableCell>
                                 <TableCell align="left">{order.price}</TableCell>
-                                <TableCell align="left">{order.delivery_date}</TableCell>
-                                <TableCell align="left">{order.delivery_address}</TableCell>
+                                <TableCell align="left">{order.deliveryDate}</TableCell>
+                                <TableCell align="left">{order.deliveryAddress}</TableCell>
                             </TableRow>
                         ))
                     }

@@ -19,7 +19,7 @@ const fs = require("fs");
 
 const service = express();
 const port = 80;
-const accessoriesDataFile = "data/accessories.json";
+const catalogDataFile = "data/catalog.json";
 
 service.use(express.json());
 
@@ -70,9 +70,9 @@ const handleNotFound = (res, message) => {
  * API endpoint for getting a list of accessories available in the catalog.
  */
 service.get("/accessories", (req, res) => {
-  fs.readFile(accessoriesDataFile, "utf8", function (err, data) {
+  fs.readFile(catalogDataFile, "utf8", function (err, data) {
     if (err) {
-      handleError(res, "Failed to read data file " + accessoriesDataFile + " due to " + err);
+      handleError(res, "Failed to read data file " + catalogDataFile + " due to " + err);
     } else {
       handleSuccess(res, JSON.parse(data));
     }
@@ -83,9 +83,9 @@ service.get("/accessories", (req, res) => {
  * API endpoint for creating a new accessory in the catalog.
  */
 service.post("/accessories", (req, res) => {
-  fs.readFile(accessoriesDataFile, "utf8", function (err, data) {
+  fs.readFile(catalogDataFile, "utf8", function (err, data) {
     if (err) {
-      handleError(res, "Failed to read data file " + accessoriesDataFile + " due to " + err);
+      handleError(res, "Failed to read data file " + catalogDataFile + " due to " + err);
     } else {
       // Creating the new accessory data.
       const maxId = data.reduce((accessory, acc) => accessory.id > acc ? accessory.id : acc, 0);
@@ -95,7 +95,7 @@ service.post("/accessories", (req, res) => {
       });
 
       // Creating the new accessory
-      fs.writeFile(accessoriesDataFile, data, "utf8", function (err) {
+      fs.writeFile(catalogDataFile, data, "utf8", function (err) {
         if (err) {
           handleError(res, "Failed to create new accessory due to " + err)
         } else {
@@ -112,9 +112,9 @@ service.post("/accessories", (req, res) => {
  * API endpoint for getting a single accessory from the catalog.
  */
 service.get("/accessories/:id", (req, res) => {
-  fs.readFile(accessoriesDataFile, "utf8", function (err, data) {
+  fs.readFile(catalogDataFile, "utf8", function (err, data) {
     if (err) {
-      handleError(res, "Failed to read data file " + accessoriesDataFile + " due to " + err);
+      handleError(res, "Failed to read data file " + catalogDataFile + " due to " + err);
     } else {
       let match = JSON.parse(data).filter((accessory) => accessory.id === req.params.id);
       if (match.length === 1) {
@@ -130,9 +130,9 @@ service.get("/accessories/:id", (req, res) => {
  * API endpoint for updating an accessory in the catalog.
  */
 service.put("/accessories/:id", (req, res) => {
-  fs.readFile(accessoriesDataFile, "utf8", function (err, data) {
+  fs.readFile(catalogDataFile, "utf8", function (err, data) {
     if (err) {
-      handleError(res, "Failed to read data file " + accessoriesDataFile + " due to " + err);
+      handleError(res, "Failed to read data file " + catalogDataFile + " due to " + err);
     } else {
       const match = data.filter((accessory) => accessory.id === req.params.id);
 
@@ -140,7 +140,7 @@ service.put("/accessories/:id", (req, res) => {
         Object.assign(match[0], req.body);
 
         // Updating the accessory
-        fs.writeFile(accessoriesDataFile, data, "utf8", function (err) {
+        fs.writeFile(catalogDataFile, data, "utf8", function (err) {
           if (err) {
             handleError(res, "Failed to update accessory " + req.params.id + " due to " + err)
           } else {
@@ -158,9 +158,9 @@ service.put("/accessories/:id", (req, res) => {
  * API endpoint for deleting an accessory in the catalog.
  */
 service.delete("/accessories/:id", (req, res) => {
-  fs.readFile(accessoriesDataFile, "utf8", function (err, data) {
+  fs.readFile(catalogDataFile, "utf8", function (err, data) {
     if (err) {
-      handleError(res, "Failed to read data file " + accessoriesDataFile + " due to " + err);
+      handleError(res, "Failed to read data file " + catalogDataFile + " due to " + err);
     } else {
       const newData = data.filter((accessory) => accessory.id !== req.params.id);
 
@@ -168,7 +168,7 @@ service.delete("/accessories/:id", (req, res) => {
         handleNotFound("Accessory not available");
       } else {
         // Deleting the accessory
-        fs.writeFile(accessoriesDataFile, newData, "utf8", function (err) {
+        fs.writeFile(catalogDataFile, newData, "utf8", function (err) {
           if (err) {
             handleError(res, "Failed to delete accessory " + req.params.id + " due to " + err)
           } else {

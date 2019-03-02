@@ -14,20 +14,21 @@
 #  limitations under the License.
 
 FROM node:11.2.0-slim
+MAINTAINER WSO2 Cellery Maintainers "dev@wso2.org"
 
-RUN mkdir -p /src/app
-WORKDIR /src/app
-# Install app dependencies
-# A wildcard is used to ensure both package.json AND package-lock.json are copied
-# where available (npm@5+)
-COPY package*.json ./
-COPY resources/orderlist.json resources/
-COPY server.js ./
+ARG PORTAL_PORT=80
+ARG APP_DIR=/service
 
-RUN npm install
-# If you are building your code for production
-# RUN npm ci --only=production
+WORKDIR ${APP_DIR}
 
+COPY package*.json ${APP_DIR}/
+COPY serve.js ${APP_DIR}/
+COPY ./data/ ${APP_DIR}/data/
 
-EXPOSE 80
-CMD node server.js
+RUN npm ci
+
+ENV PORTAL_PORT=${PORTAL_PORT}
+
+EXPOSE ${PORTAL_PORT}
+
+ENTRYPOINT ["node", "serve.js"]

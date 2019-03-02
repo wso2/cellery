@@ -82,28 +82,30 @@ service.get("/customers", (req, res) => {
 /*
  * API endpoint for creating a new customer.
  */
-service.post("/customers", (req, res) => {
+service.post("/customers/:username", (req, res) => {
     fs.readFile(customersDataFile, "utf8", function (err, data) {
         if (err) {
             handleError(res, "Failed to read data file " + customersDataFile + " due to " + err);
         } else {
             // Creating the new customer data.
-            const maxId = data.reduce((customer, acc) => customer.id > acc ? customer.id : acc, 0);
-            data.push({
-                ...req.body,
-                id: maxId
-            });
+            const match = data.filter((customer) => customer.name === req.params.username);
+            if (match.length === 0) {
+                data.push({
+                    ...req.body,
+                    name: req.params.username
+                });
 
-            // Creating the new customer
-            fs.writeFile(customersDataFile, data, "utf8", function (err) {
-                if (err) {
-                    handleError(res, "Failed to create new customer due to " + err)
-                } else {
-                    handleSuccess(res, {
-                        id: maxId
-                    });
-                }
-            });
+                // Creating the new customer
+                fs.writeFile(customersDataFile, data, "utf8", function (err) {
+                    if (err) {
+                        handleError(res, "Failed to create new customer due to " + err)
+                    } else {
+                        handleSuccess(res);
+                    }
+                });
+            } else {
+                handleError(res, "Customer " + req.params.username + " already exists");
+            }
         }
     });
 });
@@ -111,12 +113,12 @@ service.post("/customers", (req, res) => {
 /*
  * API endpoint for getting a single customer from the catalog.
  */
-service.get("/customers/:id", (req, res) => {
+service.get("/customers/:username", (req, res) => {
     fs.readFile(customersDataFile, "utf8", function (err, data) {
         if (err) {
             handleError(res, "Failed to read data file " + customersDataFile + " due to " + err);
         } else {
-            let match = JSON.parse(data).filter((customer) => customer.id === req.params.id);
+            let match = JSON.parse(data).filter((customer) => customer.username === req.params.username);
             if (match.length === 1) {
                 handleSuccess(res, match[0]);
             } else {
@@ -129,12 +131,12 @@ service.get("/customers/:id", (req, res) => {
 /*
  * API endpoint for updating a customer in the catalog.
  */
-service.put("/customers/:id", (req, res) => {
+service.put("/customers/:username", (req, res) => {
     fs.readFile(customersDataFile, "utf8", function (err, data) {
         if (err) {
             handleError(res, "Failed to read data file " + customersDataFile + " due to " + err);
         } else {
-            const match = data.filter((customer) => customer.id === req.params.id);
+            const match = data.filter((customer) => customer.username === req.params.username);
 
             if (match.length === 1) {
                 Object.assign(match[0], req.body);
@@ -142,7 +144,7 @@ service.put("/customers/:id", (req, res) => {
                 // Updating the customer
                 fs.writeFile(customersDataFile, data, "utf8", function (err) {
                     if (err) {
-                        handleError(res, "Failed to update customer " + req.params.id + " due to " + err)
+                        handleError(res, "Failed to update customer " + req.params.username + " due to " + err)
                     } else {
                         handleSuccess(res);
                     }
@@ -157,12 +159,12 @@ service.put("/customers/:id", (req, res) => {
 /*
  * API endpoint for deleting a customer in the catalog.
  */
-service.delete("/customers/:id", (req, res) => {
+service.delete("/customers/:username", (req, res) => {
     fs.readFile(customersDataFile, "utf8", function (err, data) {
         if (err) {
             handleError(res, "Failed to read data file " + customersDataFile + " due to " + err);
         } else {
-            const newData = data.filter((customer) => customer.id !== req.params.id);
+            const newData = data.filter((customer) => customer.username !== req.params.username);
 
             if (newData.length === data.length) {
                 handleNotFound("Customer not available");
@@ -170,7 +172,7 @@ service.delete("/customers/:id", (req, res) => {
                 // Deleting the customer
                 fs.writeFile(customersDataFile, newData, "utf8", function (err) {
                     if (err) {
-                        handleError(res, "Failed to delete customer " + req.params.id + " due to " + err)
+                        handleError(res, "Failed to delete customer " + req.params.username + " due to " + err);
                     } else {
                         handleSuccess(res);
                     }

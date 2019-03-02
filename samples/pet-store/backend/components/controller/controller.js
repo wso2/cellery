@@ -13,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
-// Pet-store controller microservice. Returns a static json data set.
 
 const express = require('express')
 const http = require('http');
@@ -25,7 +23,7 @@ var obj;
 var productObj;
 var ordersObj;
 var customerObj;
- 
+
 const app = express()
 const port = 80
 
@@ -36,7 +34,7 @@ const customerPort = process.env.CUSTOMER_PORT
 const orderHost = process.env.ORDER_HOST
 const orderPort = process.env.ORDER_PORT
 
-const catalogUrl = "http://" + catalogHost + ":" + catalogPort  + "/catalog";
+const catalogUrl = "http://" + catalogHost + ":" + catalogPort  + "/accessories";
 const customerUrl = "http://" + customerHost + ":" + customerPort  + "/customers";
 const orderUrl = "http://" + orderHost + ":" + orderPort  + "/orders";
 
@@ -78,7 +76,7 @@ function findOrderByCustomer(data, customer_id) {
 
 
 /******************* Axios Functions ****************/
-    
+
 const getData = async url => {
 	try {
         const response = await axios.get(url);
@@ -87,7 +85,7 @@ const getData = async url => {
         console.log(error);
       }
     };
-    
+
 /******************* End Axios Functions ****************/
 
 
@@ -97,23 +95,25 @@ const getData = async url => {
 //Get product catalog
 app.get('/catalog', function (req, res) {
 	getData(catalogUrl).then((response) => {
-		res.send(response);
-	});  
+		res.send({
+            catalog: response.data
+        });
+	});
 })
 
 // Get product by id
-app.get('/catalog/:product_id',  (req, res) => {
+app.get('/catalog/:id',  (req, res) => {
 	getData(catalogUrl).then((response) => {
-		productObj = findProduct(response, req.params.product_id);
+		productObj = findProduct(response, req.params.id);
 		res.send(productObj);
-	}); 
+	});
 });
 
 //Get all orders
 app.get('/orders', function (req, res) {
   getData(orderUrl).then((response) => {
      res.send(response);
-  });  
+  });
 })
 
 //Get order by id
@@ -121,7 +121,7 @@ app.get('/orders/:order_id', function (req, res) {
   getData(orderUrl).then((response) => {
   	 ordersObj = findOrder(response, req.params.order_id);
      res.send(ordersObj);
-  });  
+  });
 })
 
 //Get order by id
@@ -129,14 +129,14 @@ app.get('/orders/customer/:customer_id', function (req, res) {
   getData(orderUrl).then((response) => {
   	 ordersObj = findOrderByCustomer(response, req.params.customer_id);
      res.send(ordersObj);
-  });  
+  });
 })
 
 //Get all customers
 app.get('/customers', function (req, res) {
   getData(customerUrl).then((response) => {
      res.send(response);
-  });  
+  });
 })
 
 // Get customre by id
@@ -144,7 +144,7 @@ app.get('/customers/:customer_id',  (req, res) => {
 	getData(customerUrl).then((response) => {
 		customerObj = findCustomer(response, req.params.customer_id);
 		res.send(customerObj);
-	}); 
+	});
 });
 
 /******************* End Controller APIs ****************/

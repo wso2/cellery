@@ -1,5 +1,4 @@
-{
-"catalog" : [
+[
   {
     "id": 1,
     "item": "Pet Feeder",
@@ -36,4 +35,3 @@
     "inStock": 100
   }
 ]
-}

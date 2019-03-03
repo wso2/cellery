@@ -149,10 +149,18 @@ service.get("/catalog", (req, res) => {
  * API endpoint for getting a list of accessories available in the catalog.
  */
 service.get("/orders", (req, res) => {
-    callOrdersService("/orders", "GET")
+    Promise.all([
+        callOrdersService("/orders", "GET"),
+        callCatalogService("/accessories", "GET")
+    ])
         .then((data) => {
+            const orders = data[0];
+            const accessories = data[1];
+            orders.forEach((order) => {
+                order.items = accessories.filter((accessory) => order.items.includes(accessory.id));
+            });
             handleSuccess(res, {
-                orders: data
+                orders: orders
             });
         })
         .catch((error) => {

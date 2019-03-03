@@ -95,13 +95,13 @@
           "type": "string",
           "description": "Name of the Item"
         },
-        "desrciption": {
+        "description": {
           "type": "string",
           "description": "Description about the Item"
         },
         "unitPrice": {
-          "type": "string",
-          "format": "currency",
+          "type": "number",
+          "format": "float",
           "description": "Price of a single unit"
         },
         "inStock": {
@@ -154,8 +154,12 @@
           "type": "array",
           "description": "Items ordered",
           "items": {
-            "type": "integer"
+            "type": "#/definitions/Item"
           }
+        },
+        "orderDate": {
+          "type": "string",
+          "description": "The date on which the items were ordered"
         },
         "deliveryDate": {
           "type": "string",

@@ -91,7 +91,7 @@ class App extends React.Component {
             <div className={classes.root}>
                 <AppBar position="static" className={classes.appBar}>
                     <Toolbar>
-                        <Pets className={classes.icon} />
+                        <Pets className={classes.icon}/>
                         <Typography variant="h6" color="inherit" noWrap>
                             Pet Store
                         </Typography>

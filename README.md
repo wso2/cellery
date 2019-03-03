@@ -4,6 +4,8 @@
 [![GitHub last commit](https://img.shields.io/github/last-commit/wso2-cellery/sdk.svg)](https://github.com/wso2-cellery/sdk/commits/master)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
+
+<!---
 The future is evolving to a modern day mainframe: a single virtual computer that runs everything for an organization. 
 Middleware no longer runs as a separate centralized system but has become distributed and virtualized. 
 Applications are no longer standalone monolithic systems but distributed across different boundaries, lifecycles and networks. 
@@ -34,7 +36,7 @@ Cellery Mesh is the runtime implementation of the cellery specification that all
 The current implementation of Cellery uses Ballerina, the cloud native integration language to define Cells, components 
 and the interaction between those. 
 
-
+--->
 ## Getting Started
 ### Pre requisites 
 1. kubectl 

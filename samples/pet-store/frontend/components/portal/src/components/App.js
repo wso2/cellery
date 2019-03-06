@@ -18,85 +18,80 @@
 
 import Catalog from "./Catalog";
 import Orders from "./Orders";
+import {Pets} from "@material-ui/icons";
 import React from "react";
 import {withStyles} from "@material-ui/core/styles";
 import {AppBar, Toolbar, Typography} from "@material-ui/core";
-import {Pets} from "@material-ui/icons";
-import {Switch, Redirect, Route, withRouter} from "react-router-dom";
+import {Redirect, Route, Switch, withRouter} from "react-router-dom";
 
 const styles = (theme) => ({
     appBar: {
-        position: 'relative',
+        position: "relative"
     },
     icon: {
-        marginRight: theme.spacing.unit * 2,
+        marginRight: theme.spacing.unit * 2
     },
     heroContent: {
         maxWidth: 600,
-        margin: '0 auto',
-        padding: `${theme.spacing.unit * 8}px 0 ${theme.spacing.unit * 6}px`,
+        margin: "0 auto",
+        padding: `${theme.spacing.unit * 8}px 0 ${theme.spacing.unit * 6}px`
     },
     heroButtons: {
-        marginTop: theme.spacing.unit * 4,
+        marginTop: theme.spacing.unit * 4
     },
     layout: {
-        width: 'auto',
+        width: "auto",
         marginLeft: theme.spacing.unit * 3,
         marginRight: theme.spacing.unit * 3,
-        [theme.breakpoints.up(1100 + theme.spacing.unit * 3 * 2)]: {
+        [theme.breakpoints.up(1100 + (theme.spacing.unit * 3 * 2))]: {
             width: 1100,
-            marginLeft: 'auto',
-            marginRight: 'auto',
-        },
+            marginLeft: "auto",
+            marginRight: "auto"
+        }
     },
     cardGrid: {
-        padding: `${theme.spacing.unit * 8}px 0`,
+        padding: `${theme.spacing.unit * 8}px 0`
     },
     card: {
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
+        height: "100%",
+        display: "flex",
+        flexDirection: "column"
     },
     cardMedia: {
-        paddingTop: '56.25%', // 16:9
+        paddingTop: "56.25%" // 16:9
     },
     cardContent: {
-        flexGrow: 1,
+        flexGrow: 1
     },
     footer: {
         backgroundColor: theme.palette.background.paper,
-        padding: theme.spacing.unit * 6,
-    },
+        padding: theme.spacing.unit * 6
+    }
 });
 
 class App extends React.Component {
+
     constructor(props) {
         super(props);
 
         this.state = {
-            open: false,
+            open: false
         };
     }
 
     render() {
-        const {classes, initialState, location} = this.props;
+        const {classes, initialState} = this.props;
 
         const pages = [
             "/",
             "/orders"
         ];
-        let selectedIndex = 0;
-        for (let i = 0; i < pages.length; i++) {
-            if (location.pathname.startsWith(pages[i])) {
-                selectedIndex = i;
-            }
-        }
 
         return (
             <div className={classes.root}>
                 <AppBar position="static" className={classes.appBar}>
                     <Toolbar>
-                        <Pets className={classes.icon} />
+                        <Pets className={classes.icon}/>
                         <Typography variant="h6" color="inherit" noWrap>
                             Pet Store
                         </Typography>
@@ -112,6 +107,7 @@ class App extends React.Component {
             </div>
         );
     }
+
 }
 
 export default withStyles(styles, {withTheme: true})(withRouter(App));

@@ -149,9 +149,7 @@ const serverConfig = {
         __dirname: false,
         process: false
     },
-    externals: nodeExternals({
-        whitelist: [/.*/]
-    }),
+    externals: nodeExternals()
 };
 
 module.exports = [appConfig, serverConfig];

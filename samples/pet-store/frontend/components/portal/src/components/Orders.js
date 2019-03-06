@@ -17,66 +17,213 @@
  */
 
 import React from "react";
-import {Table, TableBody, TableCell, TableHead, TableRow, Typography} from "@material-ui/core";
 import classNames from "classnames";
+import {ExpandMore} from "@material-ui/icons";
 import {withStyles} from "@material-ui/core/styles";
+import {
+    ExpansionPanel, ExpansionPanelDetails, ExpansionPanelSummary, Grid, Table, TableBody, TableRow, TableCell,
+    Typography
+} from "@material-ui/core";
 
 const styles = (theme) => ({
     titleUnit: {
-        backgroundColor: theme.palette.background.paper,
+        backgroundColor: theme.palette.background.paper
     },
     titleContent: {
         maxWidth: 600,
-        margin: '0 auto',
-        padding: `${theme.spacing.unit * 8}px 0 ${theme.spacing.unit * 6}px`,
+        margin: "0 auto",
+        padding: `${theme.spacing.unit * 8}px 0 ${theme.spacing.unit * 6}px`
     },
     titleButtons: {
-        marginTop: theme.spacing.unit * 4,
+        marginTop: theme.spacing.unit * 4
     },
     layout: {
-        width: 'auto',
+        width: "auto",
         marginLeft: theme.spacing.unit * 3,
         marginRight: theme.spacing.unit * 3,
-        [theme.breakpoints.up(1100 + theme.spacing.unit * 3 * 2)]: {
+        [theme.breakpoints.up(1100 + (theme.spacing.unit * 3 * 2))]: {
             width: 1100,
-            marginLeft: 'auto',
-            marginRight: 'auto',
-        },
+            marginLeft: "auto",
+            marginRight: "auto"
+        }
+    },
+    orderPanelsContainer: {
+        width: "100%"
+    },
+    orderId: {
+        fontSize: theme.typography.pxToRem(15),
+        flexBasis: "30%",
+        flexShrink: 0,
+    },
+    itemCount: {
+        fontSize: theme.typography.pxToRem(15),
+        color: theme.palette.text.secondary,
+        flexBasis: "30%",
+        flexShrink: 0,
+    },
+    price: {
+        fontSize: theme.typography.pxToRem(15),
+        color: theme.palette.text.secondary,
+        flexBasis: "30%",
+        flexShrink: 0,
+    },
+    orderDescriptionItem: {
+        padding: theme.spacing.unit
+    },
+    itemsTable: {
+        minWidth: 700,
+        marginLeft: theme.spacing.unit * 4,
+        marginRight: theme.spacing.unit * 4,
+        marginTop: theme.spacing.unit,
+        marginBottom: theme.spacing.unit
     }
 });
 
-const Orders = ({classes, orders}) => (
-    <div className={classes.titleUnit}>
-        <div className={classes.titleContent}>
-            <Typography component="h1" variant="h2" align="center" color="textPrimary" gutterBottom>
-                Orders
-            </Typography>
-        </div>
-        <div className={classNames(classes.layout, classes.cardGrid)}>
-            <Table className={classes.table}>
-                <TableHead>
-                    <TableRow>
-                        <TableCell align="left">Order ID</TableCell>
-                        <TableCell align="left">Price</TableCell>
-                        <TableCell align="left">Delivery Date</TableCell>
-                        <TableCell align="left">Delivery Address</TableCell>
-                    </TableRow>
-                </TableHead>
-                <TableBody>
+class Orders extends React.Component {
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            orders: props.orders,
+            expanded: null
+        };
+    }
+
+    /**
+     * Handle changes in the expansion panels expaneded status.
+     *
+     * @param panel The panel for which the on change should be handled for
+     * @return {Function} The function for handling the change for the panel
+     */
+    handlePanelExpansionChange = (panel) => (event, expanded) => {
+        this.setState({
+            expanded: expanded ? panel : false,
+        });
+    };
+
+    render = () => {
+        const {classes} = this.props;
+        const {expanded, orders} = this.state;
+        return (
+            <div className={classes.titleUnit}>
+                <div className={classes.titleContent}>
+                    <Typography component="h1" variant="h2" align="center" color="textPrimary" gutterBottom>
+                        Orders
+                    </Typography>
+                </div>
+                <div className={classNames(classes.layout, classes.cardGrid)}>
                     {
-                        orders.map((order, index) => (
-                            <TableRow key={index}>
-                                <TableCell align="left">{order.order_id}</TableCell>
-                                <TableCell align="left">{order.price}</TableCell>
-                                <TableCell align="left">{order.delivery_date}</TableCell>
-                                <TableCell align="left">{order.delivery_address}</TableCell>
-                            </TableRow>
-                        ))
+                        orders.length > 0
+                            ? (
+                                <div className={classes.orderPanelsContainer}>
+                                    {
+                                        orders.map((order) => (
+                                            <ExpansionPanel key={order.id} expanded={expanded === order.id}
+                                                            onChange={this.handlePanelExpansionChange(order.id)}>
+                                                <ExpansionPanelSummary expandIcon={<ExpandMore/>}>
+                                                    <Typography className={classes.orderId}>
+                                                        Order {order.id}
+                                                    </Typography>
+                                                    <Typography className={classes.itemCount} align={"right"}>
+                                                        {order.items.length} Items
+                                                    </Typography>
+                                                    <Typography className={classes.price} align={"right"}>
+                                                        $ {
+                                                        order.items.reduce((acc, item) => acc + item.unitPrice, 0)
+                                                            .toFixed(2)
+                                                    }
+                                                    </Typography>
+                                                </ExpansionPanelSummary>
+                                                <ExpansionPanelDetails>
+                                                    <Grid container>
+                                                        <Grid item sm={12}>
+                                                            <table>
+                                                                <tr>
+                                                                    <td className={classes.orderDescriptionItem}>
+                                                                        <Typography color={"textPrimary"}>
+                                                                            Ordered Date
+                                                                        </Typography>
+                                                                    </td>
+                                                                    <td className={classes.orderDescriptionItem}>
+                                                                        <Typography color={"textSecondary"}>
+                                                                            {order.orderDate}
+                                                                        </Typography>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td className={classes.orderDescriptionItem}>
+                                                                        <Typography color={"textPrimary"}>
+                                                                            Delivery Date
+                                                                        </Typography>
+                                                                    </td>
+                                                                    <td className={classes.orderDescriptionItem}>
+                                                                        <Typography color={"textSecondary"}>
+                                                                            {
+                                                                                order.deliveryDate
+                                                                                    ? order.deliveryDate
+                                                                                    : "Undelivered"
+                                                                            }
+                                                                        </Typography>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td className={classes.orderDescriptionItem}>
+                                                                        <Typography color={"textPrimary"}>
+                                                                            Delivery Address
+                                                                        </Typography>
+                                                                    </td>
+                                                                    <td className={classes.orderDescriptionItem}>
+                                                                        <Typography color={"textSecondary"}>
+                                                                            {order.deliveryAddress}
+                                                                        </Typography>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td className={classes.orderDescriptionItem}>
+                                                                        <Typography color={"textPrimary"}>
+                                                                            Items
+                                                                        </Typography>
+                                                                    </td>
+                                                                </tr>
+                                                            </table>
+                                                        </Grid>
+                                                        <Grid item sm={12}>
+                                                            <div className={classes.itemsTable}>
+                                                                <Table>
+                                                                    <TableBody>
+                                                                        {
+                                                                            order.items.map((item) => (
+                                                                                <TableRow key={item.id}>
+                                                                                    <TableCell component="th" scope="row">
+                                                                                        {item.name}
+                                                                                    </TableCell>
+                                                                                    <TableCell align="right">
+                                                                                        $ {item.unitPrice}
+                                                                                    </TableCell>
+                                                                                </TableRow>
+                                                                            ))
+                                                                        }
+                                                                    </TableBody>
+                                                                </Table>
+                                                            </div>
+                                                        </Grid>
+                                                    </Grid>
+                                                </ExpansionPanelDetails>
+                                            </ExpansionPanel>
+                                        ))
+                                    }
+                                </div>
+                            )
+                            : (
+                                <Typography variant={"body1"} align={"center"} color={"textSecondary"}>
+                                    No Orders Placed
+                                </Typography>
+                            )
                     }
-                </TableBody>
-            </Table>
-        </div>
-    </div>
-);
+                </div>
+            </div>
+        );
+    }
+}
 
 export default withStyles(styles)(Orders);

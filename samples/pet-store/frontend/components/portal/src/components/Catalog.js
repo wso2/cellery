@@ -27,33 +27,33 @@ const styles = (theme) => ({
         flexGrow: 1
     },
     titleUnit: {
-        backgroundColor: theme.palette.background.paper,
+        backgroundColor: theme.palette.background.paper
     },
     titleContent: {
         maxWidth: 600,
-        margin: '0 auto',
-        padding: `${theme.spacing.unit * 8}px 0 ${theme.spacing.unit * 6}px`,
+        margin: "0 auto",
+        padding: `${theme.spacing.unit * 8}px 0 ${theme.spacing.unit * 6}px`
     },
     titleButtons: {
-        marginTop: theme.spacing.unit * 4,
+        marginTop: theme.spacing.unit * 4
     },
     layout: {
-        width: 'auto',
+        width: "auto",
         marginLeft: theme.spacing.unit * 3,
         marginRight: theme.spacing.unit * 3,
-        [theme.breakpoints.up(1100 + theme.spacing.unit * 3 * 2)]: {
+        [theme.breakpoints.up(1100 + (theme.spacing.unit * 3 * 2))]: {
             width: 1100,
-            marginLeft: 'auto',
-            marginRight: 'auto',
-        },
+            marginLeft: "auto",
+            marginRight: "auto"
+        }
     },
     cardGrid: {
-        padding: `${theme.spacing.unit * 8}px 0`,
+        padding: `${theme.spacing.unit * 8}px 0`
     },
     card: {
         height: "100%",
         display: "flex",
-        flexDirection: "column",
+        flexDirection: "column"
     },
     cardMedia: {
         paddingTop: "56.25%" // 16:9
@@ -78,57 +78,70 @@ const Catalog = ({catalog, classes}) => (
             <div className={classes.titleButtons}>
                 <Grid container spacing={16} justify="center">
                     <Grid item>
-                        <Button variant="contained" color="primary" onClick={() => window.location.href = "/orders"}>
-                            Check Orders
+                        <Button variant="contained" color="primary" onClick={() => {
+                            window.location.href = "/orders";
+                        }}>
+                            Check My Orders
                         </Button>
                     </Grid>
                 </Grid>
             </div>
         </div>
         <div className={classNames(classes.layout, classes.cardGrid)}>
-            <Grid container spacing={40}>
-                {
-                    catalog.map((item, index) =>(
-                        <Grid key={index} item sm={6} md={4} lg={3}>
-                            <Card className={classes.card}>
-                                <CardMedia
-                                    className={classes.cardMedia}
-                                    image={"./app/assets/award.svg"}
-                                    title={item.item}
-                                />
-                                <CardContent className={classes.cardContent}>
-                                    <Typography gutterBottom variant="h5" component="h2">
-                                        {item.item}
-                                    </Typography>
-                                    <Typography>
-                                        {item.description}
-                                    </Typography>
-                                </CardContent>
-                                <div className={classes.grow}/>
-                                <CardContent>
-                                    <Grid
-                                        container
-                                        direction="row"
-                                        justify="space-between"
-                                        alignItems="center"
-                                    >
-                                        <Grid item sm={6}>
-                                            <Typography color={"textSecondary"}>
-                                                In Stock: {item.inStock}
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item sm={6} className={classes.priceTag}>
-                                            <Typography color={"textSecondary"}>
-                                                {item.unitPrice}
-                                            </Typography>
-                                        </Grid>
+            {
+                catalog.accessories.length > 0
+                    ? (
+                        <Grid container spacing={40}>
+                            {
+                                catalog.accessories.map((item, index) => (
+                                    <Grid key={index} item sm={6} md={4} lg={3}>
+                                        <Card className={classes.card}>
+                                            <CardMedia
+                                                className={classes.cardMedia}
+                                                image={"./app/assets/default-accessory.svg"}
+                                                title={item.item}
+                                            />
+                                            <CardContent className={classes.cardContent}>
+                                                <Typography gutterBottom variant="h5" component="h2">
+                                                    {item.name}
+                                                </Typography>
+                                                <Typography>
+                                                    {item.description}
+                                                </Typography>
+                                            </CardContent>
+                                            <div className={classes.grow}/>
+                                            <CardContent>
+                                                <Grid
+                                                    container
+                                                    direction="row"
+                                                    justify="space-between"
+                                                    alignItems="center"
+                                                >
+                                                    <Grid item sm={6}>
+                                                        <Typography color={"textSecondary"}>
+                                                            In Stock: {item.inStock}
+                                                        </Typography>
+                                                    </Grid>
+                                                    <Grid item sm={6} className={classes.priceTag}>
+                                                        <Typography color={"textSecondary"}>
+                                                            $ {item.unitPrice}
+                                                        </Typography>
+                                                    </Grid>
+                                                </Grid>
+                                            </CardContent>
+                                        </Card>
                                     </Grid>
-                                </CardContent>
-                            </Card>
+                                ))
+                            }
                         </Grid>
-                    ))
-                }
-            </Grid>
+
+                    )
+                    : (
+                        <Typography variant={"body1"} align={"center"} color={"textSecondary"}>
+                            No Accessories Available for Sale
+                        </Typography>
+                    )
+            }
         </div>
     </div>
 );

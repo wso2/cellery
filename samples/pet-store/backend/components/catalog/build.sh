@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # ---------------------------------------------------------------------------
 #  Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 #
@@ -13,7 +13,5 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
-# Docker build script for petstore catalog
 
 docker build -t celleryio/samples-pet-store-catalog .

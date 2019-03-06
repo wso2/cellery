@@ -20,26 +20,28 @@ import App from "./components/App";
 import {BrowserRouter} from "react-router-dom";
 import {CssBaseline} from "@material-ui/core";
 import {JssProvider} from "react-jss";
-import {MuiThemeProvider, createGenerateClassName} from "@material-ui/core/styles";
 import React from "react";
 import ReactDOM from "react-dom";
 import {generateTheme} from "./utils";
+import {MuiThemeProvider, createGenerateClassName} from "@material-ui/core/styles";
 
 const initialState = window.__INITIAL_STATE__;
-delete window.__INITIAL_STATE__;
+Reflect.deleteProperty(window, "__INITIAL_STATE__");
 
 class Main extends React.Component {
+
     componentDidMount() {
         // Remove the server-side injected CSS.
-        const jssStyles = document.getElementById('jss-server-side');
+        const jssStyles = document.getElementById("jss-server-side");
         if (jssStyles && jssStyles.parentNode) {
             jssStyles.parentNode.removeChild(jssStyles);
         }
     }
 
     render() {
-        return <App initialState={initialState}/>
+        return <App initialState={initialState}/>;
     }
+
 }
 
 ReactDOM.hydrate((

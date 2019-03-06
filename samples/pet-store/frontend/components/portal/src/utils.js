@@ -40,6 +40,7 @@ const renderFullPage = (css, content, initialState) => (
     "<html lang='en'>" +
     "<head>" +
     "<meta charset='utf-8'>" +
+    "<link rel='shortcut icon' href='./app/assets/favicon.ico'/>" +
     "<title>Pet Store</title>" +
     "<script>window.__INITIAL_STATE__=" + JSON.stringify(initialState) + "</script>" +
     `<style id='jss-server-side'>${css}</style>` +
@@ -55,4 +56,4 @@ const renderFullPage = (css, content, initialState) => (
 export {
     generateTheme,
     renderFullPage
-}
+};

@@ -22,12 +22,12 @@ import {JssProvider} from "react-jss";
 import React from "react";
 import ReactDOMServer from "react-dom/server";
 import {SheetsRegistry} from "jss";
-import {StaticRouter, matchPath} from "react-router-dom";
-import {setDomain as setPetStoreCellDomain, getCatalog, getOrders} from "../gen/petStoreApi";
 import {MuiThemeProvider, createGenerateClassName} from "@material-ui/core/styles";
+import {StaticRouter, matchPath} from "react-router-dom";
 import {generateTheme, renderFullPage} from "../utils";
-import * as path from "path";
 import * as express from "express";
+import * as path from "path";
+import * as petStoreApi from "../gen/petStoreApi";
 
 const routes = [
     "/",
@@ -48,8 +48,9 @@ const renderApp = (req, res, initialState) => {
             </MuiThemeProvider>
         </JssProvider>
     );
+    const html = ReactDOMServer.renderToString(app);
     const css = sheetsRegistry.toString();
-    res.send(renderFullPage(css, ReactDOMServer.renderToString(app), initialState));
+    res.send(renderFullPage(css, html, initialState));
 };
 
 const createServer = (port) => {
@@ -61,33 +62,37 @@ const createServer = (port) => {
      * Serving the App
      */
     app.get("*", (req, res) => {
-        const match = routes.reduce((acc, route) => matchPath(req.url, {path: route, exact:true}) || acc, null);
+        const match = routes.reduce((acc, route) => matchPath(req.url, {path: route, exact: true}) || acc, null);
 
         const initialState = {
             petStoreCell: process.env.PET_STORE_CELL_URL
         };
 
         // Setting the Pet Store Cell URL for the Swagger Generated Client
-        setPetStoreCellDomain(initialState.petStoreCell);
+        petStoreApi.setDomain(initialState.petStoreCell);
 
         if (match) {
             if (match.path === routes[0]) {
-                getCatalog()
+                petStoreApi.getCatalog()
                     .then((response) => {
-                        initialState.catalog = response.data.catalog;
+                        let responseBody = response.data;
+                        initialState.catalog = {
+                            accessories: responseBody.data.accessories
+                        };
                         renderApp(req, res, initialState);
                     })
                     .catch((e) => {
-                        console.log(e);
+                        console.log("[ERROR] Failed to fetch the catalog due to " + e);
                     });
             } else if (match.path === routes[1]) {
-                getOrders()
+                petStoreApi.getOrders()
                     .then((response) => {
-                        initialState.orders = response.data;
+                        const responseBody = response.data;
+                        initialState.orders = responseBody.data.orders;
                         renderApp(req, res, initialState);
                     })
                     .catch((e) => {
-                        console.log(e);
+                        console.log("[ERROR] Failed to fetch the orders due to " + e);
                     });
             } else {
                 renderApp(req, res, initialState);
@@ -104,7 +109,7 @@ const createServer = (port) => {
         const host = server.address().address;
         const port = server.address().port;
 
-        console.log("Pet Store Portal listening at http://%s:%s", host, port);
+        console.log("[INFO] Pet Store Portal listening at http://%s:%s", host, port);
     });
 };
 

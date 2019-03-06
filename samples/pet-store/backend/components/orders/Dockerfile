@@ -12,22 +12,25 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+#
+# ------------------------------------------------------------------------
 
 FROM node:11.2.0-slim
+LABEL maintainer="dev@wso2.org"
 
-RUN mkdir -p /src/app
-WORKDIR /src/app
-# Install app dependencies
-# A wildcard is used to ensure both package.json AND package-lock.json are copied
-# where available (npm@5+)
-COPY package*.json ./
-COPY resources/orderlist.json resources/
-COPY server.js ./
+ARG SERVICE_PORT=80
+ARG APP_DIR=/service
 
-RUN npm install
-# If you are building your code for production
-# RUN npm ci --only=production
+WORKDIR ${APP_DIR}
 
+COPY package*.json ${APP_DIR}/
+COPY serve.js ${APP_DIR}/
+COPY ./data/ ${APP_DIR}/data/
 
-EXPOSE 80
-CMD node server.js
+RUN npm ci
+
+ENV SERVICE_PORT=${SERVICE_PORT}
+
+EXPOSE ${SERVICE_PORT}
+
+ENTRYPOINT ["node", "serve.js"]

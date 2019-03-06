@@ -1,13 +1,10 @@
 {
-  "name": "customer-service",
-  "version": "1.0.0",
-  "description": "customer-details",
-  "main": "server.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
-  },
+  "name": "@pet-store-sample/customers",
+  "version": "0.1.0",
+  "description": "Pet Store Customers Service",
+  "author": "WSO2 Cellery Maintainers <dev@wso2.org>",
   "license": "Apache-2.0",
+  "main": "serve.js",
   "dependencies": {
     "express": "^4.16.4"
   }

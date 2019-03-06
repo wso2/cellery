@@ -87,6 +87,11 @@ As mentioned in setup guide above, select Local to setup the local environment.
 This will download and install a pre-configured cellery runtime. Once the installation process is completed, 
 users can start working on a cellery project.
 
+Next add /etc/host entries to access cellery hosts such as APIM, Observability, etc
+```
+127.0.0.1 wso2-apim cellery-dashboard wso2sp-observability-api wso2-apim-gateway
+```
+
 #### GCP
 First users will have to create a GCP project and enable relevant APIs. After that user needs to install GCloud SDK and 
 point the current project to the already configured GCP project.
@@ -134,6 +139,16 @@ To create your first project, execute the command:
 ```
 When the process is completed Cellery will point to the newly created GCP cluster and user can start working on a 
 Cellery project. 
+
+Next get the Nginx Ip and add it to the /etc/hosts.
+Run the following kubectl command to get the Ip address
+```
+kubectl get ingress -n cellery-system
+```
+Then update the /etc/hosts file with that Ip as follows
+```
+<IP_ADDRESS> wso2-apim cellery-dashboard wso2sp-observability-api wso2-apim-gateway
+```
 
 ### Build and Deploy your first Cell 
 Now we can deploy a hello world cell as a the first project. Follow the instructions listed below to deploy the hello world cell.

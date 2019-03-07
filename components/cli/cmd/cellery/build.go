@@ -29,12 +29,11 @@ import (
 
 // newBuildCommand creates a cobra command which can be invoked to build a cell image from a cell file
 func newBuildCommand() *cobra.Command {
-	var tag string
 	cmd := &cobra.Command{
 		Use:   "build <cell-file>",
 		Short: "Build an immutable cell image with the required dependencies",
 		Args: func(cmd *cobra.Command, args []string) error {
-			err := cobra.ExactArgs(1)(cmd, args)
+			err := cobra.ExactArgs(2)(cmd, args)
 			if err != nil {
 				return err
 			}
@@ -42,19 +41,16 @@ func newBuildCommand() *cobra.Command {
 			if err != nil || !isProperFile {
 				return fmt.Errorf("expects a proper file as the cell-file, received %s", args[0])
 			}
-			err = util.ValidateImageTag(tag)
+			err = util.ValidateImageTag(args[1])
 			if err != nil {
 				return err
 			}
 			return nil
 		},
 		Run: func(cmd *cobra.Command, args []string) {
-			commands.RunBuild(tag, args[0])
+			commands.RunBuild(args[1], args[0])
 		},
-		Example: "  cellery build employee.bal -t cellery-samples/employee:1.0.0",
+		Example: "  cellery build employee.bal cellery-samples/employee:1.0.0",
 	}
-	cmd.Flags().StringVarP(&tag, "tag", "t", "",
-		"Cell image in the format: <organization>/<cell-image>:<version>")
-	_ = cmd.MarkFlagRequired("tag")
 	return cmd
 }

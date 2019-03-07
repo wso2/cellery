@@ -26,7 +26,7 @@ import (
 	"github.com/cellery-io/sdk/components/cli/pkg/util"
 )
 
-func RunStop(instanceName string) {
+func RunTerminate(instanceName string) {
 	cmd := exec.Command("kubectl", "delete", "cell", instanceName)
 	stdoutReader, _ := cmd.StdoutPipe()
 	stdoutScanner := bufio.NewScanner(stdoutReader)

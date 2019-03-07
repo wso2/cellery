@@ -31,7 +31,7 @@ import (
 	"github.com/cellery-io/sdk/components/cli/pkg/util"
 )
 
-func RunApis(cellName string) {
+func RunListIngresses(cellName string) {
 	cmd := exec.Command("kubectl", "get", "gateways", cellName+"--gateway", "-o", "json")
 	stdoutReader, _ := cmd.StdoutPipe()
 	stdoutScanner := bufio.NewScanner(stdoutReader)

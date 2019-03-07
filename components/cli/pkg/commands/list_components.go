@@ -32,7 +32,7 @@ import (
 	"github.com/cellery-io/sdk/components/cli/pkg/util"
 )
 
-func RunComponents(cellName string) {
+func RunListComponents(cellName string) {
 	cmd := exec.Command("kubectl", "get", "services", "-l", constants.GROUP_NAME+"/cell="+cellName, "-o", "json")
 	stdoutReader, _ := cmd.StdoutPipe()
 	stdoutScanner := bufio.NewScanner(stdoutReader)

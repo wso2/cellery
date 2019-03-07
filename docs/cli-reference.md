@@ -43,11 +43,11 @@ Example :
 cellery run wso2/cell2:1.0.1 -n mycell-2 -l mycell-1
 ```
 
-### Ps
+### List instances
 List all running cells.  
 Usage : 
 ```
-cellery ps
+cellery list instances
 ```
 
 ### Push
@@ -72,22 +72,22 @@ Example :
 cellery pull wso2/my-cell:1.0.0
 ```
 
-### Images
+### List images
 List cell images that was pulled and built in the current machine.  
 Usage : 
 ```
-cellery images
+cellery list images
 ```
 
-### Stop
-Stop a running cell instance.  
+### Terminate
+Terminate a running cell instance.
 Usage : 
 ```
-cellery stop <CELL_NAME>
+cellery terminate <CELL_NAME>
 ```
 Example : 
 ```
-cellery stop hello-cell
+cellery terminate hello-cell
 ```
 
 ### Status 
@@ -101,15 +101,15 @@ Example :
 cellery status hello-cell
 ```
 
-### Apis 
+### List ingresses
 List the exposed APIs of a cell instance.  
 Usage : 
 ```
-cellery apis <CELL_NAME>
+cellery list ingresses <CELL_NAME>
 ```
 Example : 
 ```
-cellery apis hello-cell
+cellery list ingresses hello-cell
 ```
 
 ### Logs 
@@ -123,26 +123,26 @@ Example:
 cellery logs hello-cell / cellery logs hello-cell -c my-component
 ```
 
-### Components
+### List Components
 Lists the components which the cell encapsulates.  
 Usage : 
 ```
-cellery components <CELL_NAME>
+cellery list components <CELL_NAME>
 ```  
 Example : 
 ```
-cellery components hello-cell
+cellery list components hello-cell
 ```
 
-### List-files
+### inspect
 List the files (directory structure) of a cell images.  
 Usage : 
 ```
-cellery list-files <ORGANIZATION_NAME>/<IMAGE_NAME>:<VERSION>
+cellery inspect <ORGANIZATION_NAME>/<IMAGE_NAME>:<VERSION>
 ```
 Example : 
 ```
-cellery list-files wso2/my-cell:1.0.0
+cellery inspect wso2/my-cell:1.0.0
 ```
 
 ### Extract-resources

@@ -31,8 +31,8 @@ import (
 	"github.com/cellery-io/sdk/components/cli/pkg/util"
 )
 
-// RunListFiles extracts the cell image and lists the files in the cell image
-func RunListFiles(cellImage string) {
+// RunInspect extracts the cell image and lists the files in the cell image
+func RunInspect(cellImage string) {
 	parsedCellImage, err := util.ParseImageTag(cellImage)
 	if err != nil {
 		util.ExitWithErrorMessage("Error occurred while parsing cell image", err)

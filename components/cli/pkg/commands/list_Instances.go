@@ -27,7 +27,7 @@ import (
 	"github.com/cellery-io/sdk/components/cli/pkg/util"
 )
 
-func RunPs() {
+func RunListInstances() {
 	cmd := exec.Command("kubectl", "get", "cells")
 	stdoutReader, _ := cmd.StdoutPipe()
 	stdoutScanner := bufio.NewScanner(stdoutReader)

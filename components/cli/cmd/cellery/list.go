@@ -20,19 +20,19 @@ package main
 
 import (
 	"github.com/spf13/cobra"
-
-	"github.com/cellery-io/sdk/components/cli/pkg/commands"
 )
 
-func newPsCommand() *cobra.Command {
+func newListCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "ps",
-		Short: "List all running cells",
-		Args:  cobra.NoArgs,
-		Run: func(cmd *cobra.Command, args []string) {
-			commands.RunPs()
-		},
-		Example: "  cellery ps",
+		Use:   "list <command>",
+		Short: "List cell information",
 	}
+
+	cmd.AddCommand(
+		newListInstancesCommand(),
+		newListImagesCommand(),
+		newListIngressesCommand(),
+		newListComponentsCommand(),
+	)
 	return cmd
 }

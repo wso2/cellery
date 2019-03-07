@@ -1,0 +1,37 @@
+{
+  "name": "@cellery-io/docs-view",
+  "version": "0.1.0",
+  "description": "Stand alone documentation viewer for Cells",
+  "homepage": ".",
+  "scripts": {
+    "clean": "rimraf ./build/ && rimraf ./node-server/public/ && rimraf ./coverage/",
+    "lint": "eslint --color --fix src/",
+    "build": "react-scripts build && copyfiles -u 1 resources/data/cell.js ./build/",
+    "test": "CI=true react-scripts test --colors --testURL=http://test.cellery.com --coverage",
+    "eject": "react-scripts eject"
+  },
+  "dependencies": {
+    "prop-types": "^15.7.2",
+    "react": "^16.8.3",
+    "react-dom": "^16.8.3",
+    "react-scripts": "^2.1.8"
+  },
+  "devDependencies": {
+    "copyfiles": "^2.1.0",
+    "eslint-plugin-jest": "^22.3.0",
+    "rimraf": "^2.6.3"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "jest": {
+    "resetMocks": true,
+    "resetModules": true
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ]
+}

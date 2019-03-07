@@ -34,7 +34,7 @@ const routes = [
     "/orders"
 ];
 
-const renderApp = (req, res, initialState) => {
+const renderApp = (req, res, initialState, basePath) => {
     const sheetsRegistry = new SheetsRegistry();
     const sheetsManager = new Map();
     const context = {};
@@ -50,7 +50,7 @@ const renderApp = (req, res, initialState) => {
     );
     const html = ReactDOMServer.renderToString(app);
     const css = sheetsRegistry.toString();
-    res.send(renderFullPage(css, html, initialState));
+    res.send(renderFullPage(css, html, initialState, basePath));
 };
 
 const createServer = (port) => {
@@ -67,6 +67,7 @@ const createServer = (port) => {
         const initialState = {
             petStoreCell: process.env.PET_STORE_CELL_URL
         };
+        const basePath = process.env.BASE_PATH;
 
         // Setting the Pet Store Cell URL for the Swagger Generated Client
         petStoreApi.setDomain(initialState.petStoreCell);
@@ -79,7 +80,7 @@ const createServer = (port) => {
                         initialState.catalog = {
                             accessories: responseBody.data.accessories
                         };
-                        renderApp(req, res, initialState);
+                        renderApp(req, res, initialState, basePath);
                     })
                     .catch((e) => {
                         console.log("[ERROR] Failed to fetch the catalog due to " + e);
@@ -89,16 +90,16 @@ const createServer = (port) => {
                     .then((response) => {
                         const responseBody = response.data;
                         initialState.orders = responseBody.data.orders;
-                        renderApp(req, res, initialState);
+                        renderApp(req, res, initialState, basePath);
                     })
                     .catch((e) => {
                         console.log("[ERROR] Failed to fetch the orders due to " + e);
                     });
             } else {
-                renderApp(req, res, initialState);
+                renderApp(req, res, initialState, basePath);
             }
         } else {
-            renderApp(req, res, initialState);
+            renderApp(req, res, initialState, basePath);
         }
     });
 

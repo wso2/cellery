@@ -28,6 +28,8 @@ import {MuiThemeProvider, createGenerateClassName} from "@material-ui/core/style
 const initialState = window.__INITIAL_STATE__;
 Reflect.deleteProperty(window, "__INITIAL_STATE__");
 
+const basePath = window.__BASE_PATH__;
+
 class Main extends React.Component {
 
     componentDidMount() {
@@ -48,7 +50,7 @@ ReactDOM.hydrate((
     <JssProvider generateClassName={createGenerateClassName()}>
         <MuiThemeProvider theme={generateTheme()}>
             <CssBaseline/>
-            <BrowserRouter>
+            <BrowserRouter basename={basePath}>
                 <Main/>
             </BrowserRouter>
         </MuiThemeProvider>

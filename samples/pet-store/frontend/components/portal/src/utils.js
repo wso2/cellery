@@ -35,7 +35,7 @@ const generateTheme = () => createMuiTheme({
     }
 });
 
-const renderFullPage = (css, content, initialState) => (
+const renderFullPage = (css, content, initialState, basePath) => (
     "<!DOCTYPE html>" +
     "<html lang='en'>" +
     "<head>" +
@@ -43,6 +43,7 @@ const renderFullPage = (css, content, initialState) => (
     "<link rel='shortcut icon' href='./app/assets/favicon.ico'/>" +
     "<title>Pet Store</title>" +
     "<script>window.__INITIAL_STATE__=" + JSON.stringify(initialState) + "</script>" +
+    (basePath ? "<script>window.__BASE_PATH__=" + JSON.stringify(basePath) + "</script>" : "") +
     `<style id='jss-server-side'>${css}</style>` +
     "</head>" +
     "<body>" +

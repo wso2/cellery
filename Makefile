@@ -29,7 +29,7 @@ GO_LDFLAGS := -X $(PROJECT_PKG)/components/cli/pkg/version.buildVersion=$(VERSIO
 GO_LDFLAGS += -X $(PROJECT_PKG)/components/cli/pkg/version.buildGitRevision=$(GIT_REVISION)
 GO_LDFLAGS += -X $(PROJECT_PKG)/components/cli/pkg/version.buildTime=$(shell date +%Y-%m-%dT%H:%M:%S%z)
 
-all: code.format build-lang build-cli
+all: code.format build-lang build-docs-view build-cli
 
 .PHONY: install
 install: install-lang install-cli
@@ -42,6 +42,11 @@ build-lang:
 .PHONY: build-cli
 build-cli:
 	go build -o ${GO_BUILD_DIRECTORY}/cellery -ldflags "$(GO_LDFLAGS)" -x ./components/cli/cmd/cellery
+
+.PHONY: build-docs-view
+build-docs-view:
+	cd ${PROJECT_ROOT}/components/docs-view; \
+	npm run build
 
 .PHONY: install-lang
 install-lang:
@@ -56,6 +61,8 @@ install-cli:
 .PHONY: code.format
 code.format: tools.goimports
 	@goimports -local $(PROJECT_PKG) -w -l $(GOFILES)
+	cd ${PROJECT_ROOT}/components/docs-view; \
+	npm run lint
 
 .PHONY: tools tools.goimports
 

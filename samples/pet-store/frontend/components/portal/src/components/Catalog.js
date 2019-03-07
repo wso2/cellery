@@ -79,7 +79,7 @@ const Catalog = ({catalog, classes}) => (
                 <Grid container spacing={16} justify="center">
                     <Grid item>
                         <Button variant="contained" color="primary" onClick={() => {
-                            window.location.href = "/orders";
+                            window.location.href = (window.__BASE_PATH__ ? window.__BASE_PATH__ : "") + "/orders";
                         }}>
                             Check My Orders
                         </Button>

@@ -4,6 +4,7 @@
   "description": "Pet Store Portal",
   "author": "WSO2 Cellery Maintainers <dev@wso2.org>",
   "license": "Apache-2.0",
+  "homepage": ".",
   "scripts": {
     "clean": "rimraf ./build/",
     "gen:swagger": "node src/genSwagger.js",

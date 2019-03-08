@@ -4,6 +4,7 @@
 [![GitHub last commit](https://img.shields.io/github/last-commit/wso2-cellery/sdk.svg)](https://github.com/wso2-cellery/sdk/commits/master)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
+![Cellery Logo](docs/images/cellery-logo.png)
 
 <!---
 The future is evolving to a modern day mainframe: a single virtual computer that runs everything for an organization. 
@@ -37,6 +38,8 @@ The current implementation of Cellery uses Ballerina, the cloud native integrati
 and the interaction between those. 
 
 --->
+----
+
 ## Getting Started
 ### Pre requisites 
 1. kubectl 

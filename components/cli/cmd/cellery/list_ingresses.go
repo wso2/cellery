@@ -29,9 +29,9 @@ import (
 )
 
 // newApisCommand creates a cobra command which can be invoked to get the APIs exposed by a cell
-func newApisCommand() *cobra.Command {
+func newListIngressesCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "apis <cell-name>",
+		Use:   "ingresses <cell-name>",
 		Short: "List the exposed APIs of a cell instance",
 		Args: func(cmd *cobra.Command, args []string) error {
 			err := cobra.ExactArgs(1)(cmd, args)
@@ -45,9 +45,9 @@ func newApisCommand() *cobra.Command {
 			return nil
 		},
 		Run: func(cmd *cobra.Command, args []string) {
-			commands.RunApis(args[0])
+			commands.RunListIngresses(args[0])
 		},
-		Example: "  cellery apis employee",
+		Example: "  cellery list ingresses employee",
 	}
 	return cmd
 }

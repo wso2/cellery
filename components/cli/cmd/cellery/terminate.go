@@ -20,37 +20,33 @@ package main
 
 import (
 	"fmt"
+	"regexp"
 
 	"github.com/spf13/cobra"
 
 	"github.com/cellery-io/sdk/components/cli/pkg/commands"
-	"github.com/cellery-io/sdk/components/cli/pkg/util"
+	"github.com/cellery-io/sdk/components/cli/pkg/constants"
 )
 
-// newBuildCommand creates a cobra command which can be invoked to build a cell image from a cell file
-func newBuildCommand() *cobra.Command {
+func newTerminateCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "build <cell-file>",
-		Short: "Build an immutable cell image with the required dependencies",
+		Use:   "terminate <cell-name>",
+		Short: "Terminate a running cell instance",
 		Args: func(cmd *cobra.Command, args []string) error {
-			err := cobra.ExactArgs(2)(cmd, args)
+			err := cobra.ExactArgs(1)(cmd, args)
 			if err != nil {
 				return err
 			}
-			isProperFile, err := util.FileExists(args[0])
-			if err != nil || !isProperFile {
-				return fmt.Errorf("expects a proper file as the cell-file, received %s", args[0])
-			}
-			err = util.ValidateImageTag(args[1])
-			if err != nil {
-				return err
+			isCellValid, err := regexp.MatchString(fmt.Sprintf("^%s$", constants.CELLERY_ID_PATTERN), args[0])
+			if err != nil || !isCellValid {
+				return fmt.Errorf("expects a valid cell name, received %s", args[0])
 			}
 			return nil
 		},
 		Run: func(cmd *cobra.Command, args []string) {
-			commands.RunBuild(args[1], args[0])
+			commands.RunTerminate(args[0])
 		},
-		Example: "  cellery build employee.bal cellery-samples/employee:1.0.0",
+		Example: "  cellery terminate employee",
 	}
 	return cmd
 }

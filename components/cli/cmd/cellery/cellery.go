@@ -38,22 +38,19 @@ func newCliCommand() *cobra.Command {
 	cmd.AddCommand(
 		newCompletionCommand(cmd),
 		newBuildCommand(),
-		newImageCommand(),
 		newVersionCommand(),
 		newInitCommand(),
 		newRunCommand(),
-		newStopCommand(),
-		newPsCommand(),
+		newTerminateCommand(),
+		newListCommand(),
 		newDescribeCommand(),
-		newApisCommand(),
-		newComponentsCommand(),
 		newStatusCommand(),
 		newLogsCommand(),
 		newPushCommand(),
 		newPullCommand(),
 		newSetupCommand(),
 		newExtractResourcesCommand(),
-		newListFilesCommand(),
+		newInspectCommand(),
 	)
 	return cmd
 }

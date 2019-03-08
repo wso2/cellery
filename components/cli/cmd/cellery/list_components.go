@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018 WSO2 Inc. (http:www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * http:www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -20,33 +20,33 @@ package main
 
 import (
 	"fmt"
+	"regexp"
 
 	"github.com/spf13/cobra"
 
 	"github.com/cellery-io/sdk/components/cli/pkg/commands"
-	"github.com/cellery-io/sdk/components/cli/pkg/util"
+	"github.com/cellery-io/sdk/components/cli/pkg/constants"
 )
 
-// newListFilesCommand creates a command which can be invoked to list the files (directory structure) of a cell images.
-func newListFilesCommand() *cobra.Command {
+func newListComponentsCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "list-files <organization>/<cell-image>:<version>",
-		Short: "List the files in the cell image",
+		Use:   "components <cell-name>",
+		Short: "List the components which the cell encapsulates",
 		Args: func(cmd *cobra.Command, args []string) error {
 			err := cobra.ExactArgs(1)(cmd, args)
 			if err != nil {
 				return err
 			}
-			err = util.ValidateImageTag(args[0])
-			if err != nil {
-				return fmt.Errorf("expects <organization>/<cell-image>:<version> as cell-image, received %s", args[0])
+			isCellValid, err := regexp.MatchString(fmt.Sprintf("^%s$", constants.CELLERY_ID_PATTERN), args[0])
+			if err != nil || !isCellValid {
+				return fmt.Errorf("expects a valid cell name, received %s", args[0])
 			}
 			return nil
 		},
 		Run: func(cmd *cobra.Command, args []string) {
-			commands.RunListFiles(args[0])
+			commands.RunListComponents(args[0])
 		},
-		Example: "  cellery list-files cellery-samples/employee:1.0.0",
+		Example: "  cellery components employee",
 	}
 	return cmd
 }

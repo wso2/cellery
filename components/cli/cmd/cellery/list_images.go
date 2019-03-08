@@ -24,7 +24,7 @@ import (
 	"github.com/cellery-io/sdk/components/cli/pkg/commands"
 )
 
-func newImageCommand() *cobra.Command {
+func newListImagesCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "images",
 		Short: "List cell images",
@@ -36,7 +36,7 @@ func newImageCommand() *cobra.Command {
 				commands.RunImageInformation(args[0])
 			}
 		},
-		Example: "  cellery images",
+		Example: "  cellery list images",
 	}
 	return cmd
 }

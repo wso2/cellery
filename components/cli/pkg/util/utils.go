@@ -946,3 +946,11 @@ func ReplaceInFile(srcFile, oldString, newString string, replaceCount int) error
 	}
 	return nil
 }
+
+func GetCurrentPath() (string, error) {
+	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	if err != nil {
+		return "", err
+	}
+	return dir, nil
+}

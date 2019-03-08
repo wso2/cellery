@@ -4,39 +4,15 @@
 [![GitHub last commit](https://img.shields.io/github/last-commit/wso2-cellery/sdk.svg)](https://github.com/wso2-cellery/sdk/commits/master)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
+![Cellery Logo](docs/images/cellery-logo.svg)
 
-<!---
-The future is evolving to a modern day mainframe: a single virtual computer that runs everything for an organization. 
-Middleware no longer runs as a separate centralized system but has become distributed and virtualized. 
-Applications are no longer standalone monolithic systems but distributed across different boundaries, lifecycles and networks. 
-We call these composite applications. 
+----
 
-The [cell-based architecture](https://github.com/wso2/reference-architecture/blob/master/reference-architecture-cell-based.md) is 
-an opinionated approach to building composite applications. A key aim of this work is to enable **agility** for composite, 
-cell-based architectures. There are many complexities in development, deployment, lifecycle management and operations of 
-composite, integration-first applications on a distributed compute platform.
+Cellery is a code-first approach to building, integrating, running and managing composite microservice applications on Kubernetes. 
+Build, push/pull, run, scale and observe composites. Secure APIs by default. Code in any language.
 
-Integration at scale involves:
-- Effective handling of tens of thousands of networks connections, including load-balancing, circuit-breaking and failover.
-- Inherent federated, adaptive and distributed security.
-- Dynamic discovery, versioning and management of both remote and local endpoints (API management “everywhere”)
-Equal support for pull, push, events and streaming.
+----
 
-DevOps for composite applications:
-- Versioning of apps
-- Different strategies for rolling out & rolling back versions of apps
-- Observability of the entire deployment
-- Support for GitOps
-
-Cellery is a specification that defines how a cell can be developed, deployed, and managed, therefore it is optimised 
-for agile development, deployment and operations of cell-based integration applications, running at scale. 
-
-Cellery Mesh is the runtime implementation of the cellery specification that allows the cells to be deployed and managed. 
-
-The current implementation of Cellery uses Ballerina, the cloud native integration language to define Cells, components 
-and the interaction between those. 
-
---->
 ## Getting Started
 ### Pre requisites 
 1. kubectl 

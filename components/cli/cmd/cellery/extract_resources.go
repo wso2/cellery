@@ -30,11 +30,12 @@ import (
 // newExtractResourcesCommand creates a command which can be invoked to extract the cell
 // image resources to a specific directory.
 func newExtractResourcesCommand() *cobra.Command {
+	var outputPath string
 	cmd := &cobra.Command{
 		Use:   "extract-resources <organization>/<cell-image>:<version> <output-directory>",
 		Short: "Extract the resource files of a pulled image to the provided location",
 		Args: func(cmd *cobra.Command, args []string) error {
-			err := cobra.ExactArgs(2)(cmd, args)
+			err := cobra.ExactArgs(1)(cmd, args)
 			if err != nil {
 				return err
 			}
@@ -42,16 +43,20 @@ func newExtractResourcesCommand() *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("expects <organization>/<cell-image>:<version> as cell-image, received %s", args[0])
 			}
-			err = util.CreateDir(args[1])
-			if err != nil {
-				return fmt.Errorf("expects valid directory as the output-directory, received %s", args[1])
+			if outputPath != "" {
+				err = util.CreateDir(args[1])
+				if err != nil {
+					return fmt.Errorf("expects valid directory as the output-directory, received %s", args[1])
+				}
 			}
 			return nil
 		},
 		Run: func(cmd *cobra.Command, args []string) {
-			commands.RunExtractResources(args[0], args[1])
+			commands.RunExtractResources(args[0], outputPath)
 		},
 		Example: "  cellery extract-resources cellery-samples/employee:1.0.0 ./resources",
 	}
+	cmd.Flags().StringVarP(&outputPath, "output", "o", "",
+		"Cell image in the format: <organization>/<cell-image>:<version>")
 	return cmd
 }

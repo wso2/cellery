@@ -75,6 +75,13 @@ func RunExtractResources(cellImage string, outputPath string) {
 
 	resourcesExists, _ := util.FileExists(resourcesDir)
 	if resourcesExists {
+		if outputPath == "" {
+			currentPath, err := util.GetCurrentPath()
+			if err != nil {
+				util.ExitWithErrorMessage("Error occurred while extracting the image resources", err)
+			}
+			outputPath = currentPath
+		}
 		err = util.CopyDir(resourcesDir, outputPath)
 		if err != nil {
 			util.ExitWithErrorMessage("Error occurred while extracting the image resources", err)

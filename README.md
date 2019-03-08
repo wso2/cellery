@@ -1,4 +1,4 @@
-#![Cellery Logo](docs/images/cellery-logo.svg)
+![Cellery Logo](docs/images/cellery-logo.svg)
 
 [![GitHub (pre-)release](https://img.shields.io/github/release/wso2-cellery/sdk/all.svg)](https://github.com/wso2-cellery/sdk/releases)
 [![GitHub (Pre-)Release Date](https://img.shields.io/github/release-date-pre/wso2-cellery/sdk.svg)](https://github.com/wso2-cellery/sdk/releases)

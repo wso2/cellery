@@ -1,4 +1,15 @@
-#!/bin/sh
+#!/usr/bin/env bash
+
+if [[ ! -z "${SUDO_USER}" ]]; then
+	mkdir -p ${HOME}/.ballerina/repo/celleryio/cellery/0.0.0/
+	chown -R ${SUDO_USER}:${SUDO_USER} ${HOME}/.ballerina
+	chown -R ${SUDO_USER}:${SUDO_USER} ${HOME}/.ballerina/repo/celleryio
+	cp /usr/lib/ballerina/ballerina-0.990.3/lib/repo/celleryio/cellery/0.0.0/cellery.zip $HOME/.ballerina/repo/celleryio/cellery/0.0.0/cellery.zip
+	chown -R ${SUDO_USER}:${SUDO_USER} ${HOME}/.ballerina/repo/celleryio/cellery/0.0.0/cellery.zip
+else
+	echo "Copy cellery.zip file into $HOME/.ballerina/repo/celleryio/cellery/0.0.0/ before you execute cellery build command."
+fi
+
 if [ "$1" = configure ]; then
     echo "Cellery is configured successfully."
 fi

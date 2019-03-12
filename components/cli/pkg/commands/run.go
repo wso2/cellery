@@ -144,7 +144,7 @@ func RunRun(cellImageTag string, instanceName string, dependencies []string) {
 	}
 
 	util.PrintSuccessMessage(fmt.Sprintf("Successfully deployed cell image: %s", util.Bold(cellImageTag)))
-	util.PrintWhatsNextMessage("list running cells", "cellery ps")
+	util.PrintWhatsNextMessage("list running cells", "cellery list instances")
 }
 
 func buildCommand(name string, args []string) (*exec.Cmd, error) {

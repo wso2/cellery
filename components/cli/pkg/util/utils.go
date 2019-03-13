@@ -954,3 +954,12 @@ func GetCurrentPath() (string, error) {
 	}
 	return dir, nil
 }
+
+func ContainsInStringArray(array []string, item string) bool {
+	for _, element := range array {
+		if element == item {
+			return true
+		}
+	}
+	return false
+}

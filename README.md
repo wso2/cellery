@@ -137,7 +137,7 @@ $ cellery init
 What's next?
 --------------------------------------------------------
 Execute the following command to build the image:
-  $ cellery build helloworld/helloworld.bal -t [repo/]organization/image_name:version
+  $ cellery build helloworld/helloworld.bal [repo/]organization/image_name:version
 --------------------------------------------------------
 ```
 2. The above step will auto generate a cellery file in the location: helloworld/helloworld.bal with below content. 
@@ -187,7 +187,7 @@ public function build(string orgName, string imageName, string imageVersion) {
 
 3. Build the cellery image for hello world project by executing the cellery build command as shown below.
 ```
-$ cellery build helloworld.bal -t myorg/helloworld:1.0.0
+$ cellery build helloworld.bal myorg/helloworld:1.0.0
 Hello World Cell Built successfully.
 
 ✔ Building image myorg/helloworld:1.0.0

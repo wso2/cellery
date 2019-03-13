@@ -11,8 +11,8 @@ The component interaction diagram of the application is shown below.
 ## Deploying the sample
 1. Run the following command from the `sdk/samples/pet-service` directory:
     ```
-    $ cellery build pet-cell.bal -t pet-org/pet-service:1.0.0
-    cellery build petCell.bal -t pet-org/pet-service:1.0.0
+    $ cellery build pet-cell.bal pet-org/pet-service:1.0.0
+    cellery build petCell.bal pet-org/pet-service:1.0.0
     Building Pet Service Cell ...
     
     ✔ Building image pet-org/pet-service:1.0.0

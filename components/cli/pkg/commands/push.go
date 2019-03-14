@@ -86,7 +86,7 @@ func pushImage(cellImage string, username string, password string) error {
 	spinner.SetNewAction(fmt.Sprintf("Reading image %s from the Local Repository", util.Bold(imageName)))
 
 	// Reading the cell image
-	cellImageFilePath := filepath.Join(util.UserHomeDir(), ".cellery", "repo", parsedCellImage.Organization,
+	cellImageFilePath := filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, "repo", parsedCellImage.Organization,
 		parsedCellImage.ImageName, parsedCellImage.ImageVersion, parsedCellImage.ImageName+constants.CELL_IMAGE_EXT)
 
 	// Checking if the image is present in the local repo

@@ -132,3 +132,7 @@ type GcpCore struct {
 	Account string `json:"account"`
 	Project string `json:"project"`
 }
+
+type UserConfig struct {
+	Credentials map[string]string `json:"credentials"`
+}

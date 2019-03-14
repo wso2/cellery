@@ -131,7 +131,7 @@ func pullImage(cellImage string, username string, password string, silent bool) 
 			util.ExitWithErrorMessage("Error occurred while pulling cell image", err)
 		}
 
-		repoLocation := filepath.Join(util.UserHomeDir(), ".cellery", "repo", parsedCellImage.Organization,
+		repoLocation := filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, "repo", parsedCellImage.Organization,
 			parsedCellImage.ImageName, parsedCellImage.ImageVersion)
 
 		// Cleaning up the old image if it already exists

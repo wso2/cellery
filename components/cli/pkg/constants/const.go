@@ -73,6 +73,7 @@ const ZIP_BALLERINA_SOURCE = "src"
 const ZIP_ARTIFACTS = "artifacts"
 
 const CELLERY_HOME = ".cellery"
+const USER_CONFIG = "config.json"
 const GCP = "gcp"
 const ARTIFACTS = "artifacts"
 const K8S_ARTIFACTS = "k8s-artefacts"

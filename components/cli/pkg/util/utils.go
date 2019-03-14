@@ -992,15 +992,15 @@ func ReadUserConfig() *UserConfig {
 	return config
 }
 
-// WriteUserConfig writes the provided user configuration into the config file
-func WriteUserConfig(config *UserConfig) error {
+// SaveUserConfig writes the provided user configuration into the config file
+func SaveUserConfig(config *UserConfig) error {
 	configFile := path.Join(UserHomeDir(), constants.CELLERY_HOME, constants.USER_CONFIG)
 
 	serializedConfig, err := json.Marshal(config)
 	if err != nil {
 		return err
 	}
-	err = ioutil.WriteFile(configFile, serializedConfig, 0666)
+	err = ioutil.WriteFile(configFile, serializedConfig, 0600)
 	if err != nil {
 		return err
 	}

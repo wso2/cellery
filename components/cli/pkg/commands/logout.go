@@ -34,7 +34,7 @@ func RunLogout(registryURL string) {
 		fmt.Println("\n\nYou have not logged into Registry: " + util.Bold(registryURL))
 	} else {
 		delete(config.Credentials, registryURL)
-		err := util.WriteUserConfig(config)
+		err := util.SaveUserConfig(config)
 		if err != nil {
 			util.ExitWithErrorMessage("Error occurred while removing Credentials", err)
 		}

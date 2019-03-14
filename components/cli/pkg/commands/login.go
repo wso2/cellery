@@ -34,8 +34,8 @@ func RunLogin(registryURL string) {
 
 	// Reading the existing credentials
 	config := util.ReadUserConfig()
-	existingEncryptedCredentials := config.Credentials[registryURL]
-	existingCredentials, err := base64.StdEncoding.DecodeString(existingEncryptedCredentials)
+	existingEncodedCredentials := config.Credentials[registryURL]
+	existingCredentials, err := base64.StdEncoding.DecodeString(existingEncodedCredentials)
 	isCredentialsAlreadyPresent := err == nil && strings.Contains(string(existingCredentials), ":")
 
 	var username string
@@ -69,9 +69,9 @@ func RunLogin(registryURL string) {
 	if !isCredentialsAlreadyPresent {
 		// Saving the credentials
 		spinner.SetNewAction("Saving credentials")
-		encryptedCredentials := base64.StdEncoding.EncodeToString([]byte(username + ":" + password))
-		config.Credentials[registryURL] = encryptedCredentials
-		err = util.WriteUserConfig(config)
+		encodedCredentials := base64.StdEncoding.EncodeToString([]byte(username + ":" + password))
+		config.Credentials[registryURL] = encodedCredentials
+		err = util.SaveUserConfig(config)
 		if err != nil {
 			spinner.Stop(false)
 			util.ExitWithErrorMessage("Error occurred while saving Credentials", err)
@@ -79,5 +79,5 @@ func RunLogin(registryURL string) {
 	}
 
 	spinner.Stop(true)
-	util.PrintSuccessMessage(fmt.Sprintf("Succesfully logged into Registry: %s", util.Bold(registryURL)))
+	util.PrintSuccessMessage(fmt.Sprintf("Successfully logged into Registry: %s", util.Bold(registryURL)))
 }

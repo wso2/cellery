@@ -19,6 +19,7 @@
 package commands
 
 import (
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -36,31 +37,54 @@ import (
 // RunPull connects to the Cellery Registry and pulls the cell image and saves it in the local repository.
 // This also adds the relevant ballerina files to the ballerina repo directory.
 func RunPull(cellImage string, silent bool) {
-	err := pullImage(cellImage, "", "", silent)
-	if err != nil {
-		if strings.Contains(err.Error(), "401") {
-			username, password, err := util.RequestCredentials()
-			if err != nil {
-				util.ExitWithErrorMessage("Failed to acquire credentials", err)
-			}
-			fmt.Println()
-
-			err = pullImage(cellImage, username, password, silent)
-			if err != nil {
-				util.ExitWithErrorMessage("Failed to pull image", err)
-			}
-		} else {
-			util.ExitWithErrorMessage("Failed to pull image", err)
-		}
-	}
-}
-
-func pullImage(cellImage string, username string, password string, silent bool) error {
 	parsedCellImage, err := util.ParseImageTag(cellImage)
 	if err != nil {
 		util.ExitWithErrorMessage("Error occurred while parsing cell image", err)
 	}
+
+	// Reading the existing credentials
+	config := util.ReadUserConfig()
+	existingEncodedCredentials := config.Credentials[parsedCellImage.Registry]
+	existingCredentials, err := base64.StdEncoding.DecodeString(existingEncodedCredentials)
+	isCredentialsPresent := err == nil && strings.Contains(string(existingCredentials), ":")
+
+	if isCredentialsPresent {
+		existingCredentialsSplit := strings.Split(string(existingCredentials), ":")
+		username := existingCredentialsSplit[0]
+		password := existingCredentialsSplit[1]
+
+		// Pulling the image using the saved credentials
+		err = pullImage(parsedCellImage, username, password, silent)
+		if err != nil {
+			util.ExitWithErrorMessage("Failed to pull image", err)
+		}
+	} else {
+		// Pulling image without credentials
+		err = pullImage(parsedCellImage, "", "", silent)
+		if err != nil {
+			if strings.Contains(err.Error(), "401") {
+				// Requesting the credentials since server responded with an Unauthorized status code
+				username, password, err := util.RequestCredentials()
+				if err != nil {
+					util.ExitWithErrorMessage("Failed to acquire credentials", err)
+				}
+				fmt.Println()
+
+				// Trying to pull the image again with the provided credentials
+				err = pullImage(parsedCellImage, username, password, silent)
+				if err != nil {
+					util.ExitWithErrorMessage("Failed to pull image", err)
+				}
+			} else {
+				util.ExitWithErrorMessage("Failed to pull image", err)
+			}
+		}
+	}
+}
+
+func pullImage(parsedCellImage *util.CellImage, username string, password string, silent bool) error {
 	repository := parsedCellImage.Organization + "/" + parsedCellImage.ImageName
+	cellImage := parsedCellImage.Registry + "/" + repository + ":" + parsedCellImage.ImageVersion
 
 	var spinner *util.Spinner = nil
 	if !silent {

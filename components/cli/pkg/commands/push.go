@@ -21,6 +21,7 @@ package commands
 import (
 	"bytes"
 	"crypto/sha256"
+	"encoding/base64"
 	"encoding/hex"
 	"errors"
 	"fmt"
@@ -43,31 +44,54 @@ import (
 // RunPush parses the cell image name to recognize the Cellery Registry (A Docker Registry), Organization and version
 // and pushes to the Cellery Registry
 func RunPush(cellImage string) {
-	err := pushImage(cellImage, "", "")
-	if err != nil {
-		if strings.Contains(err.Error(), "401") {
-			username, password, err := util.RequestCredentials()
-			if err != nil {
-				util.ExitWithErrorMessage("Failed to acquire credentials", err)
-			}
-			fmt.Println()
-
-			err = pushImage(cellImage, username, password)
-			if err != nil {
-				util.ExitWithErrorMessage("Failed to push image", err)
-			}
-		} else {
-			util.ExitWithErrorMessage("Failed to pull image", err)
-		}
-	}
-}
-
-func pushImage(cellImage string, username string, password string) error {
 	parsedCellImage, err := util.ParseImageTag(cellImage)
 	if err != nil {
 		util.ExitWithErrorMessage("Error occurred while parsing cell image", err)
 	}
+
+	// Reading the existing credentials
+	config := util.ReadUserConfig()
+	existingEncodedCredentials := config.Credentials[parsedCellImage.Registry]
+	existingCredentials, err := base64.StdEncoding.DecodeString(existingEncodedCredentials)
+	isCredentialsPresent := err == nil && strings.Contains(string(existingCredentials), ":")
+
+	if isCredentialsPresent {
+		existingCredentialsSplit := strings.Split(string(existingCredentials), ":")
+		username := existingCredentialsSplit[0]
+		password := existingCredentialsSplit[1]
+
+		// Pushing the image using the saved credentials
+		err = pushImage(parsedCellImage, username, password)
+		if err != nil {
+			util.ExitWithErrorMessage("Failed to push image", err)
+		}
+	} else {
+		// Pushing image without credentials
+		err = pushImage(parsedCellImage, "", "")
+		if err != nil {
+			if strings.Contains(err.Error(), "401") {
+				// Requesting the credentials since server responded with an Unauthorized status code
+				username, password, err := util.RequestCredentials()
+				if err != nil {
+					util.ExitWithErrorMessage("Failed to acquire credentials", err)
+				}
+				fmt.Println()
+
+				// Trying to push the image again with the provided credentials
+				err = pushImage(parsedCellImage, username, password)
+				if err != nil {
+					util.ExitWithErrorMessage("Failed to push image", err)
+				}
+			} else {
+				util.ExitWithErrorMessage("Failed to pull image", err)
+			}
+		}
+	}
+}
+
+func pushImage(parsedCellImage *util.CellImage, username string, password string) error {
 	repository := parsedCellImage.Organization + "/" + parsedCellImage.ImageName
+	cellImage := parsedCellImage.Registry + "/" + repository + ":" + parsedCellImage.ImageVersion
 
 	spinner := util.StartNewSpinner(fmt.Sprintf("Connecting to %s", util.Bold(parsedCellImage.Registry)))
 	defer func() {

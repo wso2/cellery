@@ -244,8 +244,6 @@ class CellDiagram extends React.Component {
             edges: edges
         };
 
-        // This.loader.current.style['visibility'] = 'visible';
-
         if (!this.network) {
             this.network = new vis.Network(this.dependencyGraph.current, graphData, CellDiagram.GRAPH_OPTIONS);
 

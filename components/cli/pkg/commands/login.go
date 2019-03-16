@@ -19,12 +19,14 @@
 package commands
 
 import (
-	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"strings"
 
+	"github.com/99designs/keyring"
 	"github.com/nokia/docker-registry-client/registry"
 
+	"github.com/cellery-io/sdk/components/cli/pkg/constants"
 	"github.com/cellery-io/sdk/components/cli/pkg/util"
 )
 
@@ -32,22 +34,29 @@ import (
 func RunLogin(registryURL string) {
 	fmt.Println("Logging into Registry: " + util.Bold(registryURL))
 
+	// Instantiating a native keyring
+	ring, err := keyring.Open(keyring.Config{
+		ServiceName: constants.CELLERY_HUB_KEYRING_NAME,
+	})
+	if err != nil {
+		util.ExitWithErrorMessage("Error occurred while logging in", err)
+	}
+
 	// Reading the existing credentials
-	config := util.ReadUserConfig()
-	existingEncodedCredentials := config.Credentials[registryURL]
-	existingCredentials, err := base64.StdEncoding.DecodeString(existingEncodedCredentials)
-	isCredentialsAlreadyPresent := err == nil && strings.Contains(string(existingCredentials), ":")
+	var registryCredentials = &util.RegistryCredentials{}
+	if err == nil {
+		ringItem, err := ring.Get(registryURL)
+		if err == nil && ringItem.Data != nil {
+			err = json.Unmarshal(ringItem.Data, registryCredentials)
+		}
+	}
+	isCredentialsAlreadyPresent := err == nil && registryCredentials.Username != "" &&
+		registryCredentials.Password != ""
 
-	var username string
-	var password string
 	if isCredentialsAlreadyPresent {
-		existingCredentialsSplit := strings.Split(string(existingCredentials), ":")
-		username = existingCredentialsSplit[0]
-		password = existingCredentialsSplit[1]
-
 		fmt.Println("Logging in with existing Credentials")
 	} else {
-		username, password, err = util.RequestCredentials()
+		registryCredentials.Username, registryCredentials.Password, err = util.RequestCredentials()
 		if err != nil {
 			util.ExitWithErrorMessage("Error occurred while reading Credentials", err)
 		}
@@ -56,7 +65,7 @@ func RunLogin(registryURL string) {
 	// Initiating a connection to Cellery Registry (to validate credentials)
 	fmt.Println()
 	spinner := util.StartNewSpinner("Logging into Cellery Registry " + registryURL)
-	_, err = registry.New("https://"+registryURL, username, password)
+	_, err = registry.New("https://"+registryURL, registryCredentials.Username, registryCredentials.Password)
 	if err != nil {
 		spinner.Stop(false)
 		if strings.Contains(err.Error(), "401") {
@@ -69,9 +78,15 @@ func RunLogin(registryURL string) {
 	if !isCredentialsAlreadyPresent {
 		// Saving the credentials
 		spinner.SetNewAction("Saving credentials")
-		encodedCredentials := base64.StdEncoding.EncodeToString([]byte(username + ":" + password))
-		config.Credentials[registryURL] = encodedCredentials
-		err = util.SaveUserConfig(config)
+		credentialsData, err := json.Marshal(registryCredentials)
+		if err != nil {
+			spinner.Stop(false)
+			util.ExitWithErrorMessage("Error occurred while saving Credentials", err)
+		}
+		err = ring.Set(keyring.Item{
+			Key:  registryURL,
+			Data: credentialsData,
+		})
 		if err != nil {
 			spinner.Stop(false)
 			util.ExitWithErrorMessage("Error occurred while saving Credentials", err)

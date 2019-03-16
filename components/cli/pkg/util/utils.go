@@ -23,7 +23,6 @@ import (
 	"bufio"
 	"bytes"
 	"crypto/tls"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -963,46 +962,4 @@ func ContainsInStringArray(array []string, item string) bool {
 		}
 	}
 	return false
-}
-
-// ReadUserConfig reads the configuration in the Cellery home or instantiates a default configuration if not present
-func ReadUserConfig() *UserConfig {
-	configFile := path.Join(UserHomeDir(), constants.CELLERY_HOME, constants.USER_CONFIG)
-
-	// Reading the configuration from config file
-	fileExists, err := FileExists(configFile)
-	var config *UserConfig
-	if err == nil && fileExists {
-		configurationFileContent, err := ioutil.ReadFile(configFile)
-		if err == nil {
-			config = &UserConfig{}
-			err = json.Unmarshal(configurationFileContent, config)
-			if err != nil {
-				config = nil
-			}
-		}
-	}
-
-	// Creating the default configuration if reading from config file failed
-	if config == nil {
-		config = &UserConfig{
-			Credentials: make(map[string]string),
-		}
-	}
-	return config
-}
-
-// SaveUserConfig writes the provided user configuration into the config file
-func SaveUserConfig(config *UserConfig) error {
-	configFile := path.Join(UserHomeDir(), constants.CELLERY_HOME, constants.USER_CONFIG)
-
-	serializedConfig, err := json.Marshal(config)
-	if err != nil {
-		return err
-	}
-	err = ioutil.WriteFile(configFile, serializedConfig, 0600)
-	if err != nil {
-		return err
-	}
-	return nil
 }

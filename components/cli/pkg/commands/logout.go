@@ -21,6 +21,9 @@ package commands
 import (
 	"fmt"
 
+	"github.com/99designs/keyring"
+
+	"github.com/cellery-io/sdk/components/cli/pkg/constants"
 	"github.com/cellery-io/sdk/components/cli/pkg/util"
 )
 
@@ -28,13 +31,31 @@ import (
 func RunLogout(registryURL string) {
 	fmt.Print("Logging out from Registry: " + util.Bold(registryURL))
 
-	config := util.ReadUserConfig()
+	// Instantiating a native keyring
+	ring, err := keyring.Open(keyring.Config{
+		ServiceName: constants.CELLERY_HUB_KEYRING_NAME,
+	})
+	if err != nil {
+		util.ExitWithErrorMessage("Error occurred while logging out", err)
+	}
 
-	if config.Credentials[registryURL] == "" {
-		fmt.Println("\n\nYou have not logged into Registry: " + util.Bold(registryURL))
+	// Checking if the credentials are present
+	keyList, err := ring.Keys()
+	if err != nil {
+		util.ExitWithErrorMessage("Error occurred while logging out", err)
+	}
+	var isCredentialsPresent bool
+	for _, key := range keyList {
+		if key == registryURL {
+			isCredentialsPresent = true
+			break
+		}
+	}
+
+	if !isCredentialsPresent {
+		fmt.Printf("\nYou have not logged into %s Registry\n", util.Bold(registryURL))
 	} else {
-		delete(config.Credentials, registryURL)
-		err := util.SaveUserConfig(config)
+		err = ring.Remove(registryURL)
 		if err != nil {
 			util.ExitWithErrorMessage("Error occurred while removing Credentials", err)
 		}

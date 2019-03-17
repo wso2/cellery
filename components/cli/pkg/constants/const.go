@@ -72,6 +72,9 @@ const GCP_SQL_DISK_SIZE_GB = 20
 const ZIP_BALLERINA_SOURCE = "src"
 const ZIP_ARTIFACTS = "artifacts"
 
+const CELLERY_HOME_ENV_VAR = "CELLERY_HOME"
+const CELLERY_HOME_DOCS_VIEW_DIR = "docs-view"
+
 const CELLERY_HOME = ".cellery"
 const GCP = "gcp"
 const ARTIFACTS = "artifacts"

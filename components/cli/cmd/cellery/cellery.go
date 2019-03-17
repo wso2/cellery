@@ -54,6 +54,7 @@ func newCliCommand() *cobra.Command {
 		newSetupCommand(),
 		newExtractResourcesCommand(),
 		newInspectCommand(),
+		newViewCommand(),
 	)
 	return cmd
 }

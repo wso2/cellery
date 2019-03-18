@@ -25,6 +25,7 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	"github.com/manifoldco/promptui"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
@@ -962,4 +963,16 @@ func ContainsInStringArray(array []string, item string) bool {
 		}
 	}
 	return false
+}
+
+func GetYesOrNoFromUser(question string) (bool, error) {
+	prompt := promptui.Select{
+		Label: question,
+		Items: []string{"Yes", "No"},
+	}
+	_, result, err := prompt.Run()
+	if err != nil {
+		return false, fmt.Errorf("Prompt failed %v\n", err)
+	}
+	return result == "Yes", nil
 }

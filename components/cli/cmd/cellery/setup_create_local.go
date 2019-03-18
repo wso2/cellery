@@ -24,18 +24,15 @@ import (
 	"github.com/cellery-io/sdk/components/cli/pkg/commands"
 )
 
-func newSetupCommand() *cobra.Command {
+func newSetupCreateLocalCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "setup",
-		Short: "Setup cellery runtime",
+		Use:   "local",
+		Short: "Create a local Cellery runtime",
 		Args:  cobra.NoArgs,
 		Run: func(cmd *cobra.Command, args []string) {
-			commands.RunSetup()
+			commands.RunSetupCreateLocal()
 		},
-		Example: "  cellery setup",
+		Example: "  cellery setup create local",
 	}
-	cmd.AddCommand(
-		newSetupCreateCommand(),
-	)
 	return cmd
 }

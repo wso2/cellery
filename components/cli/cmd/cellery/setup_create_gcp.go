@@ -24,19 +24,15 @@ import (
 	"github.com/cellery-io/sdk/components/cli/pkg/commands"
 )
 
-func newSetupCommand() *cobra.Command {
+func newSetupCreateGcpCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "setup",
-		Short: "Setup cellery runtime",
+		Use:   "gcp",
+		Short: "Create a Cellery runtime in gcp",
 		Args:  cobra.NoArgs,
 		Run: func(cmd *cobra.Command, args []string) {
-			commands.RunSetup()
+			commands.RunSetupCreateGcp()
 		},
-		Example: "  cellery setup",
+		Example: "  cellery setup create gcp",
 	}
-	cmd.AddCommand(
-		newSetupCreateCommand(),
-		newSetupManageCommand(),
-	)
 	return cmd
 }

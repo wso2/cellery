@@ -22,12 +22,14 @@ import (
 	"fmt"
 	"github.com/cellery-io/sdk/components/cli/pkg/constants"
 	"github.com/cellery-io/sdk/components/cli/pkg/util"
-	"github.com/fatih/color"
 	"github.com/manifoldco/promptui"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"time"
 )
 
-func createEnvironment() error {
-	bold := color.New(color.Bold).SprintFunc()
+func manageLocal() error {
 	cellTemplate := &promptui.SelectTemplates{
 		Label:    "{{ . }}",
 		Active:   "\U000027A4 {{ .| bold }}",
@@ -36,8 +38,8 @@ func createEnvironment() error {
 	}
 
 	cellPrompt := promptui.Select{
-		Label:     util.YellowBold("?") + " Select an environment to be installed",
-		Items:     getCreateEnvironmentList(),
+		Label:     util.YellowBold("?") + " " + getManageLabel(),
+		Items:     getManageEnvOptions(),
 		Templates: cellTemplate,
 	}
 	_, value, err := cellPrompt.Run()
@@ -46,32 +48,42 @@ func createEnvironment() error {
 	}
 
 	switch value {
-	case constants.CELLERY_CREATE_LOCAL:
+	case constants.CELLERY_MANAGE_STOP:
 		{
-			createLocal()
+			spinner := util.StartNewSpinner("Stopping Cellery Runtime")
+			defer func() {
+				spinner.Stop(true)
+			}()
+			util.ExecuteCommand(exec.Command(constants.VBOX_MANAGE, "controlvm", constants.VM_NAME, "acpipowerbutton"), "Error stopping VM")
 		}
-	case constants.CELLERY_CREATE_GCP:
+	case constants.CELLERY_MANAGE_START:
 		{
-			createGcp()
+			util.ExecuteCommand(exec.Command(constants.VBOX_MANAGE, "startvm", constants.VM_NAME, "--type", "headless"), "Error starting VM")
+		}
+	case constants.CELLERY_MANAGE_CLEANUP:
+		{
+			cleanupLocal()
 		}
 	default:
 		{
-			RunSetup()
+			manageEnvironment()
 		}
 	}
-
-	fmt.Printf(util.GreenBold("\n\U00002714") + " Successfully installed Cellery runtime.\n")
-	fmt.Println()
-	fmt.Println(bold("What's next ?"))
-	fmt.Println("======================")
-	fmt.Println("To create your first project, execute the command: ")
-	fmt.Println("  $ cellery init ")
 	return nil
 }
 
-func getCreateEnvironmentList() []string {
-	if isVmInstalled() {
-		return []string{constants.CELLERY_CREATE_GCP, constants.CELLERY_SETUP_BACK}
+func cleanupLocal() error {
+	spinner := util.StartNewSpinner("Removing Cellery Runtime")
+	defer func() {
+		spinner.Stop(true)
+	}()
+	if isVmRuning() {
+		util.ExecuteCommand(exec.Command(constants.VBOX_MANAGE, "controlvm", constants.VM_NAME, "acpipowerbutton"), "Error stopping VM")
 	}
-	return []string{constants.CELLERY_CREATE_LOCAL, constants.CELLERY_CREATE_GCP, constants.CELLERY_SETUP_BACK}
+	for isVmRuning() {
+		time.Sleep(2 * time.Second)
+	}
+	util.ExecuteCommand(exec.Command(constants.VBOX_MANAGE, "unregistervm", constants.VM_NAME, "--delete"), "Error deleting VM")
+	os.RemoveAll(filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.VM, constants.AWS_S3_ITEM_VM))
+	return nil
 }

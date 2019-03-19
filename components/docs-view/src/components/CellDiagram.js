@@ -42,10 +42,6 @@ class CellDiagram extends React.Component {
 
     static GRAPH_OPTIONS = {
         nodes: {
-            shapeProperties: {
-                borderRadius: 10
-            },
-            borderWidth: 1,
             size: 40,
             font: {
                 size: 15,
@@ -137,7 +133,7 @@ class CellDiagram extends React.Component {
         const getGroupNodesIds = (group) => {
             const output = [];
             nodes.get({
-                filter: function(item) {
+                filter: function (item) {
                     if (item.group === group) {
                         output.push(item.id);
                     }
@@ -175,6 +171,13 @@ class CellDiagram extends React.Component {
             const groupNodes = getGroupNodesIds(groupId);
             const nodePositions = this.network.getPositions(groupNodes);
             return Object.values(nodePositions);
+        };
+
+        const findPoint = (x, y, angle, distance) => {
+            let result = {};
+            result.x = Math.round(Math.cos(angle * Math.PI / 180) * distance + x);
+            result.y = Math.round(Math.sin(angle * Math.PI / 180) * distance + y);
+            return result;
         };
 
         if (availableComponents) {
@@ -230,6 +233,14 @@ class CellDiagram extends React.Component {
         const nodes = new vis.DataSet(cellNodes);
         const edges = new vis.DataSet(dataEdges);
         nodes.add(componentNodes);
+        nodes.add({
+            id: `${focusedCell}:${CellDiagram.NodeType.GATEWAY}`,
+            label: CellDiagram.NodeType.GATEWAY,
+            shape: "image",
+            image: "./gateway.svg",
+            group: CellDiagram.NodeType.GATEWAY,
+            fixed: true
+        });
 
         const graphData = {
             nodes: nodes,
@@ -283,6 +294,18 @@ class CellDiagram extends React.Component {
                             updatedNodes.push(allNodes[nodeId]);
                         }
                     }
+                }
+
+                // Placing gateway node
+                const gatewayNode = nodes.get(`${focusedCell}:${CellDiagram.NodeType.GATEWAY}`);
+                const gatewayPoint = findPoint(centerPoint.x, centerPoint.y, 90, size * Math.cos(180 / 8));
+
+                if (gatewayNode) {
+                    gatewayNode.mass = 0.00000000000000001;
+                    const x = gatewayPoint.x;
+                    const y = gatewayPoint.y;
+                    this.network.moveNode(gatewayNode.id, x, y);
+                    updatedNodes.push(gatewayNode);
                 }
 
                 updatedNodes.push(focusedNode);

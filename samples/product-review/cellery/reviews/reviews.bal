@@ -11,6 +11,8 @@
 
 import ballerina/io;
 import celleryio/cellery;
+import myorg/products;
+import myorg/products;
 
 //Reviews Component
 cellery:Component reviewsComponent = {
@@ -78,5 +80,3 @@ public function build(string orgName, string imageName, string imageVersion) {
     reviewCell.exposeGlobal(reviewsComponent);
     _ = cellery:createImage(reviewCell, orgName, imageName, imageVersion);
 }
-
-//TODO: Implement run method

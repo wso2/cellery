@@ -19,6 +19,8 @@ public class Component {
     List<API> apis;
     List<TCP> tcpList;
     List<GRPC> grpcList;
+    List<Web> webList;
+    List<OIDC> oidcList;
     String source;
     String service;
     String protocol;
@@ -31,6 +33,8 @@ public class Component {
         apis = new ArrayList<>();
         tcpList = new ArrayList<>();
         grpcList = new ArrayList<>();
+        webList = new ArrayList<>();
+        oidcList = new ArrayList<>();
         containerPortToServicePortMap = new HashMap<>();
         replicas = 1;
     }
@@ -45,6 +49,14 @@ public class Component {
 
     public void addGRPC(GRPC grpc) {
         this.grpcList.add(grpc);
+    }
+
+    public void addWeb(Web web) {
+        this.webList.add(web);
+    }
+
+    public void addOIDC(OIDC oidc) {
+        this.oidcList.add(oidc);
     }
 
     public void addPorts(int containerMap, int servicePort) {

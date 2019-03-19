@@ -62,6 +62,12 @@ public type GRPC record{
     TCPIngress ingress;
 };
 
+public type Web record{
+    string targetComponent;
+    WebProperties properties;
+    WebIngress ingress;
+};
+
 public type Resiliency record {
     RetryConfig retryConfig?;
     FailoverConfig failoverConfig?;
@@ -105,7 +111,7 @@ public type Component record {
     string name;
     ImageSource source;
     int replicas = 1;
-    map<TCPIngress|HttpApiIngress|GRPCIngress> ingresses?;
+    map<TCPIngress|HttpApiIngress|GRPCIngress|WebIngress> ingresses?;
     map<string> labels?;
     map<ParamValue> parameters?;
     AutoScaling autoscaling?;
@@ -144,6 +150,32 @@ public type HttpApiIngress object {
     }
 };
 
+public type WebIngress object {
+    public int port;
+    public string uri;
+
+    public function __init(int port, string uri = "/") {
+        self.port = port;
+        self.uri = uri;
+    }
+};
+
+public const string TLS_REQUIRED = "REQUIRED";
+public const string TLS_NONE = "NONE";
+
+public type TLS "REQUIRED"|"NONE";
+
+public type HttpProperties record {
+    boolean requireAuthentication = false;
+};
+
+public type WebProperties record {
+    string vhost;
+    string context = "/";
+    TLS tls = TLS_NONE;
+    boolean requireAuthentication = false;
+};
+
 public type ParamValue abstract object {
     public string|int|boolean|float? value;
 };
@@ -165,11 +197,19 @@ public type Secret object {
     }
 };
 
+public const string GATEWAY_ENVOY = "Envoy";
+public const string GATEWAY_MICRO_GATEWAY = "MicroGateway";
+
+public type GatewayType "Envoy"|"MicroGateway";
+
 public type CellImage object {
+    GatewayType gatewayType = GATEWAY_ENVOY;
+    string hostname = "";
     public map<Component> components = {};
     public map<API> apis = {};
     public map<TCP> tcp = {};
     public map<GRPC> grpc = {};
+    public map<Web> web = {};
 
     public function addComponent(Component component) {
         self.components[component.name] = component;
@@ -178,7 +218,8 @@ public type CellImage object {
     # Expose the all the ingresses in a component via Cell Gateway
     #
     # + component - The component record
-    public function exposeLocal(Component component) {
+    # + properties - HTTP configurations
+    public function exposeLocal(Component component, HttpProperties? properties = ()) {
         foreach var (name, ingressTemp) in component.ingresses {
             if (ingressTemp is HttpApiIngress) {
                 self.apis[name] = {
@@ -205,8 +246,10 @@ public type CellImage object {
     #
     # + component - The component record
     # + ingressName - Name of the ingress to be exposed
-    public function exposeIngressLocal(Component component, string ingressName) {
-        TCPIngress|HttpApiIngress|GRPCIngress? ingress = component.ingresses[ingressName];
+    # + properties - HTTP configurations
+    public function exposeIngressLocal(Component component, string ingressName, HttpProperties? properties
+        = ()) {
+        TCPIngress|HttpApiIngress|GRPCIngress|WebIngress? ingress = component.ingresses[ingressName];
         if (ingress is HttpApiIngress) {
             self.apis[ingressName] = {
                 targetComponent: component.name,
@@ -218,8 +261,7 @@ public type CellImage object {
                 targetComponent: component.name,
                 ingress: ingress
             };
-        }
-        else if (ingress is TCPIngress){
+        } else if (ingress is TCPIngress){
             self.tcp[ingressName] = {
                 targetComponent: component.name,
                 ingress: ingress
@@ -234,14 +276,30 @@ public type CellImage object {
     # Expose the all the HttpApiIngress ingresses in a component via Global Gateway
     #
     # + component - The component record
-    public function exposeGlobal(Component component) {
+    # + properties - HTTP/Web configurations
+    public function exposeGlobal(Component component, WebProperties|HttpProperties? properties = ()) {
         foreach var (name, ingressTemp) in component.ingresses {
             if (ingressTemp is HttpApiIngress) {
+                //TODO: Handle HTTP properties.
                 self.apis[name] = {
                     targetComponent: component.name,
                     ingress: ingressTemp,
                     global: true
                 };
+            } else if (ingressTemp is WebIngress){
+                if (!(properties is WebProperties)) {
+                    error err = error("Unable to expose ingress " + name + ". Requried WebProperties not provided.");
+                    panic err;
+                }
+                self.web[name] = {
+                    targetComponent: component.name,
+                    ingress: ingressTemp,
+                    properties: <WebProperties>properties,
+                    global: true
+                };
+            } else {
+                error err = error("Unable to expose ingress " + name + ". Unsupported ingress type.");
+                panic err;
             }
         }
     }
@@ -250,8 +308,10 @@ public type CellImage object {
     #
     # + component - The component record
     # + ingressName - Name of the ingress to be exposed
-    public function exposeIngressGlobal(Component component, string ingressName) {
-        TCPIngress|HttpApiIngress|GRPCIngress? ingress = component.ingresses[ingressName];
+    # + properties - HTTP/Web configurations
+    public function exposeIngressGlobal(Component component, string ingressName, WebProperties|HttpProperties?
+        properties = ()) {
+        TCPIngress|HttpApiIngress|GRPCIngress|WebIngress? ingress = component.ingresses[ingressName];
         if (ingress is HttpApiIngress) {
             self.apis[ingressName] = {
                 targetComponent: component.name,
@@ -270,8 +330,23 @@ public type CellImage object {
                 ingress: ingress
             };
         }
+        else if (ingress is WebIngress){
+            if ((properties is WebProperties)) {
+                self.hostname = properties.vhost;
+                self.web[ingressName] = {
+                    targetComponent: component.name,
+                    ingress: ingress,
+                    properties: <WebProperties>properties,
+                    global: true
+                };
+            } else {
+                error err = error("Unable to expose ingress " + ingressName + ". Requried WebProperties not provided.");
+                panic err;
+
+            }
+        }
         else {
-            error err = error("Ingress " + ingressName + " not found in the component " + component.name + ".");
+            error err = error("Unable to expose ingress " + ingressName + ". Unsupported ingress type.");
             panic err;
         }
     }

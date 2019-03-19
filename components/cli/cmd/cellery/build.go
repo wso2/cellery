@@ -50,7 +50,7 @@ func newBuildCommand() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			commands.RunBuild(args[1], args[0])
 		},
-		Example: "  cellery build employee.bal cellery-samples/employee:1.0.0",
+		Example: "  cellery build web.bal cellery-samples/employee:1.0.0",
 	}
 	return cmd
 }

@@ -28,16 +28,16 @@ import io.cellery.models.AutoScalingPolicy;
 import io.cellery.models.AutoScalingResourceMetric;
 import io.cellery.models.AutoScalingSpec;
 import io.cellery.models.Cell;
-import io.cellery.models.CellCache;
+import io.cellery.models.CellImage;
 import io.cellery.models.CellSpec;
 import io.cellery.models.Component;
-import io.cellery.models.ComponentHolder;
 import io.cellery.models.GRPC;
 import io.cellery.models.GatewaySpec;
 import io.cellery.models.GatewayTemplate;
 import io.cellery.models.ServiceTemplate;
 import io.cellery.models.ServiceTemplateSpec;
 import io.cellery.models.TCP;
+import io.cellery.models.Web;
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
 import io.fabric8.kubernetes.api.model.ContainerPort;
 import io.fabric8.kubernetes.api.model.ContainerPortBuilder;
@@ -67,12 +67,10 @@ import java.io.PrintStream;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
@@ -110,24 +108,25 @@ public class CreateImage extends BlockingNativeCallableUnit {
     private static final MustacheFactory mustacheFactory = new DefaultMustacheFactory();
     private static final String OUTPUT_DIRECTORY = System.getProperty("user.dir") + File.separator + TARGET;
 
-    private ComponentHolder componentHolder;
+    private CellImage cellImage;
     private PrintStream out = System.out;
 
     public void execute(Context ctx) {
-        componentHolder = new ComponentHolder();
-        String cellVersion = ctx.getStringArgument(2);
-        String orgName = ctx.getStringArgument(0);
-        String cellName = getValidName(ctx.getStringArgument(1));
-        CellCache cellCache = CellCache.getInstance();
+        cellImage = new CellImage();
+        // Read orgName,imageName and version parameters.
+        cellImage.setOrgName(ctx.getStringArgument(0));
+        cellImage.setCellName(getValidName(ctx.getStringArgument(1)));
+        cellImage.setCellVersion(ctx.getStringArgument(2));
+
+        // Read and parse cellImage object
         final BMap refArgument = (BMap) ctx.getNullableRefArgument(0);
         processComponents((BMap) refArgument.getMap().get("components"));
         processAPIs((BMap) refArgument.getMap().get("apis"));
         processTCP((BMap) refArgument.getMap().get("tcp"));
         processGRPC((BMap) refArgument.getMap().get("grpc"));
-        Set<Component> components = new HashSet<>(componentHolder.getComponentNameToComponentMap().values());
-        cellCache.setCellNameToComponentMap(cellName, components);
-        generateCell(orgName, cellName, cellVersion);
-        generateCellReference(cellName, cellVersion);
+        processWeb((BMap) refArgument.getMap().get("web"));
+        generateCell();
+        generateCellReference();
         ctx.setReturnValues(new BBoolean(true));
     }
 
@@ -155,7 +154,7 @@ public class CreateImage extends BlockingNativeCallableUnit {
             if (componentValues.containsKey("autoscaling")) {
                 processAutoScalePolicy(((BMap<?, ?>) componentValues.get("autoscaling")).getMap(), component);
             }
-            componentHolder.addComponent(component);
+            cellImage.addComponent(component);
         });
     }
 
@@ -228,7 +227,7 @@ public class CreateImage extends BlockingNativeCallableUnit {
                 apiDefinitions.add(apiDefinition);
             }
             api.setDefinitions(apiDefinitions);
-            Component component = componentHolder.getComponent(componentName);
+            Component component = cellImage.getComponent(componentName);
             component.setProtocol(PROTOCOL_HTTP);
             api.setBackend(component.getService());
             component.addApi(api);
@@ -243,7 +242,7 @@ public class CreateImage extends BlockingNativeCallableUnit {
             LinkedHashMap<?, ?> ingress = ((BMap<?, ?>) tcpValues.get("ingress")).getMap();
             tcp.setPort((int) ((BInteger) ingress.get("port")).intValue());
             tcp.setBackendPort((int) ((BInteger) ingress.get("targetPort")).intValue());
-            Component component = componentHolder.getComponent(componentName);
+            Component component = cellImage.getComponent(componentName);
             component.setProtocol(PROTOCOL_TCP);
             tcp.setBackendHost(component.getService());
             component.addTCP(tcp);
@@ -262,17 +261,29 @@ public class CreateImage extends BlockingNativeCallableUnit {
             if (!protoFile.isEmpty()) {
                 copyResourceToTarget(protoFile);
             }
-            Component component = componentHolder.getComponent(componentName);
+            Component component = cellImage.getComponent(componentName);
             component.setProtocol(PROTOCOL_GRPC);
             grpc.setBackendHost(component.getService());
             component.addGRPC(grpc);
         });
     }
 
+    private void processWeb(BMap<?, ?> webMap) {
+        webMap.getMap().forEach((key, value) -> {
+            LinkedHashMap grpcValues = ((BMap) value).getMap();
+            Web web = new Web();
+            String componentName = ((BString) grpcValues.get("targetComponent")).stringValue();
+            LinkedHashMap<?, ?> ingress = ((BMap<?, ?>) grpcValues.get("ingress")).getMap();
+            web.setPort((int) ((BInteger) ingress.get("port")).intValue());
+            Component component = cellImage.getComponent(componentName);
+            component.setProtocol(PROTOCOL_HTTP);
+            component.addWeb(web);
+        });
+    }
 
-    private void generateCell(String orgName, String name, String version) {
+    private void generateCell() {
         List<Component> components =
-                new ArrayList<>(componentHolder.getComponentNameToComponentMap().values());
+                new ArrayList<>(cellImage.getComponentNameToComponentMap().values());
         GatewaySpec spec = new GatewaySpec();
         List<ServiceTemplate> serviceTemplateList = new ArrayList<>();
 
@@ -341,14 +352,15 @@ public class CreateImage extends BlockingNativeCallableUnit {
         CellSpec cellSpec = new CellSpec();
         cellSpec.setGatewayTemplate(gatewayTemplate);
         cellSpec.setServicesTemplates(serviceTemplateList);
-        ObjectMeta objectMeta = new ObjectMetaBuilder().withName(getValidName(name))
-                .addToAnnotations(ANNOTATION_CELL_IMAGE_ORG, orgName)
-                .addToAnnotations(ANNOTATION_CELL_IMAGE_NAME, name)
-                .addToAnnotations(ANNOTATION_CELL_IMAGE_VERSION, version)
+        ObjectMeta objectMeta = new ObjectMetaBuilder().withName(getValidName(cellImage.getCellName()))
+                .addToAnnotations(ANNOTATION_CELL_IMAGE_ORG, cellImage.getOrgName())
+                .addToAnnotations(ANNOTATION_CELL_IMAGE_NAME, cellImage.getCellName())
+                .addToAnnotations(ANNOTATION_CELL_IMAGE_VERSION, cellImage.getCellVersion())
                 .build();
         Cell cell = new Cell(objectMeta, cellSpec);
 
-        String targetPath = OUTPUT_DIRECTORY + File.separator + "cellery" + File.separator + name + YAML;
+        String targetPath =
+                OUTPUT_DIRECTORY + File.separator + "cellery" + File.separator + cellImage.getCellName() + YAML;
         try {
             writeToFile(toYaml(cell), targetPath);
         } catch (IOException e) {
@@ -358,20 +370,18 @@ public class CreateImage extends BlockingNativeCallableUnit {
 
     /**
      * Generate a Cell Reference that can be used by other cells.
-     *
-     * @param name The name of the Cell
      */
-    private void generateCellReference(String name, String cellVersion) {
-        String ballerinaPathName = name.replace("-", "_").toLowerCase(Locale.ENGLISH);
+    private void generateCellReference() {
+        String ballerinaPathName = cellImage.getCellName().replace("-", "_").toLowerCase(Locale.ENGLISH);
 
         // Generating the context
         Map<String, Object> context = new HashMap<>();
-        context.put(CelleryConstants.CELL_REFERENCE_TEMPLATE_CONTEXT_NAME, name);
-        context.put(CelleryConstants.CELL_REFERENCE_TEMPLATE_CONTEXT_VERSION, cellVersion);
+        context.put(CelleryConstants.CELL_REFERENCE_TEMPLATE_CONTEXT_NAME, cellImage.getCellName());
+        context.put(CelleryConstants.CELL_REFERENCE_TEMPLATE_CONTEXT_VERSION, cellImage.getCellVersion());
         context.put(CelleryConstants.CELL_REFERENCE_TEMPLATE_CONTEXT_GATEWAY_PORT, DEFAULT_GATEWAY_PORT);
         context.put(CelleryConstants.CELL_REFERENCE_TEMPLATE_CONTEXT_GATEWAY_PROTOCOL, DEFAULT_GATEWAY_PROTOCOL);
         context.put(CelleryConstants.CELL_REFERENCE_TEMPLATE_CONTEXT_COMPONENTS,
-                componentHolder.getComponentNameToComponentMap().values());
+                cellImage.getComponentNameToComponentMap().values());
         context.put(CelleryConstants.CELL_REFERENCE_TEMPLATE_CONTEXT_HANDLE_API_NAME,
                 (Function<Object, Object>) string -> convertToTitleCase((String) string, "/|-"));
         context.put(CelleryConstants.CELL_REFERENCE_TEMPLATE_CONTEXT_HANDLE_TYPE_NAME,

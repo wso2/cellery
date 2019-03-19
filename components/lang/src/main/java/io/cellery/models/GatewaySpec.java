@@ -37,11 +37,18 @@ public class GatewaySpec {
     List<TCP> tcp;
     private @Singular("grpc")
     List<GRPC> grpc;
+    private @Singular("oidc")
+    List<GRPC> oidc;
+
+    private String type;
+    private String hostName;
+    private String tlsSecret;
 
     public GatewaySpec() {
         http = new ArrayList<>();
         tcp = new ArrayList<>();
         grpc = new ArrayList<>();
+        oidc = new ArrayList<>();
     }
 
     public void addHttpAPI(List<API> api) {

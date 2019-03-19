@@ -34,8 +34,7 @@ import (
 func RunView(cellImage string) {
 	celleryHome := os.Getenv(constants.CELLERY_HOME_ENV_VAR)
 	celleryHomeDocsViewDir := path.Join(celleryHome, constants.CELLERY_HOME_DOCS_VIEW_DIR)
-
-	const errorMessage = "Error occurred while generating Docs View"
+	errorMessage := "Error occurred while generating Docs View"
 
 	// Making a copy of the Docs Viewer
 	docsViewDir, err := ioutil.TempDir("", "cellery-docs-view")
@@ -52,7 +51,7 @@ func RunView(cellImage string) {
 	if err != nil {
 		util.ExitWithErrorMessage("Error occurred while parsing cell image", err)
 	}
-	cellImageFile := filepath.Join(util.UserHomeDir(), ".cellery", "repo", parsedCellImage.Organization,
+	cellImageFile := filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, "repo", parsedCellImage.Organization,
 		parsedCellImage.ImageName, parsedCellImage.ImageVersion, parsedCellImage.ImageName+constants.CELL_IMAGE_EXT)
 
 	// Create temp directory
@@ -76,8 +75,22 @@ func RunView(cellImage string) {
 		util.ExitWithErrorMessage("Error occurred while unpacking Cell Image", err)
 	}
 
+	metadataFileContent, err := ioutil.ReadFile(filepath.Join(tempPath, "artifacts", "cellery", "metadata.json"))
+	if err != nil {
+		util.ExitWithErrorMessage("Error occurred while reading Cell metadata", err)
+	}
+
+	docsViewData := "window.__CELL_METADATA__ = " + string(metadataFileContent) + ";"
+	err = ioutil.WriteFile(filepath.Join(docsViewDir, "data", "cell.js"), []byte(docsViewData), 0666)
+	if err != nil {
+		util.ExitWithErrorMessage("Error occurred while creating Cell view", err)
+	}
+
 	// Opening browser
 	docsViewIndexFile := path.Join(docsViewDir, "index.html")
-	_ = util.OpenBrowser(docsViewIndexFile)
-	fmt.Println("Docs Viewer: file://" + docsViewIndexFile)
+	fmt.Printf("Cell Image Viewer: file://%s\n\n", docsViewIndexFile)
+	err = util.OpenBrowser(docsViewIndexFile)
+	if err != nil {
+		util.ExitWithErrorMessage("Error occurred while opening the browser", err)
+	}
 }

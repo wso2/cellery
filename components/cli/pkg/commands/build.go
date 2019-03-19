@@ -251,7 +251,7 @@ func generateMetaData(cellImage *util.CellImage, targetDir string) {
 			// Create temp directory
 			currentTime := time.Now()
 			timestamp := currentTime.Format("27065102350415")
-			tempPath := filepath.Join(util.UserHomeDir(), ".cellery", "tmp", timestamp)
+			tempPath := filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, "tmp", timestamp)
 			err = util.CreateDir(tempPath)
 			if err != nil {
 				util.ExitWithErrorMessage(errorMessage, err)

@@ -26,5 +26,7 @@ then
     exit -1
 fi
 
-sudo cp -r build ${CELLERY_HOME}/docs-view
+sudo rm -rf ${CELLERY_HOME}/docs-view
+sudo mkdir -p ${CELLERY_HOME}/docs-view
+sudo cp -r ./build/* ${CELLERY_HOME}/docs-view
 echo Docs View Installed

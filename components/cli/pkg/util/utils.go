@@ -981,17 +981,15 @@ func GetYesOrNoFromUser(question string) (bool, error) {
 func OpenBrowser(url string) error {
 	var cmd *exec.Cmd
 	switch runtime.GOOS {
-	case "linux":
 	case "openbsd":
+		fallthrough
+	case "linux":
 		cmd = exec.Command("xdg-open", url)
-		break
 	case "darwin":
 		cmd = exec.Command("open", url)
-		break
 	case "windows":
 		r := strings.NewReplacer("&", "^&")
 		cmd = exec.Command("cmd", "/c", "start", r.Replace(url))
-		break
 	}
 	if cmd != nil {
 		var stdout, stderr bytes.Buffer

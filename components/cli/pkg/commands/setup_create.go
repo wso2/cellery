@@ -42,7 +42,7 @@ func createEnvironment() error {
 	}
 	_, value, err := cellPrompt.Run()
 	if err != nil {
-		return fmt.Errorf("Failed to install environment: %v", err)
+		return fmt.Errorf("Failed to select an option: %v", err)
 	}
 
 	switch value {

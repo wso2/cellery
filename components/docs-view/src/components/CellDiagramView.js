@@ -20,9 +20,7 @@ import CellDiagram from "./CellDiagram";
 import React from "react";
 import * as PropTypes from "prop-types";
 
-
 class CellDiagramView extends React.Component {
-
 
     constructor(props) {
         super(props);

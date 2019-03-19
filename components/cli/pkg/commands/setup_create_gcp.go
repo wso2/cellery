@@ -44,6 +44,37 @@ func RunSetupCreateGcp() {
 }
 
 func createGcp() error {
+	var addGlobalGateway bool
+	var addObservability bool
+
+	addGlobalGateway, err := util.GetYesOrNoFromUser("Add Global Gateway")
+	if err != nil {
+		fmt.Printf("Error while creating VM location: %v", err)
+		os.Exit(1)
+	}
+	if addGlobalGateway {
+		addObservability, err = util.GetYesOrNoFromUser("Add Observability")
+	}
+
+	if !addGlobalGateway && !addObservability {
+		// Todo - create complete gcp setup
+		createCompleteGcpRuntime()
+	}
+
+	if addGlobalGateway && !addObservability {
+		// Todo - create gcp setup with global gateway
+		createCompleteGcpRuntime()
+	}
+
+	if addGlobalGateway && addObservability {
+		// Todo - create gcp setup with globl gateway and observability
+		createCompleteGcpRuntime()
+	}
+	return nil
+}
+
+
+func createCompleteGcpRuntime() error {
 	// Backup artifacts folder
 	artiFactsBackupExist, errBackupDir := util.FileExists(filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP, constants.ARTIFACTS_OLD))
 	if errBackupDir == nil {

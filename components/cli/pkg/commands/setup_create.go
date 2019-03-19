@@ -42,7 +42,7 @@ func createEnvironment() error {
 	}
 	_, value, err := cellPrompt.Run()
 	if err != nil {
-		return fmt.Errorf("Failed to install environment: %v", err)
+		return fmt.Errorf("Failed to select an option: %v", err)
 	}
 
 	switch value {
@@ -67,4 +67,11 @@ func createEnvironment() error {
 	fmt.Println("To create your first project, execute the command: ")
 	fmt.Println("  $ cellery init ")
 	return nil
+}
+
+func getCreateEnvironmentList() []string {
+	if isVmInstalled() {
+		return []string{constants.CELLERY_CREATE_GCP, constants.CELLERY_SETUP_BACK}
+	}
+	return []string{constants.CELLERY_CREATE_LOCAL, constants.CELLERY_CREATE_GCP, constants.CELLERY_SETUP_BACK}
 }

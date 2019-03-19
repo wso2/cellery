@@ -275,6 +275,16 @@ class CellDiagram extends React.Component {
                 };
             });
 
+            this.network.on("afterDrawing", (ctx) => {
+                const centerPoint = getPolygonCentroid(getGroupNodePositions(CellDiagram.NodeType.COMPONENT));
+                const polygonRadius = getDistance(getGroupNodePositions(CellDiagram.NodeType.COMPONENT), centerPoint);
+                const size = polygonRadius + spacing;
+                const focusCellLabelPoint = findPoint(centerPoint.x, centerPoint.y, 270, size * Math.cos(180 / 8));
+                ctx.font = "bold 1.5rem Arial";
+                ctx.textAlign = "center";
+                ctx.fillText(focusedCell, focusCellLabelPoint.x, focusCellLabelPoint.y + 20);
+            });
+
             this.network.on("stabilizationIterationsDone", () => {
                 const centerPoint = getPolygonCentroid(getGroupNodePositions(CellDiagram.NodeType.COMPONENT));
                 const polygonRadius = getDistance(getGroupNodePositions(CellDiagram.NodeType.COMPONENT),
@@ -283,6 +293,7 @@ class CellDiagram extends React.Component {
 
                 const focusedNode = nodes.get(focusedCell);
                 focusedNode.size = size;
+                focusedNode.label = undefined;
                 focusedNode.fixed = true;
                 focusedNode.interaction = {
                     selectable: false,
@@ -305,7 +316,6 @@ class CellDiagram extends React.Component {
                 const gatewayPoint = findPoint(centerPoint.x, centerPoint.y, 90, size * Math.cos(180 / 8));
 
                 if (gatewayNode) {
-                    gatewayNode.mass = 0.00000000000000001;
                     const x = gatewayPoint.x;
                     const y = gatewayPoint.y;
                     this.network.moveNode(gatewayNode.id, x, y);
@@ -330,7 +340,7 @@ class CellDiagram extends React.Component {
                 <div ref={this.loader} style={{visibility: "visible", height: "60vh"}} className={classes.progress}>
                     <CircularProgress/>
                 </div>
-                <div style={{visibility: "hidden", height: "100vh"}} ref={this.dependencyGraph}/>
+                <div style={{visibility: "hidden", height: "93vh"}} ref={this.dependencyGraph}/>
             </div>);
     };
 

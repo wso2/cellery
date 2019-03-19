@@ -250,6 +250,10 @@ class CellDiagram extends React.Component {
         if (!this.network) {
             this.network = new vis.Network(this.dependencyGraph.current, graphData, CellDiagram.GRAPH_OPTIONS);
 
+            this.loader.current.style.visibility = "visible";
+            this.loader.current.style.height = "60vh";
+            this.dependencyGraph.current.style.visibility = "hidden";
+
             const spacing = 150;
             const allNodes = nodes.get({returnType: "Object"});
             const updatedNodes = [];

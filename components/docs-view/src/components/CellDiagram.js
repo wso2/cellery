@@ -132,7 +132,7 @@ class CellDiagram extends React.Component {
         const cellNodes = [];
         const availableCells = data.cells;
         const availableComponents = data.components.filter((component) => (focusedCell === component.cell))
-            .map((component) => component);
+            .map((component) => `${component.cell}:${component.name}`);
 
         const getGroupNodesIds = (group) => {
             const output = [];
@@ -180,8 +180,8 @@ class CellDiagram extends React.Component {
         if (availableComponents) {
             availableComponents.forEach((node, index) => {
                 componentNodes.push({
-                    id: node.name,
-                    label: node.name,
+                    id: node,
+                    label: node.split(":")[1],
                     shape: "image",
                     image: "./component.svg",
                     group: CellDiagram.NodeType.COMPONENT

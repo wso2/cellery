@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 WSO2 Inc. (http:www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2019 WSO2 Inc. (http:www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -25,6 +25,7 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	"github.com/manifoldco/promptui"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
@@ -825,7 +826,7 @@ func ValidateImageTagWithRegistry(imageTag string) error {
 // AddImageToBalPath extracts the cell image in a temporary location and copies the relevant ballerina files to the
 // ballerina repo directory. This expects the BALLERINA_HOME environment variable to be set in th developer machine.
 func AddImageToBalPath(cellImage *CellImage) error {
-	cellImageFile := filepath.Join(UserHomeDir(), ".cellery", "repo", cellImage.Organization, cellImage.ImageName,
+	cellImageFile := filepath.Join(UserHomeDir(), constants.CELLERY_HOME, "repo", cellImage.Organization, cellImage.ImageName,
 		cellImage.ImageVersion, cellImage.ImageName+constants.CELL_IMAGE_EXT)
 
 	ballerinaOrganizationName := strings.Replace(cellImage.Organization, "-", "_", -1)
@@ -834,7 +835,7 @@ func AddImageToBalPath(cellImage *CellImage) error {
 	// Create temp directory
 	currentTime := time.Now()
 	timestamp := currentTime.Format("27065102350415")
-	tempPath := filepath.Join(UserHomeDir(), ".cellery", "tmp", timestamp)
+	tempPath := filepath.Join(UserHomeDir(), constants.CELLERY_HOME, "tmp", timestamp)
 	err := CreateDir(tempPath)
 	if err != nil {
 		return err
@@ -962,4 +963,16 @@ func ContainsInStringArray(array []string, item string) bool {
 		}
 	}
 	return false
+}
+
+func GetYesOrNoFromUser(question string) (bool, error) {
+	prompt := promptui.Select{
+		Label: question,
+		Items: []string{"Yes", "No"},
+	}
+	_, result, err := prompt.Run()
+	if err != nil {
+		return false, fmt.Errorf("Prompt failed %v\n", err)
+	}
+	return result == "Yes", nil
 }

@@ -85,7 +85,6 @@ const App = ({data, classes}) => {
             });
         }
     };
-
     extractData(data);
 
     return (
@@ -110,6 +109,5 @@ App.propTypes = {
     data: PropTypes.object.isRequired,
     classes: PropTypes.object.isRequired
 };
-
 
 export default withStyles(styles)(App);

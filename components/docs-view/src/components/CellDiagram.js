@@ -16,13 +16,11 @@
  * under the License.
  */
 
-/* eslint prefer-const: ["off"] */
-
 import "vis/dist/vis-network.min.css";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import React from "react";
 import vis from "vis";
-import {withStyles} from "@material-ui/core/styles/index";
+import {withStyles} from "@material-ui/core/styles";
 import * as PropTypes from "prop-types";
 
 const styles = {
@@ -36,7 +34,6 @@ const styles = {
 };
 
 class CellDiagram extends React.Component {
-
     static NodeType = {
         CELL: "cell",
         COMPONENT: "component",
@@ -76,7 +73,6 @@ class CellDiagram extends React.Component {
             }
         },
         layout: {
-            // RandomSeed: 1,
             improvedLayout: false
         },
         autoResize: true,
@@ -95,7 +91,6 @@ class CellDiagram extends React.Component {
             }
         },
         interaction: {
-            // Selectable: false,
             selectConnectedEdges: false
         }
     };
@@ -135,8 +130,6 @@ class CellDiagram extends React.Component {
         const componentNodes = [];
         const dataEdges = [];
         const cellNodes = [];
-        let nodes;
-        let edges;
         const availableCells = data.cells;
         const availableComponents = data.components.filter((component) => (focusedCell === component.cell))
             .map((component) => component);
@@ -157,11 +150,10 @@ class CellDiagram extends React.Component {
             const cenX = centroid.x;
             const cenY = centroid.y;
             const distance = [];
-            let dist = 0;
             for (let i = 0; i < pts.length; i++) {
                 distance.push(Math.hypot(pts[i].x - cenX, pts[i].y - cenY));
             }
-            dist = Math.max(...distance);
+            const dist = Math.max(...distance);
             return dist;
         };
 
@@ -191,7 +183,7 @@ class CellDiagram extends React.Component {
                     id: node.name,
                     label: node.name,
                     shape: "image",
-                    image: "../src/icons/component.svg",
+                    image: "./component.svg",
                     group: CellDiagram.NodeType.COMPONENT
                 });
             });
@@ -204,7 +196,7 @@ class CellDiagram extends React.Component {
                         id: cell,
                         label: cell,
                         shape: "image",
-                        image: "../src/icons/focusedCell.svg",
+                        image: "./focusedCell.svg",
                         group: CellDiagram.NodeType.CELL
                     });
                 } else {
@@ -212,7 +204,7 @@ class CellDiagram extends React.Component {
                         id: cell,
                         label: cell,
                         shape: "image",
-                        image: "../src/icons/cell.svg",
+                        image: "./cell.svg",
                         group: CellDiagram.NodeType.CELL
                     });
                 }
@@ -235,16 +227,14 @@ class CellDiagram extends React.Component {
             });
         }
 
-        nodes = new vis.DataSet(cellNodes);
-        edges = new vis.DataSet(dataEdges);
+        const nodes = new vis.DataSet(cellNodes);
+        const edges = new vis.DataSet(dataEdges);
         nodes.add(componentNodes);
 
         const graphData = {
             nodes: nodes,
             edges: edges
         };
-
-        // This.loader.current.style['visibility'] = 'visible';
 
         if (!this.network) {
             this.network = new vis.Network(this.dependencyGraph.current, graphData, CellDiagram.GRAPH_OPTIONS);
@@ -321,16 +311,9 @@ class CellDiagram extends React.Component {
 
 CellDiagram.propTypes = {
     classes: PropTypes.object.isRequired,
-    id: PropTypes.string.isRequired,
     data: PropTypes.arrayOf(PropTypes.object),
     focusedCell: PropTypes.arrayOf(PropTypes.object),
-    edgeData: PropTypes.arrayOf(PropTypes.object),
-    selectedComponent: PropTypes.string,
-    config: PropTypes.object,
-    reloadGraph: PropTypes.bool,
     onClickNode: PropTypes.func,
-    viewGenerator: PropTypes.func,
-    cellColor: PropTypes.string
 };
 
 export default withStyles(styles)(CellDiagram);

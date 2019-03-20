@@ -34,6 +34,7 @@ const styles = {
 };
 
 class CellDiagram extends React.Component {
+
     static NodeType = {
         CELL: "cell",
         COMPONENT: "component",
@@ -49,8 +50,7 @@ class CellDiagram extends React.Component {
             },
             scaling: {
                 max: 10000
-            },
-            chosen: false
+            }
         },
         edges: {
             width: 2,
@@ -87,7 +87,8 @@ class CellDiagram extends React.Component {
             }
         },
         interaction: {
-            selectConnectedEdges: false
+            selectConnectedEdges: false,
+            hover: true
         }
     };
 
@@ -133,7 +134,7 @@ class CellDiagram extends React.Component {
         const getGroupNodesIds = (group) => {
             const output = [];
             nodes.get({
-                filter: function (item) {
+                filter: function(item) {
                     if (item.group === group) {
                         output.push(item.id);
                     }
@@ -174,7 +175,7 @@ class CellDiagram extends React.Component {
         };
 
         const findPoint = (x, y, angle, distance) => {
-            let result = {};
+            const result = {};
             result.x = Math.round(Math.cos(angle * Math.PI / 180) * distance + x);
             result.y = Math.round(Math.sin(angle * Math.PI / 180) * distance + y);
             return result;
@@ -275,13 +276,20 @@ class CellDiagram extends React.Component {
                 };
             });
 
+            this.network.on("beforeDrawing", (ctx) => {
+                ctx.fillStyle = "#ffffff";
+                ctx.fillRect(-ctx.canvas.offsetWidth, -(ctx.canvas.offsetHeight + 20),
+                    ctx.canvas.width, ctx.canvas.height);
+            });
+
             this.network.on("afterDrawing", (ctx) => {
                 const centerPoint = getPolygonCentroid(getGroupNodePositions(CellDiagram.NodeType.COMPONENT));
                 const polygonRadius = getDistance(getGroupNodePositions(CellDiagram.NodeType.COMPONENT), centerPoint);
                 const size = polygonRadius + spacing;
                 const focusCellLabelPoint = findPoint(centerPoint.x, centerPoint.y, 270, size * Math.cos(180 / 8));
-                ctx.font = "bold 1.5rem Arial";
+                ctx.font = "bold 1.3rem Arial";
                 ctx.textAlign = "center";
+                ctx.fillStyle = "#666666";
                 ctx.fillText(focusedCell, focusCellLabelPoint.x, focusCellLabelPoint.y + 20);
             });
 
@@ -295,12 +303,9 @@ class CellDiagram extends React.Component {
                 focusedNode.size = size;
                 focusedNode.label = undefined;
                 focusedNode.fixed = true;
-                focusedNode.interaction = {
-                    selectable: false,
-                    draggable: false
-                };
                 focusedNode.mass = polygonRadius / 10;
                 this.network.moveNode(focusedCell, centerPoint.x, centerPoint.y);
+                updatedNodes.push(focusedNode);
 
                 for (const nodeId in allNodes) {
                     if (allNodes[nodeId].group === CellDiagram.NodeType.COMPONENT) {
@@ -322,12 +327,19 @@ class CellDiagram extends React.Component {
                     updatedNodes.push(gatewayNode);
                 }
 
-                updatedNodes.push(focusedNode);
                 nodes.update(updatedNodes);
             });
 
-            this.network.on("click", (event) => {
-                onClickNode(event.nodes[0]);
+            this.network.on("selectNode", (event) => {
+                this.network.unselectAll();
+                const clickedNode = nodes.get(event.nodes[0]);
+                if (clickedNode.group === CellDiagram.NodeType.CELL && clickedNode.id !== focusedCell) {
+                    onClickNode(event.nodes[0]);
+                }
+            });
+
+            this.network.on("dragging", (event) => {
+                this.network.unselectAll();
             });
         }
     };
@@ -350,7 +362,7 @@ CellDiagram.propTypes = {
     classes: PropTypes.object.isRequired,
     data: PropTypes.arrayOf(PropTypes.object),
     focusedCell: PropTypes.arrayOf(PropTypes.object),
-    onClickNode: PropTypes.func,
+    onClickNode: PropTypes.func
 };
 
 export default withStyles(styles)(CellDiagram);

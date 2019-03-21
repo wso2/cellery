@@ -101,6 +101,17 @@ Usage :
 cellery list images
 ```
 
+### View image
+View the graphical representation of a Cell Image.
+Usage :
+```
+cellery view <ORGANIZATION_NAME>/<IMAGE_NAME>:<VERSION>
+```
+Example :
+```
+cellery view wso2/my-cell:1.0.0
+```
+
 ### Terminate
 Terminate a running cell instance.
 Usage : 

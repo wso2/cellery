@@ -32,7 +32,7 @@ GO_LDFLAGS += -X $(PROJECT_PKG)/components/cli/pkg/version.buildTime=$(shell dat
 all: code.format build-lang build-docs-view build-cli
 
 .PHONY: install
-install: install-lang install-cli
+install: install-lang install-cli install-docs-view
 
 .PHONY: build-lang
 build-lang:
@@ -58,6 +58,11 @@ install-lang:
 install-cli:
 	cd ${PROJECT_ROOT}/components/cli; \
 	bash build.sh;
+
+.PHONY: install-docs-view
+install-docs-view:
+	cd ${PROJECT_ROOT}/components/docs-view; \
+	bash install-dev.sh
 
 .PHONY: code.format
 code.format: tools.goimports

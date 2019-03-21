@@ -843,7 +843,7 @@ func AddImageToBalPath(cellImage *CellImage) error {
 	defer func() {
 		err = os.RemoveAll(tempPath)
 		if err != nil {
-			ExitWithErrorMessage("Error while cleaning up", err)
+			ExitWithErrorMessage("Error occurred while cleaning up", err)
 		}
 	}()
 
@@ -975,4 +975,42 @@ func GetYesOrNoFromUser(question string) (bool, error) {
 		return false, fmt.Errorf("Prompt failed %v\n", err)
 	}
 	return result == "Yes", nil
+}
+
+// OpenBrowser opens up the provided URL in a browser
+func OpenBrowser(url string) error {
+	var cmd *exec.Cmd
+	switch runtime.GOOS {
+	case "openbsd":
+		fallthrough
+	case "linux":
+		cmd = exec.Command("xdg-open", url)
+	case "darwin":
+		cmd = exec.Command("open", url)
+	case "windows":
+		r := strings.NewReplacer("&", "^&")
+		cmd = exec.Command("cmd", "/c", "start", r.Replace(url))
+	}
+	if cmd != nil {
+		var stdout, stderr bytes.Buffer
+		cmd.Stdout = &stdout
+		cmd.Stderr = &stderr
+		err := cmd.Start()
+		if err != nil {
+			errStr := string(stderr.Bytes())
+			fmt.Printf("%s\n", errStr)
+			fmt.Println("Failed to open browser: " + err.Error())
+		}
+		err = cmd.Wait()
+		if err != nil {
+			errStr := string(stderr.Bytes())
+			fmt.Printf("\x1b[31;1m%s\x1b[0m", errStr)
+			fmt.Println("Failed to open browser: " + err.Error())
+		}
+		outStr := string(stdout.Bytes())
+		fmt.Println(outStr)
+		return err
+	} else {
+		return errors.New("unsupported platform")
+	}
 }

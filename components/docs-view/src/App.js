@@ -68,7 +68,8 @@ const App = ({data, classes}) => {
     // Recursively extract dependencies (including transitive dependencies if available)
     const extractData = (cell) => {
         if (cell.dependencies) {
-            cell.dependencies.forEach((dependency) => {
+            Object.keys(cell.dependencies).forEach((alias) => {
+                const dependency = cell.dependencies[alias];
                 diagramData.cells.push(dependency.name);
                 diagramData.dependencyLinks.push({
                     from: cell.name,

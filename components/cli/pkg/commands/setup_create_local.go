@@ -43,7 +43,6 @@ func RunSetupCreateLocal(isCompleteSelected bool) {
 	if isCompleteSelected {
 		vmName = constants.AWS_S3_ITEM_VM_COMPLETE
 	} else {
-		// Todo : Update constants.AWS_S3_ITEM_VM_MINIMAL name
 		vmName = constants.AWS_S3_ITEM_VM_MINIMAL
 	}
 	util.DownloadFromS3Bucket(constants.AWS_S3_BUCKET, vmName, vmLocation)

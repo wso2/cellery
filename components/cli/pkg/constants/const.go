@@ -47,7 +47,8 @@ const CELLERY_MANAGE_START = "start"
 const CELLERY_MANAGE_CLEANUP = "cleanup"
 
 const AWS_S3_BUCKET = "cellery-runtime-installation"
-const AWS_S3_ITEM_VM = "Cellery_Runtime_0.1.0.vdi.tar.gz"
+const AWS_S3_ITEM_VM_COMPLETE = "Cellery_Runtime_0.1.0.vdi.tar.gz"
+const AWS_S3_ITEM_VM_MINIMAL = "Cellery_Runtime_0.1.0.vdi.tar.gz"
 const AWS_S3_ITEM_CONFIG = "config"
 const AWS_REGION = "ap-south-1"
 

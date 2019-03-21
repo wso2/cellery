@@ -22,28 +22,14 @@ import (
 	"fmt"
 	"github.com/cellery-io/sdk/components/cli/pkg/constants"
 	"github.com/cellery-io/sdk/components/cli/pkg/util"
+	"github.com/manifoldco/promptui"
 	"os"
 	"os/exec"
 	"path/filepath"
 )
 
-func RunSetupCreateLocal() {
-	
-}
-
-func createLocal() error {
-	var addGlobalGateway bool
-	var addObservability bool
-
-	addGlobalGateway, err := util.GetYesOrNoFromUser("Add Global Gateway")
-	if err != nil {
-		fmt.Printf("Error while creating VM location: %v", err)
-		os.Exit(1)
-	}
-	if addGlobalGateway {
-		addObservability, err = util.GetYesOrNoFromUser("Add Observability")
-	}
-
+func RunSetupCreateLocal(isCompleteSelected bool) {
+	vmName := ""
 	vmLocation := filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.VM)
 	repoCreateErr := util.CreateDir(vmLocation)
 	if repoCreateErr != nil {
@@ -54,58 +40,60 @@ func createLocal() error {
 	defer func() {
 		spinner.Stop(true)
 	}()
-
-	if !addGlobalGateway && !addObservability {
-		createBasicLocalEnvironment(vmLocation)
+	if isCompleteSelected {
+		vmName = constants.AWS_S3_ITEM_VM_COMPLETE
+	} else {
+		vmName = constants.AWS_S3_ITEM_VM_MINIMAL
 	}
-
-	if addGlobalGateway && !addObservability {
-		createLocalWithGlobalGateway(vmLocation)
-	}
-
-	if addGlobalGateway && addObservability {
-		createLocalEnvironmentWithObservability(vmLocation)
-	}
+	util.DownloadFromS3Bucket(constants.AWS_S3_BUCKET, vmName, vmLocation)
+	util.ExtractTarGzFile(vmLocation, filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.VM, vmName))
 	util.DownloadFromS3Bucket(constants.AWS_S3_BUCKET, constants.AWS_S3_ITEM_CONFIG, vmLocation)
 	util.ReplaceFile(filepath.Join(util.UserHomeDir(), ".kube", "config"), filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.VM, constants.AWS_S3_ITEM_CONFIG))
-	installVM()
+	installVM(isCompleteSelected)
+}
+
+func createLocal() error {
+	var isCompleteSelected = false
+	cellTemplate := &promptui.SelectTemplates{
+		Label:    "{{ . }}",
+		Active:   "\U000027A4 {{ .| bold }}",
+		Inactive: "  {{ . | faint }}",
+		Help:     util.Faint("[Use arrow keys]"),
+	}
+
+	cellPrompt := promptui.Select{
+		Label:     util.YellowBold("?") + " Select the type of runtime",
+		Items:     []string{"Basic", "Complete"},
+		Templates: cellTemplate,
+	}
+	_, value, err := cellPrompt.Run()
+	if err != nil {
+		return fmt.Errorf("Failed to select an option: %v", err)
+	}
+	if value == "Basic" {
+		isCompleteSelected = true
+	}
+	RunSetupCreateLocal(isCompleteSelected)
 
 	return nil
 }
 
-func createBasicLocalEnvironment(vmLocation string) error {
-	util.DownloadFromS3Bucket(constants.AWS_S3_BUCKET, constants.AWS_S3_ITEM_VM, vmLocation)
-	util.ExtractTarGzFile(vmLocation, filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.VM, constants.AWS_S3_ITEM_VM))
-
-	return nil
-}
-
-func createLocalWithGlobalGateway(vmLocation string) error {
-	util.DownloadFromS3Bucket(constants.AWS_S3_BUCKET, constants.AWS_S3_ITEM_VM, vmLocation)
-	util.ExtractTarGzFile(vmLocation, filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.VM, constants.AWS_S3_ITEM_VM))
-
-	return nil
-}
-
-func createLocalEnvironmentWithObservability(vmLocation string) error {
-	util.DownloadFromS3Bucket(constants.AWS_S3_BUCKET, constants.AWS_S3_ITEM_VM, vmLocation)
-	util.ExtractTarGzFile(vmLocation, filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.VM, constants.AWS_S3_ITEM_VM))
-
-	return nil
-}
-
-func installVM() error {
+func installVM(isCompleteSelected bool) error {
+	vmName := constants.VM_NAME
+	if isCompleteSelected {
+		vmName = constants.VM_NAME
+	}
 	spinner := util.StartNewSpinner("Installing Cellery Runtime")
 	defer func() {
 		spinner.Stop(true)
 	}()
-	util.ExecuteCommand(exec.Command(constants.VBOX_MANAGE, "createvm", "--name", constants.VM_NAME, "--ostype", "Ubuntu_64", "--register"), "Error Installing VM")
-	util.ExecuteCommand(exec.Command(constants.VBOX_MANAGE, "modifyvm", constants.VM_NAME, "--ostype", "Ubuntu_64", "--cpus", "4", "--memory", "8000", "--natpf1", "guestkube,tcp,,6443,,6443", "--natpf1", "guestssh,tcp,,2222,,22", "--natpf1", "guesthttps,tcp,,443,,443", "--natpf1", "guesthttp,tcp,,80,,80"), "Error Installing VM")
-	util.ExecuteCommand(exec.Command(constants.VBOX_MANAGE, "storagectl", constants.VM_NAME, "--name", "hd1", "--add", "sata", "--portcount", "2"), "Error Installing VM")
+	util.ExecuteCommand(exec.Command(constants.VBOX_MANAGE, "createvm", "--name", vmName, "--ostype", "Ubuntu_64", "--register"), "Error Installing VM")
+	util.ExecuteCommand(exec.Command(constants.VBOX_MANAGE, "modifyvm", vmName, "--ostype", "Ubuntu_64", "--cpus", "4", "--memory", "8000", "--natpf1", "guestkube,tcp,,6443,,6443", "--natpf1", "guestssh,tcp,,2222,,22", "--natpf1", "guesthttps,tcp,,443,,443", "--natpf1", "guesthttp,tcp,,80,,80"), "Error Installing VM")
+	util.ExecuteCommand(exec.Command(constants.VBOX_MANAGE, "storagectl", vmName, "--name", "hd1", "--add", "sata", "--portcount", "2"), "Error Installing VM")
 
 	vmLocation := filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.VM, constants.VM_FILE_NAME)
-	util.ExecuteCommand(exec.Command(constants.VBOX_MANAGE, "storageattach", constants.VM_NAME, "--storagectl", "hd1", "--port", "1", "--type", "hdd", "--medium", vmLocation), "Error Installing VM")
-	util.ExecuteCommand(exec.Command(constants.VBOX_MANAGE, "startvm", constants.VM_NAME, "--type", "headless"), "Error Installing VM")
+	util.ExecuteCommand(exec.Command(constants.VBOX_MANAGE, "storageattach", vmName, "--storagectl", "hd1", "--port", "1", "--type", "hdd", "--medium", vmLocation), "Error Installing VM")
+	util.ExecuteCommand(exec.Command(constants.VBOX_MANAGE, "startvm", vmName, "--type", "headless"), "Error Installing VM")
 
 	return nil
 }

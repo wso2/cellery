@@ -29,11 +29,13 @@ import (
 )
 
 func RunSetupCreateLocal(isCompleteSelected bool) {
+	if isVmInstalled() {
+		util.ExitWithErrorMessage("Error creating VM", fmt.Errorf("installed VM already exists"))
+	}
 	vmName := ""
 	vmLocation := filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.VM)
 	repoCreateErr := util.CreateDir(vmLocation)
 	if repoCreateErr != nil {
-		fmt.Println("Error while creating VM location: " + repoCreateErr.Error())
 		os.Exit(1)
 	}
 	spinner := util.StartNewSpinner("Downloading Cellery Runtime")

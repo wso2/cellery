@@ -25,14 +25,16 @@ import (
 )
 
 func newSetupCreateGcpCommand() *cobra.Command {
+	var isCompleteSetup = false
 	cmd := &cobra.Command{
 		Use:   "gcp",
 		Short: "Create a Cellery runtime in gcp",
 		Args:  cobra.NoArgs,
 		Run: func(cmd *cobra.Command, args []string) {
-			commands.RunSetupCreateGcp()
+			commands.RunSetupCreateGcp(isCompleteSetup)
 		},
 		Example: "  cellery setup create gcp",
 	}
+	cmd.Flags().BoolVarP(&isCompleteSetup, "complete", "c", false, "Create complete gcp setup")
 	return cmd
 }

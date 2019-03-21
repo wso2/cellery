@@ -59,14 +59,14 @@ func createGcp() error {
 
 	cellPrompt := promptui.Select{
 		Label:     util.YellowBold("?") + " Select the type of runtime",
-		Items:     []string{"Basic", "Complete"},
+		Items:     []string{constants.BASIC, constants.COMPLETE},
 		Templates: cellTemplate,
 	}
 	_, value, err := cellPrompt.Run()
 	if err != nil {
 		return fmt.Errorf("Failed to select an option: %v", err)
 	}
-	if value == "Basic" {
+	if value == constants.COMPLETE {
 		isCompleteSelected = true
 	}
 	RunSetupCreateGcp(isCompleteSelected)

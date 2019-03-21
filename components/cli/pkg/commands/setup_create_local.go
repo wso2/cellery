@@ -29,11 +29,13 @@ import (
 )
 
 func RunSetupCreateLocal(isCompleteSelected bool) {
+	if isVmInstalled() {
+		util.ExitWithErrorMessage("Error creating VM", fmt.Errorf("installed VM already exists"))
+	}
 	vmName := ""
 	vmLocation := filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.VM)
 	repoCreateErr := util.CreateDir(vmLocation)
 	if repoCreateErr != nil {
-		fmt.Println("Error while creating VM location: " + repoCreateErr.Error())
 		os.Exit(1)
 	}
 	spinner := util.StartNewSpinner("Downloading Cellery Runtime")
@@ -63,14 +65,14 @@ func createLocal() error {
 
 	cellPrompt := promptui.Select{
 		Label:     util.YellowBold("?") + " Select the type of runtime",
-		Items:     []string{"Basic", "Complete"},
+		Items:     []string{constants.BASIC, constants.COMPLETE},
 		Templates: cellTemplate,
 	}
 	_, value, err := cellPrompt.Run()
 	if err != nil {
 		return fmt.Errorf("Failed to select an option: %v", err)
 	}
-	if value == "Basic" {
+	if value == constants.COMPLETE {
 		isCompleteSelected = true
 	}
 	RunSetupCreateLocal(isCompleteSelected)

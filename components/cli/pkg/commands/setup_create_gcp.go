@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"github.com/cellery-io/sdk/components/cli/pkg/constants"
 	"github.com/cellery-io/sdk/components/cli/pkg/util"
+	"github.com/manifoldco/promptui"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/sqladmin/v1beta4"
 	"io"
@@ -39,37 +40,36 @@ import (
 	"context"
 )
 
-func RunSetupCreateGcp() {
-
+func RunSetupCreateGcp(isCompleteSetup bool) {
+	if isCompleteSetup {
+		createCompleteGcpRuntime()
+	} else {
+		createMinimalGcpRuntime()
+	}
 }
 
 func createGcp() error {
-	var addGlobalGateway bool
-	var addObservability bool
+	var isCompleteSelected = false
+	cellTemplate := &promptui.SelectTemplates{
+		Label:    "{{ . }}",
+		Active:   "\U000027A4 {{ .| bold }}",
+		Inactive: "  {{ . | faint }}",
+		Help:     util.Faint("[Use arrow keys]"),
+	}
 
-	addGlobalGateway, err := util.GetYesOrNoFromUser("Add Global Gateway")
+	cellPrompt := promptui.Select{
+		Label:     util.YellowBold("?") + " Select the type of runtime",
+		Items:     []string{constants.BASIC, constants.COMPLETE},
+		Templates: cellTemplate,
+	}
+	_, value, err := cellPrompt.Run()
 	if err != nil {
-		fmt.Printf("Error while creating VM location: %v", err)
-		os.Exit(1)
+		return fmt.Errorf("Failed to select an option: %v", err)
 	}
-	if addGlobalGateway {
-		addObservability, err = util.GetYesOrNoFromUser("Add Observability")
+	if value == constants.COMPLETE {
+		isCompleteSelected = true
 	}
-
-	if !addGlobalGateway && !addObservability {
-		// Todo - create complete gcp setup
-		createCompleteGcpRuntime()
-	}
-
-	if addGlobalGateway && !addObservability {
-		// Todo - create gcp setup with global gateway
-		createCompleteGcpRuntime()
-	}
-
-	if addGlobalGateway && addObservability {
-		// Todo - create gcp setup with globl gateway and observability
-		createCompleteGcpRuntime()
-	}
+	RunSetupCreateGcp(isCompleteSelected)
 	return nil
 }
 

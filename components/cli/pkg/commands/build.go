@@ -266,6 +266,9 @@ func generateMetaData(cellImage *util.CellImage, targetDir string) {
 			// Reading the dependency's metadata
 			metadataJsonContent, err := ioutil.ReadFile(
 				filepath.Join(tempPath, "artifacts", "cellery", "metadata.json"))
+			if err != nil {
+				util.ExitWithErrorMessage(errorMessage, err)
+			}
 			dependencyMetadata := &util.CellImageMetaData{}
 			err = json.Unmarshal(metadataJsonContent, dependencyMetadata)
 			if err != nil {

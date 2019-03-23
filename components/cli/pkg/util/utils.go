@@ -47,6 +47,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/fatih/color"
+	"github.com/manifoldco/promptui"
 	"github.com/tj/go-spin"
 	"golang.org/x/crypto/ssh/terminal"
 
@@ -925,14 +926,17 @@ func GetSourceFileName(filePath string) (string, error) {
 	return "", errors.New("Ballerina source file not found in extracted location: " + filePath)
 }
 
+// RunMethodExists checks if the run method exists in ballerina file
 func RunMethodExists(sourceFile string) (bool, error) {
-	bytes, err := ioutil.ReadFile(sourceFile)
+	sourceFileBytes, err := ioutil.ReadFile(sourceFile)
 	if err != nil {
 		return false, err
 	}
-	content := string(bytes)
-	// //check whether s contains substring text
-	return regexp.MatchString(".*(public)\\s+(function)\\s+(run)\\s*\\(\\s*(string)\\s+.*\\s(string)\\s+.*\\s(string)\\s+.*", content)
+
+	// Check whether s contains substring text
+	return regexp.MatchString(
+		".*(public)\\s+(function)\\s+(run)\\s*\\(\\s*(string)\\s+.*\\s(string)\\s+.*\\s(string)\\s+.*",
+		string(sourceFileBytes))
 }
 
 func ReplaceInFile(srcFile, oldString, newString string, replaceCount int) error {

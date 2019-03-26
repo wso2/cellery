@@ -246,6 +246,8 @@ func generateMetaData(cellImage *util.CellImage, targetDir string) {
 			dependencyExists, err := util.FileExists(cellImageZip)
 			if !dependencyExists {
 				RunPull(dependency, true)
+				fmt.Printf("\r\x1b[2K%s Pulling Cell Image %s/%s:%s\n", util.Green("\U00002714"),
+					dependencyCellImage.Organization, dependencyCellImage.ImageName, dependencyCellImage.ImageVersion)
 			}
 
 			// Create temp directory

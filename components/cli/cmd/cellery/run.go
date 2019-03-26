@@ -31,7 +31,7 @@ import (
 
 func newRunCommand() *cobra.Command {
 	var name string
-	var withDependencies bool
+	var startDependencies bool
 	var shareAllInstances bool
 	var dependencyLinks []string
 	cmd := &cobra.Command{
@@ -62,7 +62,7 @@ func newRunCommand() *cobra.Command {
 			return nil
 		},
 		Run: func(cmd *cobra.Command, args []string) {
-			commands.RunRun(args[0], name, withDependencies, shareAllInstances, dependencyLinks)
+			commands.RunRun(args[0], name, startDependencies, shareAllInstances, dependencyLinks)
 		},
 		Example: "  cellery run cellery-samples/hr:1.0.0 -n hr-inst\n" +
 			"  cellery run registry.foo.io/cellery-samples/hr:1.0.0 -n hr-inst -l employee:employee-inst " +
@@ -72,7 +72,7 @@ func newRunCommand() *cobra.Command {
 			"-l employee-inst.people-hr:people-hr-inst",
 	}
 	cmd.Flags().StringVarP(&name, "name", "n", "", "Name of the cell instance")
-	cmd.Flags().BoolVarP(&withDependencies, "with-dependencies", "d", false,
+	cmd.Flags().BoolVarP(&startDependencies, "start-dependencies", "d", false,
 		"Start all the dependencies of this Cell Image in order")
 	cmd.Flags().BoolVarP(&shareAllInstances, "share-instances", "s", false,
 		"Share all instances among equivalent Cell Instances")

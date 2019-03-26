@@ -39,8 +39,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/manifoldco/promptui"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -691,18 +689,18 @@ func (s *Spinner) Stop(isSuccess bool) {
 func (s *Spinner) spin() {
 	if s.isSpinning == true {
 		if s.action != s.previousAction {
-			var icon string
-			if s.error {
-				icon = Red("\U0000274C")
-			} else {
-				icon = Green("\U00002714")
+			if s.previousAction != "" {
+				var icon string
+				if s.error {
+					icon = Red("\U0000274C")
+				} else {
+					icon = Green("\U00002714")
+				}
+				fmt.Printf("\r\x1b[2K%s %s\n", icon, s.previousAction)
 			}
-			fmt.Printf("\r\x1b[2K%s %s\n", icon, s.previousAction)
 			s.previousAction = s.action
 		}
-		if s.action == "" {
-			s.isSpinning = false
-		} else {
+		if s.action != "" {
 			fmt.Printf("\r\x1b[2K\033[36m%s\033[m %s", s.core.Next(), s.action)
 		}
 	}

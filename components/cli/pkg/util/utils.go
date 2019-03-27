@@ -25,7 +25,6 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
-	"github.com/miraj/sdk/components/cli/pkg/util"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
@@ -1028,7 +1027,7 @@ func ReadCellImageYaml(cellImage string) []byte {
 		panic(err)
 	}
 
-	err = util.Unzip(cellImageZip, tmpPath)
+	err = Unzip(cellImageZip, tmpPath)
 	if err != nil {
 		panic(err)
 	}

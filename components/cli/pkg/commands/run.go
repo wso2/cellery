@@ -642,7 +642,7 @@ func startDependencyTree(registry string, tree *dependencyTreeNode, spinner *uti
 					}
 					dependencyNode.IsRunning = true
 					fmt.Printf("\r\x1b[2K%s Starting instance %s\n", util.Green("\U00002714"),
-						dependency.Instance)
+						dependencyNode.Instance)
 
 					err = os.RemoveAll(imageDir)
 					if err != nil {

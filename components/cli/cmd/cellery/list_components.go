@@ -51,7 +51,7 @@ func newListComponentsCommand() *cobra.Command {
 			commands.RunListComponents(args[0])
 		},
 		Example: "  cellery list components employee\n" +
-				 "  cellery list components cellery-samples/employee:1.0.0",
+			"  cellery list components cellery-samples/employee:1.0.0",
 	}
 	return cmd
 }

@@ -51,7 +51,7 @@ func newDescribeCommand() *cobra.Command {
 			commands.RunDescribe(args[0])
 		},
 		Example: "  cellery describe employee\n" +
-				 "  cellery describe cellery-samples/employee:1.0.0",
+			"  cellery describe cellery-samples/employee:1.0.0",
 	}
 	return cmd
 }

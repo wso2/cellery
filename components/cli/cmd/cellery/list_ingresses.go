@@ -52,7 +52,7 @@ func newListIngressesCommand() *cobra.Command {
 			commands.RunListIngresses(args[0])
 		},
 		Example: "  cellery list ingresses employee\n" +
-				 "  cellery list ingresses cellery-samples/employee:1.0.0\n",
+			"  cellery list ingresses cellery-samples/employee:1.0.0\n",
 	}
 	return cmd
 }

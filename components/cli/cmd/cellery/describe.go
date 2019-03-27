@@ -32,6 +32,7 @@ func newDescribeCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "describe <instance-name|cell-image-name>",
 		Short: "Describes a cell image",
+		Aliases: []string{"desc"},
 		Args: func(cmd *cobra.Command, args []string) error {
 			err := cobra.ExactArgs(1)(cmd, args)
 			if err != nil {

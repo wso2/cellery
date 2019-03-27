@@ -32,6 +32,7 @@ import (
 func newListIngressesCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "ingresses <instance-name|cell-image-name>",
+		Aliases: []string{"ingress", "ing"},
 		Short: "List the exposed APIs of a cell instance",
 		Args: func(cmd *cobra.Command, args []string) error {
 			err := cobra.ExactArgs(1)(cmd, args)

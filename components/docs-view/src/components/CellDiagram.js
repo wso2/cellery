@@ -269,6 +269,7 @@ class CellDiagram extends React.Component {
                 this.loader.current.style.height = "0vh";
                 this.dependencyGraph.current.style.visibility = "visible";
 
+                this.network.setOptions({physics: false});
                 window.onresize = () => {
                     this.network.fit({
                         nodes: nodeIds

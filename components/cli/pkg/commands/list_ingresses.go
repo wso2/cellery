@@ -25,15 +25,27 @@ import (
 	"github.com/cellery-io/sdk/components/cli/pkg/constants"
 	"os"
 	"os/exec"
+	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/olekukonko/tablewriter"
 
 	"github.com/cellery-io/sdk/components/cli/pkg/util"
+	"github.com/ghodss/yaml"
 )
 
-func RunListIngresses(cellName string) {
-	cmd := exec.Command("kubectl", "get", "gateways", cellName+"--gateway", "-o", "json")
+func RunListIngresses(name string) {
+	instancePattern, _ := regexp.MatchString(fmt.Sprintf("^%s$", constants.CELLERY_ID_PATTERN), name)
+	if instancePattern {
+		displayCellInstanceApisTable(name)
+	} else {
+		displayCellImageApisTable(name)
+	}
+}
+
+func displayCellInstanceApisTable(cellInstanceName string) {
+	cmd := exec.Command("kubectl", "get", "gateways", cellInstanceName+"--gateway", "-o", "json")
 	stdoutReader, _ := cmd.StdoutPipe()
 	stdoutScanner := bufio.NewScanner(stdoutReader)
 	output := ""
@@ -66,16 +78,13 @@ func RunListIngresses(cellName string) {
 	if errJson != nil {
 		fmt.Println(errJson)
 	}
+	apiArray := jsonOutput.GatewaySpec.HttpApis
 
-	displayApisTable(jsonOutput.GatewaySpec.HttpApis, cellName)
-}
-
-func displayApisTable(apiArray []util.GatewayHttpApi, cellName string) {
 	var tableData [][]string
 
 	for i := 0; i < len(apiArray); i++ {
 		for j := 0; j < len(apiArray[i].Definitions); j++ {
-			url := cellName + "--gateway-service"
+			url := cellInstanceName + "--gateway-service"
 			path := apiArray[i].Definitions[j].Path
 			context := apiArray[i].Context
 			method := apiArray[i].Definitions[j].Method
@@ -104,9 +113,9 @@ func displayApisTable(apiArray []util.GatewayHttpApi, cellName string) {
 			globalUrl := ""
 			if apiArray[i].Global {
 				if path != "/" {
-					globalUrl = constants.WSO2_APIM_HOST + "/" + cellName + "/" + context + path
+					globalUrl = constants.WSO2_APIM_HOST + "/" + cellInstanceName + "/" + context + path
 				} else {
-					globalUrl = constants.WSO2_APIM_HOST + "/" + cellName + "/" + context
+					globalUrl = constants.WSO2_APIM_HOST + "/" + cellInstanceName + "/" + context
 				}
 			}
 
@@ -128,6 +137,95 @@ func displayApisTable(apiArray []util.GatewayHttpApi, cellName string) {
 		tablewriter.Colors{tablewriter.Bold},
 		tablewriter.Colors{tablewriter.Bold})
 	table.SetColumnColor(
+		tablewriter.Colors{},
+		tablewriter.Colors{},
+		tablewriter.Colors{},
+		tablewriter.Colors{})
+
+	table.AppendBulk(tableData)
+	table.Render()
+}
+
+func displayCellImageApisTable(cellImageName string) {
+	cellYamlContent := util.ReadCellImageYaml(cellImageName)
+	cellImageContent := &util.Cell{}
+	err := yaml.Unmarshal(cellYamlContent, cellImageContent)
+	if err != nil {
+		util.ExitWithErrorMessage("Error while reading cell image content", err)
+	}
+
+	var tableData [][]string
+
+	for i := 0; i < len(cellImageContent.CellSpec.ComponentTemplates); i++ {
+		componentName := cellImageContent.CellSpec.ComponentTemplates[i].Metadata.Name
+		// Iterate HTTP and Web ingresses
+		for j :=0; j < len(cellImageContent.CellSpec.GateWayTemplate.GatewaySpec.HttpApis); j++ {
+			ingress := cellImageContent.CellSpec.GateWayTemplate.GatewaySpec.HttpApis[j]
+			backend := ingress.Backend
+			var ingressType = "web"
+			if componentName == backend {
+				var ingressData []string
+				ingressData = append(ingressData, componentName)
+
+				if len(ingress.Vhost) == 0 {
+					ingressType = "HTTP"
+				}
+				ingressData = append(ingressData, ingressType)
+				ingressData = append(ingressData, ingress.Context)
+				ingressData = append(ingressData, strconv.Itoa(80))
+				if ingress.Global {
+					ingressData = append(ingressData, "True")
+				} else {
+					ingressData = append(ingressData, "False")
+				}
+				tableData = append(tableData, ingressData)
+			}
+		}
+		// Iterate TCP ingresses
+		for j :=0; j < len(cellImageContent.CellSpec.GateWayTemplate.GatewaySpec.TcpApis); j++ {
+			ingress := cellImageContent.CellSpec.GateWayTemplate.GatewaySpec.TcpApis[j]
+			backend := ingress.Backend
+			if componentName == backend {
+				var ingressData []string
+				ingressData = append(ingressData, componentName)
+				ingressData = append(ingressData, "tcp")
+				ingressData = append(ingressData, "N/A")
+				ingressData = append(ingressData, strconv.Itoa(8080))
+				ingressData = append(ingressData, "False")
+				tableData = append(tableData, ingressData)
+			}
+		}
+		// Iterate GRPC ingresses
+		for j :=0; j < len(cellImageContent.CellSpec.GateWayTemplate.GatewaySpec.TcpApis); j++ {
+			ingress := cellImageContent.CellSpec.GateWayTemplate.GatewaySpec.TcpApis[j]
+			backend := ingress.Backend
+			if componentName == backend {
+				var ingressData []string
+				ingressData = append(ingressData, componentName)
+				ingressData = append(ingressData, "grpc")
+				ingressData = append(ingressData, "N/A")
+				ingressData = append(ingressData, strconv.Itoa(3550))
+				ingressData = append(ingressData, "False")
+				tableData = append(tableData, ingressData)
+			}
+		}
+	}
+
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetHeader([]string{"COMPONENT", "INGRESS TYPE", "INGRESS CONTEXT", "INGRESS PORT", "GLOBALLY EXPOSED"})
+	table.SetBorders(tablewriter.Border{Left: false, Top: false, Right: false, Bottom: false})
+	table.SetAlignment(3)
+	table.SetRowSeparator("-")
+	table.SetCenterSeparator(" ")
+	table.SetColumnSeparator(" ")
+	table.SetHeaderColor(
+		tablewriter.Colors{tablewriter.Bold},
+		tablewriter.Colors{tablewriter.Bold},
+		tablewriter.Colors{tablewriter.Bold},
+		tablewriter.Colors{tablewriter.Bold},
+		tablewriter.Colors{tablewriter.Bold})
+	table.SetColumnColor(
+		tablewriter.Colors{},
 		tablewriter.Colors{},
 		tablewriter.Colors{},
 		tablewriter.Colors{},

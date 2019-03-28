@@ -27,6 +27,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"sync"
 
@@ -40,7 +41,7 @@ import (
 // This also support linking instances to parts of the dependency tree
 // This command also strictly validates whether the requested Cell (and the dependencies are valid)
 func RunRun(cellImageTag string, instanceName string, startDependencies bool, shareDependencies bool,
-	dependencyLinks []string) {
+	dependencyLinks []string, envVars []string) {
 	spinner := util.StartNewSpinner("Extracting Cell Image " + util.Bold(cellImageTag))
 	parsedCellImage, err := util.ParseImageTag(cellImageTag)
 	if err != nil {
@@ -92,33 +93,101 @@ func RunRun(cellImageTag string, instanceName string, startDependencies bool, sh
 	}
 	fmt.Printf("\r\x1b[2K\n%s: %s\n\n", util.Bold("Main Instance"), instanceName)
 
-	// Parsing the dependency links list
-	spinner.SetNewAction("Validating dependency links")
 	var parsedDependencyLinks []*dependencyAliasLink
-	for _, link := range dependencyLinks {
-		var dependencyLink *dependencyAliasLink
-		linkSplit := strings.Split(link, ":")
-		if strings.Contains(linkSplit[0], ".") {
-			instanceSplit := strings.Split(linkSplit[0], ".")
-			dependencyLink = &dependencyAliasLink{
-				Instance:           instanceSplit[0],
-				DependencyAlias:    instanceSplit[1],
-				DependencyInstance: linkSplit[1],
+	if len(dependencyLinks) > 0 {
+		// Parsing the dependency links list
+		spinner.SetNewAction("Validating dependency links")
+		for _, link := range dependencyLinks {
+			var dependencyLink *dependencyAliasLink
+			linkSplit := strings.Split(link, ":")
+			if strings.Contains(linkSplit[0], ".") {
+				instanceSplit := strings.Split(linkSplit[0], ".")
+				dependencyLink = &dependencyAliasLink{
+					Instance:           instanceSplit[0],
+					DependencyAlias:    instanceSplit[1],
+					DependencyInstance: linkSplit[1],
+				}
+			} else {
+				dependencyLink = &dependencyAliasLink{
+					DependencyAlias:    linkSplit[0],
+					DependencyInstance: linkSplit[1],
+				}
 			}
-		} else {
-			dependencyLink = &dependencyAliasLink{
-				DependencyAlias:    linkSplit[0],
-				DependencyInstance: linkSplit[1],
-			}
+			cellInstance, err := getCellInstance(dependencyLink.DependencyInstance)
+			dependencyLink.IsRunning = err == nil && cellInstance.CellStatus.Status == "Ready"
+			parsedDependencyLinks = append(parsedDependencyLinks, dependencyLink)
 		}
-		cellInstance, err := getCellInstance(dependencyLink.DependencyInstance)
-		dependencyLink.IsRunning = err == nil && cellInstance.CellStatus.Status == "Ready"
-		parsedDependencyLinks = append(parsedDependencyLinks, dependencyLink)
+		err = validateDependencyLinks(instanceName, cellImageMetadata, parsedDependencyLinks)
+		if err != nil {
+			spinner.Stop(false)
+			util.ExitWithErrorMessage("Invalid dependency links", err)
+		}
 	}
-	err = validateDependencyLinks(instanceName, cellImageMetadata, parsedDependencyLinks)
-	if err != nil {
-		spinner.Stop(false)
-		util.ExitWithErrorMessage("Invalid dependency links", err)
+
+	instanceEnvVars := map[string][]*environmentVariable{}
+	if len(envVars) > 0 {
+		// Parsing environment variables
+		spinner.SetNewAction("Validating environment variables")
+		for _, envVar := range envVars {
+			var targetInstance string
+			var envVarKey string
+			var envVarValue string
+
+			// Parsing the environment variable
+			r := regexp.MustCompile(fmt.Sprintf("^%s$", constants.CLI_ARG_ENV_VAR_PATTERN))
+			matches := r.FindStringSubmatch(envVar)
+			if matches != nil {
+				for i, name := range r.SubexpNames() {
+					if i != 0 && name != "" && matches[i] != "" { // Ignore the whole regexp match and unnamed groups
+						switch name {
+						case "instance":
+							targetInstance = matches[i]
+						case "key":
+							envVarKey = matches[i]
+						case "value":
+							envVarValue = matches[i]
+						}
+					}
+				}
+			}
+			if targetInstance == "" {
+				targetInstance = instanceName
+			}
+			parsedEnvVar := &environmentVariable{
+				Key:   envVarKey,
+				Value: envVarValue,
+			}
+
+			// Validating whether the instance of the environment var is provided
+			if targetInstance != instanceName {
+				isInstanceProvided := false
+				isInstanceToBeStarted := false
+				for _, link := range parsedDependencyLinks {
+					if targetInstance == link.DependencyInstance {
+						isInstanceProvided = true
+						isInstanceToBeStarted = !link.IsRunning
+						break
+					}
+				}
+				if !isInstanceProvided {
+					spinner.Stop(false)
+					util.ExitWithErrorMessage("Invalid environment variable",
+						fmt.Errorf("the instance of the environment variables should be provided as a "+
+							"dependency link, instance %s of the environment variable %s not found", targetInstance,
+							parsedEnvVar.Key))
+				} else if !isInstanceToBeStarted {
+					spinner.Stop(false)
+					util.ExitWithErrorMessage("Invalid environment variable",
+						fmt.Errorf("the instance of the environment should be an instance to be "+
+							"created, instance %s is already available in the runtime", targetInstance))
+				}
+			}
+
+			if _, hasKey := instanceEnvVars[targetInstance]; !hasKey {
+				instanceEnvVars[targetInstance] = []*environmentVariable{}
+			}
+			instanceEnvVars[targetInstance] = append(instanceEnvVars[targetInstance], parsedEnvVar)
+		}
 	}
 
 	var mainNode *dependencyTreeNode
@@ -142,7 +211,7 @@ func RunRun(cellImageTag string, instanceName string, startDependencies bool, sh
 			util.ExitWithErrorMessage("Failed to confirm the dependency tree", err)
 		}
 		spinner.SetNewAction("Starting dependencies")
-		startDependencyTree(parsedCellImage.Registry, dependencyTree, spinner)
+		startDependencyTree(parsedCellImage.Registry, dependencyTree, spinner, instanceEnvVars)
 		if err != nil {
 			util.ExitWithErrorMessage("Failed to start dependencies", err)
 		}
@@ -219,7 +288,7 @@ func RunRun(cellImageTag string, instanceName string, startDependencies bool, sh
 	}
 
 	spinner.SetNewAction("Starting main instance " + util.Bold(instanceName))
-	err = startCellInstance(imageDir, instanceName, mainNode)
+	err = startCellInstance(imageDir, instanceName, mainNode, instanceEnvVars[instanceName])
 	if err != nil {
 		util.ExitWithErrorMessage("Failed to start Cell instance"+instanceName, err)
 	}
@@ -606,7 +675,8 @@ func confirmDependencyTree(tree *dependencyTreeNode) error {
 
 // startDependencyTree starts up the whole dependency tree except the root
 // This does not start the root of the dependency tree
-func startDependencyTree(registry string, tree *dependencyTreeNode, spinner *util.Spinner) {
+func startDependencyTree(registry string, tree *dependencyTreeNode, spinner *util.Spinner,
+	instanceEnvVars map[string][]*environmentVariable) {
 	const errorMessage = "Error occurred while starting the dependency tree"
 	var wg sync.WaitGroup
 	wg.Add(len(tree.Dependencies))
@@ -619,7 +689,7 @@ func startDependencyTree(registry string, tree *dependencyTreeNode, spinner *uti
 				dependencyNode.Mux.Lock()
 				defer dependencyNode.Mux.Unlock()
 				if !dependencyNode.IsRunning { // This level of checking is done to make sure the condition is met
-					startDependencyTree(registry, dependencyNode, spinner)
+					startDependencyTree(registry, dependencyNode, spinner, instanceEnvVars)
 					cellImage := &util.CellImage{
 						Registry:     registry,
 						Organization: dependencyNode.MetaData.Organization,
@@ -634,7 +704,8 @@ func startDependencyTree(registry string, tree *dependencyTreeNode, spinner *uti
 							dependencyNode.MetaData.Name, dependencyNode.MetaData.Version, err))
 					}
 
-					err = startCellInstance(imageDir, dependencyNode.Instance, dependencyNode)
+					err = startCellInstance(imageDir, dependencyNode.Instance, dependencyNode,
+						instanceEnvVars[dependencyNode.Instance])
 					if err != nil {
 						spinner.Stop(false)
 						util.ExitWithErrorMessage(errorMessage, fmt.Errorf("failed to start "+
@@ -701,7 +772,8 @@ func getCellInstance(instance string) (*util.Cell, error) {
 	return cell, nil
 }
 
-func startCellInstance(imageDir string, instanceName string, runningNode *dependencyTreeNode) error {
+func startCellInstance(imageDir string, instanceName string, runningNode *dependencyTreeNode,
+	envVars []*environmentVariable) error {
 	imageTag := fmt.Sprintf("%s/%s:%s", runningNode.MetaData.Organization, runningNode.MetaData.Name,
 		runningNode.MetaData.Version)
 	balFileName, err := util.GetSourceFileName(filepath.Join(imageDir, constants.ZIP_BALLERINA_SOURCE))
@@ -726,27 +798,35 @@ func startCellInstance(imageDir string, instanceName string, runningNode *depend
 			}
 		}
 
-		// Calling the run function
+		// Preparing the dependency instance map
 		dependenciesJson, err := json.Marshal(dependencies)
 		if err != nil {
-			return fmt.Errorf("failed to read the Cell Image %s depedencies due to %v", imageTag, err)
+			return fmt.Errorf("failed to start the Cell Image %s due to %v", imageTag, err)
 		}
-		cmd := exec.Command("ballerina", "run", balFilePath+":run",
-			runningNode.MetaData.Organization+"/"+runningNode.MetaData.Name, runningNode.MetaData.Version,
-			instanceName, string(dependenciesJson))
+
+		// Preparing the run command arguments
+		cmdArgs := []string{"run"}
+		for _, envVar := range envVars {
+			cmdArgs = append(cmdArgs, "-e", envVar.Key+"="+envVar.Value)
+		}
+		cmdArgs = append(cmdArgs, balFilePath+":run", runningNode.MetaData.Organization+"/"+runningNode.MetaData.Name,
+			runningNode.MetaData.Version, instanceName, string(dependenciesJson))
+
+		// Calling the run function
+		cmd := exec.Command("ballerina", cmdArgs...)
 		cmd.Env = append(cmd.Env, constants.CELLERY_IMAGE_DIR_ENV_VAR+"="+imageDir)
 		stdoutReader, _ := cmd.StdoutPipe()
 		stdoutScanner := bufio.NewScanner(stdoutReader)
 		go func() {
 			for stdoutScanner.Scan() {
-				fmt.Printf("\033[36m%s\033[m\n", stdoutScanner.Text())
+				fmt.Printf("\r\x1b[2K\033[36m%s\033[m\n", stdoutScanner.Text())
 			}
 		}()
 		stderrReader, _ := cmd.StderrPipe()
 		stderrScanner := bufio.NewScanner(stderrReader)
 		go func() {
 			for stderrScanner.Scan() {
-				fmt.Printf("\033[36m%s\033[m\n", stderrScanner.Text())
+				fmt.Printf("\r\x1b[2K\033[36m%s\033[m\n", stderrScanner.Text())
 			}
 		}()
 		err = cmd.Start()
@@ -844,6 +924,12 @@ type dependencyAliasLink struct {
 	DependencyAlias    string
 	DependencyInstance string
 	IsRunning          bool
+}
+
+// environmentVariable is used to store the environment variables to be passed to the instances
+type environmentVariable struct {
+	Key   string
+	Value string
 }
 
 // dependencyTreeNode is used as a node of the dependency tree

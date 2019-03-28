@@ -61,6 +61,19 @@ cellery run wso2/cell2:1.0.1 -n mycell-2 --with-dependencies
 cellery run wso2/cell2:1.0.1 -n mycell-2 --with-dependencies --share-instances
 ```
 
+### Run with environment variables
+Pass environment variables to the Cell file's run method when starting the Cell. When starting a tree of dependencies, environment variables can be specified for each instance (not currently running) separately.
+Usage:
+```
+cellery run <ORGANIZATION_NAME>/<IMAGE_NAME>:<VERSION> -e <KEY>=<VALUE>
+cellery run <ORGANIZATION_NAME>/<IMAGE_NAME>:<VERSION> -l <ALIAS>:<INSTANCE> -e <INSTANCE>:<KEY>=<VALUE>
+```
+Example : 
+```
+cellery run wso2/cell1:1.0.1 -n mycell-1 -e 
+cellery run wso2/cell3:1.0.1 -n mycell-3 -l cell-2:mycell-2 -e mycell-2:mysql.db=ANALYTICS_DB
+```
+
 ### List instances
 List all running cells.  
 Usage : 

@@ -716,9 +716,14 @@ func startCellInstance(imageDir string, instanceName string, runningNode *depend
 	}
 	if containsRunFunction {
 		// Generating the first level dependency map
-		dependencies := map[string]string{}
+		dependencies := map[string]*dependencyInfo{}
 		for alias, dependency := range runningNode.Dependencies {
-			dependencies[alias] = dependency.Instance
+			dependencies[alias] = &dependencyInfo{
+				Organization: dependency.MetaData.Organization,
+				Name:         dependency.MetaData.Name,
+				Version:      dependency.MetaData.Version,
+				InstanceName: dependency.Instance,
+			}
 		}
 
 		// Calling the run function
@@ -849,4 +854,12 @@ type dependencyTreeNode struct {
 	Dependencies map[string]*dependencyTreeNode
 	IsShared     bool
 	IsRunning    bool
+}
+
+// dependencyInfo is used to pass the dependency information to Ballerina
+type dependencyInfo struct {
+	Organization string `json:"org"`
+	Name         string `json:"name"`
+	Version      string `json:"ver"`
+	InstanceName string `json:"instanceName"`
 }

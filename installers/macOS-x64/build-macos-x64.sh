@@ -37,12 +37,12 @@ function printUsage() {
 if [[ "$1" == "-h" ||  "$1" == "--help" ]]; then
     printUsage
     exit 1
-elif [[ "$1" == [0-9].[0-9].[0-9] ]]; then
-    echo "Cellery Version : $1"
-else
-    echo "Please enter a valid version for cellery distribution"
+elif [ -z "$1"]; then
+    echo "Please enter the version of the Cellery distribution."
     printUsage
     exit 1
+else
+    echo "Cellery Version : $1"
 fi
 
 #Parameters

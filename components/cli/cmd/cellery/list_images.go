@@ -26,9 +26,10 @@ import (
 
 func newListImagesCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "images",
-		Short: "List cell images",
-		Args:  cobra.NoArgs,
+		Use:     "images",
+		Short:   "List cell images",
+		Aliases: []string{"image", "img"},
+		Args:    cobra.NoArgs,
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) == 0 {
 				commands.RunImage()

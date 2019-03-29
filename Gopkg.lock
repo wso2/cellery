@@ -79,6 +79,14 @@
   version = "v1.16.31"
 
 [[projects]]
+  digest = "1:e04c00d619875ce5fa67180891984a9b1fadcc031af36bcd7a3509cbdad1df15"
+  name = "github.com/cheggaaa/pb"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "c112833d014c77e8bde723fd0158e3156951639f"
+  version = "v2.0.6"
+
+[[projects]]
   branch = "master"
   digest = "1:454adc7f974228ff789428b6dc098638c57a64aa0718f0bd61e53d3cd39d7a75"
   name = "github.com/chzyer/readline"
@@ -144,20 +152,20 @@
   version = "v1.7.0"
 
 [[projects]]
-  digest = "1:b3d20bcdedab2050e6bc58e52f4fdc46f710b4c74e1a1ecee262ebec1aee7b6e"
-  name = "github.com/godbus/dbus"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "2ff6f7ffd60f0f2410b3105864bdd12c7894f844"
-  version = "v5.0.1"
-
-[[projects]]
   digest = "1:2cd7915ab26ede7d95b8749e6b1f933f1c6d5398030684e6505940a10f31cfda"
   name = "github.com/ghodss/yaml"
   packages = ["."]
   pruneopts = "UT"
   revision = "0ca9ea5df5451ffdf184b4428c902747c2c11cd7"
   version = "v1.0.0"
+
+[[projects]]
+  digest = "1:b3d20bcdedab2050e6bc58e52f4fdc46f710b4c74e1a1ecee262ebec1aee7b6e"
+  name = "github.com/godbus/dbus"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "2ff6f7ffd60f0f2410b3105864bdd12c7894f844"
+  version = "v5.0.1"
 
 [[projects]]
   digest = "1:5d1b5a25486fc7d4e133646d834f6fca7ba1cef9903d40e7aa786c41b89e9e91"
@@ -550,6 +558,54 @@
   version = "v1.18.0"
 
 [[projects]]
+  digest = "1:e626376fab8608a972d47e91b3c1bbbddaecaf1d42b82be6dcc52d10a7557893"
+  name = "gopkg.in/VividCortex/ewma.v1"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "b24eb346a94c3ba12c1da1e564dbac1b498a77ce"
+  version = "v1.1.1"
+
+[[projects]]
+  digest = "1:256938e7d43c73bd5e7bb97dd281d1ebe294b2928403ee1fbec96249915d1150"
+  name = "gopkg.in/cheggaaa/pb.v2"
+  packages = ["termutil"]
+  pruneopts = "UT"
+  revision = "c112833d014c77e8bde723fd0158e3156951639f"
+  version = "v2.0.6"
+
+[[projects]]
+  digest = "1:865079840386857c809b72ce300be7580cb50d3d3129ce11bf9aa6ca2bc1934a"
+  name = "gopkg.in/fatih/color.v1"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "5b77d2a35fb0ede96d138fc9a99f5c9b6aef11b4"
+  version = "v1.7.0"
+
+[[projects]]
+  digest = "1:c658e84ad3916da105a761660dcaeb01e63416c8ec7bc62256a9b411a05fcd67"
+  name = "gopkg.in/mattn/go-colorable.v0"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "167de6bfdfba052fa6b2d3664c8f5272e23c9072"
+  version = "v0.0.9"
+
+[[projects]]
+  digest = "1:e150b5fafbd7607e2d638e4e5cf43aa4100124e5593385147b0a74e2733d8b0d"
+  name = "gopkg.in/mattn/go-isatty.v0"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "c2a7a6ca930a4cd0bc33a3f298eb71960732a3a7"
+  version = "v0.0.7"
+
+[[projects]]
+  digest = "1:0356f3312c9bd1cbeda81505b7fd437501d8e778ab66998ef69f00d7f9b3a0d7"
+  name = "gopkg.in/mattn/go-runewidth.v0"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "3ee7d812e62a0804a7d0a324e0249ca2db3476d3"
+  version = "v0.0.4"
+
+[[projects]]
   digest = "1:4d2e5a73dc1500038e504a8d78b986630e3626dc027bc030ba5c75da257cdb96"
   name = "gopkg.in/yaml.v2"
   packages = ["."]
@@ -564,10 +620,12 @@
     "cloud.google.com/go/storage",
     "github.com/99designs/keyring",
     "github.com/aws/aws-sdk-go/aws",
+    "github.com/aws/aws-sdk-go/aws/awserr",
     "github.com/aws/aws-sdk-go/aws/credentials",
     "github.com/aws/aws-sdk-go/aws/session",
     "github.com/aws/aws-sdk-go/service/s3",
     "github.com/aws/aws-sdk-go/service/s3/s3manager",
+    "github.com/cheggaaa/pb",
     "github.com/docker/distribution/manifest",
     "github.com/docker/distribution/manifest/schema1",
     "github.com/docker/libtrust",

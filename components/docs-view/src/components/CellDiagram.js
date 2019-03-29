@@ -318,7 +318,7 @@ class CellDiagram extends React.Component {
                 focusedNode.size = size;
                 focusedNode.label = undefined;
                 focusedNode.fixed = true;
-                focusedNode.mass = polygonRadius / Math.PI;
+                focusedNode.mass = polygonRadius / 10;
                 this.network.moveNode(focusedCell, centerPoint.x, centerPoint.y);
                 updatedNodes.push(focusedNode);
 

@@ -70,7 +70,7 @@ cellery run <ORGANIZATION_NAME>/<IMAGE_NAME>:<VERSION> -l <ALIAS>:<INSTANCE> -e 
 ```
 Example : 
 ```
-cellery run wso2/cell1:1.0.1 -n mycell-1 -e 
+cellery run wso2/cell1:1.0.1 -n mycell-1 -e gcp.project=myproject
 cellery run wso2/cell3:1.0.1 -n mycell-3 -l cell-2:mycell-2 -e mycell-2:mysql.db=ANALYTICS_DB
 ```
 

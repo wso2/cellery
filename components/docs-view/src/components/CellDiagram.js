@@ -82,7 +82,7 @@ class CellDiagram extends React.Component {
             solver: "forceAtlas2Based",
             stabilization: {
                 enabled: true,
-                iterations: 10,
+                iterations: 20,
                 fit: true
             }
         },
@@ -232,7 +232,6 @@ class CellDiagram extends React.Component {
         }
 
         const nodes = new vis.DataSet(cellNodes);
-        const edges = new vis.DataSet(dataEdges);
         nodes.add(componentNodes);
         nodes.add({
             id: `${focusedCell}:${CellDiagram.NodeType.GATEWAY}`,
@@ -242,6 +241,12 @@ class CellDiagram extends React.Component {
             group: CellDiagram.NodeType.GATEWAY,
             fixed: true
         });
+        dataEdges.forEach((edge, index) => {
+            if (edge.to === focusedCell) {
+                edge.to = `${focusedCell}:${CellDiagram.NodeType.GATEWAY}`;
+            }
+        });
+        const edges = new vis.DataSet(dataEdges);
 
         const graphData = {
             nodes: nodes,
@@ -269,6 +274,7 @@ class CellDiagram extends React.Component {
                 this.loader.current.style.height = "0vh";
                 this.dependencyGraph.current.style.visibility = "visible";
 
+                this.network.setOptions({physics: false});
                 window.onresize = () => {
                     this.network.fit({
                         nodes: nodeIds
@@ -299,14 +305,6 @@ class CellDiagram extends React.Component {
                     centerPoint);
                 const size = polygonRadius + spacing;
 
-                const focusedNode = nodes.get(focusedCell);
-                focusedNode.size = size;
-                focusedNode.label = undefined;
-                focusedNode.fixed = true;
-                focusedNode.mass = polygonRadius / 10;
-                this.network.moveNode(focusedCell, centerPoint.x, centerPoint.y);
-                updatedNodes.push(focusedNode);
-
                 for (const nodeId in allNodes) {
                     if (allNodes[nodeId].group === CellDiagram.NodeType.COMPONENT) {
                         allNodes[nodeId].fixed = true;
@@ -315,6 +313,14 @@ class CellDiagram extends React.Component {
                         }
                     }
                 }
+
+                const focusedNode = nodes.get(focusedCell);
+                focusedNode.size = size;
+                focusedNode.label = undefined;
+                focusedNode.fixed = true;
+                focusedNode.mass = polygonRadius / 10;
+                this.network.moveNode(focusedCell, centerPoint.x, centerPoint.y);
+                updatedNodes.push(focusedNode);
 
                 // Placing gateway node
                 const gatewayNode = nodes.get(`${focusedCell}:${CellDiagram.NodeType.GATEWAY}`);

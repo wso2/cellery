@@ -104,13 +104,7 @@ func installVM() error {
 		spinner.Stop(true)
 	}()
 
-	util.ExecuteCommand(exec.Command(constants.VBOX_MANAGE, "hostonlyif", "create"), "Error Installing VM")
-	util.ExecuteCommand(exec.Command(constants.VBOX_MANAGE, "hostonlyif", "ipconfig", "vboxnet0", "--ip", "192.168.56.1"), "Error Installing VM")
-	util.ExecuteCommand(exec.Command(constants.VBOX_MANAGE, "dhcpserver", "modify", "--ifname", "vboxnet0", "--ip", "192.168.56.1", "--netmask", "255.255.255.0", "--lowerip", "192.168.56.100", "--upperip", "192.168.56.200"), "Error Installing VM")
-	util.ExecuteCommand(exec.Command(constants.VBOX_MANAGE, "dhcpserver", "modify", "--ifname", "vboxnet0", "--enable"), "Error Installing VM")
 	util.ExecuteCommand(exec.Command(constants.VBOX_MANAGE, "import", vmPath), "Error Installing VM")
-	util.ExecuteCommand(exec.Command(constants.VBOX_MANAGE, "modifyvm", constants.VM_NAME, "--nic2", "hostonly"), "Error Installing VM")
-	util.ExecuteCommand(exec.Command(constants.VBOX_MANAGE, "modifyvm", constants.VM_NAME, "--hostonlyadapter2", "vboxnet0"), "Error Installing VM")
 	util.ExecuteCommand(exec.Command(constants.VBOX_MANAGE, "modifyvm", constants.VM_NAME, "--ostype", "Ubuntu_64", "--cpus", "2", "--memory", "8000", "--natpf1", "guestkube,tcp,,6443,,6443", "--natpf1", "guestssh,tcp,,2222,,22", "--natpf1", "guesthttps,tcp,,443,,443", "--natpf1", "guesthttp,tcp,,80,,80"), "Error Installing VM")
 	util.ExecuteCommand(exec.Command(constants.VBOX_MANAGE, "startvm", constants.VM_NAME, "--type", "headless"), "Error Installing VM")
 

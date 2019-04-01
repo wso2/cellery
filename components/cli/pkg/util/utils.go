@@ -993,7 +993,8 @@ func OpenBrowser(url string) error {
 
 func ReadCellImageYaml(cellImage string) []byte {
 	parsedCellImage, err := ParseImageTag(cellImage)
-	cellImageZip := path.Join(UserHomeDir(), constants.CELLERY_HOME, "repo", parsedCellImage.Organization, parsedCellImage.ImageName, parsedCellImage.ImageVersion, parsedCellImage.ImageName+constants.CELL_IMAGE_EXT)
+	cellImageZip := path.Join(UserHomeDir(), constants.CELLERY_HOME, "repo", parsedCellImage.Organization,
+		parsedCellImage.ImageName, parsedCellImage.ImageVersion, parsedCellImage.ImageName+constants.CELL_IMAGE_EXT)
 
 	// Create tmp directory
 	tmpPath := filepath.Join(UserHomeDir(), constants.CELLERY_HOME, "tmp", "imageExtracted")
@@ -1010,7 +1011,8 @@ func ReadCellImageYaml(cellImage string) []byte {
 		ExitWithErrorMessage("Error occurred while extracting cell image", err)
 	}
 
-	cellYamlContent, err := ioutil.ReadFile(filepath.Join(tmpPath, constants.ZIP_ARTIFACTS, "cellery", parsedCellImage.ImageName+".yaml"))
+	cellYamlContent, err := ioutil.ReadFile(filepath.Join(tmpPath, constants.ZIP_ARTIFACTS, "cellery",
+		parsedCellImage.ImageName+".yaml"))
 	if err != nil {
 		ExitWithErrorMessage("Error while reading cell image content", err)
 	}

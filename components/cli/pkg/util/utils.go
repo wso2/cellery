@@ -823,7 +823,6 @@ func ValidateImageTagWithRegistry(imageTag string) error {
 	return nil
 }
 
-
 // ExitWithErrorMessage prints an error message and exits the command
 func ExitWithErrorMessage(message string, err error) {
 	fmt.Printf("\n\n\x1b[31;1m%s:\x1b[0m %v\n\n", message, err)

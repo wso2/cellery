@@ -23,6 +23,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 
 	"github.com/manifoldco/promptui"
 
@@ -39,20 +40,49 @@ func RunSetupCreateLocal(isCompleteSelected bool) {
 	if repoCreateErr != nil {
 		os.Exit(1)
 	}
-	spinner := util.StartNewSpinner("Downloading Cellery Runtime")
-	defer func() {
-		spinner.Stop(true)
-	}()
+
 	if isCompleteSelected {
-		util.DownloadFromS3Bucket(constants.AWS_S3_BUCKET, constants.AWS_S3_ITEM_VM_COMPLETE, vmLocation)
-		util.ExtractTarGzFile(vmLocation, filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.VM, constants.AWS_S3_ITEM_VM_COMPLETE))
-		util.DownloadFromS3Bucket(constants.AWS_S3_BUCKET, constants.AWS_S3_ITEM_CONFIG_COMPLETE, vmLocation)
-		util.ReplaceFile(filepath.Join(util.UserHomeDir(), ".kube", "config"), filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.VM, constants.AWS_S3_ITEM_CONFIG_COMPLETE))
+		confirmDownload, err := util.GetYesOrNoFromUser("Downloading " + constants.AWS_S3_ITEM_VM_COMPLETE +
+			" of size " +
+			strconv.FormatFloat(float64(util.GetS3ObjectSize(constants.AWS_S3_BUCKET,
+				constants.AWS_S3_ITEM_VM_COMPLETE))/(1024*1024*1024),
+				'f', 2, 64) + " GB. Do you wish to continue")
+		if err != nil {
+			util.ExitWithErrorMessage("Failed to select an option", err)
+		}
+		if !confirmDownload {
+			os.Exit(1)
+		}
+		fmt.Println("Downloading " + constants.AWS_S3_ITEM_VM_COMPLETE)
+		util.DownloadFromS3Bucket(constants.AWS_S3_BUCKET, constants.AWS_S3_ITEM_VM_COMPLETE, vmLocation,
+			true)
+		util.ExtractTarGzFile(vmLocation, filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.VM,
+			constants.AWS_S3_ITEM_VM_COMPLETE))
+		util.DownloadFromS3Bucket(constants.AWS_S3_BUCKET, constants.AWS_S3_ITEM_CONFIG_COMPLETE, vmLocation,
+			false)
+		util.ReplaceFile(filepath.Join(util.UserHomeDir(), ".kube", "config"), filepath.Join(util.UserHomeDir(),
+			constants.CELLERY_HOME, constants.VM, constants.AWS_S3_ITEM_CONFIG_COMPLETE))
 	} else {
-		util.DownloadFromS3Bucket(constants.AWS_S3_BUCKET, constants.AWS_S3_ITEM_VM_MINIMAL, vmLocation)
-		util.ExtractTarGzFile(vmLocation, filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.VM, constants.AWS_S3_ITEM_VM_MINIMAL))
-		util.DownloadFromS3Bucket(constants.AWS_S3_BUCKET, constants.AWS_S3_ITEM_CONFIG_MINIMAL, vmLocation)
-		util.ReplaceFile(filepath.Join(util.UserHomeDir(), ".kube", "config"), filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.VM, constants.AWS_S3_ITEM_CONFIG_MINIMAL))
+		confirmDownload, err := util.GetYesOrNoFromUser("Downloading " + constants.AWS_S3_ITEM_VM_MINIMAL +
+			" of size " +
+			strconv.FormatFloat(float64(util.GetS3ObjectSize(constants.AWS_S3_BUCKET,
+				constants.AWS_S3_ITEM_VM_MINIMAL))/(1024*1024*1024),
+				'f', 2, 64) + " GB. Do you wish to continue")
+		if err != nil {
+			util.ExitWithErrorMessage("Failed to select an option", err)
+		}
+		if !confirmDownload {
+			os.Exit(1)
+		}
+		fmt.Println("Downloading " + constants.AWS_S3_ITEM_VM_MINIMAL)
+		util.DownloadFromS3Bucket(constants.AWS_S3_BUCKET, constants.AWS_S3_ITEM_VM_MINIMAL, vmLocation,
+			true)
+		util.ExtractTarGzFile(vmLocation, filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.VM,
+			constants.AWS_S3_ITEM_VM_MINIMAL))
+		util.DownloadFromS3Bucket(constants.AWS_S3_BUCKET, constants.AWS_S3_ITEM_CONFIG_MINIMAL, vmLocation,
+			false)
+		util.ReplaceFile(filepath.Join(util.UserHomeDir(), ".kube", "config"), filepath.Join(util.UserHomeDir(),
+			constants.CELLERY_HOME, constants.VM, constants.AWS_S3_ITEM_CONFIG_MINIMAL))
 	}
 	installVM()
 }
@@ -89,9 +119,14 @@ func installVM() error {
 	defer func() {
 		spinner.Stop(true)
 	}()
-	util.ExecuteCommand(exec.Command("vboxmanage", "import", vmPath), "Error Installing VM")
-	util.ExecuteCommand(exec.Command(constants.VBOX_MANAGE, "modifyvm", constants.VM_NAME, "--ostype", "Ubuntu_64", "--cpus", "2", "--memory", "8000", "--natpf1", "guestkube,tcp,,6443,,6443", "--natpf1", "guestssh,tcp,,2222,,22", "--natpf1", "guesthttps,tcp,,443,,443", "--natpf1", "guesthttp,tcp,,80,,80"), "Error Installing VM")
-	util.ExecuteCommand(exec.Command(constants.VBOX_MANAGE, "startvm", constants.VM_NAME, "--type", "headless"), "Error Installing VM")
+
+	util.ExecuteCommand(exec.Command(constants.VBOX_MANAGE, "import", vmPath), "Error Installing VM")
+	util.ExecuteCommand(exec.Command(constants.VBOX_MANAGE, "modifyvm", constants.VM_NAME,
+		"--ostype", "Ubuntu_64", "--cpus", "2", "--memory", "8000", "--natpf1", "guestkube,tcp,,6443,,6443", "--natpf1",
+		"guestssh,tcp,,2222,,22", "--natpf1", "guesthttps,tcp,,443,,443", "--natpf1", "guesthttp,tcp,,80,,80"),
+		"Error Installing VM")
+	util.ExecuteCommand(exec.Command(constants.VBOX_MANAGE, "startvm", constants.VM_NAME, "--type", "headless"),
+		"Error Installing VM")
 
 	return nil
 }

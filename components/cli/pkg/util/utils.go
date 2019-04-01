@@ -40,10 +40,12 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/cheggaaa/pb"
 	"github.com/fatih/color"
 	"github.com/manifoldco/promptui"
 	"github.com/tj/go-spin"
@@ -581,7 +583,7 @@ func ExecuteCommand(cmd *exec.Cmd, errorMessage string) error {
 	return nil
 }
 
-func DownloadFromS3Bucket(bucket, item, path string) {
+func DownloadFromS3Bucket(bucket, item, path string, displayProgressBar bool) {
 	file, err := os.Create(filepath.Join(path, item))
 	if err != nil {
 		fmt.Printf("Error in downloading from file: %v \n", err)
@@ -594,6 +596,24 @@ func DownloadFromS3Bucket(bucket, item, path string) {
 		Region: aws.String(constants.AWS_REGION), Credentials: credentials.AnonymousCredentials},
 	)
 
+	if displayProgressBar {
+		s3ObjectSize := GetS3ObjectSize(bucket, item)
+
+		var downloadedFileSize = 0
+		bar := pb.StartNew(s3ObjectSize)
+
+		go func() {
+			for int(downloadedFileSize) < s3ObjectSize {
+				downloadedFileSize, err := GetFileSize(filepath.Join(path, item))
+				if err != nil {
+					ExitWithErrorMessage("Error downloading file", err)
+				}
+				bar.SetCurrent(downloadedFileSize)
+				time.Sleep(time.Microsecond)
+			}
+			bar.Finish()
+		}()
+	}
 	// Create a downloader with the session and custom options
 	downloader := s3manager.NewDownloader(sess, func(d *s3manager.Downloader) {
 		d.PartSize = 64 * 1024 * 1024 // 64MB per part
@@ -611,6 +631,28 @@ func DownloadFromS3Bucket(bucket, item, path string) {
 	}
 
 	fmt.Println("Download completed", file.Name(), numBytes, "bytes")
+}
+
+func GetS3ObjectSize(bucket, item string) int {
+	sess, _ := session.NewSession(&aws.Config{
+		Region: aws.String(constants.AWS_REGION), Credentials: credentials.AnonymousCredentials},
+	)
+
+	svc := s3.New(sess)
+	input := &s3.HeadObjectInput{
+		Bucket: aws.String(bucket),
+		Key:    aws.String(item),
+	}
+
+	result, err := svc.HeadObject(input)
+	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok {
+			ExitWithErrorMessage("Error getting size of file", aerr)
+		} else {
+			ExitWithErrorMessage("Error getting size of file", err)
+		}
+	}
+	return int(*result.ContentLength)
 }
 
 func ExtractTarGzFile(extractTo, archive_name string) error {
@@ -951,7 +993,8 @@ func OpenBrowser(url string) error {
 
 func ReadCellImageYaml(cellImage string) []byte {
 	parsedCellImage, err := ParseImageTag(cellImage)
-	cellImageZip := path.Join(UserHomeDir(), constants.CELLERY_HOME, "repo", parsedCellImage.Organization, parsedCellImage.ImageName, parsedCellImage.ImageVersion, parsedCellImage.ImageName+constants.CELL_IMAGE_EXT)
+	cellImageZip := path.Join(UserHomeDir(), constants.CELLERY_HOME, "repo", parsedCellImage.Organization,
+		parsedCellImage.ImageName, parsedCellImage.ImageVersion, parsedCellImage.ImageName+constants.CELL_IMAGE_EXT)
 
 	// Create tmp directory
 	tmpPath := filepath.Join(UserHomeDir(), constants.CELLERY_HOME, "tmp", "imageExtracted")
@@ -968,7 +1011,8 @@ func ReadCellImageYaml(cellImage string) []byte {
 		ExitWithErrorMessage("Error occurred while extracting cell image", err)
 	}
 
-	cellYamlContent, err := ioutil.ReadFile(filepath.Join(tmpPath, constants.ZIP_ARTIFACTS, "cellery", parsedCellImage.ImageName+".yaml"))
+	cellYamlContent, err := ioutil.ReadFile(filepath.Join(tmpPath, constants.ZIP_ARTIFACTS, "cellery",
+		parsedCellImage.ImageName+".yaml"))
 	if err != nil {
 		ExitWithErrorMessage("Error while reading cell image content", err)
 	}

@@ -368,7 +368,7 @@ public class CreateImage extends BlockingNativeCallableUnit {
                 // Therefore we only process the 0th element
                 Web webIngress = component.getWebList().get(0);
                 spec.addHttpAPI(Collections.singletonList(webIngress.getHttpAPI()));
-                spec.setHostName(webIngress.getVhost());
+                spec.setHost(webIngress.getVhost());
                 spec.setOidc(webIngress.getOidc());
             } else if (component.getApis().size() > 0) {
                 // HTTP ingress

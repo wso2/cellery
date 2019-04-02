@@ -32,7 +32,7 @@ import java.util.List;
 @AllArgsConstructor
 public class GatewaySpec {
     private String type;
-    private String hostName;
+    private String host;
     private String tlsSecretName;
     private OIDC oidc;
     private @Singular("http")

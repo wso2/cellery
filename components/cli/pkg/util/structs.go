@@ -19,7 +19,10 @@
 package util
 
 import (
+	"io"
 	"sync"
+
+	"github.com/cheggaaa/pb"
 
 	"github.com/tj/go-spin"
 )
@@ -196,4 +199,12 @@ type CellImageMetaData struct {
 	CellImageName
 	Components   []string                      `json:"components"`
 	Dependencies map[string]*CellImageMetaData `json:"dependencies"`
+}
+
+type progressWriter struct {
+	written int64
+	writer  io.WriterAt
+	size    int64
+	bar     *pb.ProgressBar
+	display bool
 }

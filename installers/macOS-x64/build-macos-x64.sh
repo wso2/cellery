@@ -128,6 +128,12 @@ buildCelleryCLI() {
     popd >/dev/null 2>&1
 }
 
+buildDocsView() {
+    go_to_dir ../../
+    make build-docs-view
+    popd >/dev/null 2>&1
+}
+
 copyDarwinDirectory(){
   createInstallationDirectory
   rm -rf ${TARGET_DIRECTORY}/darwin
@@ -167,6 +173,9 @@ copyBuildDirectory() {
     cp ../../components/lang/target/cellery-*.jar ${TARGET_DIRECTORY}/darwinpkg/Library/Cellery/runtime/${BALLERINA_RUNTIME}/bre/lib/
     cp -R ../../components/lang/target/generated-balo/repo/celleryio ${TARGET_DIRECTORY}/darwinpkg/Library/Cellery/repo
     chmod -R 755 ${TARGET_DIRECTORY}/darwinpkg
+
+    mkdir -p ${TARGET_DIRECTORY}/${INSTALLATION_DIRECTORY}/darwinpkg/Library/Cellery/docs-view
+    cp -R ../../components/docs-view/build/* ${TARGET_DIRECTORY}/${INSTALLATION_DIRECTORY}/darwinpkg/Library/Cellery/docs-view
 
     rm -rf ${TARGET_DIRECTORY}/package
     mkdir -p ${TARGET_DIRECTORY}/package
@@ -235,8 +244,11 @@ log_info "Installer generating process started."
 
 buildBallerinaNatives
 buildCelleryCLI
+buildDocsView
+
 copyDarwinDirectory
 copyBuildDirectory
+
 createUninstaller
 createInstaller
 

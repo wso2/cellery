@@ -119,6 +119,12 @@ buildCelleryCLI() {
     popd >/dev/null 2>&1
 }
 
+buildDocsView() {
+    go_to_dir ../../
+    make build-docs-view
+    popd >/dev/null 2>&1
+}
+
 getProductSize() {
     CELLERY_SIZE=$(du -s ../../components/build/cellery | awk '{print $1}')
     CELLERY_JAR_SIZE=$(du -s ../../components/lang/target/cellery-*.jar | awk '{print $1}')
@@ -150,6 +156,9 @@ copyBuildDirectories() {
     cp ../../components/lang/target/cellery-*.jar ${TARGET_DIRECTORY}/${INSTALLATION_DIRECTORY}/usr/share/cellery/runtime/${BALLERINA_RUNTIME}/bre/lib/
     mkdir -p ${TARGET_DIRECTORY}/${INSTALLATION_DIRECTORY}/usr/local/bin
     cp ../../components/build/cellery ${TARGET_DIRECTORY}/${INSTALLATION_DIRECTORY}/usr/local/bin
+
+    mkdir -p ${TARGET_DIRECTORY}/${INSTALLATION_DIRECTORY}/usr/share/cellery/docs-view
+    cp -R ../../components/docs-view/build/* ${TARGET_DIRECTORY}/${INSTALLATION_DIRECTORY}/usr/share/cellery/docs-view
 }
 
 createInstaller() {
@@ -171,6 +180,7 @@ log_info "Installer Generating process started."
 
 buildBallerinaNatives
 buildCelleryCLI
+buildDocsView
 
 getProductSize
 
@@ -178,5 +188,6 @@ copyDebianDirectory
 copyBuildDirectories
 
 createInstaller
+
 log_info "Build completed."
 exit 0

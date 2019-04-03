@@ -528,7 +528,8 @@ func validateGcpConfigFile(configFiles []string) error {
 }
 
 func deployMinimalCelleryRuntime() error {
-	util.CopyDir(util.CelleryInstallationDir(), filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP, constants.ARTIFACTS))
+	util.CopyDir(filepath.Join(util.CelleryInstallationDir(), "artifacts"),
+		filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP, constants.ARTIFACTS))
 	var artifactPath = filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP, constants.ARTIFACTS)
 	errorDeployingCelleryRuntime := "Error deploying cellery runtime"
 	// Give permission

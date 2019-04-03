@@ -122,8 +122,8 @@ const CELLERY_HUB_KEYRING_NAME = "hubcelleryio"
 const BASIC = "Basic"
 const COMPLETE = "Complete"
 
-const K8S_ARTIFACTS_PATH_MAC = "/Library/Cellery/artifacts"
-const K8S_ARTIFACTS_PATH_UBUNTU = "/usr/share/cellery/artifacts"
+const CELLERY_INSTALLATION_PATH_MAC = "/Library/Cellery"
+const CELLERY_INSTALLATION_PATH_UBUNTU = "/usr/share/cellery"
 
 const WSO2_APIM_HOST = "https://wso2-apim-gateway"
 

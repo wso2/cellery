@@ -21,13 +21,13 @@
 echo "Post installation process started"
 PRODUCT_HOME=/Library/Cellery/
 
-#Change permissions in home directory
+# Change permissions in home directory
 echo "Change permissions in product home"
 cd $PRODUCT_HOME
 chmod -R 755 .
 [ -d /usr/local/bin ] || mkdir /usr/local/bin
 
-#Add cellery shortcut to /usr/local/bin
+# Add cellery shortcut to /usr/local/bin
 rm -f /usr/local/bin/cellery
 ln -s $PRODUCT_HOME/cellery /usr/local/bin/cellery
 echo "Post installation process finished"

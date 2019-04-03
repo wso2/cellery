@@ -47,7 +47,7 @@ func RunRun(cellImageTag string, instanceName string, startDependencies bool, sh
 	if err != nil {
 		util.ExitWithErrorMessage("Error occurred while parsing cell image", err)
 	}
-	imageDir, err := extractImage(parsedCellImage)
+	imageDir, err := extractImage(parsedCellImage, spinner)
 	if err != nil {
 		spinner.Stop(false)
 		util.ExitWithErrorMessage("Error occurred while extracting image", err)
@@ -740,7 +740,7 @@ func startDependencyTree(registry string, tree *dependencyTreeNode, spinner *uti
 						ImageName:    dependencyNode.MetaData.Name,
 						ImageVersion: dependencyNode.MetaData.Version,
 					}
-					imageDir, err := extractImage(cellImage)
+					imageDir, err := extractImage(cellImage, spinner)
 					if err != nil {
 						spinner.Stop(false)
 						util.ExitWithErrorMessage(errorMessage, fmt.Errorf("failed to extract "+
@@ -773,7 +773,7 @@ func startDependencyTree(registry string, tree *dependencyTreeNode, spinner *uti
 
 // extractImage extracts the image into a temporary directory and returns the path.
 // Cleaning the path after finishing your work is your responsibility.
-func extractImage(cellImage *util.CellImage) (string, error) {
+func extractImage(cellImage *util.CellImage, spinner *util.Spinner) (string, error) {
 	repoLocation := filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, "repo", cellImage.Organization,
 		cellImage.ImageName, cellImage.ImageVersion)
 	zipLocation := filepath.Join(repoLocation, cellImage.ImageName+constants.CELL_IMAGE_EXT)
@@ -785,9 +785,10 @@ func extractImage(cellImage *util.CellImage) (string, error) {
 		return "", err
 	}
 	if !imageExists {
+		spinner.Pause()
 		RunPull(cellImageTag, true)
-		fmt.Printf("\r\x1b[2K%s Pulling Cell Image %s/%s:%s\n", util.Green("\U00002714"),
-			cellImage.Organization, cellImage.ImageName, cellImage.ImageVersion)
+		fmt.Println()
+		spinner.Resume()
 	}
 
 	// Unzipping image to a temporary location

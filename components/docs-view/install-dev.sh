@@ -22,8 +22,11 @@ npm run build
 
 if [[ -z "${CELLERY_HOME}" ]]
 then
-    echo CELLERY_HOME environment variable is required
-    exit -1
+    if [[ "$OSTYPE" == "linux-gnu" ]]; then
+        CELLERY_HOME=/usr/share/cellery
+    elif [[ "$OSTYPE" == "darwin"* ]]; then
+        CELLERY_HOME=/Library/Cellery
+    fi
 fi
 
 sudo rm -rf ${CELLERY_HOME}/docs-view

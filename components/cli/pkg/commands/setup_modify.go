@@ -28,7 +28,8 @@ import (
 )
 
 func RunSetupModify(addObservability bool) {
-	util.CopyDir(util.CelleryInstallationDir(), filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP, constants.ARTIFACTS))
+	util.CopyDir(filepath.Join(util.CelleryInstallationDir(), "artifacts"),
+		filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP, constants.ARTIFACTS))
 	artifactPath := filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP, constants.ARTIFACTS)
 	errorDeployingCelleryRuntime := "Error deploying cellery runtime"
 

@@ -62,35 +62,46 @@ func RunInit() {
 
 	cellTemplate := "import celleryio/cellery;\n" +
 		"\n" +
-		"cellery:Component helloWorldComp = {\n" +
-		"    name: \"hello-world\",\n" +
+		"// Hello Component\n" +
+		"// This Components exposes the HTML hello world page\n" +
+		"cellery:Component helloComponent = {\n" +
+		"    name: \"hello\",\n" +
 		"    source: {\n" +
-		"        image: \"sumedhassk/hello-world:1.0.0\"\n" +
+		"        image: \"wso2cellery/samples-hello-world-hello\"\n" +
 		"    },\n" +
 		"    ingresses: {\n" +
-		"        hello: new cellery:HttpApiIngress(\n" +
-		"                   9090,\n" +
-		"\n" +
-		"                   \"hello\",\n" +
-		"                   [\n" +
-		"                       {\n" +
-		"                           path: \"/*\",\n" +
-		"                           method: \"GET\"\n" +
-		"                       }\n" +
-		"                   ]\n" +
-		"\n" +
-		"        )\n" +
+		"        webUI: <cellery:WebIngress>{ // Web ingress will be always exposed globally.\n" +
+		"            port: 80,\n" +
+		"            gatewayConfig: {\n" +
+		"                vhost: \"hello-world.com\",\n" +
+		"                context: \"/\"\n" +
+		"            }\n" +
+		"        }\n" +
 		"    }\n" +
 		"};\n" +
 		"\n" +
-		"cellery:CellImage helloCell = new();\n" +
+		"// Hello World Cell\n" +
+		"cellery:CellImage helloCell = {\n" +
+		"    components: {\n" +
+		"        webComp: helloComponent\n" +
+		"    }\n" +
+		"};\n" +
 		"\n" +
-		"public function build(string orgName, string imageName, string imageVersion) {\n" +
-		"    helloCell.addComponent(helloWorldComp);\n" +
+		"# The Cellery Lifecycle Build method which is invoked for building the Cell Image.\n" +
+		"#\n" +
+		"# + iName - The Image name\n" +
+		"# + return - The created Cell Image\n" +
+		"public function build(cellery:ImageName iName) returns error? {\n" +
+		"    return cellery:createImage(helloCell, iName);\n" +
+		"}\n" +
 		"\n" +
-		"    helloCell.exposeGlobal(helloWorldComp);\n" +
-		"\n" +
-		"    _= cellery:createImage(helloCell, orgName, imageName, imageVersion);\n" +
+		"# The Cellery Lifecycle Run method which is invoked for creating a Cell Instance.\n" +
+		"#\n" +
+		"# + iName - The Image name\n" +
+		"# + instances - The map dependency instances of the Cell instance to be created\n" +
+		"# + return - The Cell instance\n" +
+		"public function run(cellery:ImageName iName, map<string> instances) returns error? {\n" +
+		"    return cellery:createInstance(helloCell, iName);\n" +
 		"}\n" +
 		"\n"
 
@@ -127,5 +138,5 @@ func RunInit() {
 
 	util.PrintSuccessMessage(fmt.Sprintf("Initialized project in directory: %s", util.Faint(projectDir)))
 	util.PrintWhatsNextMessage("build the image",
-		"cellery build "+projectName+"/"+projectName+".bal"+" [repo/]organization/image_name:version")
+		"cellery build "+projectName+"/"+projectName+".bal"+" organization/image_name:version")
 }

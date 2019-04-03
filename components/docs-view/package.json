@@ -11,16 +11,16 @@
     "eject": "react-scripts eject"
   },
   "dependencies": {
-    "@material-ui/core": "^3.9.2",
+    "@material-ui/core": "^3.9.3",
     "prop-types": "^15.7.2",
-    "react": "^16.8.3",
-    "react-dom": "^16.8.3",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
     "react-scripts": "^2.1.8",
     "vis": "^4.21.0"
   },
   "devDependencies": {
     "copyfiles": "^2.1.0",
-    "eslint-plugin-jest": "^22.3.0",
+    "eslint-plugin-jest": "^22.4.1",
     "rimraf": "^2.6.3"
   },
   "eslintConfig": {

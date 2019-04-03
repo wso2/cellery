@@ -481,14 +481,16 @@ func UserHomeDir() string {
 }
 
 func CelleryInstallationDir() string {
-	var celleryInstallationDirectory string
-	if runtime.GOOS == "darwin" {
-		celleryInstallationDirectory = constants.K8S_ARTIFACTS_PATH_MAC
+	celleryHome := os.Getenv(constants.CELLERY_HOME_ENV_VAR)
+	if celleryHome == "" {
+		if runtime.GOOS == "darwin" {
+			celleryHome = constants.CELLERY_INSTALLATION_PATH_MAC
+		}
+		if runtime.GOOS == "linux" {
+			celleryHome = constants.CELLERY_INSTALLATION_PATH_UBUNTU
+		}
 	}
-	if runtime.GOOS == "linux" {
-		celleryInstallationDirectory = constants.K8S_ARTIFACTS_PATH_UBUNTU
-	}
-	return celleryInstallationDirectory
+	return celleryHome
 }
 
 func CreateDir(dirPath string) error {
@@ -718,11 +720,12 @@ func StartNewSpinner(action string) *Spinner {
 		core:           spin.New(),
 		action:         action,
 		previousAction: action,
+		isRunning:      true,
 		isSpinning:     true,
 		error:          false,
 	}
 	go func() {
-		for newSpinner.isSpinning {
+		for newSpinner.isRunning {
 			newSpinner.mux.Lock()
 			newSpinner.spin()
 			newSpinner.mux.Unlock()
@@ -740,19 +743,35 @@ func (s *Spinner) SetNewAction(action string) {
 	s.mux.Unlock()
 }
 
+// Pause the spinner and clear the line
+func (s *Spinner) Pause() {
+	s.mux.Lock()
+	s.isSpinning = false
+	fmt.Printf("\r\x1b[2K")
+	s.mux.Unlock()
+}
+
+// Resume the previous action
+func (s *Spinner) Resume() {
+	s.mux.Lock()
+	s.isSpinning = true
+	s.spin()
+	s.mux.Unlock()
+}
+
 // Stop causes the spinner to stop
 func (s *Spinner) Stop(isSuccess bool) {
 	s.mux.Lock()
 	s.error = !isSuccess
 	s.action = ""
 	s.spin()
-	s.isSpinning = false
+	s.isRunning = false
 	s.mux.Unlock()
 }
 
 // spin causes the spinner to do one spin
 func (s *Spinner) spin() {
-	if s.isSpinning == true {
+	if s.isRunning && s.isSpinning {
 		if s.action != s.previousAction {
 			if s.previousAction != "" {
 				var icon string

@@ -37,6 +37,7 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"sync/atomic"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -596,31 +597,20 @@ func DownloadFromS3Bucket(bucket, item, path string, displayProgressBar bool) {
 		Region: aws.String(constants.AWS_REGION), Credentials: credentials.AnonymousCredentials},
 	)
 
-	if displayProgressBar {
-		s3ObjectSize := GetS3ObjectSize(bucket, item)
+	// Get the object size
+	s3ObjectSize := GetS3ObjectSize(bucket, item)
 
-		var downloadedFileSize = 0
-		bar := pb.StartNew(s3ObjectSize)
-
-		go func() {
-			for int(downloadedFileSize) < s3ObjectSize {
-				downloadedFileSize, err := GetFileSize(filepath.Join(path, item))
-				if err != nil {
-					ExitWithErrorMessage("Error downloading file", err)
-				}
-				bar.SetCurrent(downloadedFileSize)
-				time.Sleep(time.Microsecond)
-			}
-			bar.Finish()
-		}()
-	}
 	// Create a downloader with the session and custom options
 	downloader := s3manager.NewDownloader(sess, func(d *s3manager.Downloader) {
 		d.PartSize = 64 * 1024 * 1024 // 64MB per part
 		d.Concurrency = 6
 	})
 
-	numBytes, err := downloader.Download(file,
+	writer := &progressWriter{writer: file, size: s3ObjectSize, written: 0}
+	writer.display = displayProgressBar
+
+	writer.init(s3ObjectSize)
+	numBytes, err := downloader.Download(writer,
 		&s3.GetObjectInput{
 			Bucket: aws.String(bucket),
 			Key:    aws.String(item),
@@ -630,10 +620,32 @@ func DownloadFromS3Bucket(bucket, item, path string, displayProgressBar bool) {
 		os.Exit(1)
 	}
 
+	writer.finish()
 	fmt.Println("Download completed", file.Name(), numBytes, "bytes")
 }
 
-func GetS3ObjectSize(bucket, item string) int {
+func (pw *progressWriter) WriteAt(p []byte, off int64) (int, error) {
+	atomic.AddInt64(&pw.written, int64(len(p)))
+	if pw.display {
+		pw.bar.SetCurrent(pw.written)
+	}
+
+	return pw.writer.WriteAt(p, off)
+}
+
+func (pw *progressWriter) init(s3ObjectSize int64) {
+	if pw.display {
+		pw.bar = pb.StartNew(int(s3ObjectSize))
+	}
+}
+
+func (pw *progressWriter) finish() {
+	if pw.display {
+		pw.bar.Finish()
+	}
+}
+
+func GetS3ObjectSize(bucket, item string) int64 {
 	sess, _ := session.NewSession(&aws.Config{
 		Region: aws.String(constants.AWS_REGION), Credentials: credentials.AnonymousCredentials},
 	)
@@ -652,7 +664,7 @@ func GetS3ObjectSize(bucket, item string) int {
 			ExitWithErrorMessage("Error getting size of file", err)
 		}
 	}
-	return int(*result.ContentLength)
+	return *result.ContentLength
 }
 
 func ExtractTarGzFile(extractTo, archive_name string) error {

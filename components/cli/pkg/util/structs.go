@@ -165,6 +165,7 @@ type Spinner struct {
 	core           *spin.Spinner
 	action         string
 	previousAction string
+	isRunning      bool
 	isSpinning     bool
 	error          bool
 }

@@ -112,7 +112,7 @@ func RunBuild(tag string, fileName string) {
 	outStr := string(stdout.Bytes())
 	fmt.Printf("\r\x1b[2K\033[36m%s\033[m\n", outStr)
 
-	generateMetaData(parsedCellImage, targetDir)
+	generateMetaData(parsedCellImage, targetDir, spinner)
 
 	folderCopyError := util.CopyDir(targetDir, filepath.Join(projectDir, constants.ZIP_ARTIFACTS))
 	if folderCopyError != nil {
@@ -180,7 +180,7 @@ func RunBuild(tag string, fileName string) {
 }
 
 // generateMetaData generates the metadata file for cellery
-func generateMetaData(cellImage *util.CellImage, targetDir string) {
+func generateMetaData(cellImage *util.CellImage, targetDir string, spinner *util.Spinner) {
 	errorMessage := "Error occurred while generating metadata"
 	dependenciesFile := path.Join(targetDir, "tmp", "dependencies.properties")
 	dependenciesMap := map[string]*util.CellImageMetaData{}
@@ -217,9 +217,10 @@ func generateMetaData(cellImage *util.CellImage, targetDir string) {
 			// Pulling the dependency if not exist (This will not be executed most of the time)
 			dependencyExists, err := util.FileExists(cellImageZip)
 			if !dependencyExists {
+				spinner.Pause()
 				RunPull(dependency, true)
-				fmt.Printf("\r\x1b[2K%s Pulling Cell Image %s/%s:%s\n", util.Green("\U00002714"),
-					dependencyCellImage.Organization, dependencyCellImage.ImageName, dependencyCellImage.ImageVersion)
+				fmt.Println()
+				spinner.Resume()
 			}
 
 			// Create temp directory

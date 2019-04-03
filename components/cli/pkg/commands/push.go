@@ -103,7 +103,7 @@ func RunPush(cellImage string) {
 					Data: credentialsData,
 				})
 				if err == nil {
-					fmt.Printf("\n\n%s Saved Credentials for %s Registry", util.GreenBold("\U00002714"),
+					fmt.Printf("\n%s Saved Credentials for %s Registry", util.GreenBold("\U00002714"),
 						util.Bold(parsedCellImage.Registry))
 				} else {
 					fmt.Printf("\n\n%s %s", util.YellowBold("\U000026A0"),
@@ -114,7 +114,7 @@ func RunPush(cellImage string) {
 			}
 		}
 	}
-	util.PrintSuccessMessage(fmt.Sprintf("Successfully pushed cell image: %s", util.Bold(cellImage)))
+	util.PrintSuccessMessage(fmt.Sprintf("\nSuccessfully pushed cell image: %s", util.Bold(cellImage)))
 	util.PrintWhatsNextMessage("pull the image", "cellery pull "+cellImage)
 }
 

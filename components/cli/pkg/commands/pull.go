@@ -37,7 +37,7 @@ import (
 
 // RunPull connects to the Cellery Registry and pulls the cell image and saves it in the local repository.
 // This also adds the relevant ballerina files to the ballerina repo directory.
-func RunPull(cellImage string, silent bool) {
+func RunPull(cellImage string, isSilent bool) {
 	parsedCellImage, err := util.ParseImageTag(cellImage)
 	if err != nil {
 		util.ExitWithErrorMessage("Error occurred while parsing cell image", err)
@@ -64,13 +64,13 @@ func RunPull(cellImage string, silent bool) {
 
 	if isCredentialsPresent {
 		// Pulling the image using the saved credentials
-		err = pullImage(parsedCellImage, registryCredentials.Username, registryCredentials.Password, silent)
+		err = pullImage(parsedCellImage, registryCredentials.Username, registryCredentials.Password)
 		if err != nil {
 			util.ExitWithErrorMessage("Failed to pull image", err)
 		}
 	} else {
 		// Pulling image without credentials
-		err = pullImage(parsedCellImage, "", "", silent)
+		err = pullImage(parsedCellImage, "", "")
 		if err != nil {
 			if strings.Contains(err.Error(), "401") {
 				// Requesting the credentials since server responded with an Unauthorized status code
@@ -81,7 +81,7 @@ func RunPull(cellImage string, silent bool) {
 				fmt.Println()
 
 				// Trying to pull the image again with the provided credentials
-				err = pullImage(parsedCellImage, registryCredentials.Username, registryCredentials.Password, silent)
+				err = pullImage(parsedCellImage, registryCredentials.Username, registryCredentials.Password)
 				if err != nil {
 					util.ExitWithErrorMessage("Failed to pull image", err)
 				}
@@ -96,7 +96,7 @@ func RunPull(cellImage string, silent bool) {
 					Data: credentialsData,
 				})
 				if err == nil {
-					fmt.Printf("\n\n%s Saved Credentials for %s Registry", util.GreenBold("\U00002714"),
+					fmt.Printf("\n%s Saved Credentials for %s Registry", util.GreenBold("\U00002714"),
 						util.Bold(parsedCellImage.Registry))
 				} else {
 					fmt.Printf("\n\n%s %s", util.YellowBold("\U000026A0"),
@@ -107,43 +107,32 @@ func RunPull(cellImage string, silent bool) {
 			}
 		}
 	}
-	if !silent {
-		util.PrintSuccessMessage(fmt.Sprintf("Successfully pulled cell image: %s", util.Bold(cellImage)))
+	if !isSilent {
+		util.PrintSuccessMessage(fmt.Sprintf("\nSuccessfully pulled cell image: %s", util.Bold(cellImage)))
 		util.PrintWhatsNextMessage("run the image", "cellery run "+cellImage)
 	}
 }
 
-func pullImage(parsedCellImage *util.CellImage, username string, password string, silent bool) error {
+func pullImage(parsedCellImage *util.CellImage, username string, password string) error {
 	repository := parsedCellImage.Organization + "/" + parsedCellImage.ImageName
 
-	var spinner *util.Spinner = nil
-	if !silent {
-		spinner = util.StartNewSpinner("Connecting to " + util.Bold(parsedCellImage.Registry))
-		defer func() {
-			if !silent {
-				spinner.Stop(true)
-			}
-		}()
-	}
+	spinner := util.StartNewSpinner("Connecting to " + util.Bold(parsedCellImage.Registry))
+	defer func() {
+		spinner.Stop(true)
+	}()
 
 	// Initiating a connection to Cellery Registry
 	hub, err := registry.New("https://"+parsedCellImage.Registry, username, password)
 	if err != nil {
-		if !silent {
-			spinner.Stop(false)
-		}
+		spinner.Stop(false)
 		util.ExitWithErrorMessage("Error occurred while initializing connection to the Cellery Registry", err)
 	}
 
 	// Fetching the Docker Image Manifest
-	if !silent {
-		spinner.SetNewAction("Fetching metadata")
-	}
+	spinner.SetNewAction("Fetching metadata")
 	cellImageManifest, err := hub.Manifest(repository, parsedCellImage.ImageVersion)
 	if err != nil {
-		if !silent {
-			spinner.Stop(false)
-		}
+		spinner.Stop(false)
 		return err
 	}
 
@@ -152,36 +141,28 @@ func pullImage(parsedCellImage *util.CellImage, username string, password string
 		cellImageReference := cellImageManifest.References()[0]
 		cellImageDigest = cellImageReference.Digest
 
-		if !silent {
-			imageName := fmt.Sprintf("%s/%s:%s", parsedCellImage.Organization, parsedCellImage.ImageName,
-				parsedCellImage.ImageVersion)
-			spinner.SetNewAction("Pulling image " + util.Bold(imageName))
-		}
+		imageName := fmt.Sprintf("%s/%s:%s", parsedCellImage.Organization, parsedCellImage.ImageName,
+			parsedCellImage.ImageVersion)
+		spinner.SetNewAction("Pulling image " + util.Bold(imageName))
 
 		// Downloading the Cell Image from the repository
 		reader, err := hub.DownloadBlob(repository, cellImageReference.Digest)
 		if err != nil {
-			if !silent {
-				spinner.Stop(false)
-			}
+			spinner.Stop(false)
 			return err
 		}
 		if reader != nil {
 			defer func() {
 				err = reader.Close()
 				if err != nil {
-					if !silent {
-						spinner.Stop(false)
-					}
+					spinner.Stop(false)
 					util.ExitWithErrorMessage("Error occurred while cleaning up", err)
 				}
 			}()
 		}
 		bytes, err := ioutil.ReadAll(reader)
 		if err != nil {
-			if !silent {
-				spinner.Stop(false)
-			}
+			spinner.Stop(false)
 			util.ExitWithErrorMessage("Error occurred while pulling cell image", err)
 		}
 
@@ -191,34 +172,24 @@ func pullImage(parsedCellImage *util.CellImage, username string, password string
 		// Cleaning up the old image if it already exists
 		hasOldImage, err := util.FileExists(repoLocation)
 		if err != nil {
-			if !silent {
-				spinner.Stop(false)
-			}
+			spinner.Stop(false)
 			util.ExitWithErrorMessage("Error occurred while removing the old cell image", err)
 		}
 		if hasOldImage {
-			if !silent {
-				spinner.SetNewAction("Removing old Image")
-			}
+			spinner.SetNewAction("Removing old Image")
 			err = os.RemoveAll(repoLocation)
 			if err != nil {
-				if !silent {
-					spinner.Stop(false)
-				}
+				spinner.Stop(false)
 				util.ExitWithErrorMessage("Error while cleaning up", err)
 			}
 		}
 
-		if !silent {
-			spinner.SetNewAction("Saving new Image to the Local Repository")
-		}
+		spinner.SetNewAction("Saving new Image to the Local Repository")
 
 		// Creating the Repo location
 		err = util.CreateDir(repoLocation)
 		if err != nil {
-			if !silent {
-				spinner.Stop(false)
-			}
+			spinner.Stop(false)
 			util.ExitWithErrorMessage("Error occurred while saving cell image to local repo", err)
 		}
 
@@ -226,23 +197,17 @@ func pullImage(parsedCellImage *util.CellImage, username string, password string
 		cellImageFile := filepath.Join(repoLocation, parsedCellImage.ImageName+constants.CELL_IMAGE_EXT)
 		err = ioutil.WriteFile(cellImageFile, bytes, 0644)
 		if err != nil {
-			if !silent {
-				spinner.Stop(false)
-			}
+			spinner.Stop(false)
 			util.ExitWithErrorMessage("Error occurred while saving cell image to local repo", err)
 		}
 	} else {
-		if !silent {
-			spinner.Stop(false)
-		}
+		spinner.Stop(false)
 		util.ExitWithErrorMessage("Invalid cell image",
 			errors.New(fmt.Sprintf("expected exactly 1 File Layer, but found %d",
 				len(cellImageManifest.References()))))
 	}
 
-	if !silent {
-		spinner.Stop(true)
-	}
+	spinner.Stop(true)
 	fmt.Printf("\nImage Digest : %s\n", util.Bold(cellImageDigest))
 	return nil
 }

@@ -31,7 +31,6 @@ import io.cellery.models.Component;
 import io.cellery.models.GRPC;
 import io.cellery.models.GatewaySpec;
 import io.cellery.models.GatewayTemplate;
-import io.cellery.models.OIDC;
 import io.cellery.models.ServiceTemplate;
 import io.cellery.models.ServiceTemplateSpec;
 import io.cellery.models.TCP;
@@ -65,10 +64,8 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.IntStream;
 
 import static io.cellery.CelleryConstants.ANNOTATION_CELL_IMAGE_NAME;
@@ -86,6 +83,7 @@ import static io.cellery.CelleryConstants.YAML;
 import static io.cellery.CelleryUtils.copyResourceToTarget;
 import static io.cellery.CelleryUtils.getValidName;
 import static io.cellery.CelleryUtils.processEnvVars;
+import static io.cellery.CelleryUtils.processOidc;
 import static io.cellery.CelleryUtils.toYaml;
 import static io.cellery.CelleryUtils.writeToFile;
 
@@ -136,7 +134,7 @@ public class CreateImage extends BlockingNativeCallableUnit {
 
             //Process Optional fields
             if (attributeMap.containsKey("ingresses")) {
-                processHttpIngress(((BMap<?, ?>) attributeMap.get("ingresses")).getMap(), component);
+                processIngress(((BMap<?, ?>) attributeMap.get("ingresses")).getMap(), component);
             }
             if (attributeMap.containsKey("labels")) {
                 ((BMap<?, ?>) attributeMap.get("labels")).getMap().forEach((labelKey, labelValue) ->
@@ -161,7 +159,7 @@ public class CreateImage extends BlockingNativeCallableUnit {
      * @param ingressMap list of ingresses defined
      * @param component  current component
      */
-    private void processHttpIngress(LinkedHashMap<?, ?> ingressMap, Component component) {
+    private void processIngress(LinkedHashMap<?, ?> ingressMap, Component component) {
         ingressMap.forEach((key, ingressValues) -> {
             BMap ingressValueMap = ((BMap) ingressValues);
             LinkedHashMap attributeMap = ingressValueMap.getMap();
@@ -209,7 +207,6 @@ public class CreateImage extends BlockingNativeCallableUnit {
 
     private void processHttpIngress(Component component, LinkedHashMap attributeMap) {
         API httpAPI = new API();
-        httpAPI.setContext(((BString) attributeMap.get("context")).stringValue());
         int containerPort = (int) ((BInteger) attributeMap.get("port")).intValue();
         // Validate the container port is same for all the ingresses.
         if (component.getContainerPort() > 0 && containerPort != component.getContainerPort()) {
@@ -217,22 +214,30 @@ public class CreateImage extends BlockingNativeCallableUnit {
                     "not supported.");
         }
         component.setContainerPort(containerPort);
-        if ("global".equals(((BString) attributeMap.get("expose")).stringValue())) {
+        // Process optional attributes
+        if (attributeMap.containsKey("context")) {
+            httpAPI.setContext(((BString) attributeMap.get("context")).stringValue());
+        }
+
+        if (attributeMap.containsKey("expose") &&
+                "global".equals(((BString) attributeMap.get("expose")).stringValue())) {
             httpAPI.setGlobal(true);
         } else {
             httpAPI.setGlobal(false);
         }
-        List<APIDefinition> apiDefinitions = new ArrayList<>();
-        BValueArray resourceDefs =
-                (BValueArray) ((BMap<?, ?>) attributeMap.get("definition")).getMap().get("resources");
-        IntStream.range(0, (int) resourceDefs.size()).forEach(resourceIndex -> {
-            APIDefinition apiDefinition = new APIDefinition();
-            LinkedHashMap definitions = ((BMap) resourceDefs.getBValue(resourceIndex)).getMap();
-            apiDefinition.setPath(((BString) definitions.get("path")).stringValue());
-            apiDefinition.setMethod(((BString) definitions.get("method")).stringValue());
-            apiDefinitions.add(apiDefinition);
-        });
-        httpAPI.setDefinitions(apiDefinitions);
+        if (attributeMap.containsKey("definition")) {
+            List<APIDefinition> apiDefinitions = new ArrayList<>();
+            BValueArray resourceDefs =
+                    (BValueArray) ((BMap<?, ?>) attributeMap.get("definition")).getMap().get("resources");
+            IntStream.range(0, (int) resourceDefs.size()).forEach(resourceIndex -> {
+                APIDefinition apiDefinition = new APIDefinition();
+                LinkedHashMap definitions = ((BMap) resourceDefs.getBValue(resourceIndex)).getMap();
+                apiDefinition.setPath(((BString) definitions.get("path")).stringValue());
+                apiDefinition.setMethod(((BString) definitions.get("method")).stringValue());
+                apiDefinitions.add(apiDefinition);
+            });
+            httpAPI.setDefinitions(apiDefinitions);
+        }
         httpAPI.setBackend(component.getService());
         component.addApi(httpAPI);
     }
@@ -261,53 +266,9 @@ public class CreateImage extends BlockingNativeCallableUnit {
         }
         if (gatewayConfig.containsKey("oidc")) {
             // OIDC enabled
-            OIDC oidc = processOidc(((BMap) gatewayConfig.get("oidc")).getMap());
-            webIngress.setOidc(oidc);
+            webIngress.setOidc(processOidc(((BMap) gatewayConfig.get("oidc")).getMap()));
         }
         component.addWeb(webIngress);
-    }
-
-    private OIDC processOidc(LinkedHashMap oidcConfig) {
-        OIDC oidc = new OIDC();
-        oidc.setDiscoveryUrl(((BString) oidcConfig.get("discoveryUrl")).stringValue());
-        oidc.setRedirectUrl(((BString) oidcConfig.get("redirectUrl")).stringValue());
-        oidc.setBaseUrl(((BString) oidcConfig.get("baseUrl")).stringValue());
-        oidc.setClientId(((BString) oidcConfig.get("clientId")).stringValue());
-        BValueArray nonSecurePaths = ((BValueArray) oidcConfig.get("nonSecurePaths"));
-        Set<String> nonSecurePathList = new HashSet<>();
-        IntStream.range(0, (int) nonSecurePaths.size()).forEach(nonSecurePathIndex ->
-                nonSecurePathList.add(nonSecurePaths.getString(nonSecurePathIndex)));
-        oidc.setNonSecurePaths(nonSecurePathList);
-
-        BValueArray securePaths = ((BValueArray) oidcConfig.get("securePaths"));
-        Set<String> securePathList = new HashSet<>();
-        IntStream.range(0, (int) securePaths.size()).forEach(securePathIndex ->
-                securePathList.add(securePaths.getString(securePathIndex)));
-        oidc.setSecurePaths(securePathList);
-
-        // Optional fields
-        if (oidcConfig.containsKey("clientSecret")) {
-            // Not using DCR
-            oidc.setClientSecret(((BString) oidcConfig.get("clientSecret")).stringValue());
-        } else {
-            // Using DCR
-            oidc.setDcrUser(((BString) oidcConfig.get("dcrUser")).stringValue());
-            oidc.setDcrPassword(((BString) oidcConfig.get("dcrPassword")).stringValue());
-            if (oidcConfig.containsKey("dcrUrl")) {
-                // DCR url is optional
-                oidc.setDcrUrl(((BString) oidcConfig.get("dcrUrl")).stringValue());
-            }
-        }
-        if (oidc.getDcrUser() == null && oidc.getClientSecret() == null) {
-            //DCR or ClientSecret is not provided
-            throw new BallerinaException("Error while processing OIDC config. Either clientSecret of dcrUser need to " +
-                    "be specified. " + oidcConfig);
-        }
-        if (oidcConfig.containsKey("subjectClaim")) {
-            //optional field
-            oidc.setSubjectClaim(((BString) oidcConfig.get("subjectClaim")).stringValue());
-        }
-        return oidc;
     }
 
 

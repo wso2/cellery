@@ -19,8 +19,12 @@ package io.cellery;
 
 import com.esotericsoftware.yamlbeans.YamlWriter;
 import io.cellery.models.Component;
+import io.cellery.models.OIDC;
 import org.apache.commons.io.FileUtils;
 import org.ballerinalang.model.values.BMap;
+import org.ballerinalang.model.values.BString;
+import org.ballerinalang.model.values.BValue;
+import org.ballerinalang.model.values.BValueArray;
 import org.ballerinalang.util.exceptions.BallerinaException;
 
 import java.io.File;
@@ -30,8 +34,11 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Locale;
+import java.util.Set;
+import java.util.stream.IntStream;
 
 import static io.cellery.CelleryConstants.DEFAULT_PARAMETER_VALUE;
 import static io.cellery.CelleryConstants.RESOURCES;
@@ -81,6 +88,49 @@ public class CelleryUtils {
                 component.addEnv(k.toString(), ((BMap) v).getMap().get("value").toString());
             }
         });
+    }
+
+    /**
+     * Process OIDCConfig.
+     *
+     * @param oidcConfig OIDC configuration
+     */
+    public static OIDC processOidc(LinkedHashMap oidcConfig) {
+        OIDC oidc = new OIDC();
+        oidc.setDiscoveryUrl(((BString) oidcConfig.get("discoveryUrl")).stringValue());
+        oidc.setRedirectUrl(((BString) oidcConfig.get("redirectUrl")).stringValue());
+        oidc.setBaseUrl(((BString) oidcConfig.get("baseUrl")).stringValue());
+        oidc.setClientId(((BString) oidcConfig.get("clientId")).stringValue());
+        BValueArray nonSecurePaths = ((BValueArray) oidcConfig.get("nonSecurePaths"));
+        Set<String> nonSecurePathList = new HashSet<>();
+        IntStream.range(0, (int) nonSecurePaths.size()).forEach(nonSecurePathIndex ->
+                nonSecurePathList.add(nonSecurePaths.getString(nonSecurePathIndex)));
+        oidc.setNonSecurePaths(nonSecurePathList);
+
+        BValueArray securePaths = ((BValueArray) oidcConfig.get("securePaths"));
+        Set<String> securePathList = new HashSet<>();
+        IntStream.range(0, (int) securePaths.size()).forEach(securePathIndex ->
+                securePathList.add(securePaths.getString(securePathIndex)));
+        oidc.setSecurePaths(securePathList);
+
+        if (((BValue) oidcConfig.get("clientSecret")).getType().getName().equals("string")) {
+            // Not using DCR
+            oidc.setClientSecret(((BString) oidcConfig.get("clientSecret")).stringValue());
+        } else {
+            // Using DCR
+            LinkedHashMap dcrConfig = ((BMap) oidcConfig.get("clientSecret")).getMap();
+            oidc.setDcrUser(((BString) dcrConfig.get("dcrUser")).stringValue());
+            oidc.setDcrPassword(((BString) dcrConfig.get("dcrPassword")).stringValue());
+            if (dcrConfig.containsKey("dcrUrl")) {
+                // DCR url is optional
+                oidc.setDcrUrl(((BString) oidcConfig.get("dcrUrl")).stringValue());
+            }
+        }
+        if (oidcConfig.containsKey("subjectClaim")) {
+            //optional field
+            oidc.setSubjectClaim(((BString) oidcConfig.get("subjectClaim")).stringValue());
+        }
+        return oidc;
     }
 
     /**

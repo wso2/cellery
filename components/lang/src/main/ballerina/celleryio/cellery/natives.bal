@@ -104,9 +104,9 @@ public type GRPCIngress record {
 
 public type HttpApiIngress record {
     int port;
-    string context;
-    ApiDefinition? definition;
-    Expose expose;
+    string context?;
+    ApiDefinition definition?;
+    Expose expose?;
     boolean authenticate = true;
     !...;
 };
@@ -142,8 +142,7 @@ public type OIDC record {
     string[] securePaths = [];
     string discoveryUrl;
     string clientId;
-    string clientSecret?;
-    DCR dcr?;
+    string|DCR clientSecret;
     string redirectUrl;
     string baseUrl;
     string subjectClaim?;

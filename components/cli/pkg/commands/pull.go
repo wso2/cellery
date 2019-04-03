@@ -108,7 +108,8 @@ func RunPull(cellImage string, isSilent bool) {
 		}
 	}
 	if !isSilent {
-		util.PrintSuccessMessage(fmt.Sprintf("\nSuccessfully pulled cell image: %s", util.Bold(cellImage)))
+		fmt.Println()
+		util.PrintSuccessMessage(fmt.Sprintf("Successfully pulled cell image: %s", util.Bold(cellImage)))
 		util.PrintWhatsNextMessage("run the image", "cellery run "+cellImage)
 	}
 }

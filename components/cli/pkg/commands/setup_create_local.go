@@ -120,7 +120,7 @@ func installVM() error {
 	util.ExecuteCommand(exec.Command(constants.VBOX_MANAGE, "hostonlyif", "create"),
 		"Error Installing VM")
 	util.ExecuteCommand(exec.Command(constants.VBOX_MANAGE, "hostonlyif", "ipconfig", "vboxnet0",
-		"--ip", "192.168.56.10"), "Error Installing VM")
+		"--ip", "192.168.56.1"), "Error Installing VM")
 
 	util.ExecuteCommand(exec.Command(constants.VBOX_MANAGE, "import", vmPath), "Error Installing VM")
 	util.ExecuteCommand(exec.Command(constants.VBOX_MANAGE, "modifyvm", constants.VM_NAME,

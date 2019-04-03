@@ -19,7 +19,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -84,13 +83,6 @@ func main() {
 		log.Printf("Writing log to stdout because error occured while opening log file: %v", err)
 	} else {
 		log.SetOutput(logFile)
-	}
-
-	// Validating the environment
-	celleryHome := os.Getenv(constants.CELLERY_HOME_ENV_VAR)
-	if celleryHome == "" {
-		util.ExitWithErrorMessage("Error occurred while initializing",
-			errors.New("\"CELLERY_HOME\" environment variable not set"))
 	}
 
 	cmd := newCliCommand()

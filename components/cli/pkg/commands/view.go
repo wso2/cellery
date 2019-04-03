@@ -32,8 +32,7 @@ import (
 
 // RunView opens the View for a particular Cell Image
 func RunView(cellImage string) {
-	celleryHome := os.Getenv(constants.CELLERY_HOME_ENV_VAR)
-	celleryHomeDocsViewDir := path.Join(celleryHome, constants.CELLERY_HOME_DOCS_VIEW_DIR)
+	celleryHomeDocsViewDir := path.Join(util.CelleryInstallationDir(), constants.CELLERY_HOME_DOCS_VIEW_DIR)
 	errorMessage := "Error occurred while generating Docs View"
 
 	// Making a copy of the Docs Viewer

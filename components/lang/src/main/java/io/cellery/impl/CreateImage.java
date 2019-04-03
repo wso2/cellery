@@ -219,27 +219,31 @@ public class CreateImage extends BlockingNativeCallableUnit {
             httpAPI.setContext(((BString) attributeMap.get("context")).stringValue());
         }
 
-        if (attributeMap.containsKey("expose") &&
-                "global".equals(((BString) attributeMap.get("expose")).stringValue())) {
-            httpAPI.setGlobal(true);
-        } else {
-            httpAPI.setGlobal(false);
+        if (attributeMap.containsKey("expose")) {
+            if ("global".equals(((BString) attributeMap.get("expose")).stringValue())) {
+                httpAPI.setGlobal(true);
+                httpAPI.setBackend(component.getService());
+            } else if ("local".equals(((BString) attributeMap.get("expose")).stringValue())) {
+                httpAPI.setGlobal(false);
+                httpAPI.setBackend(component.getService());
+            }
+            if (attributeMap.containsKey("definition")) {
+                List<APIDefinition> apiDefinitions = new ArrayList<>();
+                BValueArray resourceDefs =
+                        (BValueArray) ((BMap<?, ?>) attributeMap.get("definition")).getMap().get("resources");
+                IntStream.range(0, (int) resourceDefs.size()).forEach(resourceIndex -> {
+                    APIDefinition apiDefinition = new APIDefinition();
+                    LinkedHashMap definitions = ((BMap) resourceDefs.getBValue(resourceIndex)).getMap();
+                    apiDefinition.setPath(((BString) definitions.get("path")).stringValue());
+                    apiDefinition.setMethod(((BString) definitions.get("method")).stringValue());
+                    apiDefinitions.add(apiDefinition);
+                });
+                if (apiDefinitions.size() > 0) {
+                    httpAPI.setDefinitions(apiDefinitions);
+                }
+            }
+            component.addApi(httpAPI);
         }
-        if (attributeMap.containsKey("definition")) {
-            List<APIDefinition> apiDefinitions = new ArrayList<>();
-            BValueArray resourceDefs =
-                    (BValueArray) ((BMap<?, ?>) attributeMap.get("definition")).getMap().get("resources");
-            IntStream.range(0, (int) resourceDefs.size()).forEach(resourceIndex -> {
-                APIDefinition apiDefinition = new APIDefinition();
-                LinkedHashMap definitions = ((BMap) resourceDefs.getBValue(resourceIndex)).getMap();
-                apiDefinition.setPath(((BString) definitions.get("path")).stringValue());
-                apiDefinition.setMethod(((BString) definitions.get("method")).stringValue());
-                apiDefinitions.add(apiDefinition);
-            });
-            httpAPI.setDefinitions(apiDefinitions);
-        }
-        httpAPI.setBackend(component.getService());
-        component.addApi(httpAPI);
     }
 
     private void processWebIngress(Component component, LinkedHashMap attributeMap) {
@@ -318,34 +322,34 @@ public class CreateImage extends BlockingNativeCallableUnit {
     private void generateCell() {
         List<Component> components =
                 new ArrayList<>(cellImage.getComponentNameToComponentMap().values());
-        GatewaySpec spec = new GatewaySpec();
+        GatewaySpec gatewaySpec = new GatewaySpec();
         List<ServiceTemplate> serviceTemplateList = new ArrayList<>();
         for (Component component : components) {
             ServiceTemplateSpec templateSpec = new ServiceTemplateSpec();
             if (component.getWebList().size() > 0) {
                 templateSpec.setServicePort(DEFAULT_GATEWAY_PORT);
-                spec.setType(ENVOY_GATEWAY);
+                gatewaySpec.setType(ENVOY_GATEWAY);
                 // Only Single web ingress is supported for 0.2.0
                 // Therefore we only process the 0th element
                 Web webIngress = component.getWebList().get(0);
-                spec.addHttpAPI(Collections.singletonList(webIngress.getHttpAPI()));
-                spec.setHost(webIngress.getVhost());
-                spec.setOidc(webIngress.getOidc());
+                gatewaySpec.addHttpAPI(Collections.singletonList(webIngress.getHttpAPI()));
+                gatewaySpec.setHost(webIngress.getVhost());
+                gatewaySpec.setOidc(webIngress.getOidc());
             } else if (component.getApis().size() > 0) {
                 // HTTP ingress
                 templateSpec.setServicePort(DEFAULT_GATEWAY_PORT);
-                spec.setType(MICRO_GATEWAY);
-                spec.addHttpAPI(component.getApis());
+                gatewaySpec.setType(MICRO_GATEWAY);
+                gatewaySpec.addHttpAPI(component.getApis());
             } else if (component.getTcpList().size() > 0) {
                 // Only Single TCP ingress is supported for 0.2.0
                 // Therefore we only process the 0th element
-                spec.setType(ENVOY_GATEWAY);
-                spec.addTCP(component.getTcpList());
+                gatewaySpec.setType(ENVOY_GATEWAY);
+                gatewaySpec.addTCP(component.getTcpList());
                 templateSpec.setServicePort(component.getTcpList().get(0).getPort());
             } else if (component.getGrpcList().size() > 0) {
-                spec.setType(ENVOY_GATEWAY);
+                gatewaySpec.setType(ENVOY_GATEWAY);
                 templateSpec.setServicePort(component.getGrpcList().get(0).getPort());
-                spec.addGRPC(component.getGrpcList());
+                gatewaySpec.addGRPC(component.getGrpcList());
             }
             templateSpec.setReplicas(component.getReplicas());
             templateSpec.setProtocol(component.getProtocol());
@@ -378,7 +382,7 @@ public class CreateImage extends BlockingNativeCallableUnit {
         }
 
         GatewayTemplate gatewayTemplate = new GatewayTemplate();
-        gatewayTemplate.setSpec(spec);
+        gatewayTemplate.setSpec(gatewaySpec);
 
         CellSpec cellSpec = new CellSpec();
         cellSpec.setGatewayTemplate(gatewayTemplate);

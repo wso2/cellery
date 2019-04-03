@@ -13,7 +13,6 @@ cellery:Component employeeComponent = {
         employee: <cellery:HttpApiIngress>{
             port: 8080,
             context: "employee",
-            definition: (),
             expose: "local"
         }
     },

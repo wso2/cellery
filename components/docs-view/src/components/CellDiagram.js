@@ -54,18 +54,25 @@ class CellDiagram extends React.Component {
         },
         edges: {
             width: 2,
-            smooth: false,
+            smooth: {
+                type: "continuous",
+                forceDirection: "none",
+                roundness: 0
+            },
             color: {
                 inherit: false,
                 color: "#ccc7c7"
             },
             arrows: {
-                to: {
+                from: {
                     enabled: true,
                     scaleFactor: 0.5
                 }
-            }, scaling: {
-                max: 10000
+            },
+            font: {
+                align: "horizontal",
+                size: 12,
+                color: "#777777"
             }
         },
         layout: {
@@ -75,14 +82,14 @@ class CellDiagram extends React.Component {
         physics: {
             enabled: true,
             forceAtlas2Based: {
-                gravitationalConstant: -500,
-                centralGravity: 0.075,
+                gravitationalConstant: -800,
+                centralGravity: 0.1,
                 avoidOverlap: 1
             },
             solver: "forceAtlas2Based",
             stabilization: {
                 enabled: true,
-                iterations: 20,
+                iterations: 25,
                 fit: true
             }
         },
@@ -224,8 +231,9 @@ class CellDiagram extends React.Component {
                 if (!linkMatches) {
                     dataEdges.push({
                         id: index,
-                        from: edge.from,
-                        to: edge.to
+                        from: edge.to,
+                        to: edge.from,
+                        label: edge.alias
                     });
                 }
             });
@@ -241,9 +249,12 @@ class CellDiagram extends React.Component {
             group: CellDiagram.NodeType.GATEWAY,
             fixed: true
         });
+
+        const incomingNodes = [];
         dataEdges.forEach((edge, index) => {
-            if (edge.to === focusedCell) {
-                edge.to = `${focusedCell}:${CellDiagram.NodeType.GATEWAY}`;
+            if (edge.from === focusedCell) {
+                edge.from = `${focusedCell}:${CellDiagram.NodeType.GATEWAY}`;
+                incomingNodes.push(edge.from);
             }
         });
         const edges = new vis.DataSet(dataEdges);
@@ -300,7 +311,7 @@ class CellDiagram extends React.Component {
             });
 
             this.network.on("stabilizationIterationsDone", () => {
-                const centerPoint = getPolygonCentroid(getGroupNodePositions(CellDiagram.NodeType.COMPONENT));
+                let centerPoint = getPolygonCentroid(getGroupNodePositions(CellDiagram.NodeType.COMPONENT));
                 const polygonRadius = getDistance(getGroupNodePositions(CellDiagram.NodeType.COMPONENT),
                     centerPoint);
                 const size = polygonRadius + spacing;
@@ -308,17 +319,36 @@ class CellDiagram extends React.Component {
                 for (const nodeId in allNodes) {
                     if (allNodes[nodeId].group === CellDiagram.NodeType.COMPONENT) {
                         allNodes[nodeId].fixed = true;
+
+                        if (incomingNodes.length > 0) {
+                            const positions = this.network.getPositions(allNodes[nodeId].id);
+                            if (componentNodes.length === 1) {
+                                this.network.moveNode(allNodes[nodeId].id, positions[allNodes[nodeId].id].x, 100);
+                            } else if (centerPoint.y > -100 && centerPoint.y < 50) {
+                                this.network.moveNode(allNodes[nodeId].id,
+                                    positions[allNodes[nodeId].id].x, positions[allNodes[nodeId].id].y + 100);
+                            } else {
+                                this.network.moveNode(allNodes[nodeId].id,
+                                    positions[allNodes[nodeId].id].x, positions[allNodes[nodeId].id].y + 200);
+                            }
+                        }
                         if (allNodes.hasOwnProperty(nodeId)) {
                             updatedNodes.push(allNodes[nodeId]);
                         }
                     }
                 }
 
+                centerPoint = getPolygonCentroid(getGroupNodePositions(CellDiagram.NodeType.COMPONENT));
+
                 const focusedNode = nodes.get(focusedCell);
                 focusedNode.size = size;
                 focusedNode.label = undefined;
                 focusedNode.fixed = true;
-                focusedNode.mass = polygonRadius / 10;
+                if (componentNodes.length === 1) {
+                    focusedNode.mass = 5;
+                } else {
+                    focusedNode.mass = polygonRadius / 10;
+                }
                 this.network.moveNode(focusedCell, centerPoint.x, centerPoint.y);
                 updatedNodes.push(focusedNode);
 

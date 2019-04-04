@@ -72,6 +72,7 @@ const App = ({data, classes}) => {
                 const dependency = cell.dependencies[alias];
                 diagramData.cells.push(dependency.name);
                 diagramData.dependencyLinks.push({
+                    alias: alias,
                     from: cell.name,
                     to: dependency.name
                 });

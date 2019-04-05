@@ -39,7 +39,6 @@ import (
 	"strings"
 	"time"
 
-	"gopkg.in/cheggaaa/pb.v1"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -50,6 +49,7 @@ import (
 	"github.com/manifoldco/promptui"
 	"github.com/tj/go-spin"
 	"golang.org/x/crypto/ssh/terminal"
+	"gopkg.in/cheggaaa/pb.v1"
 
 	"github.com/cellery-io/sdk/components/cli/pkg/constants"
 	"github.com/cellery-io/sdk/components/cli/pkg/kubectl"

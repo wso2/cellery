@@ -85,7 +85,7 @@ func createMinimalGcpRuntime() {
 	gcpSpinner := util.StartNewSpinner("Creating GKE client")
 	createKubernentesClusterOnGcp(ctx, gcpSpinner)
 
-	sqlService, serviceAccountEmailAddress := configureMysqlOnGcp(ctx, gcpSpinner)
+	sqlService, serviceAccountEmailAddress := configureMysqlOnMinimalGcp(ctx, gcpSpinner)
 
 	configureBucketOnGcp(ctx, gcpSpinner, gcpBucketName, serviceAccountEmailAddress, sqlService)
 
@@ -213,17 +213,17 @@ func configureMysqlOnGcp(ctx context.Context, gcpSpinner *util.Spinner) (*sqladm
 	// Replace username in /global-apim/conf/datasources/master-datasources.xml
 	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP, constants.ARTIFACTS, constants.K8S_ARTIFACTS, constants.GLOBAL_APIM, constants.CONF, constants.DATA_SOURCES, constants.MASTER_DATA_SOURCES_XML), constants.DATABASE_USERNAME, constants.GCP_SQL_USER_NAME, -1); err != nil {
 		gcpSpinner.Stop(false)
-		fmt.Printf("%v: %v", constants.ERROR_REPLACING_MASTER_DATASOURCES_XML, err)
+		fmt.Printf("%v: %v", constants.ERROR_REPLACING_APIM_MASTER_DATASOURCES_XML, err)
 	}
 	// Replace password in /global-apim/conf/datasources/master-datasources.xml
 	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP, constants.ARTIFACTS, constants.K8S_ARTIFACTS, constants.GLOBAL_APIM, constants.CONF, constants.DATA_SOURCES, constants.MASTER_DATA_SOURCES_XML), constants.DATABASE_PASSWORD, constants.GCP_SQL_PASSWORD+uniqueNumber, -1); err != nil {
 		gcpSpinner.Stop(false)
-		fmt.Printf("%v: %v", constants.ERROR_REPLACING_MASTER_DATASOURCES_XML, err)
+		fmt.Printf("%v: %v", constants.ERROR_REPLACING_APIM_MASTER_DATASOURCES_XML, err)
 	}
 	// Replace host in /global-apim/conf/datasources/master-datasources.xml
 	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP, constants.ARTIFACTS, constants.K8S_ARTIFACTS, constants.GLOBAL_APIM, constants.CONF, constants.DATA_SOURCES, constants.MASTER_DATA_SOURCES_XML), constants.MYSQL_DATABASE_HOST, sqlIpAddress, -1); err != nil {
 		gcpSpinner.Stop(false)
-		fmt.Printf("%v: %v", constants.ERROR_REPLACING_MASTER_DATASOURCES_XML, err)
+		fmt.Printf("%v: %v", constants.ERROR_REPLACING_APIM_MASTER_DATASOURCES_XML, err)
 	}
 	// Replace username in /observability/sp/conf/deployment.yaml
 	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP, constants.ARTIFACTS, constants.K8S_ARTIFACTS, constants.OBSERVABILITY, constants.SP, constants.CONF, constants.DEPLOYMENT_YAML), constants.DATABASE_USERNAME, constants.GCP_SQL_USER_NAME, -1); err != nil {
@@ -237,6 +237,42 @@ func configureMysqlOnGcp(ctx context.Context, gcpSpinner *util.Spinner) (*sqladm
 	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP, constants.ARTIFACTS, constants.K8S_ARTIFACTS, constants.OBSERVABILITY, constants.SP, constants.CONF, constants.DEPLOYMENT_YAML), constants.MYSQL_DATABASE_HOST, sqlIpAddress, -1); err != nil {
 		gcpSpinner.Stop(false)
 		fmt.Printf("%V: %v", constants.ERROR_REPLACING_OBSERVABILITY_YAML, err)
+	}
+	return sqlService, serviceAccountEmailAddress
+}
+
+func configureMysqlOnMinimalGcp(ctx context.Context, gcpSpinner *util.Spinner) (*sqladmin.Service, string) {
+	hcSql, err := google.DefaultClient(ctx, sqladmin.CloudPlatformScope)
+	if err != nil {
+		gcpSpinner.Stop(false)
+		fmt.Printf("Error creating client: %v", err)
+	}
+	sqlService, err := sqladmin.New(hcSql)
+	if err != nil {
+		gcpSpinner.Stop(false)
+		fmt.Printf("Error creating sql service: %v", err)
+	}
+	//Create sql instance
+	gcpSpinner.SetNewAction("Creating sql instance")
+	_, err = createSqlInstance(ctx, sqlService, projectName, region, region, constants.GCP_DB_INSTANCE_NAME+uniqueNumber)
+	if err != nil {
+		gcpSpinner.Stop(false)
+		fmt.Printf("Error creating sql instance: %v", err)
+	}
+	sqlIpAddress, serviceAccountEmailAddress := getSqlServieAccount(ctx, sqlService, projectName, constants.GCP_DB_INSTANCE_NAME+uniqueNumber)
+	fmt.Printf("Sql Ip address : %v", sqlIpAddress)
+	// Replace username in /global-idp/conf/datasources/master-datasources.xml
+	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP, constants.ARTIFACTS, constants.K8S_ARTIFACTS, constants.GLOBAL_IDP, constants.CONF, constants.DATA_SOURCES, constants.MASTER_DATA_SOURCES_XML), constants.DATABASE_USERNAME, constants.GCP_SQL_USER_NAME, -1); err != nil {
+		gcpSpinner.Stop(false)
+		fmt.Printf("%V: %v", constants.ERROR_REPLACING_IDP_MASTER_DATASOURCES_XML, err)
+	}
+	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP, constants.ARTIFACTS, constants.K8S_ARTIFACTS, constants.GLOBAL_IDP, constants.CONF, constants.DATA_SOURCES, constants.MASTER_DATA_SOURCES_XML), constants.DATABASE_PASSWORD, constants.GCP_SQL_PASSWORD+uniqueNumber, -1); err != nil {
+		gcpSpinner.Stop(false)
+		fmt.Printf("%V: %v", constants.ERROR_REPLACING_IDP_MASTER_DATASOURCES_XML, err)
+	}
+	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP, constants.ARTIFACTS, constants.K8S_ARTIFACTS, constants.GLOBAL_IDP, constants.CONF, constants.DATA_SOURCES, constants.MASTER_DATA_SOURCES_XML), constants.MYSQL_DATABASE_HOST, sqlIpAddress, -1); err != nil {
+		gcpSpinner.Stop(false)
+		fmt.Printf("%V: %v", constants.ERROR_REPLACING_IDP_MASTER_DATASOURCES_XML, err)
 	}
 	return sqlService, serviceAccountEmailAddress
 }

@@ -600,6 +600,10 @@ func deployMinimalCelleryRuntime() error {
 	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.APPLY, constants.KUBECTL_FLAG, artifactPath+"/k8s-artefacts/controller/10-controller.yaml"), errorDeployingCelleryRuntime)
 
 	createIdp(artifactPath, errorDeployingCelleryRuntime)
+
+	// Install nginx-ingress for control plane ingress
+	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.APPLY, constants.KUBECTL_FLAG, artifactPath+"/k8s-artefacts/system/mandatory.yaml"), errorDeployingCelleryRuntime)
+	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.APPLY, constants.KUBECTL_FLAG, artifactPath+"/k8s-artefacts/system/cloud-generic.yaml"), errorDeployingCelleryRuntime)
 	return nil
 }
 

@@ -77,12 +77,18 @@ func createGcp() error {
 }
 
 func createMinimalGcpRuntime() {
+	gcpBucketName := configureGCPCredentials()
 	_ = configureGCPCredentials()
 	ctx := context.Background()
 
 	// Create a GKE client
 	gcpSpinner := util.StartNewSpinner("Creating GKE client")
 	createKubernentesClusterOnGcp(ctx, gcpSpinner)
+
+	sqlService, serviceAccountEmailAddress := configureMysqlOnGcp(ctx, gcpSpinner)
+
+	configureBucketOnGcp(ctx, gcpSpinner, gcpBucketName, serviceAccountEmailAddress, sqlService)
+
 	// Deploy cellery runtime
 	gcpSpinner.SetNewAction("Deploying Cellery runtime")
 	deployMinimalCelleryRuntime()
@@ -557,6 +563,7 @@ func deployMinimalCelleryRuntime() error {
 	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.APPLY, constants.KUBECTL_FLAG, artifactPath+"/k8s-artefacts/controller/09-autoscale-policy.yaml"), errorDeployingCelleryRuntime)
 	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.APPLY, constants.KUBECTL_FLAG, artifactPath+"/k8s-artefacts/controller/10-controller.yaml"), errorDeployingCelleryRuntime)
 
+	createIdp(artifactPath, errorDeployingCelleryRuntime)
 	return nil
 }
 
@@ -567,8 +574,12 @@ func deployCompleteCelleryRuntime() {
 	deployMinimalCelleryRuntime()
 
 	// Create apim NFS volumes and volume claims
-	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.APPLY, constants.KUBECTL_FLAG, artifactPath+"/k8s-artefacts/global-apim/artifacts-persistent-volume.yaml", "-n", "cellery-system"), errorDeployingCelleryRuntime)
-	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.APPLY, constants.KUBECTL_FLAG, artifactPath+"/k8s-artefacts/global-apim/artifacts-persistent-volume-claim.yaml", "-n", "cellery-system"), errorDeployingCelleryRuntime)
+	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.APPLY, constants.KUBECTL_FLAG,
+		artifactPath+"/k8s-artefacts/global-apim/artifacts-persistent-volume.yaml", "-n", "cellery-system"),
+		errorDeployingCelleryRuntime)
+	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.APPLY, constants.KUBECTL_FLAG,
+		artifactPath+"/k8s-artefacts/global-apim/artifacts-persistent-volume-claim.yaml", "-n", "cellery-system"),
+		errorDeployingCelleryRuntime)
 	// Create the gw config maps
 	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.CREATE, constants.CONFIG_MAP, "gw-conf", "--from-file", artifactPath+"/k8s-artefacts/global-apim/conf", "-n", "cellery-system"), errorDeployingCelleryRuntime)
 	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.CREATE, constants.CONFIG_MAP, "gw-conf-datasources", "--from-file", artifactPath+"/k8s-artefacts/global-apim/conf/datasources/", "-n", "cellery-system"), errorDeployingCelleryRuntime)
@@ -582,7 +593,7 @@ func deployCompleteCelleryRuntime() {
 	// Wait till the gateway deployment availability
 	//util.ExecuteCommand(exec.Command(constants.KUBECTL, "wait", "deployment.apps/gateway", "--for", "condition available", "--timeout", "6000s", "-n", "cellery-system"), errorDeployingCelleryRuntime)
 	// Create SP worker configmaps
-	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.CREATE, constants.CONFIG_MAP, "sp-worker-siddhi", "--from-file", artifactPath+"/k8s-artefacts/global-apim/conf/identity", "-n", "cellery-system"), errorDeployingCelleryRuntime)
+	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.CREATE, constants.CONFIG_MAP, "sp-worker-siddhi", "--from-file", artifactPath+"/k8s-artefacts/observability/siddhi", "-n", "cellery-system"), errorDeployingCelleryRuntime)
 	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.CREATE, constants.CONFIG_MAP, "sp-worker-conf", "--from-file", artifactPath+"/k8s-artefacts/observability/sp/conf", "-n", "cellery-system"), errorDeployingCelleryRuntime)
 	// Create SP worker deployment
 	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.APPLY, constants.KUBECTL_FLAG, artifactPath+"/k8s-artefacts/observability/sp/sp-worker.yaml", "-n", "cellery-system"), errorDeployingCelleryRuntime)
@@ -601,4 +612,20 @@ func deployCompleteCelleryRuntime() {
 	// Install nginx-ingress for control plane ingress
 	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.APPLY, constants.KUBECTL_FLAG, artifactPath+"/k8s-artefacts/system/mandatory.yaml"), errorDeployingCelleryRuntime)
 	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.APPLY, constants.KUBECTL_FLAG, artifactPath+"/k8s-artefacts/system/cloud-generic.yaml"), errorDeployingCelleryRuntime)
+}
+
+func createIdp(artifactPath, errorDeployingCelleryRuntime string) {
+	// Create the IDP config maps
+	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.CREATE, constants.CONFIG_MAP, "identity-server-conf",
+		"--from-file", artifactPath+"/k8s-artefacts/global-idp/conf", "-n", "cellery-system"), errorDeployingCelleryRuntime)
+	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.CREATE, constants.CONFIG_MAP, "identity-server-conf-datasources",
+		"--from-file", artifactPath+"/k8s-artefacts/global-idp/conf/datasources", "-n", "cellery-system"), errorDeployingCelleryRuntime)
+	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.CREATE, constants.CONFIG_MAP, "identity-server-conf-identity",
+		"--from-file", artifactPath+"/k8s-artefacts/global-idp/conf/identity", "-n", "cellery-system"), errorDeployingCelleryRuntime)
+	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.CREATE, constants.CONFIG_MAP, "identity-server-tomcat",
+		"--from-file", artifactPath+"/k8s-artefacts/global-idp/conf/tomcat", "-n", "cellery-system"), errorDeployingCelleryRuntime)
+
+	// Create IDP deployment and the service
+	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.APPLY, constants.KUBECTL_FLAG,
+		artifactPath+"/k8s-artefacts/global-idp/global-idp.yaml", "-n", "cellery-system"), errorDeployingCelleryRuntime)
 }

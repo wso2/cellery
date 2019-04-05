@@ -482,13 +482,11 @@ func UserHomeDir() string {
 
 func CelleryInstallationDir() string {
 	celleryHome := os.Getenv(constants.CELLERY_HOME_ENV_VAR)
-	if celleryHome == "" {
-		if runtime.GOOS == "darwin" {
-			celleryHome = constants.CELLERY_INSTALLATION_PATH_MAC
-		}
-		if runtime.GOOS == "linux" {
-			celleryHome = constants.CELLERY_INSTALLATION_PATH_UBUNTU
-		}
+	if runtime.GOOS == "darwin" {
+		celleryHome = constants.CELLERY_INSTALLATION_PATH_MAC
+	}
+	if runtime.GOOS == "linux" {
+		celleryHome = constants.CELLERY_INSTALLATION_PATH_UBUNTU
 	}
 	return celleryHome
 }
@@ -640,7 +638,9 @@ func DownloadFromS3Bucket(bucket, item, path string, displayProgressBar bool) {
 func (pw *progressWriter) WriteAt(p []byte, off int64) (int, error) {
 	atomic.AddInt64(&pw.written, int64(len(p)))
 	if pw.display {
-		pw.bar.SetCurrent(pw.written)
+		//pw.bar.SetCurrent(pw.written)
+		pw.bar.Add64(int64(len(p)))
+		//pw.bar.Increment()
 	}
 
 	return pw.writer.WriteAt(p, off)

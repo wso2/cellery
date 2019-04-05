@@ -260,8 +260,8 @@ func createKubernentesClusterOnGcp(ctx context.Context, gcpSpinner *util.Spinner
 func configureGCPCredentials() string {
 	util.CopyDir(filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP, constants.ARTIFACTS),
 		filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP, constants.ARTIFACTS_OLD))
-	util.CopyDir(filepath.Join(util.CelleryInstallationDir(), constants.ARTIFACTS), filepath.Join(util.UserHomeDir(),
-		constants.CELLERY_HOME, constants.GCP, constants.ARTIFACTS))
+	util.CopyDir(filepath.Join(util.CelleryInstallationDir(), constants.K8S_ARTIFACTS), filepath.Join(util.UserHomeDir(),
+		constants.CELLERY_HOME, constants.GCP, constants.ARTIFACTS, constants.K8S_ARTIFACTS))
 	validateGcpConfigFile([]string{filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP,
 		constants.ARTIFACTS, constants.K8S_ARTIFACTS, constants.GLOBAL_APIM, constants.CONF, constants.DATA_SOURCES,
 		constants.MASTER_DATA_SOURCES_XML),

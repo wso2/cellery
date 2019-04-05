@@ -60,30 +60,34 @@ func RunInit() {
 		util.ExitWithErrorMessage("Error occurred while initializing the project", err)
 	}
 
-	cellTemplate := "import celleryio/cellery;\n" +
+	cellTemplate := "import ballerina/config;\n" +
+		"import celleryio/cellery;\n" +
 		"\n" +
 		"// Hello Component\n" +
 		"// This Components exposes the HTML hello world page\n" +
 		"cellery:Component helloComponent = {\n" +
 		"    name: \"hello\",\n" +
 		"    source: {\n" +
-		"        image: \"wso2cellery/samples-hello-world-hello\"\n" +
+		"        image: \"wso2cellery/samples-hello-world-webapp\"\n" +
 		"    },\n" +
 		"    ingresses: {\n" +
-		"        webUI: <cellery:WebIngress>{ // Web ingress will be always exposed globally.\n" +
+		"        webUI: <cellery:WebIngress> { // Web ingress will be always exposed globally.\n" +
 		"            port: 80,\n" +
 		"            gatewayConfig: {\n" +
 		"                vhost: \"hello-world.com\",\n" +
 		"                context: \"/\"\n" +
 		"            }\n" +
 		"        }\n" +
+		"    },\n" +
+		"    envVars: {\n" +
+		"        HELLO_NAME: {value: \"Cellery\"}\n" +
 		"    }\n" +
 		"};\n" +
 		"\n" +
-		"// Hello World Cell\n" +
+		"// Cell Initialization\n" +
 		"cellery:CellImage helloCell = {\n" +
 		"    components: {\n" +
-		"        webComp: helloComponent\n" +
+		"        helloComp: helloComponent\n" +
 		"    }\n" +
 		"};\n" +
 		"\n" +
@@ -100,7 +104,17 @@ func RunInit() {
 		"# + iName - The Image name\n" +
 		"# + instances - The map dependency instances of the Cell instance to be created\n" +
 		"# + return - The Cell instance\n" +
-		"public function run(cellery:ImageName iName, map<string> instances) returns error? {\n" +
+		"public function run(cellery:ImageName iName, map<cellery:ImageName> instances) returns error? {\n" +
+		"    string VHostName = config:getAsString(\"VHOST_NAME\");\n" +
+		"    if (VHostName !== \"\"){\n" +
+		"        cellery:WebIngress web=<cellery:WebIngress>helloCell.components.helloComp.ingresses.webUI;\n" +
+		"        web.gatewayConfig.vhost = VHostName;\n" +
+		"    }\n" +
+		"\n" +
+		"    string HelloName = config:getAsString(\"HELLO_NAME\");\n" +
+		"    if (HelloName !== \"\"){\n" +
+		"        helloCell.components.helloComp.envVars.HELLO_NAME.value = HelloName;\n" +
+		"    }\n" +
 		"    return cellery:createInstance(helloCell, iName);\n" +
 		"}\n" +
 		"\n"

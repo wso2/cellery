@@ -105,15 +105,15 @@ func RunInit() {
 		"# + instances - The map dependency instances of the Cell instance to be created\n" +
 		"# + return - The Cell instance\n" +
 		"public function run(cellery:ImageName iName, map<cellery:ImageName> instances) returns error? {\n" +
-		"    string VHostName = config:getAsString(\"VHOST_NAME\");\n" +
-		"    if (VHostName !== \"\"){\n" +
-		"        cellery:WebIngress web=<cellery:WebIngress>helloCell.components.helloComp.ingresses.webUI;\n" +
-		"        web.gatewayConfig.vhost = VHostName;\n" +
+		"    string vhostName = config:getAsString(\"VHOST_NAME\");\n" +
+		"    if (vhostName !== \"\"){\n" +
+		"        cellery:WebIngress web = <cellery:WebIngress> helloComponent.ingresses.webUI;\n" +
+		"        web.gatewayConfig.vhost = vhostName;\n" +
 		"    }\n" +
 		"\n" +
-		"    string HelloName = config:getAsString(\"HELLO_NAME\");\n" +
-		"    if (HelloName !== \"\"){\n" +
-		"        helloCell.components.helloComp.envVars.HELLO_NAME.value = HelloName;\n" +
+		"    string helloName = config:getAsString(\"HELLO_NAME\");\n" +
+		"    if (helloName !== \"\"){\n" +
+		"        helloComponent.envVars.HELLO_NAME.value = helloName;\n" +
 		"    }\n" +
 		"    return cellery:createInstance(helloCell, iName);\n" +
 		"}\n" +

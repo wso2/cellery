@@ -85,6 +85,12 @@ func main() {
 		log.SetOutput(logFile)
 	}
 
+	// copy cellery installation artifacts to user repo
+	moduleMgr := &util.BLangManager{}
+	if err := moduleMgr.Init(); err != nil {
+		util.ExitWithErrorMessage("Unable to copy cellery installation artifacts to user repo", err)
+	}
+
 	cmd := newCliCommand()
 	if err := cmd.Execute(); err != nil {
 		log.Fatal(fmt.Sprintf("%s: %s", "cellery", err))

@@ -640,9 +640,7 @@ func DownloadFromS3Bucket(bucket, item, path string, displayProgressBar bool) {
 func (pw *progressWriter) WriteAt(p []byte, off int64) (int, error) {
 	atomic.AddInt64(&pw.written, int64(len(p)))
 	if pw.display {
-		//pw.bar.SetCurrent(pw.written)
-		pw.bar.Add64(int64(len(p)))
-		//pw.bar.Increment()
+		pw.bar.SetCurrent(pw.written)
 	}
 
 	return pw.writer.WriteAt(p, off)

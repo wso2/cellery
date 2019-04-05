@@ -482,11 +482,13 @@ func UserHomeDir() string {
 
 func CelleryInstallationDir() string {
 	celleryHome := os.Getenv(constants.CELLERY_HOME_ENV_VAR)
-	if runtime.GOOS == "darwin" {
-		celleryHome = constants.CELLERY_INSTALLATION_PATH_MAC
-	}
-	if runtime.GOOS == "linux" {
-		celleryHome = constants.CELLERY_INSTALLATION_PATH_UBUNTU
+	if celleryHome == "" {
+		if runtime.GOOS == "darwin" {
+			celleryHome = constants.CELLERY_INSTALLATION_PATH_MAC
+		}
+		if runtime.GOOS == "linux" {
+			celleryHome = constants.CELLERY_INSTALLATION_PATH_UBUNTU
+		}
 	}
 	return celleryHome
 }

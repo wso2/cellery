@@ -116,7 +116,7 @@ returns json
 }
 
 function getEmployeeDetails(http:Request clientRequest) returns http:Response|error {
-    var response = employeeDetailsEp->get("/employee/details", message = untaint clientRequest);
+    var response = employeeDetailsEp->get("/details", message = untaint clientRequest);
     match response {
         http:Response httpResponse => {
             return httpResponse;
@@ -129,7 +129,7 @@ function getEmployeeDetails(http:Request clientRequest) returns http:Response|er
 }
 
 function getStockOptionData(http:Request clientRequest) returns http:Response|error {
-    var response = stockOptionsEp->get("/stock/options", message = untaint clientRequest);
+    var response = stockOptionsEp->get("/options", message = untaint clientRequest);
     match response {
         http:Response httpResponse => {
             return httpResponse;

@@ -23,12 +23,14 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
+	"time"
 
+	"github.com/docker/go-units"
 	"github.com/olekukonko/tablewriter"
 
 	"github.com/cellery-io/sdk/components/cli/pkg/constants"
+	"github.com/cellery-io/sdk/components/cli/pkg/image"
 	"github.com/cellery-io/sdk/components/cli/pkg/util"
 )
 
@@ -42,7 +44,7 @@ func RunImage() {
 	data := getImagesArray()
 
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"CELL", "VERSION", "SIZE"})
+	table.SetHeader([]string{"CELL", "VERSION", "SIZE", "CREATED"})
 	table.SetBorders(tablewriter.Border{Left: false, Top: false, Right: false, Bottom: false})
 	table.SetAlignment(3)
 	table.SetRowSeparator("-")
@@ -51,8 +53,10 @@ func RunImage() {
 	table.SetHeaderColor(
 		tablewriter.Colors{tablewriter.Bold},
 		tablewriter.Colors{tablewriter.Bold},
+		tablewriter.Colors{tablewriter.Bold},
 		tablewriter.Colors{tablewriter.Bold})
 	table.SetColumnColor(
+		tablewriter.Colors{},
 		tablewriter.Colors{},
 		tablewriter.Colors{},
 		tablewriter.Colors{})
@@ -167,14 +171,16 @@ func getImagesArray() [][]string {
 				if err != nil {
 					log.Fatal(err)
 				}
-				if size > 1024 {
-					images = append(images, []string{organization + "/" + project, version,
-						strconv.FormatFloat(float64(size/1024), 'f', -1, 64) + "KB"})
-				} else {
-					images = append(images, []string{organization + "/" + project, version,
-						strconv.FormatInt(size, 10) + "B"})
+				meta, err := image.ReadMetaData(organization, project, version)
+				if err != nil {
+					util.ExitWithErrorMessage("Error while listing images", err)
 				}
-
+				images = append(images, []string{
+					organization + "/" + project,
+					version,
+					units.HumanSize(float64(size)),
+					fmt.Sprintf("%s ago", units.HumanDuration(time.Since(time.Unix(meta.BuildTimestamp, 0)))),
+				})
 			}
 		}
 	}

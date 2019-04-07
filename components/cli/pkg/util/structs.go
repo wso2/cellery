@@ -197,8 +197,9 @@ type CellImageName struct {
 
 type CellImageMetaData struct {
 	CellImageName
-	Components   []string                      `json:"components"`
-	Dependencies map[string]*CellImageMetaData `json:"dependencies"`
+	BuildTimestamp int64                         `json:"buildTimestamp"`
+	Components     []string                      `json:"components"`
+	Dependencies   map[string]*CellImageMetaData `json:"dependencies"`
 }
 
 type progressWriter struct {

@@ -290,8 +290,9 @@ func generateMetaData(cellImage *util.CellImage, targetDir string, spinner *util
 			Name:         cellImage.ImageName,
 			Version:      cellImage.ImageVersion,
 		},
-		Components:   components,
-		Dependencies: dependenciesMap,
+		BuildTimestamp: time.Now().Unix(),
+		Components:     components,
+		Dependencies:   dependenciesMap,
 	}
 	metadataFileContent, err := json.Marshal(outputFileMetadata)
 	if err != nil {

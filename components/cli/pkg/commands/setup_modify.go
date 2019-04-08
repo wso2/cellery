@@ -38,7 +38,7 @@ func RunSetupModify(addApimGlobalGateway, addObservability bool) {
 		removeIdp(artifactPath, errorDeployingCelleryRuntime)
 
 		// Create APIM global gateway
-		executeAPIMArtifacts(artifactPath, errorDeployingCelleryRuntime)
+		//executeAPIMArtifactsForPersistedVolumeWithoutNfs(artifactPath, errorDeployingCelleryRuntime)
 	}
 	if addObservability {
 		executeObservabilityArtifacts(artifactPath, errorDeployingCelleryRuntime, false)

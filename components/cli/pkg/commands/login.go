@@ -56,7 +56,7 @@ func RunLogin(registryURL string) {
 	if isCredentialsAlreadyPresent {
 		fmt.Println("Logging in with existing Credentials")
 	} else {
-		registryCredentials.Username, registryCredentials.Password, err = util.RequestCredentials()
+		registryCredentials.Username, registryCredentials.Password, err = util.RequestCredentials("Docker hub")
 		if err != nil {
 			util.ExitWithErrorMessage("Error occurred while reading Credentials", err)
 		}

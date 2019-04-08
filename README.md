@@ -409,10 +409,15 @@ and pass `my-hello-world.com` for `VHOST_NAME`, and your name for `HELLO_NAME` a
        ------------------------------------------ -------------------------------------------- -------- ----------------------------------------------------------- ------------ ----------------------
         hello-world-cell-1-0-0-676b2131   sinthuja/hello-world-cell:1.0.0              Ready    sinthuja-hello-world-cell-1-0-0-676b2131--gateway-service   1            10 minutes 1 seconds
     ```
+6. Execute `cellery view` to see the components of your cell. This will open a HTML page in a browser and you can visualize the components and dependent cells of the cell image.
+    ```
+    $ cellery view <DOCKER_HUB_ORG>/hello-world-cell:1.0.0
+    ```
+    ![hello world cell view](docs/images/hello-web-cell.png)
     
-6. Access url [http://my-hello-world.com/](http://my-hello-world.com/) from browser. You will see updated web page with greeting param you passed for HELLO_NAME in step-4.
+7. Access url [http://my-hello-world.com/](http://my-hello-world.com/) from browser. You will see updated web page with greeting param you passed for HELLO_NAME in step-4.
 
-7. As a final step, let's push your first cell project to your docker hub account. Tp perform this execute `cellery push` as shown below.
+8. As a final step, let's push your first cell project to your docker hub account. Tp perform this execute `cellery push` as shown below.
     ```
     $ cellery push <DOCKER_HUB_ORG>/hello-world-cell:1.0.0
     ✔ Connecting to registry-1.docker.io

@@ -40,8 +40,8 @@ Complete has full set of components for cellery which includes API Manager and O
 
 | Packages | Components | Supported Functionality | 
 |----------|------------|-------------------------|
-| Basic | <ul><li>Cell controller</li><li>Light weight Identity Provider</li><li>Database</li></ul>| <ul><li>HTTP(S) cells with local APIs</li><li>Full support for web cells</li><li>Inbuilt security for inter cell and intra cell communication</li></ul> |
-| Complete | <ul><li>Cell controller</li><li>Global API manager</li><li>Observability portal and components</li><li>database</li></ul> | <ul><li>Full HTTP(S) cells with local/global APIs</li><li>Full support for web cells</li><li>Inbuilt security for inter cell and intra cell communication</li><li>API management functionality</li><li>observability of cells with rich UIs</li></ul> |
+| Basic | <ul><li>Cell controller</li><li>Light weight Identity Provider</li></ul>| <ul><li>HTTP(S) cells with local APIs</li><li>Full support for web cells</li><li>Inbuilt security for inter cell and intra cell communication</li></ul> |
+| Complete | <ul><li>Cell controller</li><li>Global API manager</li><li>Observability portal and components</li></ul> | <ul><li>Full HTTP(S) cells with local/global APIs</li><li>Full support for web cells</li><li>Inbuilt security for inter cell and intra cell communication</li><li>API management functionality</li><li>observability of cells with rich UIs</li></ul> |
 
 ##### Interactive mode setup
 This mode will guide through the available options in each steps, and it's ideal for the first time use to install cellery. 
@@ -76,7 +76,7 @@ $ ✔ Create
 Instead of selecting each options one by one, you also can use the inline commands to perform the setup operations. 
 The below are the list of inline commands to setup cellery.
 
-| Setup Option | Package | Command | Description |
+| Setup Option | Package | Command <img width=1100/> | Description |
 |--------------|------|---------|-------------|
 | Local | Basic | `cellery setup create local` | Creates basic local setup. This download a VM and installs to your machine. You will require Virtual Box as pre-requisite to perform this operation| 
 | Local | Complete | `cellery setup create local --complete` | Creates complete local setup. This download a VM with complete cellery runtime and installs to your machine. You will require Virtual Box as pre-requisite to perform this operation| 
@@ -87,19 +87,20 @@ The below are the list of inline commands to setup cellery.
 #### 1. Local Setup
 This will setup the local environment, by creating a virtual machine with pre-installed kubeadm and cellery runtime. 
 
-1) As mentioned above this can be installed with interactive mode by selecting Create > Local > Basic or Complete options or executing inline command with `cellery setup create local [--complete]`.
+1) As mentioned above this can be installed with [interactively](#interactive-mode-setup) by selecting Create > Local > Basic or Complete options 
+or executing [inline command](#inline-command-mode-setup) with `cellery setup create local [--complete]`.
 
 2) Add below to /etc/host entries to access cellery hosts.
     ```
     192.168.56.10 wso2-apim cellery-dashboard wso2sp-observability-api wso2-apim-gateway cellery-k8s-metrics idp.cellery-system pet-store.com hello-world.com my-hello-world.com
     ```
-3) Once the installation process is completed, you can [create your first cell](#build-and-deploy-your-first-cell).
+3) Once the installation process is completed, you can [quick start with cellery](#quick-start-with-cellery).
 
 #### 2. GCP
 To create a GCP based cellery installation, you need to have GCP account and [Gloud SDK](https://cloud.google.com/sdk/docs/) installed in your machine. 
 Follow the below steps to install cellery into your GCP.
 
-1. Use gloud init command and create a project if not exists. Make sure gcloud is configured to the project which you want to install cellery runtime.
+1. Use gloud init command and create a project if not exists. Make sure gcloud is configured to the project which you want to install cellery runtime, and also billing is enabled.
     ```
     gcloud init
     ```

@@ -23,13 +23,13 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"time"
 
-	"github.com/cellery-io/sdk/components/cli/pkg/kubectl"
-
+	"github.com/fatih/color"
 	"github.com/manifoldco/promptui"
+	"github.com/oxequa/interact"
 
 	"github.com/cellery-io/sdk/components/cli/pkg/constants"
+	"github.com/cellery-io/sdk/components/cli/pkg/kubectl"
 	"github.com/cellery-io/sdk/components/cli/pkg/util"
 )
 
@@ -65,9 +65,10 @@ func RunSetupCreateOnExistingCluster(isPersistedVolumeVolume bool) {
 	} else {
 		createRuntimeOnExistingClusterWithNonPersistedVolume()
 	}
+	util.WaitForRuntime()
 }
 
-func createRuntimeOnExistingClusterWithPersistedVolume() {
+func createRuntimeOnExistingClusterWithPersistedVolumeWithoutNfs() {
 	gcpSpinner := util.StartNewSpinner("Creating cellery runtime")
 	// Backup folders
 	util.RenameFile(filepath.Join(constants.ROOT_DIR, constants.VAR, constants.TMP, constants.CELLERY, constants.MYSQL),
@@ -83,16 +84,21 @@ func createRuntimeOnExistingClusterWithPersistedVolume() {
 	util.CreateDir(filepath.Join(constants.ROOT_DIR, constants.VAR, constants.TMP, constants.CELLERY,
 		constants.APIM_REPOSITORY_DEPLOYMENT_SERVER))
 
-	updateK8sArtifacts()
+	updateMysqlDataInK8sArtifacts(constants.MYSQL_HOST_NAME_FOR_EXISTING_CLUSTER, constants.CELLERY_SQL_USER_NAME,
+		constants.CELLERY_SQL_PASSWORD)
 
 	var artifactPath = filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP, constants.ARTIFACTS)
 	errorDeployingCelleryRuntime := "Error deploying cellery runtime"
 
 	gcpSpinner.SetNewAction("Creating controller")
+	labelMasterNode(errorDeployingCelleryRuntime)
 	executeControllerArtifacts(artifactPath, errorDeployingCelleryRuntime)
 
+	gcpSpinner.SetNewAction("Configuring mysql")
+	configureMysqlOnExistingClusterWithPersistedVolume(artifactPath, errorDeployingCelleryRuntime)
+
 	gcpSpinner.SetNewAction("Creating APIM")
-	executeAPIMArtifacts(artifactPath, errorDeployingCelleryRuntime)
+	executeAPIMArtifactsForPersistedVolumeWithoutNfs(artifactPath, errorDeployingCelleryRuntime)
 
 	gcpSpinner.SetNewAction("Creating Observability")
 	executeObservabilityArtifacts(artifactPath, errorDeployingCelleryRuntime, true)
@@ -108,12 +114,14 @@ func createRuntimeOnExistingClusterWithPersistedVolume() {
 func createRuntimeOnExistingClusterWithNonPersistedVolume() {
 	gcpSpinner := util.StartNewSpinner("Creating cellery runtime")
 
-	updateK8sArtifacts()
+	updateMysqlDataInK8sArtifacts(constants.MYSQL_HOST_NAME_FOR_EXISTING_CLUSTER, constants.CELLERY_SQL_USER_NAME,
+		constants.CELLERY_SQL_PASSWORD)
 
 	var artifactPath = filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP, constants.ARTIFACTS)
 	errorDeployingCelleryRuntime := "Error deploying cellery runtime"
 
 	gcpSpinner.SetNewAction("Creating controller")
+	labelMasterNode(errorDeployingCelleryRuntime)
 	executeControllerArtifacts(artifactPath, errorDeployingCelleryRuntime)
 
 	gcpSpinner.SetNewAction("Creating APIM")
@@ -130,7 +138,94 @@ func createRuntimeOnExistingClusterWithNonPersistedVolume() {
 	gcpSpinner.Stop(true)
 }
 
-func updateK8sArtifacts() {
+func createRuntimeOnExistingClusterWithPersistedVolumeWithNfs() {
+	prefix := util.CyanBold("?")
+	nfsServerIp := ""
+	fileShare := ""
+	dbHostName := ""
+	dbUserName := ""
+	dbPassword := ""
+	err := interact.Run(&interact.Interact{
+		Before: func(c interact.Context) error {
+			c.SetPrfx(color.Output, prefix)
+			return nil
+		},
+		Questions: []*interact.Question{
+			{
+				Before: func(c interact.Context) error {
+					c.SetPrfx(nil, util.CyanBold("?"))
+					return nil
+				},
+				Quest: interact.Quest{
+					Msg: util.Bold("NFS server ip: "),
+				},
+				Action: func(c interact.Context) interface{} {
+					nfsServerIp, _ = c.Ans().String()
+					return nil
+				},
+			},
+			{
+				Before: func(c interact.Context) error {
+					c.SetPrfx(nil, util.CyanBold("?"))
+					return nil
+				},
+				Quest: interact.Quest{
+					Msg: util.Bold("File share name: "),
+				},
+				Action: func(c interact.Context) interface{} {
+					fileShare, _ = c.Ans().String()
+					return nil
+				},
+			},
+			{
+				Before: func(c interact.Context) error {
+					c.SetPrfx(nil, util.CyanBold("?"))
+					return nil
+				},
+				Quest: interact.Quest{
+					Msg: util.Bold("Database host: "),
+				},
+				Action: func(c interact.Context) interface{} {
+					dbHostName, _ = c.Ans().String()
+					return nil
+				},
+			},
+		},
+	})
+	if err != nil {
+		util.ExitWithErrorMessage("Error occurred while getting user input", err)
+	}
+	dbUserName, dbPassword, err = util.RequestCredentials("Mysql")
+	if err != nil {
+		util.ExitWithErrorMessage("Error occurred while getting user input", err)
+	}
+
+	gcpSpinner := util.StartNewSpinner("Creating cellery runtime")
+	updateMysqlDataInK8sArtifacts(dbHostName, dbUserName, dbPassword)
+
+	updateNfsDataInK8sArtifacts(nfsServerIp, fileShare)
+
+	var artifactPath = filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP, constants.ARTIFACTS)
+	errorDeployingCelleryRuntime := "Error deploying cellery runtime"
+
+	gcpSpinner.SetNewAction("Creating controller")
+	executeControllerArtifacts(artifactPath, errorDeployingCelleryRuntime)
+
+	gcpSpinner.SetNewAction("Creating APIM")
+	executeAPIMArtifactsForPersistedVolumeWithNfs(artifactPath, errorDeployingCelleryRuntime)
+
+	gcpSpinner.SetNewAction("Creating Observability")
+	executeObservabilityArtifacts(artifactPath, errorDeployingCelleryRuntime, true)
+
+	// Create ingress-nginx deployment
+	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.APPLY, constants.KUBECTL_FLAG,
+		artifactPath+"/k8s-artefacts/system/mandatory.yaml"), errorDeployingCelleryRuntime)
+	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.APPLY, constants.KUBECTL_FLAG,
+		artifactPath+"/k8s-artefacts/system/service-nodeport.yaml"), errorDeployingCelleryRuntime)
+	gcpSpinner.Stop(true)
+}
+
+func updateMysqlDataInK8sArtifacts(dbHostName, dbUserName, dbPassword string) {
 	os.RemoveAll(filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP, constants.ARTIFACTS_OLD))
 	util.CopyDir(filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP, constants.ARTIFACTS),
 		filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP, constants.ARTIFACTS_OLD))
@@ -140,68 +235,59 @@ func updateK8sArtifacts() {
 	// Replace username, password, host in /global-apim/conf/datasources/master-datasources.xml
 	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP,
 		constants.ARTIFACTS, constants.K8S_ARTIFACTS, constants.GLOBAL_APIM, constants.CONF, constants.DATA_SOURCES,
-		constants.MASTER_DATA_SOURCES_XML), constants.DATABASE_USERNAME, constants.GCP_SQL_USER_NAME, -1); err != nil {
+		constants.MASTER_DATA_SOURCES_XML), constants.DATABASE_USERNAME, dbUserName, -1); err != nil {
 		fmt.Printf("%v: %v", constants.ERROR_REPLACING_APIM_MASTER_DATASOURCES_XML, err)
 	}
 
 	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP,
 		constants.ARTIFACTS, constants.K8S_ARTIFACTS, constants.GLOBAL_APIM, constants.CONF, constants.DATA_SOURCES,
-		constants.MASTER_DATA_SOURCES_XML), constants.DATABASE_PASSWORD, constants.GCP_SQL_PASSWORD, -1); err != nil {
+		constants.MASTER_DATA_SOURCES_XML), constants.DATABASE_PASSWORD, dbPassword, -1); err != nil {
 		fmt.Printf("%v: %v", constants.ERROR_REPLACING_APIM_MASTER_DATASOURCES_XML, err)
 	}
 
 	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP,
 		constants.ARTIFACTS, constants.K8S_ARTIFACTS, constants.GLOBAL_APIM, constants.CONF, constants.DATA_SOURCES,
 		constants.MASTER_DATA_SOURCES_XML), constants.MYSQL_DATABASE_HOST,
-		constants.MYSQL_HOST_NAME_FOR_EXISTING_CLUSTER, -1); err != nil {
+		dbHostName, -1); err != nil {
 		fmt.Printf("%v: %v", constants.ERROR_REPLACING_APIM_MASTER_DATASOURCES_XML, err)
 	}
 	// Replace username username, password, host in /observability/sp/conf/deployment.yaml
 	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME,
 		constants.GCP, constants.ARTIFACTS, constants.K8S_ARTIFACTS, constants.OBSERVABILITY,
 		constants.SP, constants.CONF, constants.DEPLOYMENT_YAML), constants.DATABASE_USERNAME,
-		constants.GCP_SQL_USER_NAME, -1); err != nil {
+		dbUserName, -1); err != nil {
 		fmt.Printf("%V: %v", constants.ERROR_REPLACING_OBSERVABILITY_YAML, err)
 	}
 	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP,
 		constants.ARTIFACTS, constants.K8S_ARTIFACTS, constants.OBSERVABILITY, constants.SP,
 		constants.CONF, constants.DEPLOYMENT_YAML), constants.DATABASE_PASSWORD,
-		constants.GCP_SQL_PASSWORD, -1); err != nil {
+		dbPassword, -1); err != nil {
 		fmt.Printf("%V: %v", constants.ERROR_REPLACING_OBSERVABILITY_YAML, err)
 	}
 	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP,
 		constants.ARTIFACTS, constants.K8S_ARTIFACTS, constants.OBSERVABILITY, constants.SP, constants.CONF,
-		constants.DEPLOYMENT_YAML), constants.MYSQL_DATABASE_HOST, constants.MYSQL_HOST_NAME_FOR_EXISTING_CLUSTER,
+		constants.DEPLOYMENT_YAML), constants.MYSQL_DATABASE_HOST, dbHostName,
 		-1); err != nil {
 		fmt.Printf("%V: %v", constants.ERROR_REPLACING_OBSERVABILITY_YAML, err)
 	}
 
 	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP,
 		constants.ARTIFACTS, constants.K8S_ARTIFACTS, constants.MYSQL, constants.DB_SCRIPTS, constants.INIT_SQL),
-		constants.DATABASE_USERNAME, constants.GCP_SQL_USER_NAME, -1); err != nil {
+		constants.DATABASE_USERNAME, dbUserName, -1); err != nil {
 		fmt.Printf("%V: %v", constants.ERROR_REPLACING_INIT_SQL, err)
 	}
 
 	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP,
 		constants.ARTIFACTS, constants.K8S_ARTIFACTS, constants.MYSQL, constants.DB_SCRIPTS, constants.INIT_SQL),
-		constants.DATABASE_PASSWORD, constants.GCP_SQL_PASSWORD, -1); err != nil {
+		constants.DATABASE_PASSWORD, dbPassword, -1); err != nil {
 		fmt.Printf("%V: %v", constants.ERROR_REPLACING_INIT_SQL, err)
 	}
 }
 
 func executeControllerArtifacts(artifactPath, errorDeployingCelleryRuntime string) {
-	nodeName, err := kubectl.GetMasterNodeName()
-	if err != nil {
-		util.ExitWithErrorMessage("Failed to create controller", err)
-	}
 	// Setup Celley namespace, create service account and the docker registry credentials
 	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.APPLY, constants.KUBECTL_FLAG,
 		artifactPath+"/k8s-artefacts/system/ns-init.yaml"), errorDeployingCelleryRuntime)
-
-	// Label the node
-	util.ExecuteCommand(exec.Command(constants.KUBECTL, "label", "nodes", nodeName, "disk=local"),
-		errorDeployingCelleryRuntime)
-	time.Sleep(60 * time.Second)
 
 	// Istio
 	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.APPLY, constants.KUBECTL_FLAG,
@@ -213,7 +299,8 @@ func executeControllerArtifacts(artifactPath, errorDeployingCelleryRuntime strin
 		artifactPath+"/k8s-artefacts/system/istio-gateway.yaml"), errorDeployingCelleryRuntime)
 
 	// Enabling Istio injection
-	util.ExecuteCommand(exec.Command(constants.KUBECTL, "label", "namespace", "default", "istio-injection=enabled"),
+	util.ExecuteCommand(exec.Command(constants.KUBECTL, "label", "namespace", "default", "istio-injection=enabled",
+		"--overwrite"),
 		errorDeployingCelleryRuntime)
 
 	// Install Cellery crds
@@ -237,11 +324,9 @@ func executeControllerArtifacts(artifactPath, errorDeployingCelleryRuntime strin
 		artifactPath+"/k8s-artefacts/controller/09-autoscale-policy.yaml"), errorDeployingCelleryRuntime)
 	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.APPLY, constants.KUBECTL_FLAG,
 		artifactPath+"/k8s-artefacts/controller/10-controller.yaml"), errorDeployingCelleryRuntime)
-
-	time.Sleep(120 * time.Second)
 }
 
-func executeAPIMArtifacts(artifactPath, errorDeployingCelleryRuntime string) {
+func configureMysqlOnExistingClusterWithPersistedVolume(artifactPath, errorDeployingCelleryRuntime string) {
 	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.CREATE, constants.CONFIG_MAP,
 		"mysql-dbscripts", "--from-file", artifactPath+"/k8s-artefacts/mysql/dbscripts/", "-n", "cellery-system"),
 		errorDeployingCelleryRuntime)
@@ -259,15 +344,9 @@ func executeAPIMArtifacts(artifactPath, errorDeployingCelleryRuntime string) {
 		"--for", "condition=available", "--timeout", "300s", "-n", "cellery-system"), errorDeployingCelleryRuntime)
 	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.APPLY, constants.KUBECTL_FLAG,
 		artifactPath+"/k8s-artefacts/mysql/mysql-service.yaml", "-n", "cellery-system"), errorDeployingCelleryRuntime)
+}
 
-	// Create apim NFS volumes and volume claims
-	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.APPLY, constants.KUBECTL_FLAG,
-		artifactPath+"/k8s-artefacts/global-apim/persistent-volume-local-dev.yaml", "-n", "cellery-system"),
-		errorDeployingCelleryRuntime)
-	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.APPLY, constants.KUBECTL_FLAG,
-		artifactPath+"/k8s-artefacts/global-apim/persistent-volume-claim-local.yaml", "-n", "cellery-system"),
-		errorDeployingCelleryRuntime)
-
+func configureGatewayConfigMaps(artifactPath, errorDeployingCelleryRuntime string) {
 	// Create the gw config maps
 	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.CREATE, constants.CONFIG_MAP, "gw-conf", "--from-file",
 		artifactPath+"/k8s-artefacts/global-apim/conf", "-n", "cellery-system"), errorDeployingCelleryRuntime)
@@ -288,16 +367,9 @@ func executeAPIMArtifacts(artifactPath, errorDeployingCelleryRuntime string) {
 	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.CREATE, constants.CONFIG_MAP,
 		"apim-security", "--from-file", artifactPath+"/k8s-artefacts/global-apim/conf/security", "-n",
 		"cellery-system"), errorDeployingCelleryRuntime)
-
-	//Create gateway deployment and the service
-	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.APPLY, constants.KUBECTL_FLAG,
-		artifactPath+"/k8s-artefacts/global-apim/global-apim.yaml", "-n", "cellery-system"), errorDeployingCelleryRuntime)
-	// Wait till the gateway deployment availability
-	util.ExecuteCommand(exec.Command(constants.KUBECTL, "wait", "deployment.apps/gateway", "--for",
-		"condition=available", "--timeout", "600s", "-n", "cellery-system"), errorDeployingCelleryRuntime)
 }
 
-func executeAPIMArtifactsForNonPersistedVolume(artifactPath, errorDeployingCelleryRuntime string) {
+func configureMysqlOnExistingClusterWithNonPersistedVolume(artifactPath, errorDeployingCelleryRuntime string) {
 	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.CREATE, constants.CONFIG_MAP,
 		"mysql-dbscripts", "--from-file", artifactPath+"/k8s-artefacts/mysql/dbscripts/", "-n", "cellery-system"),
 		errorDeployingCelleryRuntime)
@@ -311,34 +383,56 @@ func executeAPIMArtifactsForNonPersistedVolume(artifactPath, errorDeployingCelle
 		"--for", "condition=available", "--timeout", "300s", "-n", "cellery-system"), errorDeployingCelleryRuntime)
 	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.APPLY, constants.KUBECTL_FLAG,
 		artifactPath+"/k8s-artefacts/mysql/mysql-service.yaml", "-n", "cellery-system"), errorDeployingCelleryRuntime)
+}
 
-	// Create the gw config maps
-	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.CREATE, constants.CONFIG_MAP, "gw-conf", "--from-file",
-		artifactPath+"/k8s-artefacts/global-apim/conf", "-n", "cellery-system"), errorDeployingCelleryRuntime)
-	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.CREATE, constants.CONFIG_MAP, "gw-conf-datasources",
-		"--from-file", artifactPath+"/k8s-artefacts/global-apim/conf/datasources/", "-n", "cellery-system"),
+func executeAPIMArtifactsForPersistedVolumeWithoutNfs(artifactPath, errorDeployingCelleryRuntime string) {
+	// Create apim NFS volumes and volume claims
+	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.APPLY, constants.KUBECTL_FLAG,
+		artifactPath+"/k8s-artefacts/global-apim/persistent-volume-local-dev.yaml", "-n", "cellery-system"),
+		errorDeployingCelleryRuntime)
+	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.APPLY, constants.KUBECTL_FLAG,
+		artifactPath+"/k8s-artefacts/global-apim/persistent-volume-claim-local.yaml", "-n", "cellery-system"),
 		errorDeployingCelleryRuntime)
 
-	// Create KM config maps
-	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.CREATE, constants.CONFIG_MAP,
-		"conf-identity", "--from-file", artifactPath+"/k8s-artefacts/global-apim/conf/identity",
-		"-n", "cellery-system"), errorDeployingCelleryRuntime)
-	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.CREATE, constants.CONFIG_MAP,
-		"apim-template", "--from-file", artifactPath+"/k8s-artefacts/global-apim/conf/resources/api_templates",
-		"-n", "cellery-system"), errorDeployingCelleryRuntime)
-	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.CREATE, constants.CONFIG_MAP,
-		"apim-tomcat", "--from-file", artifactPath+"/k8s-artefacts/global-apim/conf/tomcat", "-n",
-		"cellery-system"), errorDeployingCelleryRuntime)
-	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.CREATE, constants.CONFIG_MAP,
-		"apim-security", "--from-file", artifactPath+"/k8s-artefacts/global-apim/conf/security", "-n",
-		"cellery-system"), errorDeployingCelleryRuntime)
+	configureGatewayConfigMaps(artifactPath, errorDeployingCelleryRuntime)
+
+	//Create gateway deployment and the service
+	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.APPLY, constants.KUBECTL_FLAG,
+		artifactPath+"/k8s-artefacts/global-apim/global-apim.yaml", "-n", "cellery-system"), errorDeployingCelleryRuntime)
+	// Wait till the gateway deployment availability
+	//util.ExecuteCommand(exec.Command(constants.KUBECTL, "wait", "deployment.apps/gateway", "--for",
+	//	"condition=available", "--timeout", "600s", "-n", "cellery-system"), errorDeployingCelleryRuntime)
+}
+
+func executeAPIMArtifactsForPersistedVolumeWithNfs(artifactPath, errorDeployingCelleryRuntime string) {
+	// Create apim volumes and volume claims
+	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.APPLY, constants.KUBECTL_FLAG,
+		artifactPath+"/k8s-artefacts/global-apim/artifacts-persistent-volume.yaml", "-n", "cellery-system"),
+		errorDeployingCelleryRuntime)
+	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.APPLY, constants.KUBECTL_FLAG,
+		artifactPath+"/k8s-artefacts/global-apim/artifacts-persistent-volume-claim.yaml", "-n", "cellery-system"),
+		errorDeployingCelleryRuntime)
+
+	configureGatewayConfigMaps(artifactPath, errorDeployingCelleryRuntime)
+	//Create gateway deployment and the service
+	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.APPLY, constants.KUBECTL_FLAG,
+		artifactPath+"/k8s-artefacts/global-apim/global-apim.yaml", "-n", "cellery-system"), errorDeployingCelleryRuntime)
+	// Wait till the gateway deployment availability
+	//util.ExecuteCommand(exec.Command(constants.KUBECTL, "wait", "deployment.apps/gateway", "--for",
+	//	"condition=available", "--timeout", "600s", "-n", "cellery-system"), errorDeployingCelleryRuntime)
+}
+
+func executeAPIMArtifactsForNonPersistedVolume(artifactPath, errorDeployingCelleryRuntime string) {
+	configureMysqlOnExistingClusterWithNonPersistedVolume(artifactPath, errorDeployingCelleryRuntime)
+
+	configureGatewayConfigMaps(artifactPath, errorDeployingCelleryRuntime)
 
 	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.APPLY, constants.KUBECTL_FLAG,
 		artifactPath+"/k8s-artefacts/global-apim/global-apim-volatile.yaml", "-n", "cellery-system"),
 		errorDeployingCelleryRuntime)
 	// Wait till the gateway deployment availability
-	util.ExecuteCommand(exec.Command(constants.KUBECTL, "wait", "deployment.apps/gateway", "--for",
-		"condition=available", "--timeout", "600s", "-n", "cellery-system"), errorDeployingCelleryRuntime)
+	//util.ExecuteCommand(exec.Command(constants.KUBECTL, "wait", "deployment.apps/gateway", "--for",
+	//	"condition=available", "--timeout", "600s", "-n", "cellery-system"), errorDeployingCelleryRuntime)
 }
 
 func executeObservabilityArtifacts(artifactPath, errorDeployingCelleryRuntime string, existingCluster bool) error {
@@ -388,4 +482,39 @@ func executeObservabilityArtifacts(artifactPath, errorDeployingCelleryRuntime st
 		errorDeployingCelleryRuntime)
 
 	return nil
+}
+
+func createRuntimeOnExistingClusterWithPersistedVolume() {
+	useNfs, err := util.GetYesOrNoFromUser(fmt.Sprintf("Do you want to use your NFS server"))
+	if err != nil {
+		util.ExitWithErrorMessage("Failed to select an option", err)
+	}
+	if useNfs {
+		createRuntimeOnExistingClusterWithPersistedVolumeWithNfs()
+	} else {
+		createRuntimeOnExistingClusterWithPersistedVolumeWithoutNfs()
+	}
+}
+
+func updateNfsDataInK8sArtifacts(nfsIpAddress, fileShare string) {
+	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP,
+		constants.ARTIFACTS, constants.K8S_ARTIFACTS, constants.GLOBAL_APIM, constants.ARTIFACTS_PERSISTENT_VOLUME_YAML),
+		"NFS_SERVER_IP", nfsIpAddress, -1); err != nil {
+		fmt.Printf("Error replacing in file artifacts-persistent-volume.yaml: %v", err)
+	}
+	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP,
+		constants.ARTIFACTS, constants.K8S_ARTIFACTS, constants.GLOBAL_APIM, constants.ARTIFACTS_PERSISTENT_VOLUME_YAML),
+		"NFS_SHARE_LOCATION", "/"+fileShare, -1); err != nil {
+		fmt.Printf("Error replacing in file artifacts-persistent-volume.yaml: %v", err)
+	}
+}
+
+func labelMasterNode(errorDeployingCelleryRuntime string) {
+	nodeName, err := kubectl.GetMasterNodeName()
+	if err != nil {
+		util.ExitWithErrorMessage("Failed to create controller", err)
+	}
+	// Label the node
+	util.ExecuteCommand(exec.Command(constants.KUBECTL, "label", "nodes", nodeName, "disk=local", "--overwrite"),
+		errorDeployingCelleryRuntime)
 }

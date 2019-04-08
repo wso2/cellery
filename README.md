@@ -13,14 +13,16 @@ Build, push/pull, run, scale and observe composites. Secure APIs by default. Cod
 ## Getting Started
 ### Pre requisites 
 1. kubectl v1.11 or higher
-2. Existing Kubernetes cluster or VirtualBox (if local installation is required) or Google Cloud SDK (if required to install cellery mesh in GCP)
+2. Existing Kubernetes cluster OR  
+   VirtualBox (if local installation is required) OR  
+   Google Cloud SDK (if required to install cellery mesh in GCP)
 
 ### How to Install
 
 #### Linux
 Download the [cellery-ubuntu-x64-0.2.0.deb](https://wso2.org/jenkins/job/cellery/job/sdk/) and install it using dpkg command as shown below.
 ```
-dpkg -i cellery-ubuntu-x64-0.1.0.deb
+dpkg -i cellery-ubuntu-x64-0.2.0.deb
 ```
 #### Mac OS
 Download [cellery-0.2.0.pkg](https://wso2.org/jenkins/job/cellery/job/sdk/) and install it by following macOS package installation steps.
@@ -94,7 +96,7 @@ or executing [inline command](#inline-command-mode-setup) with `cellery setup cr
     ```
     192.168.56.10 wso2-apim cellery-dashboard wso2sp-observability-api wso2-apim-gateway cellery-k8s-metrics idp.cellery-system pet-store.com hello-world.com my-hello-world.com
     ```
-3) Once the installation process is completed, you can [quick start with cellery](#quick-start-with-cellery).
+3) As the installation process is completed, you can [quick start with cellery](#quick-start-with-cellery).
 
 #### 2. GCP
 To create a GCP based cellery installation, you need to have GCP account and [Gloud SDK](https://cloud.google.com/sdk/docs/) installed in your machine. 
@@ -196,6 +198,8 @@ executing inline command with `cellery setup create gcp [--complete]`.
     ```
     <IP Address> wso2-apim cellery-dashboard wso2sp-observability-api wso2-apim-gateway cellery-k8s-metrics idp.cellery-system pet-store.com hello-world.com my-hello-world.com
     ```
+8. As the installation process is completed, you can [quick start with cellery](#quick-start-with-cellery).
+
 ### Quick start with cellery
 Let's quickly run a sample hello world cell by following below steps.
 
@@ -406,7 +410,7 @@ and pass `my-hello-world.com` for `VHOST_NAME`, and your name for `HELLO_NAME` a
         hello-world-cell-1-0-0-676b2131   sinthuja/hello-world-cell:1.0.0              Ready    sinthuja-hello-world-cell-1-0-0-676b2131--gateway-service   1            10 minutes 1 seconds
     ```
     
-6. Access url [http://my-hello-world.com/](http://my-hello-world.com/) from browser. You will updated web page with greeting param you passed for HELLO_NAME in step-4.
+6. Access url [http://my-hello-world.com/](http://my-hello-world.com/) from browser. You will see updated web page with greeting param you passed for HELLO_NAME in step-4.
 
 7. As a final step, let's push your first cell project to your docker hub account. Tp perform this execute `cellery push` as shown below.
     ```
@@ -430,4 +434,32 @@ and pass `my-hello-world.com` for `VHOST_NAME`, and your name for `HELLO_NAME` a
     ```
  Congratulations! You have successfully created your own cell, and completed getting started!
  
-  
+### Clean up
+You can terminate the cells that are started during this guide.
+
+1) List the cells that are running in the current setup by `cellery list instances`.
+    ```
+    $ cellery list instances
+         INSTANCE                      CELL IMAGE                   STATUS               GATEWAY               COMPONENTS            AGE
+     ---------------- -------------------------------------------- -------- --------------------------------- ------------ -----------------------
+      hello            wso2cellery/cells-hello-world-webapp:0.1.0    Ready    hello--gateway-service            1            1 hours 2 minutes
+      my-hello-world   <ORGNAME>/hello-world-cell:1.0.0              Ready    my-hello-world--gateway-service   1            27 minutes 42 seconds
+    ```
+2) Execute terminate command for each cell instances that you want to clean up as shown below.
+    ```
+    $ cellery terminate hello
+    $ cellery terminate my-hello-world
+    ```
+
+## What is Next?
+- [Try Petstore application](https://github.com/wso2-cellery/samples/tree/master/pet-store) 
+
+## Useful Links
+- [Samples](https://github.com/wso2-cellery/samples)
+- How to code cells?
+- CLI commands
+- Architecture
+
+## Community 
+- [Cellery mailing list](https://groups.google.com/forum/#!forum/wso2-cellery-dev)
+- [How to contribute?] (https://github.com/wso2-cellery/sdk/blob/master/CONTRIBUTING.md)

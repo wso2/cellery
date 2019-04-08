@@ -144,3 +144,6 @@ const APIM_REPOSITORY_DEPLOYMENT_SERVER = "apim_repository_deployment_server"
 
 const PERSISTENT_VOLUME = "Persistent volume"
 const NON_PERSISTENT_VOLUME = "Non persistent volume"
+
+const CELLERY_SQL_USER_NAME = "cellery-sql-user"
+const CELLERY_SQL_PASSWORD = "cellery-sql-user"

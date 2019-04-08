@@ -158,7 +158,7 @@ Let's quickly run a sample hello world cell by following below steps.
 Congratulations! You have successfully got running the first web cell running!  
 
 
-### Build and deploy your first Cell 
+### Build and deploy your first cell 
 In this section let's focus on initialize, build, run and push a hello world cell. Follow the instructions listed below to create your first cell.
 
 1. Execute cellery init command from the command prompt, and provide the project name as ‘hello-world-cell’. 

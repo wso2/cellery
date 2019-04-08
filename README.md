@@ -467,4 +467,4 @@ You can terminate the cells that are started during this guide.
 
 ## Community 
 - [Cellery mailing list](https://groups.google.com/forum/#!forum/wso2-cellery-dev)
-- [How to contribute?] (https://github.com/wso2-cellery/sdk/blob/master/CONTRIBUTING.md)
+- [How to contribute?](https://github.com/wso2-cellery/sdk/blob/master/CONTRIBUTING.md)

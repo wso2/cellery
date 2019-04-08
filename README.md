@@ -14,8 +14,8 @@ Build, push/pull, run, scale and observe composites. Secure APIs by default. Cod
 ### Pre requisites 
 1. kubectl v1.11 or higher
 2. Existing Kubernetes cluster OR  
-   VirtualBox (if local installation is required) OR  
-   Google Cloud SDK (if required to install cellery mesh in GCP)
+   VirtualBox (If local installation is required) OR  
+   Google Cloud SDK (If required to install cellery runtime in GCP)
 
 ### How to Install
 
@@ -27,7 +27,7 @@ dpkg -i cellery-ubuntu-x64-0.2.0.deb
 #### Mac OS
 Download [cellery-0.2.0.pkg](https://wso2.org/jenkins/job/cellery/job/sdk/) and install it by following macOS package installation steps.
 
-### Set up Cellery Runtime
+### Set up cellery runtime
 Once the cellery is installed, verify the installation by executing `cellery version` command. 
 
 You can install the cellery runtime locally as a virtual machine (`Local`) or in google cloud platform (`GCP`) 
@@ -86,7 +86,7 @@ The below are the list of inline commands to setup cellery.
 | GCP | Complete | `cellery setup create gcp --complete` | Creates complete GCP setup. This will spawn a GCP kubernetes cluster and create resources for the cellery runtime. You will require GCloud SDK as pre-requisite to perform this operation. Please check [GCP](#2.-gcp) for the steps| 
                                     
 
-#### 1. Local Setup
+#### 1. Local setup
 This will setup the local environment, by creating a virtual machine with pre-installed kubeadm and cellery runtime. 
 
 1) As mentioned above this can be installed with [interactively](#interactive-mode-setup) by selecting Create > Local > Basic or Complete options 
@@ -98,7 +98,7 @@ or executing [inline command](#inline-command-mode-setup) with `cellery setup cr
     ```
 3) As the installation process is completed, you can [quick start with cellery](#quick-start-with-cellery).
 
-#### 2. GCP
+#### 2. GCP setup
 To create a GCP based cellery installation, you need to have GCP account and [Gloud SDK](https://cloud.google.com/sdk/docs/) installed in your machine. 
 Follow the below steps to install cellery into your GCP.
 
@@ -265,7 +265,7 @@ Let's quickly run a sample hello world cell by following below steps.
 Congratulations! You have successfully got running the first web cell running!  
 
 
-### Build and Deploy your first Cell 
+### Build and deploy your first Cell 
 In this section let's focus on initialize, build, run and push a hello world cell. Follow the instructions listed below to create your first cell.
 
 1. Execute cellery init command from the command prompt, and provide the project name as ‘hello-world-cell’. 
@@ -451,10 +451,10 @@ You can terminate the cells that are started during this guide.
     $ cellery terminate my-hello-world
     ```
 
-## What is Next?
+## What is next?
 - [Try Petstore application](https://github.com/wso2-cellery/samples/tree/master/pet-store) 
 
-## Useful Links
+## Useful links
 - [Samples](https://github.com/wso2-cellery/samples)
 - How to code cells?
 - CLI commands

@@ -103,15 +103,41 @@ func createRuntimeOnExistingClusterWithPersistedVolumeWithoutNfs() {
 	gcpSpinner.SetNewAction("Creating Observability")
 	executeObservabilityArtifacts(artifactPath, errorDeployingCelleryRuntime, true)
 
-	// Create ingress-nginx deployment
-	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.APPLY, constants.KUBECTL_FLAG,
-		artifactPath+"/k8s-artefacts/system/mandatory.yaml"), errorDeployingCelleryRuntime)
-	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.APPLY, constants.KUBECTL_FLAG,
-		artifactPath+"/k8s-artefacts/system/service-nodeport.yaml"), errorDeployingCelleryRuntime)
+	gcpSpinner.SetNewAction("Creating ingress-nginx")
+	createNGinx(artifactPath, errorDeployingCelleryRuntime)
 	gcpSpinner.Stop(true)
 }
 
 func createRuntimeOnExistingClusterWithNonPersistedVolume() {
+	var isCompleteSelected = false
+	cellTemplate := &promptui.SelectTemplates{
+		Label:    "{{ . }}",
+		Active:   "\U000027A4 {{ .| bold }}",
+		Inactive: "  {{ . | faint }}",
+		Help:     util.Faint("[Use arrow keys]"),
+	}
+
+	cellPrompt := promptui.Select{
+		Label:     util.YellowBold("?") + " Select the type of runtime",
+		Items:     []string{constants.BASIC, constants.COMPLETE},
+		Templates: cellTemplate,
+	}
+	_, value, err := cellPrompt.Run()
+	if err != nil {
+		util.ExitWithErrorMessage("Failed to select an option: %v", err)
+	}
+	if value == constants.COMPLETE {
+		isCompleteSelected = true
+	}
+
+	if isCompleteSelected {
+		createRuntimeOnExistingClusterWithNonPersistedVolumeComplete()
+	} else {
+		createRuntimeOnExistingClusterWithNonPersistedVolumeBasic()
+	}
+}
+
+func createRuntimeOnExistingClusterWithNonPersistedVolumeBasic() {
 	gcpSpinner := util.StartNewSpinner("Creating cellery runtime")
 
 	updateMysqlDataInK8sArtifacts(constants.MYSQL_HOST_NAME_FOR_EXISTING_CLUSTER, constants.CELLERY_SQL_USER_NAME,
@@ -124,17 +150,45 @@ func createRuntimeOnExistingClusterWithNonPersistedVolume() {
 	labelMasterNode(errorDeployingCelleryRuntime)
 	executeControllerArtifacts(artifactPath, errorDeployingCelleryRuntime)
 
+	gcpSpinner.SetNewAction("Configuring mysql")
+	updateIdpDataInK8sArtifacts(constants.MYSQL_HOST_NAME_FOR_EXISTING_CLUSTER, constants.CELLERY_SQL_USER_NAME,
+		constants.CELLERY_SQL_PASSWORD)
+	configureMysqlOnExistingClusterWithNonPersistedVolume(artifactPath, errorDeployingCelleryRuntime)
+
+	gcpSpinner.SetNewAction("Creating IDP")
+	createIdp(artifactPath, errorDeployingCelleryRuntime)
+
+	gcpSpinner.SetNewAction("Creating ingress-nginx")
+	createNGinx(artifactPath, errorDeployingCelleryRuntime)
+
+	gcpSpinner.Stop(true)
+}
+
+func createRuntimeOnExistingClusterWithNonPersistedVolumeComplete() {
+	gcpSpinner := util.StartNewSpinner("Creating cellery runtime")
+
+	updateMysqlDataInK8sArtifacts(constants.MYSQL_HOST_NAME_FOR_EXISTING_CLUSTER, constants.CELLERY_SQL_USER_NAME,
+		constants.CELLERY_SQL_PASSWORD)
+
+	var artifactPath = filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP, constants.ARTIFACTS)
+	errorDeployingCelleryRuntime := "Error deploying cellery runtime"
+
+	gcpSpinner.SetNewAction("Creating controller")
+	labelMasterNode(errorDeployingCelleryRuntime)
+	executeControllerArtifacts(artifactPath, errorDeployingCelleryRuntime)
+
+	gcpSpinner.SetNewAction("Configuring mysql")
+	configureMysqlOnExistingClusterWithNonPersistedVolume(artifactPath, errorDeployingCelleryRuntime)
+
 	gcpSpinner.SetNewAction("Creating APIM")
 	executeAPIMArtifactsForNonPersistedVolume(artifactPath, errorDeployingCelleryRuntime)
 
 	gcpSpinner.SetNewAction("Creating Observability")
 	executeObservabilityArtifacts(artifactPath, errorDeployingCelleryRuntime, true)
 
-	// Create ingress-nginx deployment
-	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.APPLY, constants.KUBECTL_FLAG,
-		artifactPath+"/k8s-artefacts/system/mandatory.yaml"), errorDeployingCelleryRuntime)
-	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.APPLY, constants.KUBECTL_FLAG,
-		artifactPath+"/k8s-artefacts/system/service-nodeport.yaml"), errorDeployingCelleryRuntime)
+	gcpSpinner.SetNewAction("Creating ingress-nginx")
+	createNGinx(artifactPath, errorDeployingCelleryRuntime)
+
 	gcpSpinner.Stop(true)
 }
 
@@ -217,11 +271,9 @@ func createRuntimeOnExistingClusterWithPersistedVolumeWithNfs() {
 	gcpSpinner.SetNewAction("Creating Observability")
 	executeObservabilityArtifacts(artifactPath, errorDeployingCelleryRuntime, true)
 
-	// Create ingress-nginx deployment
-	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.APPLY, constants.KUBECTL_FLAG,
-		artifactPath+"/k8s-artefacts/system/mandatory.yaml"), errorDeployingCelleryRuntime)
-	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.APPLY, constants.KUBECTL_FLAG,
-		artifactPath+"/k8s-artefacts/system/service-nodeport.yaml"), errorDeployingCelleryRuntime)
+	gcpSpinner.SetNewAction("Creating ingress-nginx")
+	createNGinx(artifactPath, errorDeployingCelleryRuntime)
+
 	gcpSpinner.Stop(true)
 }
 
@@ -281,6 +333,25 @@ func updateMysqlDataInK8sArtifacts(dbHostName, dbUserName, dbPassword string) {
 		constants.ARTIFACTS, constants.K8S_ARTIFACTS, constants.MYSQL, constants.DB_SCRIPTS, constants.INIT_SQL),
 		constants.DATABASE_PASSWORD, dbPassword, -1); err != nil {
 		fmt.Printf("%V: %v", constants.ERROR_REPLACING_INIT_SQL, err)
+	}
+}
+
+func updateIdpDataInK8sArtifacts(dbHostName, dbUserName, dbPassword string) {
+	// Replace username in /global-idp/conf/datasources/master-datasources.xml
+	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP,
+		constants.ARTIFACTS, constants.K8S_ARTIFACTS, constants.GLOBAL_IDP, constants.CONF, constants.DATA_SOURCES,
+		constants.MASTER_DATA_SOURCES_XML), constants.DATABASE_USERNAME, dbUserName, -1); err != nil {
+		fmt.Printf("%V: %v", constants.ERROR_REPLACING_IDP_MASTER_DATASOURCES_XML, err)
+	}
+	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP,
+		constants.ARTIFACTS, constants.K8S_ARTIFACTS, constants.GLOBAL_IDP, constants.CONF, constants.DATA_SOURCES,
+		constants.MASTER_DATA_SOURCES_XML), constants.DATABASE_PASSWORD, dbPassword, -1); err != nil {
+		fmt.Printf("%V: %v", constants.ERROR_REPLACING_IDP_MASTER_DATASOURCES_XML, err)
+	}
+	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP,
+		constants.ARTIFACTS, constants.K8S_ARTIFACTS, constants.GLOBAL_IDP, constants.CONF, constants.DATA_SOURCES,
+		constants.MASTER_DATA_SOURCES_XML), constants.MYSQL_DATABASE_HOST, dbHostName, -1); err != nil {
+		fmt.Printf("%V: %v", constants.ERROR_REPLACING_IDP_MASTER_DATASOURCES_XML, err)
 	}
 }
 
@@ -423,8 +494,6 @@ func executeAPIMArtifactsForPersistedVolumeWithNfs(artifactPath, errorDeployingC
 }
 
 func executeAPIMArtifactsForNonPersistedVolume(artifactPath, errorDeployingCelleryRuntime string) {
-	configureMysqlOnExistingClusterWithNonPersistedVolume(artifactPath, errorDeployingCelleryRuntime)
-
 	configureGatewayConfigMaps(artifactPath, errorDeployingCelleryRuntime)
 
 	util.ExecuteCommand(exec.Command(constants.KUBECTL, constants.APPLY, constants.KUBECTL_FLAG,

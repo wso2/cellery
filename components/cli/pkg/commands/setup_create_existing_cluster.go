@@ -288,51 +288,51 @@ func updateMysqlDataInK8sArtifacts(dbHostName, dbUserName, dbPassword string) {
 	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP,
 		constants.ARTIFACTS, constants.K8S_ARTIFACTS, constants.GLOBAL_APIM, constants.CONF, constants.DATA_SOURCES,
 		constants.MASTER_DATA_SOURCES_XML), constants.DATABASE_USERNAME, dbUserName, -1); err != nil {
-		fmt.Printf("%v: %v", constants.ERROR_REPLACING_APIM_MASTER_DATASOURCES_XML, err)
+		fmt.Printf("%s: %v", constants.ERROR_REPLACING_APIM_MASTER_DATASOURCES_XML, err)
 	}
 
 	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP,
 		constants.ARTIFACTS, constants.K8S_ARTIFACTS, constants.GLOBAL_APIM, constants.CONF, constants.DATA_SOURCES,
 		constants.MASTER_DATA_SOURCES_XML), constants.DATABASE_PASSWORD, dbPassword, -1); err != nil {
-		fmt.Printf("%v: %v", constants.ERROR_REPLACING_APIM_MASTER_DATASOURCES_XML, err)
+		fmt.Printf("%s: %v", constants.ERROR_REPLACING_APIM_MASTER_DATASOURCES_XML, err)
 	}
 
 	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP,
 		constants.ARTIFACTS, constants.K8S_ARTIFACTS, constants.GLOBAL_APIM, constants.CONF, constants.DATA_SOURCES,
 		constants.MASTER_DATA_SOURCES_XML), constants.MYSQL_DATABASE_HOST,
 		dbHostName, -1); err != nil {
-		fmt.Printf("%v: %v", constants.ERROR_REPLACING_APIM_MASTER_DATASOURCES_XML, err)
+		fmt.Printf("%s: %v", constants.ERROR_REPLACING_APIM_MASTER_DATASOURCES_XML, err)
 	}
 	// Replace username username, password, host in /observability/sp/conf/deployment.yaml
 	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME,
 		constants.GCP, constants.ARTIFACTS, constants.K8S_ARTIFACTS, constants.OBSERVABILITY,
 		constants.SP, constants.CONF, constants.DEPLOYMENT_YAML), constants.DATABASE_USERNAME,
 		dbUserName, -1); err != nil {
-		fmt.Printf("%V: %v", constants.ERROR_REPLACING_OBSERVABILITY_YAML, err)
+		fmt.Printf("%s: %v", constants.ERROR_REPLACING_OBSERVABILITY_YAML, err)
 	}
 	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP,
 		constants.ARTIFACTS, constants.K8S_ARTIFACTS, constants.OBSERVABILITY, constants.SP,
 		constants.CONF, constants.DEPLOYMENT_YAML), constants.DATABASE_PASSWORD,
 		dbPassword, -1); err != nil {
-		fmt.Printf("%V: %v", constants.ERROR_REPLACING_OBSERVABILITY_YAML, err)
+		fmt.Printf("%s: %v", constants.ERROR_REPLACING_OBSERVABILITY_YAML, err)
 	}
 	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP,
 		constants.ARTIFACTS, constants.K8S_ARTIFACTS, constants.OBSERVABILITY, constants.SP, constants.CONF,
 		constants.DEPLOYMENT_YAML), constants.MYSQL_DATABASE_HOST, dbHostName,
 		-1); err != nil {
-		fmt.Printf("%V: %v", constants.ERROR_REPLACING_OBSERVABILITY_YAML, err)
+		fmt.Printf("%s: %v", constants.ERROR_REPLACING_OBSERVABILITY_YAML, err)
 	}
 
 	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP,
 		constants.ARTIFACTS, constants.K8S_ARTIFACTS, constants.MYSQL, constants.DB_SCRIPTS, constants.INIT_SQL),
 		constants.DATABASE_USERNAME, dbUserName, -1); err != nil {
-		fmt.Printf("%V: %v", constants.ERROR_REPLACING_INIT_SQL, err)
+		fmt.Printf("%s: %v", constants.ERROR_REPLACING_INIT_SQL, err)
 	}
 
 	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP,
 		constants.ARTIFACTS, constants.K8S_ARTIFACTS, constants.MYSQL, constants.DB_SCRIPTS, constants.INIT_SQL),
 		constants.DATABASE_PASSWORD, dbPassword, -1); err != nil {
-		fmt.Printf("%V: %v", constants.ERROR_REPLACING_INIT_SQL, err)
+		fmt.Printf("%s: %v", constants.ERROR_REPLACING_INIT_SQL, err)
 	}
 }
 
@@ -341,17 +341,17 @@ func updateIdpDataInK8sArtifacts(dbHostName, dbUserName, dbPassword string) {
 	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP,
 		constants.ARTIFACTS, constants.K8S_ARTIFACTS, constants.GLOBAL_IDP, constants.CONF, constants.DATA_SOURCES,
 		constants.MASTER_DATA_SOURCES_XML), constants.DATABASE_USERNAME, dbUserName, -1); err != nil {
-		fmt.Printf("%V: %v", constants.ERROR_REPLACING_IDP_MASTER_DATASOURCES_XML, err)
+		fmt.Printf("%s: %v", constants.ERROR_REPLACING_IDP_MASTER_DATASOURCES_XML, err)
 	}
 	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP,
 		constants.ARTIFACTS, constants.K8S_ARTIFACTS, constants.GLOBAL_IDP, constants.CONF, constants.DATA_SOURCES,
 		constants.MASTER_DATA_SOURCES_XML), constants.DATABASE_PASSWORD, dbPassword, -1); err != nil {
-		fmt.Printf("%V: %v", constants.ERROR_REPLACING_IDP_MASTER_DATASOURCES_XML, err)
+		fmt.Printf("%s: %v", constants.ERROR_REPLACING_IDP_MASTER_DATASOURCES_XML, err)
 	}
 	if err := util.ReplaceInFile(filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP,
 		constants.ARTIFACTS, constants.K8S_ARTIFACTS, constants.GLOBAL_IDP, constants.CONF, constants.DATA_SOURCES,
 		constants.MASTER_DATA_SOURCES_XML), constants.MYSQL_DATABASE_HOST, dbHostName, -1); err != nil {
-		fmt.Printf("%V: %v", constants.ERROR_REPLACING_IDP_MASTER_DATASOURCES_XML, err)
+		fmt.Printf("%s: %v", constants.ERROR_REPLACING_IDP_MASTER_DATASOURCES_XML, err)
 	}
 }
 

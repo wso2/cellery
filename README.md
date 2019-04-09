@@ -12,9 +12,9 @@ Build, push/pull, run, scale and observe composites. Secure APIs by default. Cod
 
 ## Getting Started
 ### Pre requisites 
-1. kubectl v1.11 or higher
+1. kubectl v1.11 or higher (Execute `kubectl version` command and make sure kubectl client is v1.11 or higher. Please follow [instructions](https://kubernetes.io/docs/tasks/tools/install-kubectl/) to install latest kubectl)
 2. Existing Kubernetes cluster OR  
-   VirtualBox (If local installation is required) OR  
+   VirtualBox (If local installation is required) OR   
    Google Cloud SDK (If required to install cellery runtime in GCP)
 
 ### How to Install
@@ -319,8 +319,6 @@ and pass `my-hello-world.com` for `VHOST_NAME`, and your name for `HELLO_NAME` a
     ✔ Pushing image <DOCKER_HUB_ORG>/hello-world-cell:1.0.0
     
     Image Digest : sha256:8935b3495a6c1cbc466ac28f4120c3836894e8ea1563fb5da7ecbd17e4b80df5
-    
-    
     
     ✔ Successfully pushed cell image: <DOCKER_HUB_ORG>/hello-world-cell:1.0.0
     

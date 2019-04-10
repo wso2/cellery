@@ -13,19 +13,19 @@ Build, push/pull, run, scale and observe composites. Secure APIs by default. Cod
 ## Getting Started
 ### Pre requisites 
 1. kubectl v1.11 or higher (Execute `kubectl version` command and make sure kubectl client is v1.11 or higher. Please follow [instructions](https://kubernetes.io/docs/tasks/tools/install-kubectl/) to install latest kubectl)
-2. Existing Kubernetes cluster OR  
-   VirtualBox (If local installation is required) OR   
-   Google Cloud SDK (If required to install cellery runtime in GCP)
+2. [VirtualBox](https://www.virtualbox.org/wiki/Downloads) (If local installation is required) OR   
+   [Google Cloud SDK](https://cloud.google.com/sdk/) (If required to install cellery runtime in GCP) OR
+   [Existing Kubernetes cluster](https://kubernetes.io/docs/setup/)
 
 ### How to Install
 
 #### Linux
-Download the [cellery-ubuntu-x64-0.2.0.deb](https://wso2.org/jenkins/job/cellery/job/sdk/) and install it using dpkg command as shown below.
+Download the [cellery-ubuntu-x64-0.2.0.deb](https://wso2-cellery.github.io/downloads) and install it using dpkg command as shown below.
 ```
 dpkg -i cellery-ubuntu-x64-0.2.0.deb
 ```
 #### Mac OS
-Download [cellery-0.2.0.pkg](https://wso2.org/jenkins/job/cellery/job/sdk/) and install it by following macOS package installation steps.
+Download [cellery-0.2.0.pkg](https://wso2-cellery.github.io/downloads) and install it by following macOS package installation steps.
 
 #### Cellery Tooling (Optional)
 Set the following environment variable to enable Cellery tooling with VSCode. 

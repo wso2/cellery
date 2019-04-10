@@ -1,12 +1,14 @@
-### 2. GCP setup
+### GCP setup
+
 To create a GCP based cellery installation, you need to have GCP account and [Gloud SDK](https://cloud.google.com/sdk/docs/) installed in your machine. 
 Follow the below steps to install cellery into your GCP.
 
-1. Use gloud init command and create a project if not exists. Make sure gcloud is configured to the project which you want to install cellery runtime, and also billing is enabled.
+i. Use gloud init command and create a project if not exists. Make sure gcloud is configured to the project which you want to install cellery runtime, and also billing is enabled.
     ```
     gcloud init
     ```
-2. Make sure zone and region is set correctly for the project. Execute below mentioned command.
+
+ii. Make sure zone and region is set correctly for the project. Execute below mentioned command.
     ```
     gcloud config list --format json
     ```
@@ -24,7 +26,8 @@ Follow the below steps to install cellery into your GCP.
       }
     }
     ```
-3. If region or zone is not set as above, then please go to [GCP console](https://console.cloud.google.com/compute/settings?_ga=2.20830648.-1274616255.1554447482), and select default zone and region for your project created. 
+
+iii. If region or zone is not set as above, then please go to [GCP console](https://console.cloud.google.com/compute/settings?_ga=2.20830648.-1274616255.1554447482), and select default zone and region for your project created. 
    OR 
    Use gcloud CLI to set the project zone and the region.
    ```
@@ -32,7 +35,8 @@ Follow the below steps to install cellery into your GCP.
    gcloud config set compute/region <region>
    gcloud config set compute/zone <zone>
    ```
-4. Cellery uses some APIs to create resources in the GCP, therefore we need to enable the below listed APIs. 
+
+iv. Cellery uses some APIs to create resources in the GCP, therefore we need to enable the below listed APIs. 
 You can enable this via the GCP Dashboard by going to menu pane, and selecting APIs and Services > Dashboard options. 
     - Cloud Engine API
     - Kubernetes API
@@ -43,12 +47,14 @@ You can enable this via the GCP Dashboard by going to menu pane, and selecting A
     ```
     gcloud services enable container.googleapis.com file.googleapis.com sqladmin.googleapis.com
     ```
-5. Since cellery creates the resources in the GCP, it needs the API key to access the above mentioned APIs. Hence create the key for default service account via 
+
+v. Since cellery creates the resources in the GCP, it needs the API key to access the above mentioned APIs. Hence create the key for default service account via 
 selecting IAM & Admin > Service Account from left menu pane. And then select the default service account > Create Key > JSON options, and download the JSON file. Copy the 
 downloaded JSON file into directory `$HOME/.cellery/gcp folder`.
 
-6. Now we are ready install cellery into GCP. Run `cellery setup` command and select Create > GCP > Basic or Complete from the menu OR 
-executing inline command with `cellery setup create gcp [--complete]`.
+vi. Now we are ready install cellery into GCP, either using interactive or non-interactive. 
+
+#### Interactive Method
 
     ```
     cellery setup
@@ -87,10 +93,9 @@ executing inline command with `cellery setup create gcp [--complete]`.
     To create your first project, execute the command:
       $ cellery init
     ```
-    When the process is completed Cellery will point to the newly created GCP cluster and user can start working on a 
-    Cellery project. 
+When the process is completed Cellery will point to the newly created GCP cluster and user can start working on a Cellery project. 
 
-7. Get the Nginx Ip and add it to the /etc/hosts. Run the following kubectl command to get the IP address.
+vii. Get the Nginx Ip and add it to the /etc/hosts. Run the following kubectl command to get the IP address.
     ```
     kubectl get ingress -n cellery-system
     ```
@@ -98,4 +103,20 @@ executing inline command with `cellery setup create gcp [--complete]`.
     ```
     <IP Address> wso2-apim cellery-dashboard wso2sp-observability-api wso2-apim-gateway cellery-k8s-metrics idp.cellery-system pet-store.com hello-world.com my-hello-world.com
     ```
-8. As the installation process is completed, you can [quick start with cellery](../../README.md#quick-start-with-cellery).
+
+#### Non-Interactive Method
+
+With the non-interactive method, creating the GCP setup with CLI commands with one go is supported. This supports both complete and basic setups as shown below:
+
+| Setup Option | Package | Command <img width=1100/> | Description |
+|--------------|------|---------|-------------|
+| GCP | Basic | `cellery setup create gcp` | Creates basic GCP setup. This will spawn a GCP kubernetes cluster and create resources for the cellery runtime. You will require GCloud SDK as pre-requisite to perform this operation. Please check [GCP](#2.-gcp) for the steps.| 
+| GCP | Complete | `cellery setup create gcp --complete` | Creates complete GCP setup. This will spawn a GCP kubernetes cluster and create resources for the cellery runtime. You will require GCloud SDK as pre-requisite to perform this operation. Please check [GCP](#2.-gcp) for the steps| 
+
+#### Trying Out
+
+Once the installation process is completed, you can try out [quick start with cellery](../../README.md#quick-start-with-cellery).
+
+#### Cleaning Up
+
+Please refer readme for [managing cellery runtimes](./manage-setup.md) for details on how to clean up the setup.

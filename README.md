@@ -6,7 +6,7 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 Cellery is a code-first approach to building, integrating, running and managing composite microservice applications on Kubernetes. 
-Build, push/pull, run, scale and observe composites. Secure APIs by default. Code in any language.
+Build, push/pull, run, scale and observe composites. Create secure APIs by default, code components in any language.
 
 ----
 
@@ -14,8 +14,8 @@ Build, push/pull, run, scale and observe composites. Secure APIs by default. Cod
 ### Pre requisites 
 1. kubectl v1.11 or higher (Execute `kubectl version` command and make sure kubectl client is v1.11 or higher. Please follow [instructions](https://kubernetes.io/docs/tasks/tools/install-kubectl/) to install latest kubectl)
 2. Existing Kubernetes cluster OR  
-   VirtualBox (If local installation is required) OR   
-   Google Cloud SDK (If required to install cellery runtime in GCP)
+   VirtualBox (for a local installation including a Kubernetes cluster) OR   
+   Google Cloud SDK (to install cellery runtime in GCP)
 
 ### How to Install
 
@@ -25,7 +25,7 @@ Download the [cellery-ubuntu-x64-0.2.0.deb](https://wso2.org/jenkins/job/cellery
 dpkg -i cellery-ubuntu-x64-0.2.0.deb
 ```
 #### Mac OS
-Download [cellery-0.2.0.pkg](https://wso2.org/jenkins/job/cellery/job/sdk/) and install it by following macOS package installation steps.
+Download [cellery-0.2.0.pkg](https://wso2.org/jenkins/job/cellery/job/sdk/) and install using the standard macOS package installation process.
 
 #### Cellery Tooling (Optional)
 Set the following environment variable to enable Cellery tooling with VSCode. 
@@ -41,17 +41,16 @@ BALLERINA_HOME=/Library/Cellery/runtime/ballerina-0.990.3
 ```
 
 ### Set up cellery runtime
-Once the cellery is installed, verify the installation by executing `cellery version` command. 
+Once Cellery is installed, verify the installation is working by executing `cellery version` command. 
 
-You can install the cellery runtime locally as a virtual machine (`Local`) or in google cloud platform (`GCP`) 
-or in any kubernetes cluster (`Existing cluster`). The installation options can be selected [interactively](#interactive-mode-setup) or by passing [inline command](#inline-command-mode-setup) options.  
+You can install the cellery runtime locally as a virtual machine (`Local`), in Google Cloud Platform (`GCP`) 
+or in any Kubernetes cluster (`Existing cluster`). The installation options can be selected [interactively](#interactive-mode-setup) or by passing [inline command](#inline-command-mode-setup) options.  
 
-If you don't have kubernetes cluster running, then you can either select `Local` or `GCP `. If you have the access for kubernetes cluster, then select `Existing cluster` 
-to install cellery into that cluster.  Further,  `Local` option will spawn a new kubernetes cluster in a virtual machine with cellery 
-runtime pre-installed, and `GCP` option will start a new kubernetes cluster in provided GCP account and install cellery. 
+If you don't have Kubernetes cluster running, then either select `Local` or `GCP `. If you have access to an existing Kubernetes cluster (for example via [Docker for Desktop](https://www.docker.com/products/docker-desktop), then select `Existing cluster`. 
+The `Local` option downloads and installs a virtual machine with both Kubernetes and the Cellery 
+runtime pre-installed. The `GCP` option starts a new Kubernetes (GKE) cluster in your existing GCP account and then installs cellery into that cluster. 
 
-Further, cellery can be installed in two flavours; Basic or Complete. Basic has minimal cellery system installation, and 
-Complete has full set of components for cellery which includes API Manager and Observability. 
+The Cellery runtime can be installed in two versions: Basic or Complete. The basic version has a minimal cellery runtime installation that supports defining Logic cells and Web cells. The complete version also includes an API Management runtime and Observability dashboard.
 
 | Packages | Components | Supported Functionality | 
 |----------|------------|-------------------------|
@@ -69,8 +68,8 @@ Each installation can be perfomed by interactive or inline command mode as expla
 This mode will guide through the available options in each steps, and it's ideal for the first time use to install cellery. 
 
 1. Execute `cellery setup` command to configure Cellery runtime. This 
-will prompt a list of selections. There are three options to select from; create, manage, modify and switch. By selecting 
-`create ` section users can setup the Cellery runtime. 
+will prompt a list of options. There are four options to select from: `Create`, `Manage`, `Modify` and `Switch`. Select 
+`Create` to setup a Kubernetes cluster with Cellery installed.
 ```
 $ cellery setup
 [Use arrow keys]
@@ -82,8 +81,8 @@ $ cellery setup
     EXIT
 ```
 
-2. Based on your installation requirement, and availability of kubernetes cluster, you can select the installation type. 
-Please note, you can have multiple installations at the same time such as one Local setup, and multiple GCP setups. 
+2. Based on your installation requirement, and availability of Kubernetes cluster, you can select the installation type. 
+You can have multiple installations at the same time such as one Local setup, and multiple GCP setups. 
 ```
 $ ✔ Create
 [Use arrow keys]
@@ -166,7 +165,19 @@ Let's quickly run a sample hello world cell by following below steps.
       hello                                      wso2cellery/cells-hello-world-webapp:0.1.0   Ready    hello--gateway-service                                      1            30 minutes 48 seconds
     ```
 
-3) Now access the [http://hello-world.com/](http://hello-world.com/) and you will be landed in the hello world web page. 
+3) You need to add an entry into your `/etc/hosts` file so that your browser will use the right IP address for `hello-world.com`.
+Use the `kubectl` tool to find out which IP your service is running on:
+```
+$ kubectl get ingress
+NAME                     HOSTS             ADDRESS                                 PORTS   AGE
+hello--gateway-ingress   hello-world.com   10.0.2.15,172.17.17.100,192.168.56.10   80      3m
+```
+Now add a line to `/etc/hosts` to resolve `hello-world.com` to one of those IPs. e.g.
+```
+192.168.56.10  hello-world.com
+```
+
+4) Now browse [http://hello-world.com/](http://hello-world.com/) and you will should see the cell web page running.
 
 Congratulations! You have successfully got running the first web cell running!  
 

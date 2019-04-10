@@ -173,8 +173,8 @@ copyBuildDirectory() {
     cp ../../components/lang/target/cellery-*.jar ${TARGET_DIRECTORY}/darwinpkg/Library/Cellery/runtime/${BALLERINA_RUNTIME}/bre/lib/
     cp -R ../../components/lang/target/generated-balo/repo/celleryio ${TARGET_DIRECTORY}/darwinpkg/Library/Cellery/repo
 
-    mkdir -p ${TARGET_DIRECTORY}/${INSTALLATION_DIRECTORY}/darwinpkg/Library/Cellery/docs-view
-    cp -R ../../components/docs-view/build/* ${TARGET_DIRECTORY}/${INSTALLATION_DIRECTORY}/darwinpkg/Library/Cellery/docs-view
+    mkdir -p ${TARGET_DIRECTORY}/darwinpkg/Library/Cellery/docs-view
+    cp -R ../../components/docs-view/build/* ${TARGET_DIRECTORY}/darwinpkg/Library/Cellery/docs-view
 
     rm -rf ${TARGET_DIRECTORY}/package
     mkdir -p ${TARGET_DIRECTORY}/package

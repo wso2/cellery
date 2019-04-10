@@ -21,15 +21,15 @@ package commands
 import (
 	"fmt"
 
-	"github.com/fatih/color"
 	"github.com/manifoldco/promptui"
 
 	"github.com/cellery-io/sdk/components/cli/pkg/constants"
+	"github.com/cellery-io/sdk/components/cli/pkg/kubectl"
+
 	"github.com/cellery-io/sdk/components/cli/pkg/util"
 )
 
-func createEnvironment() error {
-	bold := color.New(color.Bold).SprintFunc()
+func manageExistingCluster() error {
 	cellTemplate := &promptui.SelectTemplates{
 		Label:    "{{ . }}",
 		Active:   "\U000027A4 {{ .| bold }}",
@@ -38,8 +38,8 @@ func createEnvironment() error {
 	}
 
 	cellPrompt := promptui.Select{
-		Label:     util.YellowBold("?") + " Select an environment to be installed",
-		Items:     getCreateEnvironmentList(),
+		Label:     util.YellowBold("?") + " Select `cleanup` to remove an existing GCP cluster",
+		Items:     []string{constants.CELLERY_MANAGE_CLEANUP, constants.CELLERY_SETUP_BACK},
 		Templates: cellTemplate,
 	}
 	_, value, err := cellPrompt.Run()
@@ -48,36 +48,39 @@ func createEnvironment() error {
 	}
 
 	switch value {
-	case constants.CELLERY_SETUP_LOCAL:
+	case constants.CELLERY_MANAGE_CLEANUP:
 		{
-			createLocal()
-		}
-	case constants.CELLERY_SETUP_GCP:
-		{
-			createGcp()
-		}
-	case constants.CELLERY_SETUP_EXISTING_CLUSTER:
-		{
-			createOnExistingCluster()
+			cleanupExistingCluster()
 		}
 	default:
 		{
-			RunSetup()
+			manageEnvironment()
 		}
 	}
-
-	fmt.Printf(util.GreenBold("\n\U00002714") + " Successfully installed Cellery runtime.\n")
-	fmt.Println()
-	fmt.Println(bold("What's next ?"))
-	fmt.Println("======================")
-	fmt.Println("To create your first project, execute the command: ")
-	fmt.Println("  $ cellery init ")
 	return nil
 }
 
-func getCreateEnvironmentList() []string {
-	if isVmInstalled() {
-		return []string{constants.CELLERY_SETUP_GCP, constants.CELLERY_SETUP_EXISTING_CLUSTER, constants.CELLERY_SETUP_BACK}
+func cleanupExistingCluster() error {
+	confirmCleanup, _, err := util.GetYesOrNoFromUser("Do you want to delete the cellery runtime (This will "+
+		"delete all your cells and data)", false)
+	if err != nil {
+		util.ExitWithErrorMessage("failed to select option", err)
 	}
-	return []string{constants.CELLERY_SETUP_LOCAL, constants.CELLERY_SETUP_GCP, constants.CELLERY_SETUP_EXISTING_CLUSTER, constants.CELLERY_SETUP_BACK}
+	if confirmCleanup {
+		removeIstio, _, err := util.GetYesOrNoFromUser("Remove istio", false)
+		if err != nil {
+			util.ExitWithErrorMessage("failed to select option", err)
+		}
+		gcpSpinner := util.StartNewSpinner("Cleaning up cluster")
+
+		kubectl.DeleteNameSpace("cellery-system")
+		if removeIstio {
+			kubectl.DeleteNameSpace("istio-system")
+		}
+		kubectl.DeleteAllCells()
+		kubectl.DeletePersistedVolume("wso2apim-local-pv")
+		kubectl.DeletePersistedVolume("wso2apim-with-analytics-mysql-pv")
+		gcpSpinner.Stop(true)
+	}
+	return nil
 }

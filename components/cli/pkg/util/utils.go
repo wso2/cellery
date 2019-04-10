@@ -975,16 +975,26 @@ func ContainsInStringArray(array []string, item string) bool {
 	return false
 }
 
-func GetYesOrNoFromUser(question string) (bool, error) {
+func GetYesOrNoFromUser(question string, withBackOption bool) (bool, bool, error) {
+	options := []string{}
+	var isBackSelected = false
+	if withBackOption {
+		options = []string{"Yes", "No", constants.CELLERY_SETUP_BACK}
+	} else {
+		options = []string{"Yes", "No"}
+	}
 	prompt := promptui.Select{
 		Label: question,
-		Items: []string{"Yes", "No"},
+		Items: options,
 	}
 	_, result, err := prompt.Run()
-	if err != nil {
-		return false, fmt.Errorf("Prompt failed %v\n", err)
+	if result == constants.CELLERY_SETUP_BACK {
+		isBackSelected = true
 	}
-	return result == "Yes", nil
+	if err != nil {
+		return false, isBackSelected, fmt.Errorf("Prompt failed %v\n", err)
+	}
+	return result == "Yes", isBackSelected, nil
 }
 
 // OpenBrowser opens up the provided URL in a browser
@@ -1160,8 +1170,9 @@ func MergeKubeConfig(newConfigFile string) error {
 	return kubectl.WriteConfig(confFile, merged)
 }
 
-func IsCompleteSetupSelected() bool {
+func IsCompleteSetupSelected() (bool, bool) {
 	var isCompleteSelected = false
+	var isBackSelected = false
 	cellTemplate := &promptui.SelectTemplates{
 		Label:    "{{ . }}",
 		Active:   "\U000027A4 {{ .| bold }}",
@@ -1171,21 +1182,25 @@ func IsCompleteSetupSelected() bool {
 
 	cellPrompt := promptui.Select{
 		Label:     YellowBold("?") + " Select the type of runtime",
-		Items:     []string{constants.BASIC, constants.COMPLETE},
+		Items:     []string{constants.BASIC, constants.COMPLETE, constants.CELLERY_SETUP_BACK},
 		Templates: cellTemplate,
 	}
 	_, value, err := cellPrompt.Run()
 	if err != nil {
 		ExitWithErrorMessage("Failed to select an option: %v", err)
 	}
+	if value == constants.CELLERY_SETUP_BACK {
+		isBackSelected = true
+	}
 	if value == constants.COMPLETE {
 		isCompleteSelected = true
 	}
-	return isCompleteSelected
+	return isCompleteSelected, isBackSelected
 }
 
-func IsLoadBalancerIngressTypeSelected() bool {
+func IsLoadBalancerIngressTypeSelected() (bool, bool) {
 	var isLoadBalancerSelected = false
+	var isBackSelected = false
 	cellTemplate := &promptui.SelectTemplates{
 		Label:    "{{ . }}",
 		Active:   "\U000027A4 {{ .| bold }}",
@@ -1195,15 +1210,18 @@ func IsLoadBalancerIngressTypeSelected() bool {
 
 	cellPrompt := promptui.Select{
 		Label:     YellowBold("?") + " Select ingress mode",
-		Items:     []string{constants.INGRESS_MODE_NODE_PORT, constants.INGRESS_MODE_LOAD_BALANCER},
+		Items:     []string{constants.INGRESS_MODE_NODE_PORT + " [kubeadm, minikube]", constants.INGRESS_MODE_LOAD_BALANCER + "[gcp, docker for desktop]", constants.CELLERY_SETUP_BACK},
 		Templates: cellTemplate,
 	}
 	_, value, err := cellPrompt.Run()
 	if err != nil {
 		ExitWithErrorMessage("Failed to select an option: %v", err)
 	}
+	if value == constants.CELLERY_SETUP_BACK {
+		isBackSelected = true
+	}
 	if value == constants.INGRESS_MODE_LOAD_BALANCER {
 		isLoadBalancerSelected = true
 	}
-	return isLoadBalancerSelected
+	return isLoadBalancerSelected, isBackSelected
 }

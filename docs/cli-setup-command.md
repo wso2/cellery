@@ -12,7 +12,7 @@ the current context of `kubectl` also will be updated, and cellery commands will
     
 ### Create
 Setup cellery runtime. The setup can be an existing K8s cluster or new runtimes in either GCP or local environment.
-Refer readme files for [setting up in GCP](./setup/gcp-setup.md) and [setting up in local](./setup/local-setup.md) for detailed instructions.
+Refer readme files for [setting up in GCP](./setup/gcp-setup.md), [setting up in local](./setup/local-setup.md) and [setting up in existing kubernetes cluster](./setup/existing-cluster.md) for detailed instructions.
 ### Manage
 Perform management operations on the targeted cellery runtime. Refer the readme file for [managing cellery runtime](./setup/manage-setup.md) for detailed instructions.
 ### Modify

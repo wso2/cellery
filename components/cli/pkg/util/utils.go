@@ -692,21 +692,6 @@ func RequestCredentials(credentialType string, usernameOverride string) (string,
 		return username, "", err
 	}
 	password := string(bytePassword)
-	fmt.Println()
-
-	// Requesting the confirm password from the user
-	fmt.Print("Confirm Password: ")
-	byteConfirmPassword, err := terminal.ReadPassword(0)
-	if err != nil {
-		return username, "", err
-	}
-	confirmPassword := string(byteConfirmPassword)
-	fmt.Println()
-
-	if password != confirmPassword {
-		fmt.Println("Password and Confirm password mismatch.")
-		return RequestCredentials(credentialType, usernameOverride)
-	}
 
 	fmt.Println()
 	return strings.TrimSpace(username), strings.TrimSpace(password), nil

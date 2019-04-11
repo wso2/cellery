@@ -45,7 +45,7 @@ BALLERINA_HOME=/Library/Cellery/runtime/ballerina-0.990.3
 Once Cellery is installed, verify the installation is working by executing `cellery version` command.
 
 You can install the cellery runtime locally as a virtual machine (`Local`), in Google Cloud Platform (`GCP`)
-or in any Kubernetes cluster (`Existing cluster`). The installation options can be selected [interactively](#interactive-mode-setup) or by passing [inline command](#inline-command-mode-setup) options.
+or in any Kubernetes cluster (`Existing cluster`). The installation options can be selected interactively or by passing inline command options.
 
 #### Which option to choose to install cellery runtime?
 
@@ -74,6 +74,7 @@ Let's quickly run a sample hello world cell as shown in the diagram below.
 
 The `hello-world-cell` contains, one component `hello` and it's a web app. The `hello` component is exposed globally via a global and cell gateway.
 In the quick start we'll be deploying this `hello-world-cell` and browsing the `hello` component's web page.  
+
 ---
 Please follow below instructions to run the hello-world-cell.
 

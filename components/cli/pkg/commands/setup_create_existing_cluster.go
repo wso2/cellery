@@ -334,7 +334,7 @@ func createRuntimeOnExistingClusterWithPersistedVolumeWithNfs() error {
 	if err != nil {
 		util.ExitWithErrorMessage("Error occurred while getting user input", err)
 	}
-	dbUserName, dbPassword, err = util.RequestCredentials("Mysql")
+	dbUserName, dbPassword, err = util.RequestCredentials("Mysql", "")
 	if err != nil {
 		util.ExitWithErrorMessage("Error occurred while getting user input", err)
 	}

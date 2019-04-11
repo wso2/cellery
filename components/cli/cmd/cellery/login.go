@@ -19,6 +19,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
 
 	"github.com/cellery-io/sdk/components/cli/pkg/commands"
@@ -27,19 +29,33 @@ import (
 
 // newLoginCommand saves the credentials for a particular registry
 func newLoginCommand() *cobra.Command {
+	var username string
+	var password string
 	cmd := &cobra.Command{
 		Use:   "login [registry-url]",
 		Short: "Login to a Cellery Registry",
-		Args:  cobra.MaximumNArgs(1),
+		Args: func(cmd *cobra.Command, args []string) error {
+			err := cobra.MaximumNArgs(1)(cmd, args)
+			if err != nil {
+				return err
+			}
+			if password != "" && username == "" {
+				return fmt.Errorf("expects username if the password is provided, username not provided")
+			}
+			return nil
+		},
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) == 1 {
-				commands.RunLogin(args[0])
+				commands.RunLogin(args[0], username, password)
 			} else {
-				commands.RunLogin(constants.CENTRAL_REGISTRY_HOST)
+				commands.RunLogin(constants.CENTRAL_REGISTRY_HOST, username, password)
 			}
 		},
 		Example: "  cellery login\n" +
+			"  cellery login -u john -p john123" +
 			"  cellery login registry.foo.io",
 	}
+	cmd.Flags().StringVarP(&username, "username", "u", "", "Username for Cellery Registry")
+	cmd.Flags().StringVarP(&password, "password", "p", "", "Password for Cellery Registry")
 	return cmd
 }

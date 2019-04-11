@@ -667,16 +667,22 @@ func ExtractTarGzFile(extractTo, archive_name string) error {
 }
 
 // RequestCredentials requests the credentials form the user and returns them
-func RequestCredentials(credentialType string) (string, string, error) {
+func RequestCredentials(credentialType string, usernameOverride string) (string, string, error) {
 	fmt.Println()
 	fmt.Println(YellowBold("?") + " " + credentialType + " credentials required")
 
-	// Requesting the username from the user
-	reader := bufio.NewReader(os.Stdin)
-	fmt.Print("Username: ")
-	username, err := reader.ReadString('\n')
-	if err != nil {
-		return "", "", err
+	var username string
+	var err error
+	if usernameOverride == "" {
+		// Requesting the username from the user
+		reader := bufio.NewReader(os.Stdin)
+		fmt.Print("Username: ")
+		username, err = reader.ReadString('\n')
+		if err != nil {
+			return "", "", err
+		}
+	} else {
+		username = usernameOverride
 	}
 
 	// Requesting the password from the user
@@ -686,21 +692,6 @@ func RequestCredentials(credentialType string) (string, string, error) {
 		return username, "", err
 	}
 	password := string(bytePassword)
-	fmt.Println()
-
-	// Requesting the confirm password from the user
-	fmt.Print("Confirm Password: ")
-	byteConfirmPassword, err := terminal.ReadPassword(0)
-	if err != nil {
-		return username, "", err
-	}
-	confirmPassword := string(byteConfirmPassword)
-	fmt.Println()
-
-	if password != confirmPassword {
-		fmt.Println("Password and Confirm password mismatch.")
-		RequestCredentials(credentialType)
-	}
 
 	fmt.Println()
 	return strings.TrimSpace(username), strings.TrimSpace(password), nil

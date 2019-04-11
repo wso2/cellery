@@ -74,7 +74,8 @@ func RunPull(cellImage string, isSilent bool) {
 		if err != nil {
 			if strings.Contains(err.Error(), "401") {
 				// Requesting the credentials since server responded with an Unauthorized status code
-				registryCredentials.Username, registryCredentials.Password, err = util.RequestCredentials("Docker hub")
+				registryCredentials.Username, registryCredentials.Password, err = util.RequestCredentials(
+					"Cellery Registry", "")
 				if err != nil {
 					util.ExitWithErrorMessage("Failed to acquire credentials", err)
 				}

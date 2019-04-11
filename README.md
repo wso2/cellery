@@ -53,7 +53,8 @@ or in any Kubernetes cluster (`Existing cluster`). The installation options can 
 * if you want to deploy in an existing K8s cluster -> select`Existing cluster` option
 * if you want to deploy locally via a pre-built VM -> select `Local` option 
 
-Further, cellery can be installed in two flavours; Basic or Complete. The following is a comparison between two options:
+#### Cellery runtime packages
+Cellery can be installed in two packages; Basic or Complete. The following is a comparison between two options:
 
 | Packages | Components | Supported Functionality | 
 |----------|------------|-------------------------|
@@ -67,11 +68,18 @@ Please follow the relevant link below for the chosen setup.
 #### [3. GCP setup](docs/setup/gcp-setup.md)                                    
 
 ### Quick start with cellery
-Let's quickly run a sample hello world cell by following below steps.
+Let's quickly run a sample hello world cell as shown in the diagram below.  
+
+![Hello world cell](docs/images/hello-world-architecture.jpg) 
+
+The `hello-world-cell` contains, one component `hello` and it's a web app. The `hello` component is exposed globally via a global and cell gateway.
+In the quick start we'll be deploying this `hello-world-cell` and browsing the `hello` component's web page.
+---
+Please follow below instructions to run the hello-world-cell.
 
 1) Execute below command that will download the hello world web cell from `wso2cellery` organization in [docker hub](https://hub.docker.com/u/wso2cellery) and run the cell.
     ```
-    $ cellery run wso2cellery/cells-hello-world-webapp:0.1.0 -n hello
+    $ cellery run wso2cellery/hello-world-cell:0.2.0 -n hello-world-cell
     ✔ Connecting to registry-1.docker.io
     ✔ Fetching metadata
     ✔ Pulling image wso2cellery/cells-hello-world-webapp:0.1.0
@@ -88,9 +96,9 @@ Let's quickly run a sample hello world cell by following below steps.
     
     Instances to be Used:
     
-      INSTANCE NAME                   CELL IMAGE                   USED INSTANCE   SHARED
-     --------------- -------------------------------------------- --------------- --------
-      hello           wso2cellery/cells-hello-world-webapp:0.1.0   To be Created    -
+      INSTANCE NAME                            CELL IMAGE                   USED INSTANCE   SHARED
+     ------------------------- -------------------------------------------- --------------- --------
+      hello-world-cell           wso2cellery/cells-hello-world-webapp:0.1.0   To be Created    -
     
     Dependency Tree to be Used:
     
@@ -98,7 +106,7 @@ Let's quickly run a sample hello world cell by following below steps.
     
     ? Do you wish to continue with starting above Cell instances (Y/n)?
     
-    ✔ Starting main instance hello
+    ✔ Starting main instance hello-world-cell
     
     
     ✔ Successfully deployed cell image: wso2cellery/cells-hello-world-webapp:0.1.0
@@ -126,17 +134,17 @@ Let's quickly run a sample hello world cell by following below steps.
       hello                                      wso2cellery/cells-hello-world-webapp:0.1.0   Ready    hello--gateway-service                                      1            30 minutes 48 seconds
     ```
 
-3) You would have added an entry into your `/etc/hosts` file during the cellery setup, so that your browser will use the right IP address for `hello-world.com`.
-Use the `kubectl` tool to make sure the IP your service is running on:
-```
-$ kubectl get ingress
-NAME                     HOSTS             ADDRESS        PORTS   AGE
-hello--gateway-ingress   hello-world.com   192.168.56.10   80      3m
-```
-Check it's correctly configured in `/etc/hosts` to resolve `hello-world.com` to one of those IPs. e.g.
-```
-192.168.56.10  hello-world.com
-```
+3) You would have added an entry into your `/etc/hosts` file during the [cellery setup](#set-up-cellery-runtime), 
+so that your browser will use the right IP address for `hello-world.com`. Use the `kubectl` tool to make sure the IP your service is running on:
+    ```
+    $ kubectl get ingress
+    NAME                     HOSTS             ADDRESS        PORTS   AGE
+    hello--gateway-ingress   hello-world.com   192.168.56.10   80      3m
+    ```
+    Check it's correctly configured in `/etc/hosts` to resolve `hello-world.com` to one of those IPs. 
+    ```
+    192.168.56.10  hello-world.com
+    ```
 
 4) Now browse [http://hello-world.com/](http://hello-world.com/) and you will should see the cell web page running.
 
@@ -144,7 +152,7 @@ Congratulations! You have successfully got running the first web cell running!
 
 
 ### Build and deploy your first cell 
-In this section let's focus on initialize, build, run and push a hello world cell. Follow the instructions listed below to create your first cell.
+In this section let's focus on initialize, build, run and push the same hello world cell explained above. Follow the instructions listed below to create your first cell.
 
 1. Execute cellery init command from the command prompt, and provide the project name as ‘hello-world-cell’. 
     ```
@@ -160,7 +168,7 @@ In this section let's focus on initialize, build, run and push a hello world cel
       $ cellery build helloworld/helloworld.bal [repo/]organization/image_name:version
     --------------------------------------------------------
     ```
-2. The above step will auto generate a cellery file in the location: hello-world-cell/hello-world-cell.bal with below content. 
+2. The above step will auto generate a cellery file in the location: hello-world-cell/hello-world-cell.bal with below content. This file is implemented in [Ballerina](https://ballerina.io/) - A Cloud Native Programming Language. 
 The cell `helloCell` consists of one component defined as `helloComponent` and it has one web ingress with default vhost `hello-world.com`.
 An environment variable `HELLO_NAME`with default value `Cellery` is used by `helloComponent` to render the webpage. By passing the  parameters in the runtime, the vhost entry and
 env variable HELLO_NAME can be modified.

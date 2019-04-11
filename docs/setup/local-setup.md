@@ -1,7 +1,8 @@
-### Local setup
+Local setup
+---
 This will setup the local environment, by creating a virtual machine with pre-installed kubeadm and cellery runtime. 
 
-#### Interactive Method
+## Interactive Method
 
    i. Execute `cellery setup` command to configure Cellery runtime. This 
     will prompt a list of selections. By selecting `create ` section users can setup the Cellery runtime: 
@@ -53,7 +54,7 @@ This will setup the local environment, by creating a virtual machine with pre-in
     192.168.56.10 wso2-apim cellery-dashboard wso2sp-observability-api wso2-apim-gateway cellery-k8s-metrics idp.cellery-system pet-store.com hello-world.com my-hello-world.com
     ```
 
-#### Non-Interactive Method
+## Non-Interactive Method
 
 With the non-interactive method, creating the local setup with CLI commands with one go is supported. This supports both complete and basic setups as shown below:
 
@@ -62,10 +63,10 @@ With the non-interactive method, creating the local setup with CLI commands with
 | Local | Basic | `cellery setup create local` | Creates basic local setup. This download a VM and installs to your machine. You will require Virtual Box as pre-requisite to perform this operation| 
 | Local | Complete | `cellery setup create local --complete` | Creates complete local setup. This download a VM with complete cellery runtime and installs to your machine. You will require Virtual Box as pre-requisite to perform this operation| 
 
-#### Trying Out
+## Trying Out
 
 Once the installation process is completed, you can try out [quick start with cellery](../../README.md#quick-start-with-cellery).
 
-#### Cleaning Up
+## Cleaning Up
 
 Please refer readme for [managing cellery runtimes](./manage-setup.md) for details on how to clean up the setup.

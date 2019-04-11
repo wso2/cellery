@@ -13,9 +13,9 @@ Build, push/pull, run, scale and observe composites. Create secure APIs by defau
 
 ## Getting Started
 ### Pre requisites 
-1. kubectl v1.11 or higher (Execute `kubectl version` command and make sure kubectl client is v1.11 or higher. Please follow [instructions](https://kubernetes.io/docs/tasks/tools/install-kubectl/) to install latest kubectl)
+1. kubectl v1.11.x (Execute `kubectl version` command and make sure kubectl client is v1.11. Please follow [instructions](https://kubernetes.io/docs/tasks/tools/install-kubectl/) to install kubectl)
 2. [Existing Kubernetes cluster](https://kubernetes.io/docs/setup/) OR  
-   [VirtualBox](https://www.virtualbox.org/wiki/Downloads) (for a local installation including a Kubernetes cluster) OR
+   [VirtualBox](https://www.virtualbox.org/wiki/Downloads) (for a local installation including a Kubernetes cluster) OR  
    [Google Cloud SDK](https://cloud.google.com/sdk/) (to install cellery runtime in GCP)
 
 ### How to Install
@@ -73,7 +73,7 @@ Let's quickly run a sample hello world cell as shown in the diagram below.
 ![Hello world cell](docs/images/hello-world-architecture.jpg) 
 
 The `hello-world-cell` contains, one component `hello` and it's a web app. The `hello` component is exposed globally via a global and cell gateway.
-In the quick start we'll be deploying this `hello-world-cell` and browsing the `hello` component's web page.
+In the quick start we'll be deploying this `hello-world-cell` and browsing the `hello` component's web page.  
 ---
 Please follow below instructions to run the hello-world-cell.
 
@@ -134,7 +134,8 @@ Please follow below instructions to run the hello-world-cell.
       hello                                      wso2cellery/cells-hello-world-webapp:0.1.0   Ready    hello--gateway-service                                      1            30 minutes 48 seconds
     ```
 
-3) You would have added an entry into your `/etc/hosts` file during the [cellery setup](#set-up-cellery-runtime), 
+3) You would have added an entry into your `/etc/hosts` file during the setting up your runtime [local setup](docs/setup/local-setup.md#configure-host-entries), [Existing Cluster](docs/setup/existing-cluster.md#configure-host-entries), 
+and [GCP setup](docs/setup/gcp-setup.md)     , 
 so that your browser will use the right IP address for `hello-world.com`. Use the `kubectl` tool to make sure the IP your service is running on:
     ```
     $ kubectl get ingress
@@ -235,6 +236,7 @@ env variable HELLO_NAME can be modified.
 
 3. Build the cellery image for hello world project by executing the cellery build command as shown below. Note `DOCKER_HUB_ORG` is your organization name in docker hub.
     ```
+    $ cd hellow-world-cell
     $ cellery build hello-world-cell.bal <DOCKER_HUB_ORG>/hello-world-cell:1.0.0
     Hello World Cell Built successfully.
     
@@ -255,7 +257,7 @@ env variable HELLO_NAME can be modified.
 and if it's available then it'll will be using those as vhost and greeting name. Therefore run the built cellery image with ‘cellery run’ command, 
 and pass `my-hello-world.com` for `VHOST_NAME`, and your name for `HELLO_NAME` as shown below. 
     ```
-    $ cellery run <DOCKER_HUB_ORG/hello-world-cell:1.0.0 -e VHOST_NAME=my-hello-world.com -e HELLO_NAME=WSO2 -n my-hello-world
+    $ cellery run <DOCKER_HUB_ORG>/hello-world-cell:1.0.0 -e VHOST_NAME=my-hello-world.com -e HELLO_NAME=WSO2 -n my-hello-world
        ✔ Extracting Cell Image  <DOCKER_HUB_ORG/hello-world-cell:1.0.0
        
        Main Instance: my-hello-world

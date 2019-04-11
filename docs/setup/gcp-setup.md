@@ -1,5 +1,5 @@
-### GCP setup
-
+GCP setup
+---
 To create a GCP based cellery installation, you need to have GCP account and [Gloud SDK](https://cloud.google.com/sdk/docs/) installed in your machine. 
 Follow the below steps to install cellery into your GCP.
 
@@ -54,7 +54,7 @@ downloaded JSON file into directory `$HOME/.cellery/gcp folder`.
 
 vi. Now we are ready install cellery into GCP, either using interactive or non-interactive. 
 
-#### Interactive Method
+### Interactive Method
 
     ```
     cellery setup
@@ -93,18 +93,12 @@ vi. Now we are ready install cellery into GCP, either using interactive or non-i
     To create your first project, execute the command:
       $ cellery init
     ```
+    
 When the process is completed Cellery will point to the newly created GCP cluster and user can start working on a Cellery project. 
 
-vii. Get the Nginx Ip and add it to the /etc/hosts. Run the following kubectl command to get the IP address.
-    ```
-    kubectl get ingress -n cellery-system
-    ```
-    Then update the /etc/hosts file with that Ip as follows.  
-    ```
-    <IP Address> wso2-apim cellery-dashboard wso2sp-observability-api wso2-apim-gateway cellery-k8s-metrics idp.cellery-system pet-store.com hello-world.com my-hello-world.com
-    ```
+Once the installation is completed [configure the host entries](#configure-host-entries).
 
-#### Non-Interactive Method
+### Non-Interactive Method
 
 With the non-interactive method, creating the GCP setup with CLI commands with one go is supported. This supports both complete and basic setups as shown below:
 
@@ -113,10 +107,23 @@ With the non-interactive method, creating the GCP setup with CLI commands with o
 | GCP | Basic | `cellery setup create gcp` | Creates basic GCP setup. This will spawn a GCP kubernetes cluster and create resources for the cellery runtime. You will require GCloud SDK as pre-requisite to perform this operation. Please check [GCP](#2.-gcp) for the steps.| 
 | GCP | Complete | `cellery setup create gcp --complete` | Creates complete GCP setup. This will spawn a GCP kubernetes cluster and create resources for the cellery runtime. You will require GCloud SDK as pre-requisite to perform this operation. Please check [GCP](#2.-gcp) for the steps| 
 
-#### Trying Out
+Once the installation is completed [configure the host entries](#configure-host-entries)
+
+## Configure host entries
+
+Get the Nginx Ip and add it to the /etc/hosts. Run the following kubectl command to get the IP address.
+```
+ kubectl get ingress -n cellery-system
+```
+Then update the /etc/hosts file with that Ip as follows.  
+```
+ <IP Address> wso2-apim cellery-dashboard wso2sp-observability-api wso2-apim-gateway cellery-k8s-metrics idp.cellery-system pet-store.com hello-world.com my-hello-world.com
+```
+
+## Trying Out
 
 Once the installation process is completed, you can try out [quick start with cellery](../../README.md#quick-start-with-cellery).
 
-#### Cleaning Up
+## Cleaning Up
 
 Please refer readme for [managing cellery runtimes](./manage-setup.md) for details on how to clean up the setup.

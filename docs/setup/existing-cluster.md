@@ -134,9 +134,9 @@ The user can provide database username/password of the MySQL instance that's run
 Once above are performed, there will be an option to select `Basic` or `Complete` [installation packages](../../README.md#cellery-runtime-packages). 
 Now continue to [configure host entries](#configure-host-entries) to complete the setup. 
 
-###2. Non-Persistent Volume
+### 2. Non-Persistent Volume
 This mode allows users to start cellery system without any need for access to NFS/File system or MySQL database storage. 
-But this will not preserve the state of the cellery system, and once the cellery system is retarted any changes made during runtime will be lost, and observability and APIM changes also will be not be stored.
+But this will not preserve the state of the cellery system, and once the cellery system is restarted any changes made during runtime will be lost, and observability and APIM changes also will be not be stored.
 This is ideal for development and quick test environments. 
 
    i. Select the option `Non persistent volume` and continue.

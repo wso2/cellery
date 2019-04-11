@@ -40,10 +40,9 @@ User needs to increase the Docker Desktop resources to support Cellery runtime. 
  * CPU : 4 core or more
  * Memory : 8 GB or more
 
-**Note: If users wants to install cellery with persisted volume, then add /var/tmp/cellery to the Docker Desktop file sharing to support persistence deployments.'**
-<img src="../images/docker-for-desktop-config.png" style="width:50px;"/>
-
-**Note: User may need to restart the Docker Desktop to update the ingress-nginx EXTERNAL-IP after deploying the Cellery runtime.  ( This is a known issue in Docker Desktop.)**
+**Note:**
+ * If users wants to install cellery with persisted volume, then add /var/tmp/cellery to the Docker Desktop file sharing to support persistence deployments.
+ * User may need to restart the Docker Desktop to update the ingress-nginx EXTERNAL-IP after deploying the Cellery runtime.  ( This is a known issue in Docker Desktop.)
 
 ### 3. Kube Admin
 Tested on Ubuntu 18.04. Cellery supports both [persistent](#1.-persistent-volume) and [non-persistent](#2.-non-persistent-volume) runtime deployment on kubeadm based k8s. 

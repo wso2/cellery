@@ -13,12 +13,12 @@ Build, push/pull, run, scale and observe composites. Create secure APIs by defau
 
 ## Getting Started
 ### Pre requisites 
-1. kubectl v1.11.x (Execute `kubectl version` command and make sure kubectl client is v1.11. Please follow [instructions](https://kubernetes.io/docs/tasks/tools/install-kubectl/) to install kubectl)
+1. kubectl v1.11.x (Execute `kubectl version` command and make sure kubectl client is v1.11. Please follow [instructions](https://kubernetes.io/docs/tasks/tools/install-kubectl/) to install kubectl v1.11.x)
 2. [Existing Kubernetes cluster](https://kubernetes.io/docs/setup/) OR  
    [VirtualBox](https://www.virtualbox.org/wiki/Downloads) (for a local installation including a Kubernetes cluster) OR  
    [Google Cloud SDK](https://cloud.google.com/sdk/) (to install cellery runtime in GCP)
 
-### How to Install
+### Setup Cellery CLI
 
 #### Linux
 Download the [cellery-ubuntu-x64-0.2.0.deb](https://wso2-cellery.github.io/downloads) and install it using dpkg command as shown below.
@@ -28,20 +28,7 @@ dpkg -i cellery-ubuntu-x64-0.2.0.deb
 #### Mac OS
 Download [cellery-0.2.0.pkg](https://wso2-cellery.github.io/downloads) and install it by following macOS package installation steps.
 
-#### Cellery Tooling (Optional)
-Set the following environment variable to enable Cellery tooling with VSCode. 
-
-##### Linux
-```
-BALLERINA_HOME=/usr/share/cellery/runtime/ballerina-0.990.3
-```
-
-##### Mac OS
-```
-BALLERINA_HOME=/Library/Cellery/runtime/ballerina-0.990.3
-```
-
-### Set up cellery runtime
+### Set up Cellery runtime
 Once Cellery is installed, verify the installation is working by executing `cellery version` command.
 
 You can install the cellery runtime locally as a virtual machine (`Local`), in Google Cloud Platform (`GCP`)
@@ -65,7 +52,23 @@ Please follow the relevant link below for the chosen setup.
 
 #### [1. Local setup](docs/setup/local-setup.md)
 #### [2. Existing Cluster](docs/setup/existing-cluster.md)
-#### [3. GCP setup](docs/setup/gcp-setup.md)                                    
+#### [3. GCP setup](docs/setup/gcp-setup.md)     
+
+### Setup Cellery Tooling (Optional)
+1. Download and install [VS Code](https://code.visualstudio.com/Download).
+1. Install the [Ballerina vscode plugin 0.990.3](https://product-dist.ballerina.io/downloads/0.990.3/ballerina-vscode-plugin-0.990.3.vsix). 
+1. Open VS Code and navigate to `File|Code->preferences->settings->Extensions->Ballerina` and set the home value to following. 
+
+##### Linux
+```bash
+/usr/share/cellery/runtime/ballerina-0.990.3
+```
+
+##### Mac OS
+```bash
+/Library/Cellery/runtime/ballerina-0.990.3
+```
+![VSCode Settings](docs/images/vscode-settings.png)                               
 
 ### Quick start with cellery
 Let's quickly run a sample hello world cell as shown in the diagram below.  

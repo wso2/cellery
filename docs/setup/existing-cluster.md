@@ -183,6 +183,8 @@ desktop for the IPs to appear in the `kubectl get ingress` command. **
     <IP Address> wso2-apim cellery-dashboard wso2sp-observability-api wso2-apim-gateway cellery-k8s-metrics idp.cellery-system pet-store.com hello-world.com my-hello-world.com
    ```
 
+**Note: IP Address for docker for desktop is `127.0.0.1`, and minikube is `192.168.99.100`.**
+
 ## Trying Out
 Once the installation process is completed, you can try out [quick start with cellery](../../README.md#quick-start-with-cellery).
 

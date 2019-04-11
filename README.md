@@ -33,6 +33,7 @@ Once Cellery is installed, verify the installation is working by executing `cell
 
 You can install the cellery runtime locally as a virtual machine (`Local`), in Google Cloud Platform (`GCP`)
 or in any Kubernetes cluster (`Existing cluster`). The installation options can be selected interactively or by passing inline command options.
+More can go to [cellery setup](docs/cli-setup-command.md) for more details.
 
 #### Which option to choose to install cellery runtime?
 
@@ -86,23 +87,23 @@ Please follow below instructions to run the hello-world-cell.
     $ cellery run wso2cellery/hello-world-cell:0.2.0 -n hello-world-cell
     ✔ Connecting to registry-1.docker.io
     ✔ Fetching metadata
-    ✔ Pulling image wso2cellery/cells-hello-world-webapp:0.1.0
+    ✔ Pulling image wso2cellery/hello-world-cell:0.2.0
     ✔ Saving new Image to the Local Repository
     
     Image Digest : sha256:2d5659e5787df7e7ae0f58671c0b9d857b5a19e5fbdb02fccbc98a64016a97f6
     
-    ✔ Extracting Cell Image wso2cellery/cells-hello-world-webapp:0.1.0
+    ✔ Extracting Cell Image wso2cellery/hello-world-cell:0.2.0
     
     Main Instance: hello
     
-    ✔ Reading Cell Image wso2cellery/cells-hello-world-webapp:0.1.0
+    ✔ Reading Cell Image wso2cellery/hello-world-cell:0.2.0
     ✔ Validating dependencies
     
     Instances to be Used:
     
-      INSTANCE NAME                            CELL IMAGE                   USED INSTANCE   SHARED
-     ------------------------- -------------------------------------------- --------------- --------
-      hello-world-cell           wso2cellery/cells-hello-world-webapp:0.1.0   To be Created    -
+      INSTANCE NAME                            CELL IMAGE             USED INSTANCE   SHARED
+     ------------------------- ------------------------------------- --------------- --------
+      hello-world-cell           wso2cellery/hello-world-cell:0.2.0   To be Created    -
     
     Dependency Tree to be Used:
     
@@ -113,7 +114,7 @@ Please follow below instructions to run the hello-world-cell.
     ✔ Starting main instance hello-world-cell
     
     
-    ✔ Successfully deployed cell image: wso2cellery/cells-hello-world-webapp:0.1.0
+    ✔ Successfully deployed cell image: wso2cellery/hello-world-cell:0.1.0
     
     What's next?
     --------------------------------------------------------
@@ -135,7 +136,7 @@ Please follow below instructions to run the hello-world-cell.
     $ cellery list instances
                       INSTANCE                                   CELL IMAGE                   STATUS                            GATEWAY                            COMPONENTS            AGE
      ------------------------------------------ -------------------------------------------- -------- ----------------------------------------------------------- ------------ -----------------------
-      hello                                      wso2cellery/cells-hello-world-webapp:0.1.0   Ready    hello--gateway-service                                      1            30 minutes 48 seconds
+      hello                                      wso2cellery/hello-world-cell:0.1.0   Ready    hello--gateway-service                                      1            30 minutes 48 seconds
     ```
 
 3) You would have added an entry into your `/etc/hosts` file during the setting up your runtime [local setup](docs/setup/local-setup.md#configure-host-entries), [Existing Cluster](docs/setup/existing-cluster.md#configure-host-entries), 
@@ -337,7 +338,7 @@ You can terminate the cells that are started during this guide.
     $ cellery list instances
          INSTANCE                      CELL IMAGE                   STATUS               GATEWAY               COMPONENTS            AGE
      ---------------- -------------------------------------------- -------- --------------------------------- ------------ -----------------------
-      hello            wso2cellery/cells-hello-world-webapp:0.1.0    Ready    hello--gateway-service            1            1 hours 2 minutes
+      hello            wso2cellery/hello-world-cell:0.1.0    Ready    hello--gateway-service            1            1 hours 2 minutes
       my-hello-world   <ORGNAME>/hello-world-cell:1.0.0              Ready    my-hello-world--gateway-service   1            27 minutes 42 seconds
     ```
 2) Execute terminate command for each cell instances that you want to clean up as shown below.

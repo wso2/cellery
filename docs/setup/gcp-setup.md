@@ -4,16 +4,15 @@ To create a GCP based cellery installation, you need to have GCP account and [Gl
 Follow the below steps to install cellery into your GCP.
 
 i. Use gloud init command and create a project if not exists. Make sure gcloud is configured to the project which you want to install cellery runtime, and also billing is enabled.
-    ```
-    gcloud init
-    ```
-
+```
+   gloud init
+```
 ii. Make sure zone and region is set correctly for the project. Execute below mentioned command.
-    ```
-    gcloud config list --format json
-    ```
-    The expected output from the command should be as below with zone, and region fields.
-    ```json
+```
+   gcloud config list --format json
+```
+The expected output from the command should be as below with zone, and region fields.
+```
     {
       "compute": {
         "region": "us-central1",
@@ -25,7 +24,7 @@ ii. Make sure zone and region is set correctly for the project. Execute below me
         "project": "cellery-gcp-test"
       }
     }
-    ```
+```
 
 iii. If region or zone is not set as above, then please go to [GCP console](https://console.cloud.google.com/compute/settings?_ga=2.20830648.-1274616255.1554447482), and select default zone and region for your project created. 
    OR 
@@ -43,10 +42,10 @@ You can enable this via the GCP Dashboard by going to menu pane, and selecting A
     - Cloud Filestore API
     - Cloud SQL Admin API
 
-    Or you can execute commands via gcloud as below.
-    ```
+   Or you can execute commands via gcloud as below.
+```
     gcloud services enable container.googleapis.com file.googleapis.com sqladmin.googleapis.com
-    ```
+```
 
 v. Since cellery creates the resources in the GCP, it needs the API key to access the above mentioned APIs. Hence create the key for default service account via 
 selecting IAM & Admin > Service Account from left menu pane. And then select the default service account > Create Key > JSON options, and download the JSON file. Copy the 

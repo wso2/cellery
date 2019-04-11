@@ -62,7 +62,7 @@ With the non-interactive method, creating the local setup with CLI commands with
 
 [Configure host entries](#configure-host-entries) once the cellery system is installed. 
 
-### Configure host entries
+## Configure host entries
 
 Add below to /etc/host entries to access cellery hosts.
 ```

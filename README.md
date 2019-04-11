@@ -33,6 +33,7 @@ Once Cellery is installed, verify the installation is working by executing `cell
 
 You can install the cellery runtime locally as a virtual machine (`Local`), in Google Cloud Platform (`GCP`)
 or in any Kubernetes cluster (`Existing cluster`). The installation options can be selected interactively or by passing inline command options.
+More can go to [cellery setup](docs/cli-setup-command.md) for more details.
 
 #### Which option to choose to install cellery runtime?
 

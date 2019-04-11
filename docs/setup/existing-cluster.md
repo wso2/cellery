@@ -98,8 +98,9 @@ Once the option `Existing cluster` is selected, the CLI will prompt to select wh
 
 #### 1.1. Access to NFS
 If the user has access to an NFS server he/she can use it as the persistent volume, else he/she can proceed with file system mount by default. 
-And based on this, user should select `yes` or `no` for the using NFS server option. ** Note: If you are trying this on 
-docker for desktop, and you don't have NFS, then you will be required add /var/tmp/cellery to the [Docker Desktop](#2.-docker-for-desktop-on-macos) file sharing as mentioned.
+And based on this, user should select `yes` or `no` for the using NFS server option.  
+
+**Note: If you are trying this on docker for desktop, and you don't have NFS, then you will be required add /var/tmp/cellery to the [Docker Desktop](#2.-docker-for-desktop-on-macos) file sharing as mentioned.**
    
    ```
     $ cellery setup 

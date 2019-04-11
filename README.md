@@ -28,7 +28,7 @@ dpkg -i cellery-ubuntu-x64-0.2.0.deb
 #### Mac OS
 Download [cellery-0.2.0.pkg](https://wso2-cellery.github.io/downloads) and install it by following macOS package installation steps.
 
-### Set up Cellery runtime
+### Setup Cellery runtime
 Once Cellery is installed, verify the installation is working by executing `cellery version` command.
 
 You can install the cellery runtime locally as a virtual machine (`Local`), in Google Cloud Platform (`GCP`)

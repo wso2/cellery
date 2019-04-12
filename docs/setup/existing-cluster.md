@@ -47,6 +47,9 @@ User needs to increase the Docker Desktop resources to support Cellery runtime. 
 ### 3. Kube Admin
 Tested on Ubuntu 18.04. Cellery supports both [persistent](#1.-persistent-volume) and [non-persistent](#2.-non-persistent-volume) runtime deployment on kubeadm based k8s. 
 
+**Note:**
+Create a folder in **/var/tmp/cellery** and give full executable permission to create and modify the artifacts which are shared with the cellery runtime.
+
 ### 4. Minikube
 Cellery only supports [non-persistence mode](#2.-non-persistent-volume) deployment on Minikube.
 

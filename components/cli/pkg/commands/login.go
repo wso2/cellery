@@ -19,14 +19,12 @@
 package commands
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 
-	"github.com/99designs/keyring"
 	"github.com/nokia/docker-registry-client/registry"
 
-	"github.com/cellery-io/sdk/components/cli/pkg/constants"
+	"github.com/cellery-io/sdk/components/cli/pkg/registry/credentials"
 	"github.com/cellery-io/sdk/components/cli/pkg/util"
 )
 
@@ -34,26 +32,35 @@ import (
 func RunLogin(registryURL string, username string, password string) {
 	fmt.Println("Logging into Registry: " + util.Bold(registryURL))
 
-	// Instantiating a native keyring
-	ring, err := keyring.Open(keyring.Config{
-		ServiceName: constants.CELLERY_HUB_KEYRING_NAME,
-	})
-	if err != nil {
-		util.ExitWithErrorMessage("Error occurred while logging in", err)
+	var registryCredentials = &credentials.RegistryCredentials{
+		Registry: registryURL,
+		Username: username,
+		Password: password,
 	}
-
-	// Reading the existing credentials
-	var registryCredentials = &util.RegistryCredentials{}
-	if err == nil {
-		ringItem, err := ring.Get(registryURL)
-		if err == nil && ringItem.Data != nil {
-			err = json.Unmarshal(ringItem.Data, registryCredentials)
-		}
-	}
-	isCredentialsAlreadyPresent := err == nil && registryCredentials.Username != "" &&
+	isCredentialsProvided := registryCredentials.Username != "" &&
 		registryCredentials.Password != ""
 
-	if isCredentialsAlreadyPresent {
+	credManager, err := credentials.NewCredManager()
+	if err != nil {
+		util.ExitWithErrorMessage("Error occurred while creating Credentials Manager", err)
+	}
+	var isCredentialsAlreadyPresent bool
+	if !isCredentialsProvided {
+		// Reading the existing credentials
+		registryCredentials, err := credManager.GetCredentials(registryURL)
+		if registryCredentials == nil {
+			registryCredentials = &credentials.RegistryCredentials{
+				Registry: registryURL,
+			}
+		}
+		// errors are ignored and considered as credentials not present
+		isCredentialsAlreadyPresent = err == nil && registryCredentials.Username != "" &&
+			registryCredentials.Password != ""
+	}
+
+	if isCredentialsProvided {
+		fmt.Println("Logging in with provided Credentials")
+	} else if isCredentialsAlreadyPresent {
 		fmt.Println("Logging in with existing Credentials")
 	} else {
 		if password == "" {
@@ -84,15 +91,7 @@ func RunLogin(registryURL string, username string, password string) {
 	if !isCredentialsAlreadyPresent {
 		// Saving the credentials
 		spinner.SetNewAction("Saving credentials")
-		credentialsData, err := json.Marshal(registryCredentials)
-		if err != nil {
-			spinner.Stop(false)
-			util.ExitWithErrorMessage("Error occurred while saving Credentials", err)
-		}
-		err = ring.Set(keyring.Item{
-			Key:  registryURL,
-			Data: credentialsData,
-		})
+		err = credManager.StoreCredentials(registryCredentials)
 		if err != nil {
 			spinner.Stop(false)
 			util.ExitWithErrorMessage("Error occurred while saving Credentials", err)

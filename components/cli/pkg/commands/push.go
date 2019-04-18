@@ -22,7 +22,6 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -31,7 +30,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/99designs/keyring"
 	"github.com/docker/distribution/manifest"
 	"github.com/docker/distribution/manifest/schema1"
 	"github.com/docker/libtrust"
@@ -39,6 +37,7 @@ import (
 	"github.com/opencontainers/go-digest"
 
 	"github.com/cellery-io/sdk/components/cli/pkg/constants"
+	"github.com/cellery-io/sdk/components/cli/pkg/registry/credentials"
 	"github.com/cellery-io/sdk/components/cli/pkg/util"
 )
 
@@ -50,7 +49,8 @@ func RunPush(cellImage string, username string, password string) {
 		util.ExitWithErrorMessage("Error occurred while parsing cell image", err)
 	}
 
-	var registryCredentials = &util.RegistryCredentials{
+	var registryCredentials = &credentials.RegistryCredentials{
+		Registry: parsedCellImage.Registry,
 		Username: username,
 		Password: password,
 	}
@@ -60,24 +60,23 @@ func RunPush(cellImage string, username string, password string) {
 	isCredentialsPresent := err == nil && registryCredentials.Username != "" &&
 		registryCredentials.Password != ""
 
-	var ring keyring.Keyring
+	var credManager credentials.CredManager
 	if !isCredentialsPresent {
-		// Instantiating a native keyring
-		ring, err := keyring.Open(keyring.Config{
-			ServiceName: constants.CELLERY_HUB_KEYRING_NAME,
-		})
+		credManager, err = credentials.NewCredManager()
 		if err != nil {
-			util.ExitWithErrorMessage("Error occurred while logging out", err)
+			util.ExitWithErrorMessage("Unable to use a Credentials Manager, "+
+				"please use inline flags instead", err)
 		}
-
-		if err == nil {
-			ringItem, err := ring.Get(parsedCellImage.Registry)
-			if err == nil && ringItem.Data != nil {
-				err = json.Unmarshal(ringItem.Data, registryCredentials)
-			}
+		savedCredentials, err := credManager.GetCredentials(parsedCellImage.Registry)
+		if err != nil {
+			util.ExitWithErrorMessage("failed to read saved credentials", err)
 		}
-		isCredentialsPresent = err == nil && registryCredentials.Username != "" &&
-			registryCredentials.Password != ""
+		if savedCredentials.Username != "" && savedCredentials.Password != "" {
+			registryCredentials = savedCredentials
+			isCredentialsPresent = true
+		} else {
+			isCredentialsPresent = false
+		}
 	}
 
 	if isCredentialsPresent {
@@ -105,16 +104,8 @@ func RunPush(cellImage string, username string, password string) {
 					util.ExitWithErrorMessage("Failed to push image", err)
 				}
 
-				// Saving credentials
-				credentialsData, err := json.Marshal(registryCredentials)
-				if err != nil {
-					util.ExitWithErrorMessage("Error occurred while saving Credentials", err)
-				}
-				if ring != nil {
-					err = ring.Set(keyring.Item{
-						Key:  parsedCellImage.Registry,
-						Data: credentialsData,
-					})
+				if credManager != nil {
+					err = credManager.StoreCredentials(registryCredentials)
 					if err == nil {
 						fmt.Printf("\n%s Saved Credentials for %s Registry", util.GreenBold("\U00002714"),
 							util.Bold(parsedCellImage.Registry))
@@ -128,7 +119,6 @@ func RunPush(cellImage string, username string, password string) {
 			}
 		}
 	}
-	fmt.Println()
 	util.PrintSuccessMessage(fmt.Sprintf("Successfully pushed cell image: %s", util.Bold(cellImage)))
 	util.PrintWhatsNextMessage("pull the image", "cellery pull "+cellImage)
 }

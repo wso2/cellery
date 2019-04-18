@@ -21,9 +21,7 @@ package commands
 import (
 	"fmt"
 
-	"github.com/99designs/keyring"
-
-	"github.com/cellery-io/sdk/components/cli/pkg/constants"
+	"github.com/cellery-io/sdk/components/cli/pkg/registry/credentials"
 	"github.com/cellery-io/sdk/components/cli/pkg/util"
 )
 
@@ -31,31 +29,21 @@ import (
 func RunLogout(registryURL string) {
 	fmt.Print("Logging out from Registry: " + util.Bold(registryURL))
 
-	// Instantiating a native keyring
-	ring, err := keyring.Open(keyring.Config{
-		ServiceName: constants.CELLERY_HUB_KEYRING_NAME,
-	})
+	credManager, err := credentials.NewCredManager()
 	if err != nil {
-		util.ExitWithErrorMessage("Error occurred while logging out", err)
+		util.ExitWithErrorMessage("Error occurred while creating Credentials Manager", err)
 	}
 
 	// Checking if the credentials are present
-	keyList, err := ring.Keys()
+	isCredentialsPresent, err := credManager.HasCredentials(registryURL)
 	if err != nil {
-		util.ExitWithErrorMessage("Error occurred while logging out", err)
-	}
-	var isCredentialsPresent bool
-	for _, key := range keyList {
-		if key == registryURL {
-			isCredentialsPresent = true
-			break
-		}
+		util.ExitWithErrorMessage("Error occurred while checking whether credentials are already saved", err)
 	}
 
 	if !isCredentialsPresent {
 		fmt.Printf("\nYou have not logged into %s Registry\n", util.Bold(registryURL))
 	} else {
-		err = ring.Remove(registryURL)
+		err = credManager.RemoveCredentials(registryURL)
 		if err != nil {
 			util.ExitWithErrorMessage("Error occurred while removing Credentials", err)
 		}

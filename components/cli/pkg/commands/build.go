@@ -283,13 +283,21 @@ func generateMetaData(cellImage *util.CellImage, targetDir string, spinner *util
 		components = append(components, component.Metadata.Name)
 	}
 
+	metadataFile := filepath.Join(targetDir, "cellery", "metadata.json")
+	metadataJSON, err := ioutil.ReadFile(metadataFile)
+	if err != nil {
+		util.ExitWithErrorMessage("Error occurred while reading metadata "+metadataFile, err)
+	}
+
+	metaInfo := util.MetaInfo{}
+	err = json.Unmarshal(metadataJSON, &metaInfo)
+	if err != nil {
+		util.ExitWithErrorMessage(errorMessage, err)
+	}
+
 	// Writing the metadata file
 	outputFileMetadata := &util.CellImageMetaData{
-		CellImageName: util.CellImageName{
-			Organization: cellImage.Organization,
-			Name:         cellImage.ImageName,
-			Version:      cellImage.ImageVersion,
-		},
+		MetaInfo:       metaInfo,
 		BuildTimestamp: time.Now().Unix(),
 		Components:     components,
 		Dependencies:   dependenciesMap,
@@ -298,7 +306,7 @@ func generateMetaData(cellImage *util.CellImage, targetDir string, spinner *util
 	if err != nil {
 		util.ExitWithErrorMessage(errorMessage, err)
 	}
-	metadataFile := filepath.Join(targetDir, "cellery", "metadata.json")
+
 	err = ioutil.WriteFile(metadataFile, metadataFileContent, 0666)
 	if err != nil {
 		util.ExitWithErrorMessage(errorMessage, err)

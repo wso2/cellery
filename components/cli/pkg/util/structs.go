@@ -195,8 +195,13 @@ type CellImageName struct {
 	Version      string `json:"ver"`
 }
 
-type CellImageMetaData struct {
+type MetaInfo struct {
 	CellImageName
+	DockerImages []string `json:"dockerImages"`
+}
+
+type CellImageMetaData struct {
+	MetaInfo
 	BuildTimestamp int64                         `json:"buildTimestamp"`
 	Components     []string                      `json:"components"`
 	Dependencies   map[string]*CellImageMetaData `json:"dependencies"`

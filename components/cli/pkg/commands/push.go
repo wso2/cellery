@@ -19,14 +19,18 @@
 package commands
 
 import (
+	"bufio"
 	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/cellery-io/sdk/components/cli/pkg/registry/credentials"
 	"io/ioutil"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -37,7 +41,6 @@ import (
 	"github.com/opencontainers/go-digest"
 
 	"github.com/cellery-io/sdk/components/cli/pkg/constants"
-	"github.com/cellery-io/sdk/components/cli/pkg/registry/credentials"
 	"github.com/cellery-io/sdk/components/cli/pkg/util"
 )
 
@@ -45,10 +48,21 @@ import (
 // and pushes to the Cellery Registry
 func RunPush(cellImage string, username string, password string) {
 	parsedCellImage, err := util.ParseImageTag(cellImage)
+	//Read docker images from metadata.json
+	spinner := util.StartNewSpinner("Extracting Cell Image " + util.Bold(cellImage))
+	imageDir, err := extractImage(parsedCellImage, spinner)
+	metadataFileContent, err := ioutil.ReadFile(filepath.Join(imageDir, constants.ZIP_ARTIFACTS, "cellery",
+		"metadata.json"))
+	if err != nil {
+		spinner.Stop(false)
+		util.ExitWithErrorMessage("Error occurred while reading Cell Image metadata", err)
+	}
+	cellImageMetadata := &util.CellImageMetaData{}
+	err = json.Unmarshal(metadataFileContent, cellImageMetadata)
 	if err != nil {
 		util.ExitWithErrorMessage("Error occurred while parsing cell image", err)
 	}
-
+	spinner.Stop(true)
 	var registryCredentials = &credentials.RegistryCredentials{
 		Registry: parsedCellImage.Registry,
 		Username: username,
@@ -85,6 +99,7 @@ func RunPush(cellImage string, username string, password string) {
 		if err != nil {
 			util.ExitWithErrorMessage("Failed to push image", err)
 		}
+		pushDockerImages(cellImageMetadata.DockerImages)
 	} else {
 		// Pushing image without credentials
 		err = pushImage(parsedCellImage, "", "")
@@ -103,6 +118,7 @@ func RunPush(cellImage string, username string, password string) {
 				if err != nil {
 					util.ExitWithErrorMessage("Failed to push image", err)
 				}
+				pushDockerImages(cellImageMetadata.DockerImages)
 
 				if credManager != nil {
 					err = credManager.StoreCredentials(registryCredentials)
@@ -117,10 +133,48 @@ func RunPush(cellImage string, username string, password string) {
 			} else {
 				util.ExitWithErrorMessage("Failed to pull image", err)
 			}
+		} else {
+			pushDockerImages(cellImageMetadata.DockerImages)
 		}
 	}
 	util.PrintSuccessMessage(fmt.Sprintf("Successfully pushed cell image: %s", util.Bold(cellImage)))
 	util.PrintWhatsNextMessage("pull the image", "cellery pull "+cellImage)
+}
+
+func pushDockerImages(dockerImages []string) {
+	for _, elem := range dockerImages {
+		spinner := util.StartNewSpinner("Pushing Docker image " + util.Bold(elem))
+		cmd := exec.Command("docker", "push", elem)
+		execError := ""
+		stderrReader, _ := cmd.StderrPipe()
+		stderrScanner := bufio.NewScanner(stderrReader)
+		go func() {
+			for stderrScanner.Scan() {
+				execError += stderrScanner.Text()
+			}
+		}()
+		var stdout, stderr bytes.Buffer
+		cmd.Stdout = &stdout
+		cmd.Stderr = &stderr
+		err := cmd.Start()
+		if err != nil {
+			spinner.Stop(false)
+			errStr := string(stderr.Bytes())
+			fmt.Printf("%s\n", errStr)
+			util.ExitWithErrorMessage("Error occurred while pushing Docker image", err)
+		}
+		err = cmd.Wait()
+		if err != nil {
+			spinner.Stop(false)
+			fmt.Println()
+			fmt.Printf("\x1b[31;1m\nPush Failed.\x1b[0m %v \n", execError)
+			fmt.Println("\x1b[31;1m======================\x1b[0m")
+			errStr := string(stderr.Bytes())
+			fmt.Printf("\x1b[31;1m%s\x1b[0m", errStr)
+			util.ExitWithErrorMessage("Error occurred while pushing cell image", err)
+		}
+		spinner.Stop(true)
+	}
 }
 
 func pushImage(parsedCellImage *util.CellImage, username string, password string) error {

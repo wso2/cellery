@@ -99,11 +99,10 @@ func RunPush(cellImage string, username string, password string) {
 		if err != nil {
 			util.ExitWithErrorMessage("Failed to push image", err)
 		}
-		pushDockerImages(cellImageMetadata.DockerImages, registryCredentials.Username, registryCredentials.Password)
+		pushDockerImages(cellImageMetadata.DockerImages)
 	} else {
 		// Pushing image without credentials
 		err = pushImage(parsedCellImage, "", "")
-		pushDockerImages(cellImageMetadata.DockerImages, "", "")
 		if err != nil {
 			if strings.Contains(err.Error(), "401") {
 				// Requesting the credentials since server responded with an Unauthorized status code
@@ -119,8 +118,7 @@ func RunPush(cellImage string, username string, password string) {
 				if err != nil {
 					util.ExitWithErrorMessage("Failed to push image", err)
 				}
-				pushDockerImages(cellImageMetadata.DockerImages, registryCredentials.Username,
-					registryCredentials.Password)
+				pushDockerImages(cellImageMetadata.DockerImages)
 
 				if credManager != nil {
 					err = credManager.StoreCredentials(registryCredentials)
@@ -135,13 +133,15 @@ func RunPush(cellImage string, username string, password string) {
 			} else {
 				util.ExitWithErrorMessage("Failed to pull image", err)
 			}
+		} else {
+			pushDockerImages(cellImageMetadata.DockerImages)
 		}
 	}
 	util.PrintSuccessMessage(fmt.Sprintf("Successfully pushed cell image: %s", util.Bold(cellImage)))
 	util.PrintWhatsNextMessage("pull the image", "cellery pull "+cellImage)
 }
 
-func pushDockerImages(dockerImages []string, username string, password string) {
+func pushDockerImages(dockerImages []string) {
 	for _, elem := range dockerImages {
 		spinner := util.StartNewSpinner("Pushing Docker image " + util.Bold(elem))
 		cmd := exec.Command("docker", "push", elem)

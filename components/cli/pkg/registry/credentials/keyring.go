@@ -28,6 +28,7 @@ import (
 
 // celleryHubKeyringName is the name of the keyring that will be created to store the credentials
 const celleryHubKeyringName = "registrycelleryio"
+const keyringDoesNotExistErrMsg = "The collection \"" + celleryHubKeyringName + "\" does not exist"
 
 // KeyringCredManager holds the core of the KeyringCredManager which can be used to store the registry
 // credentials in the native keyring
@@ -78,12 +79,16 @@ func (credManager KeyringCredManager) GetCredentials(registry string) (*Registry
 		return nil, fmt.Errorf(
 			"registry to which the credentials belongs to is required for retrieving credentials")
 	}
-	ringItem, err := credManager.ring.Get(registry)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get credentials from the native keyring due to: %v", err)
-	}
 	var registryCredentials = &RegistryCredentials{
 		Registry: registry,
+	}
+	ringItem, err := credManager.ring.Get(registry)
+	if err != nil {
+		if strings.Contains(err.Error(), keyringDoesNotExistErrMsg) {
+			return registryCredentials, nil
+		} else {
+			return nil, fmt.Errorf("failed to get credentials from the native keyring due to: %v", err)
+		}
 	}
 	if ringItem.Data == nil {
 		return registryCredentials, nil
@@ -115,7 +120,7 @@ func (credManager KeyringCredManager) HasCredentials(registry string) (bool, err
 	}
 	keyList, err := credManager.ring.Keys()
 	if err != nil {
-		if strings.Contains(err.Error(), "The collection \""+celleryHubKeyringName+"\" does not exist") {
+		if strings.Contains(err.Error(), keyringDoesNotExistErrMsg) {
 			return false, nil
 		} else {
 			return false, fmt.Errorf(

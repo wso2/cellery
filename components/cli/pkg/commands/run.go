@@ -951,8 +951,7 @@ func generateRandomInstanceName(dependencyMetaData *util.CellImageMetaData) (str
 	uuid := fmt.Sprintf("%x", u)
 
 	// Generating random instance name
-	return dependencyMetaData.Organization + "-" + dependencyMetaData.Name + "-" +
-		strings.Replace(dependencyMetaData.Version, ".", "-", -1) + "-" + uuid, nil
+	return dependencyMetaData.Name + "-" + strings.Replace(dependencyMetaData.Version, ".", "-", -1) + "-" + uuid, nil
 }
 
 // Get list of yaml files in a dir.

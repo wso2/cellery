@@ -40,7 +40,7 @@ func newLoginCommand() *cobra.Command {
 				return err
 			}
 			if password != "" && username == "" {
-				return fmt.Errorf("expects username if the password is provided, username not provided")
+				return fmt.Errorf("expects username if the password/ token is provided, username not provided")
 			}
 			return nil
 		},
@@ -56,6 +56,7 @@ func newLoginCommand() *cobra.Command {
 			"  cellery login registry.foo.io",
 	}
 	cmd.Flags().StringVarP(&username, "username", "u", "", "Username for Cellery Registry")
-	cmd.Flags().StringVarP(&password, "password", "p", "", "Password for Cellery Registry")
+	cmd.Flags().StringVarP(&password, "password", "p", "",
+		"Password/ Token for Cellery Registry")
 	return cmd
 }

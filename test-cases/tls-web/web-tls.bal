@@ -24,7 +24,6 @@ cellery:Component webComponent = {
     }
 };
 
-
 cellery:CellImage webCell = {
     components: {
         webComp: webComponent
@@ -47,7 +46,6 @@ public function run(cellery:ImageName iName, map<cellery:ImageName> instance) re
     webUI.gatewayConfig.tls.cert = tlsCert;
     return cellery:createInstance(webCell, iName);
 }
-
 
 function readFile(string filePath) returns (string) {
     io:ReadableByteChannel bchannel = io:openReadableFile(filePath);

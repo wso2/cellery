@@ -20,7 +20,7 @@ GO_BUILD_DIRECTORY := $(PROJECT_ROOT)/components/build
 GOFILES		= $(shell find . -type f -name '*.go' -not -path "./vendor/*")
 GIT_REVISION := $(shell git rev-parse --verify HEAD)
 BALLERINA_VERSION := 0.990.3
-BALLERINA_DIST_LOCATION := /build/resources/ballerina-$(BALLERINA_VERSION).zip
+BALLERINA_DIST_LOCATION := $(PROJECT_ROOT)/ballerina-$(BALLERINA_VERSION).zip
 BALLERINA_JRE_LOCATION := ballerina-$(BALLERINA_VERSION)/bre/lib
 BALLERINA_BIN_LOCATION := ballerina-$(BALLERINA_VERSION)/bin
 
@@ -56,7 +56,7 @@ install: install-lang install-cli install-docs-view
 
 .PHONY: build-lang
 build-lang:
-	cd ${PROJECT_ROOT}/components/lang; \
+	cd ${PROJECT_ROOT}/components; \
 	mvn clean install;
 
 .PHONY: build-cli

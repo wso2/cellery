@@ -36,8 +36,10 @@ func newSetupCommand() *cobra.Command {
 	}
 	cmd.AddCommand(
 		newSetupCreateCommand(),
-		newSetupManageCommand(),
+		newSetupCleanupCommand(),
 		newSetupModifyCommand(),
+		newSetupListCommand(),
+		newSetupSwitchCommand(),
 	)
 	return cmd
 }

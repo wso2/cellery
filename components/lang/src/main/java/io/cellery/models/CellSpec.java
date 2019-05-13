@@ -35,4 +35,5 @@ public class CellSpec {
     private GatewayTemplate gatewayTemplate;
     private @Singular
     List<ServiceTemplate> servicesTemplates;
+    private STSTemplate stsTemplate;
 }

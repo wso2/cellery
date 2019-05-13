@@ -584,13 +584,11 @@ func ExecuteCommand(cmd *exec.Cmd, errorMessage string) error {
 	}()
 	err := cmd.Start()
 	if err != nil {
-		fmt.Printf("cellery : %v: %v \n", errorMessage, err)
-		os.Exit(1)
+		return err
 	}
 	err = cmd.Wait()
 	if err != nil {
-		fmt.Printf("cellery : %v: %v \n", errorMessage, err)
-		os.Exit(1)
+		return err
 	}
 	return nil
 }
@@ -598,8 +596,7 @@ func ExecuteCommand(cmd *exec.Cmd, errorMessage string) error {
 func DownloadFromS3Bucket(bucket, item, path string, displayProgressBar bool) {
 	file, err := os.Create(filepath.Join(path, item))
 	if err != nil {
-		fmt.Printf("Error in downloading from file: %v \n", err)
-		os.Exit(1)
+		ExitWithErrorMessage("Failed to create file path "+path, err)
 	}
 
 	defer file.Close()
@@ -627,8 +624,7 @@ func DownloadFromS3Bucket(bucket, item, path string, displayProgressBar bool) {
 			Key:    aws.String(item),
 		})
 	if err != nil {
-		fmt.Printf("Error in downloading from file: %v \n", err)
-		os.Exit(1)
+		ExitWithErrorMessage("Failed to download "+item+" from s3 bucket "+bucket, fmt.Errorf("Error downloading from file", err))
 	}
 
 	writer.finish()
@@ -851,7 +847,7 @@ func ValidateImageTag(imageTag string) error {
 // ValidateImageTag validates the image tag (with the registry in it). The registry is an option element
 // in this validation.
 func ValidateImageTagWithRegistry(imageTag string) error {
-	r := regexp.MustCompile("^(?:([^/:]*)/)?([^/:]*)/([^/:]*):([^/:]*)$")
+	r := regexp.MustCompile("^(?:([^/]*)/)?([^/:]*)/([^/:]*):([^/:]*)$")
 	subMatch := r.FindStringSubmatch(imageTag)
 
 	if subMatch == nil {
@@ -904,14 +900,12 @@ func PrintSuccessMessage(message string) {
 func GetSourceFileName(filePath string) (string, error) {
 	d, err := os.Open(filePath)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		ExitWithErrorMessage("Error opening file "+filePath, err)
 	}
 	defer d.Close()
 	fi, err := d.Readdir(-1)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		ExitWithErrorMessage("Error reading file "+filePath, err)
 	}
 	for _, fi := range fi {
 		if fi.Mode().IsRegular() && strings.HasSuffix(fi.Name(), ".bal") {
@@ -1214,4 +1208,12 @@ func IsLoadBalancerIngressTypeSelected() (bool, bool) {
 		isLoadBalancerSelected = true
 	}
 	return isLoadBalancerSelected, isBackSelected
+}
+
+func IsCommandAvailable(name string) bool {
+	cmd := exec.Command("/bin/sh", "-c", "command -v "+name)
+	if err := cmd.Run(); err != nil {
+		return false
+	}
+	return true
 }

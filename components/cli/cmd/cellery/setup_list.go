@@ -18,14 +18,16 @@
 
 package main
 
-import (
-	"github.com/spf13/cobra"
-)
+import "github.com/spf13/cobra"
 
-func newSetupManageLocalCommand() *cobra.Command {
+func newSetupListCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "local",
-		Short: "Manage local Cellery runtime",
+		Use:   "list <command>",
+		Short: "List k8s clusters",
 	}
+
+	cmd.AddCommand(
+		newSetupListClustersCommand(),
+	)
 	return cmd
 }

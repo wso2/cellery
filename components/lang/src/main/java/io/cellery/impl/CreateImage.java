@@ -87,6 +87,7 @@ import static io.cellery.CelleryConstants.METADATA_FILE_NAME;
 import static io.cellery.CelleryConstants.MICRO_GATEWAY;
 import static io.cellery.CelleryConstants.PROTOCOL_GRPC;
 import static io.cellery.CelleryConstants.PROTOCOL_TCP;
+import static io.cellery.CelleryConstants.PROTO_FILE;
 import static io.cellery.CelleryConstants.REFERENCE_FILE_NAME;
 import static io.cellery.CelleryConstants.TARGET;
 import static io.cellery.CelleryConstants.YAML;
@@ -215,9 +216,11 @@ public class CreateImage extends BlockingNativeCallableUnit {
         GRPC grpc = new GRPC();
         grpc.setPort((int) ((BInteger) attributeMap.get("gatewayPort")).intValue());
         grpc.setBackendPort((int) ((BInteger) attributeMap.get("backendPort")).intValue());
-        String protoFile = ((BString) attributeMap.get("protoFile")).stringValue();
-        if (!protoFile.isEmpty()) {
-            copyResourceToTarget(protoFile);
+        if (attributeMap.containsKey(PROTO_FILE)) {
+            String protoFile = ((BString) attributeMap.get(PROTO_FILE)).stringValue();
+            if (!protoFile.isEmpty()) {
+                copyResourceToTarget(protoFile);
+            }
         }
         component.setProtocol(PROTOCOL_GRPC);
         component.setContainerPort(grpc.getBackendPort());
@@ -457,9 +460,16 @@ public class CreateImage extends BlockingNativeCallableUnit {
         JSONObject json = new JSONObject();
         cellImage.getComponentNameToComponentMap().forEach((componentName, component) -> {
             component.getApis().forEach(api -> {
-                String url = DEFAULT_GATEWAY_PROTOCOL + "://" + INSTANCE_NAME_PLACEHOLDER + "--gateway" +
-                        "-service:" + DEFAULT_GATEWAY_PORT + "/" + api.getContext();
-                json.put(api.getContext() + "_api_url", url.replaceAll("(?<!http:)//", "/"));
+                String context = api.getContext();
+                if (StringUtils.isNotEmpty(context)) {
+                    String url = DEFAULT_GATEWAY_PROTOCOL + "://" + INSTANCE_NAME_PLACEHOLDER + "--gateway" +
+                            "-service:" + DEFAULT_GATEWAY_PORT + "/" + context;
+                    if ("/".equals(context)) {
+                        json.put(componentName + "_api_url", url.replaceAll("(?<!http:)//", "/"));
+                    } else {
+                        json.put(context + "_api_url", url.replaceAll("(?<!http:)//", "/"));
+                    }
+                }
             });
             component.getTcpList().forEach(tcp -> json.put(componentName + "_tcp_port", tcp.getPort()));
             component.getGrpcList().forEach(grpc -> json.put(componentName + "_grpc_port", grpc.getPort()));

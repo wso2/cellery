@@ -1,4 +1,5 @@
 #!/bin/bash
+
 # ----------------------------------------------------------------------------------
 # Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 #
@@ -17,23 +18,18 @@
 # under the License.
 # ----------------------------------------------------------------------------------
 #
+# Generate required artifacts for ballerina-runtime docker image creation
 
-#echo "Post installation process started"
-PRODUCT_HOME=/Library/Cellery
-BALLERINA_RUNTIME="ballerina-0.990.3"
+SOURCE_ROOT=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
+BALLERINA_VERSION=0.990.3
+BALLERINA_DEB_LOCATION=$SOURCE_ROOT/../../ballerina-linux-installer-x64-$BALLERINA_VERSION.deb
 
-# Change permissions in home directory
-cd ${PRODUCT_HOME}
-chmod -R 755 .
-chmod 0644 repo/celleryio/cellery/*/cellery.zip
-[ -d /usr/local/bin ] || mkdir /usr/local/bin
+cd $SOURCE_ROOT
 
-# create a symlink so that executable path can be used without version
-SYMLINK_DIR=${PRODUCT_HOME}/runtime/executable
-mkdir -p ${SYMLINK_DIR}
-ln -sf ${PRODUCT_HOME}/runtime/${BALLERINA_RUNTIME}/bin/ballerina ${SYMLINK_DIR}/ballerina
+mkdir -p files
+[ -f $BALLERINA_DEB_LOCATION ] || curl --retry 5 \
+https://product-dist.ballerina.io/downloads/$BALLERINA_VERSION/ballerina-linux-installer-x64-$BALLERINA_VERSION.deb \
+--output $BALLERINA_DEB_LOCATION
 
-# Add cellery shortcut to /usr/local/bin
-rm -f /usr/local/bin/cellery
-ln -s ${PRODUCT_HOME}/cellery /usr/local/bin/cellery
-#echo "Post installation process finished"
+cp $BALLERINA_DEB_LOCATION files/
+cp -r ../../components/lang/target/cellery-*.jar files/

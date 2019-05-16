@@ -130,6 +130,12 @@ const CELLERY_INSTALLATION_PATH_MAC = "/Library/Cellery"
 const CELLERY_INSTALLATION_PATH_UBUNTU = "/usr/share/cellery"
 const CELLERY_EXECUTABLE_PATH = "/runtime/executable/"
 
+const BALLERINA_INSTALLATION_PATH_MAC = "/Library/Ballerina/ballerina-0.990.3"
+const BALLERINA_INSTALLATION_PATH_UBUNTU = "/usr/lib/ballerina/ballerina-0.990.3"
+const BALLERINA_EXECUTABLE_PATH = "/bin/"
+
+const DOCKER_CLI_BALLERINA_EXECUTABLE_PATH = "/usr/lib/ballerina/ballerina-0.990.3/bin/ballerina"
+
 const WSO2_APIM_HOST = "https://wso2-apim-gateway"
 
 const CELLERY_IMAGE_DIR_ENV_VAR = "CELLERY_IMAGE_DIR"
@@ -148,3 +154,5 @@ const CELLERY_SQL_PASSWORD = "cellery-sql-user"
 
 const INGRESS_MODE_NODE_PORT = "Node port [kubeadm, minikube]"
 const INGRESS_MODE_LOAD_BALANCER = "Load balancer [gcp, docker for desktop]"
+
+const CELLERY_RELEASE_VERSION = "0.2.1"

@@ -48,7 +48,6 @@ type AuthConf struct {
 // LoadConfig reads the config file from the Cellery home and returns the Config struct
 func LoadConfig() Conf {
 	var conf = Conf{}
-	//auth = AuthConf{}
 	configFilePath := filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, CONFIG_FILE)
 	configFile, err := ioutil.ReadFile(configFilePath)
 	if err != nil {

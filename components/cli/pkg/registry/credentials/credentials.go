@@ -80,9 +80,10 @@ func FromBrowser(username string) (string, string, error) {
 				util.ExitWithErrorMessage("Did not receive any code", err)
 			}
 			flusher, ok := w.(http.Flusher)
-			if ok {
-				flusher.Flush()
+			if !ok {
+				util.ExitWithErrorMessage("Error in casting the flusher", err)
 			}
+			flusher.Flush()
 			err = server.Shutdown(context.Background())
 			if err != nil {
 				util.ExitWithErrorMessage("Error while shutting down the server\n", err)
@@ -101,7 +102,7 @@ func FromBrowser(username string) (string, string, error) {
 	}
 	// Setting up a timeout
 	go func() {
-		time.Sleep(60 * time.Minute)
+		time.Sleep(5 * time.Minute)
 		timeout <- true
 	}()
 	// Wait for a code, or timeout
@@ -112,8 +113,8 @@ func FromBrowser(username string) (string, string, error) {
 			New("time out. Did not receive any code"))
 	}
 	token := getTokenFromCode(code, codeReceiverPort, auth)
-	username, idToken := getSubjectAndUsernameFromJWT(token)
-	return username, idToken, nil
+	username, accessToken := getUsernameAndTokenFromJWT(token)
+	return username, accessToken, nil
 }
 
 // FromTerminal is to allow this login flow to work in headless mode
@@ -136,17 +137,26 @@ func FromTerminal(username string) (string, string, error) {
 	return username, password, nil
 }
 
-// getSubjectAndUsernameFromJWT returns the extracted subject from the JWT
-func getSubjectAndUsernameFromJWT(token string) (string, string) {
+// getUsernameAndTokenFromJWT returns the extracted subject from the JWT
+func getUsernameAndTokenFromJWT(token string) (string, string) {
+	fmt.Println(token)
 	var result map[string]interface{}
 	err := json.Unmarshal([]byte(token), &result)
 	if err != nil {
 		util.ExitWithErrorMessage("Error while unmarshal the id_token", err)
 	}
-	idToken := result["id_token"]
-	jwtToken, _ := jwt.Parse(idToken.(string), nil)
+	idToken, ok := (result["id_token"]).(string)
+	accessToken, ok := (result["access_token"]).(string)
+	if !ok {
+		util.ExitWithErrorMessage("Error while retrieving the access token", err)
+	}
+	jwtToken, _ := jwt.Parse(idToken, nil)
 	claims := jwtToken.Claims.(jwt.MapClaims)
-	return claims["sub"].(string), idToken.(string)
+	sub, ok := claims["sub"].(string)
+	if !ok {
+		util.ExitWithErrorMessage("Error in casting the subject", err)
+	}
+	return sub, accessToken
 }
 
 // getTokenFromCode returns the JWT from the auth code provided

@@ -48,7 +48,7 @@ func RunPull(cellImage string, isSilent bool, username string, password string) 
 		Password: password,
 	}
 	if username != "" && password == "" {
-		username, password, err = util.RequestCredentials("Cellery Registry", username)
+		username, password, err = credentials.FromTerminal(username)
 	}
 	isCredentialsPresent := err == nil && registryCredentials.Username != "" &&
 		registryCredentials.Password != ""
@@ -81,8 +81,7 @@ func RunPull(cellImage string, isSilent bool, username string, password string) 
 		if err != nil {
 			if strings.Contains(err.Error(), "401") {
 				// Requesting the credentials since server responded with an Unauthorized status code
-				registryCredentials.Username, registryCredentials.Password, err = util.RequestCredentials(
-					"Cellery Registry", "")
+				registryCredentials.Username, registryCredentials.Password, err = credentials.FromTerminal(username)
 				if err != nil {
 					util.ExitWithErrorMessage("Failed to acquire credentials", err)
 				}

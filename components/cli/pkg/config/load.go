@@ -28,7 +28,15 @@ import (
 	"github.com/cellery-io/sdk/components/cli/pkg/util"
 )
 
-const CONFIG_FILE = "config.json"
+const configFile = "config.json"
+const callBackDefaultPort = 8888
+const callBackContextPath = "/auth"
+const callBackHost = "localhost"
+const callBackParameter = "code"
+const redirectSuccessUrl = "https://cloud.google.com/sdk/auth_success"
+const idpHost = "localhost"
+const idpPort = 9443
+const spClientId = "htl0MoApITB1j0a7HkqDjc_1REIa"
 
 type Conf struct {
 	AuthConf AuthConf `json:"auth"`
@@ -40,23 +48,35 @@ type AuthConf struct {
 	CallBackHost        string `json:"callBackHost"`
 	CallBackParameter   string `json:"callBackParameter"`
 	RedirectSuccessUrl  string `json:"redirectSuccessUrl"`
-	IsHost              string `json:"idpHost"`
-	IsPort              int    `json:"idpPort"`
+	IdpHost             string `json:"idpHost"`
+	IdpPort             int    `json:"idpPort"`
 	SpClientId          string `json:"spClientId"`
 }
 
 // LoadConfig reads the config file from the Cellery home and returns the Config struct
-func LoadConfig() Conf {
+func LoadConfig() *Conf {
 	var conf = Conf{}
-	configFilePath := filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, CONFIG_FILE)
+	configFilePath := filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, configFile)
 	configFile, err := ioutil.ReadFile(configFilePath)
 	if err != nil {
-		fmt.Printf("Could not read from the file %s \n", configFilePath)
-		util.ExitWithErrorMessage("Error reading the file", err)
+		fmt.Printf("Could not read from the file %s. Reading from default values\n", configFilePath)
+		loadFromConstants(&conf)
+		return &conf
 	}
 	err = json.Unmarshal(configFile, &conf)
 	if err != nil {
 		util.ExitWithErrorMessage("Error while unmarshal the json", err)
 	}
-	return conf
+	return &conf
+}
+
+func loadFromConstants(conf *Conf) {
+	conf.AuthConf.CallBackDefaultPort = callBackDefaultPort
+	conf.AuthConf.CallBackContextPath = callBackContextPath
+	conf.AuthConf.CallBackHost = callBackHost
+	conf.AuthConf.CallBackParameter = callBackParameter
+	conf.AuthConf.RedirectSuccessUrl = redirectSuccessUrl
+	conf.AuthConf.IdpHost = idpHost
+	conf.AuthConf.IdpPort = idpPort
+	conf.AuthConf.SpClientId = spClientId
 }

@@ -904,7 +904,7 @@ func startCellInstance(imageDir string, instanceName string, runningNode *depend
 			if string(out) == "" {
 
 				cmdDockerRun := exec.Command("docker", "run", "-d", "-l", "ballerina-runtime="+constants.CELLERY_RELEASE_VERSION,
-					"--mount", "type=bind,source="+currentDir+",target=/home/cellery",
+					"--mount", "type=bind,source="+currentDir+",target=/home/cellery/src",
 					"--mount", "type=bind,source="+util.UserHomeDir()+string(os.PathSeparator)+".ballerina,target=/home/cellery/.ballerina",
 					"--mount", "type=bind,source="+util.UserHomeDir()+string(os.PathSeparator)+".cellery,target=/home/cellery/.cellery",
 					"--mount", "type=bind,source="+util.UserHomeDir()+string(os.PathSeparator)+".kube,target=/home/cellery/.kube",
@@ -924,10 +924,25 @@ func startCellInstance(imageDir string, instanceName string, runningNode *depend
 			balFilePath = re.ReplaceAllString(balFilePath, "/home/cellery/.cellery/tmp/cellery-cell-image")
 			dockerImageDir := re.ReplaceAllString(imageDir, "/home/cellery/.cellery/tmp/cellery-cell-image")
 
-			cmd = exec.Command("docker", "exec", "-e", constants.CELLERY_IMAGE_DIR_ENV_VAR+"="+dockerImageDir,
-				"-w", "/home/cellery", "-u", "1000",
-				strings.TrimSpace(string(out)), constants.DOCKER_CLI_BALLERINA_EXECUTABLE_PATH,
-				"run", constants.BALLERINA_PRINT_RETURN_FLAG, balFilePath+":run",
+			cmd = exec.Command("docker", "exec", "-e", constants.CELLERY_IMAGE_DIR_ENV_VAR+"="+dockerImageDir)
+			shellEnvs := os.Environ()
+			// check if any env var prepended with `CELLERY` exists. If so, set them to docker exec command.
+			if len(shellEnvs) != 0 {
+				for _, shellEnv := range shellEnvs {
+					if strings.HasPrefix(shellEnv, "CELLERY") {
+						cmd.Args = append(cmd.Args, "-e", shellEnv)
+					}
+				}
+			}
+			// set any explicitly passed env vars in cellery run command to the docker exec.
+			// This will override any env vars with identical names (prefixed with 'CELLERY') set previously.
+			if len(envVars) != 0 {
+				for _, envVar := range envVars {
+					cmd.Args = append(cmd.Args, "-e", envVar.Key+"="+envVar.Value)
+				}
+			}
+			cmd.Args = append(cmd.Args, "-w", "/home/cellery/src", "-u", "1000",
+				strings.TrimSpace(string(out)), constants.DOCKER_CLI_BALLERINA_EXECUTABLE_PATH, "run", constants.BALLERINA_PRINT_RETURN_FLAG, balFilePath+":run",
 				string(iName), string(dependenciesJson))
 		}
 		defer os.Remove(imageDir)

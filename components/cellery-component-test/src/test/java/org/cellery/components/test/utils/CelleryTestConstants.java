@@ -17,19 +17,30 @@
  */
 
 package org.cellery.components.test.utils;
+
+import java.io.File;
+
 /**
  * Constants used in Cellery Lang Testing.
  */
 public class CelleryTestConstants {
+    public static final String CELLERY_REPO_PATH =
+            System.getProperty("user.home") + File.separator + ".cellery" + File.separator + "repo";
     public static final String CELLERY = "cellery";
     public static final String TARGET = "target";
+    public static final String ARTIFACTS = "artifacts";
+    public static final String TMP = "tmp";
+    public static final String DEPENDENCIES_PROPERTIES = "dependencies.properties";
     public static final String EMPLOYEE_PORTAL = "employee-portal";
     public static final String HELLO_WEB = "hello-web";
     public static final String PET_CARE_STORE = "pet-care-store";
     public static final String PET_SERVICE = "pet-service";
     public static final String TLS_WEB = "tls-web";
     public static final String DOCKER_SOURCE = "docker-source";
+    public static final String PRODUCT_REVIEW = "product-review";
     public static final String CELLERY_IMAGE_ORG = "mesh.cellery.io/cell-image-org";
     public static final String CELLERY_IMAGE_NAME = "mesh.cellery.io/cell-image-name";
     public static final String CELLERY_IMAGE_VERSION = "mesh.cellery.io/cell-image-version";
+    public static final String YAML = ".yaml";
+    public static final String BAL = ".bal";
 }

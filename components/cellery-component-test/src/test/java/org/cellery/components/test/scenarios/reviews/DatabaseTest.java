@@ -16,11 +16,12 @@
  * under the License.
  */
 
-package org.cellery.components.test;
+package org.cellery.components.test.scenarios.reviews;
 
 import io.cellery.models.Cell;
 import org.ballerinax.kubernetes.exceptions.KubernetesPluginException;
 import org.ballerinax.kubernetes.utils.KubernetesUtils;
+import org.cellery.components.test.models.CellImageInfo;
 import org.cellery.components.test.utils.CelleryUtils;
 import org.cellery.components.test.utils.LangTestUtils;
 import org.testng.Assert;
@@ -33,31 +34,32 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static org.cellery.components.test.utils.CelleryTestConstants.BAL;
 import static org.cellery.components.test.utils.CelleryTestConstants.CELLERY;
 import static org.cellery.components.test.utils.CelleryTestConstants.CELLERY_IMAGE_NAME;
 import static org.cellery.components.test.utils.CelleryTestConstants.CELLERY_IMAGE_ORG;
 import static org.cellery.components.test.utils.CelleryTestConstants.CELLERY_IMAGE_VERSION;
+import static org.cellery.components.test.utils.CelleryTestConstants.PRODUCT_REVIEW;
 import static org.cellery.components.test.utils.CelleryTestConstants.TARGET;
-import static org.cellery.components.test.utils.CelleryTestConstants.TLS_WEB;
+import static org.cellery.components.test.utils.CelleryTestConstants.YAML;
 
-public class WebTlsTest {
-
+public class DatabaseTest {
     private static final Path SAMPLE_DIR = Paths.get(System.getProperty("sample.dir"));
-    private static final Path SOURCE_DIR_PATH = SAMPLE_DIR.resolve(TLS_WEB);
+    private static final Path SOURCE_DIR_PATH =
+            SAMPLE_DIR.resolve(PRODUCT_REVIEW + File.separator + CELLERY + File.separator +
+            "database");
     private static final Path TARGET_PATH = SOURCE_DIR_PATH.resolve(TARGET);
     private static final Path CELLERY_PATH = TARGET_PATH.resolve(CELLERY);
     private Cell cell;
-    private String orgName = "wso2";
-    private String imageName = "tls-web";
-    private String version = "1.0.0";
+    private CellImageInfo cellImageInfo = new CellImageInfo("myorg", "database", "1.0.0");
 
     @BeforeClass
     public void compileSample() throws IOException, InterruptedException {
-        String imgData = "{\"org\":\"wso2\", \"name\":\"tls-web\", \"ver\":\"1.0.0\"}";
-        Assert.assertEquals(LangTestUtils.compileCellBuildFunction(SOURCE_DIR_PATH, "web-tls.bal", imgData), 0);
-        File artifactYaml = CELLERY_PATH.resolve("tls-web.yaml").toFile();
+        Assert.assertEquals(LangTestUtils.compileCellBuildFunction(SOURCE_DIR_PATH, "database" + BAL
+                , cellImageInfo), 0);
+        File artifactYaml = CELLERY_PATH.resolve(cellImageInfo.getName() + YAML).toFile();
         Assert.assertTrue(artifactYaml.exists());
-        cell = CelleryUtils.getInstance(CELLERY_PATH.resolve("tls-web.yaml").toString());
+        cell = CelleryUtils.getInstance(CELLERY_PATH.resolve(cellImageInfo.getName() + YAML).toString());
     }
 
     @Test
@@ -71,39 +73,37 @@ public class WebTlsTest {
     }
 
     @Test
-    public void validateKind() {
-        Assert.assertEquals(cell.getKind(), "Cell");
-    }
-
-    @Test
     public void validateMetaData() {
-        Assert.assertEquals(cell.getMetadata().getName(), imageName);
+        Assert.assertEquals(cell.getMetadata().getName(), cellImageInfo.getName());
         Assert.assertEquals(cell.getMetadata().getAnnotations().get(CELLERY_IMAGE_ORG),
-                orgName);
+                cellImageInfo.getOrg());
         Assert.assertEquals(cell.getMetadata().getAnnotations().get(CELLERY_IMAGE_NAME),
-                imageName);
+                cellImageInfo.getName());
         Assert.assertEquals(cell.getMetadata().getAnnotations().get(CELLERY_IMAGE_VERSION),
-                version);
+                cellImageInfo.getVer());
     }
 
     @Test
     public void validateGatewayTemplate() {
-        Assert.assertEquals(cell.getSpec().getGatewayTemplate().getSpec().getHost(), "hello.com");
-        Assert.assertEquals(cell.getSpec().getGatewayTemplate().getSpec().getHttp().get(0).getBackend(), "web-ui");
-        Assert.assertEquals(cell.getSpec().getGatewayTemplate().getSpec().getHttp().get(0).getContext(), "/");
-        Assert.assertTrue(cell.getSpec().getGatewayTemplate().getSpec().getHttp().get(0).isGlobal());
         Assert.assertEquals(cell.getSpec().getGatewayTemplate().getSpec().getType(), "Envoy");
+        Assert.assertEquals(cell.getSpec().getGatewayTemplate().getSpec().getTcp().get(0).getBackendPort(), 3306);
+        Assert.assertEquals(cell.getSpec().getGatewayTemplate().getSpec().getTcp().get(0).getPort(), 31406);
     }
 
     @Test
     public void validateServicesTemplates() {
-        Assert.assertEquals(cell.getSpec().getServicesTemplates().get(0).getMetadata().getName(), "web-ui");
+        Assert.assertEquals(cell.getSpec().getServicesTemplates().get(0).getMetadata().getName(), "mysql");
+        Assert.assertEquals(cell.getSpec().getServicesTemplates().get(0).getSpec().getContainer().getEnv().get(0).
+                getName(), "MYSQL_ROOT_PASSWORD");
+        Assert.assertEquals(cell.getSpec().getServicesTemplates().get(0).getSpec().getContainer().getEnv().get(0).
+                getValue(), "root");
         Assert.assertEquals(cell.getSpec().getServicesTemplates().get(0).getSpec().getContainer().getImage(),
-                "wso2cellery/samples-hello-world-webapp");
+                "mirage20/samples-productreview-mysql");
         Assert.assertEquals(cell.getSpec().getServicesTemplates().get(0).getSpec().getContainer().getPorts().get(0).
-                getContainerPort().intValue(), 80);
+                getContainerPort().intValue(), 3306);
+        Assert.assertEquals(cell.getSpec().getServicesTemplates().get(0).getSpec().getProtocol(), "TCP");
         Assert.assertEquals(cell.getSpec().getServicesTemplates().get(0).getSpec().getReplicas(), 1);
-        Assert.assertEquals(cell.getSpec().getServicesTemplates().get(0).getSpec().getServicePort(), 80);
+        Assert.assertEquals(cell.getSpec().getServicesTemplates().get(0).getSpec().getServicePort(), 31406);
     }
 
     @AfterClass

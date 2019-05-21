@@ -57,11 +57,11 @@ func FromBrowser(username string) (string, string, error) {
 		httpPortString = ":" + strconv.Itoa(codeReceiverPort)
 	}
 	redirectUrl := url.QueryEscape("http://" + auth.CallBackHost + ":" + strconv.Itoa(codeReceiverPort) + "/auth")
-	var gitHubAuthUrl = "https://" + auth.IsHost + ":" + strconv.Itoa(auth.IsPort) +
+	var googleAuthUrl = "https://" + auth.IdpHost + ":" + strconv.Itoa(auth.IdpPort) +
 		"/oauth2/authorize?scope=openid&response_type=" + "code&redirect_uri=" + redirectUrl + "&client_id=" +
 		auth.SpClientId + "&fidp=google"
 
-	fmt.Println("\n", gitHubAuthUrl)
+	fmt.Println("\n", googleAuthUrl)
 	go func() {
 		mux := http.NewServeMux()
 		server := http.Server{Addr: httpPortString, Handler: mux}
@@ -74,7 +74,7 @@ func FromBrowser(username string) (string, string, error) {
 			code = r.Form.Get(auth.CallBackParameter)
 			ch <- code
 			if len(code) != 0 {
-				http.Redirect(w, r, "https://"+auth.IsHost+":"+strconv.Itoa(auth.IsPort)+
+				http.Redirect(w, r, "https://"+auth.IdpHost+":"+strconv.Itoa(auth.IdpPort)+
 					"/authenticationendpoint/auth_success.html", http.StatusSeeOther)
 			} else {
 				util.ExitWithErrorMessage("Did not receive any code", err)
@@ -94,10 +94,10 @@ func FromBrowser(username string) (string, string, error) {
 		}
 	}()
 
-	err := util.OpenBrowser(gitHubAuthUrl)
+	err := util.OpenBrowser(googleAuthUrl)
 	if err != nil {
 		fmt.Printf("Could not resolve the given url %s. Started to operate in the headless "+
-			"mode\n", gitHubAuthUrl)
+			"mode\n", googleAuthUrl)
 		return FromTerminal(username)
 	}
 	// Setting up a timeout
@@ -113,7 +113,7 @@ func FromBrowser(username string) (string, string, error) {
 			New("time out. Did not receive any code"))
 	}
 	token := getTokenFromCode(code, codeReceiverPort, auth)
-	username, accessToken := getUsernameAndTokenFromJWT(token)
+	username, accessToken := getUsernameAndToken(token)
 	return username, accessToken, nil
 }
 
@@ -133,15 +133,15 @@ func FromTerminal(username string) (string, string, error) {
 		util.ExitWithErrorMessage("Error reading the input token", err)
 	}
 	password = strings.TrimSpace(string(bytePassword))
+	username = strings.TrimSpace(username)
 	fmt.Println()
 	return username, password, nil
 }
 
-// getUsernameAndTokenFromJWT returns the extracted subject from the JWT
-func getUsernameAndTokenFromJWT(token string) (string, string) {
-	fmt.Println(token)
+// getUsernameAndToken returns the extracted subject from the JWT
+func getUsernameAndToken(response string) (string, string) {
 	var result map[string]interface{}
-	err := json.Unmarshal([]byte(token), &result)
+	err := json.Unmarshal([]byte(response), &result)
 	if err != nil {
 		util.ExitWithErrorMessage("Error while unmarshal the id_token", err)
 	}
@@ -161,7 +161,7 @@ func getUsernameAndTokenFromJWT(token string) (string, string) {
 
 // getTokenFromCode returns the JWT from the auth code provided
 func getTokenFromCode(code string, port int, auth config.AuthConf) string {
-	tokenUrl := "https://" + auth.IsHost + ":" + strconv.Itoa(auth.IsPort) + "/oauth2/token"
+	tokenUrl := "https://" + auth.IdpHost + ":" + strconv.Itoa(auth.IdpPort) + "/oauth2/token"
 	responseBody := "client_id=" + auth.SpClientId + "&grant_type=authorization_code&code=" + code +
 		"&redirect_uri=http://localhost:" + strconv.Itoa(port) + auth.CallBackContextPath
 	body := strings.NewReader(responseBody)
@@ -171,6 +171,7 @@ func getTokenFromCode(code string, port int, auth config.AuthConf) string {
 		util.ExitWithErrorMessage("Error while creating the code receiving request", err)
 	}
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8")
+	// todo Remove this
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {

@@ -56,7 +56,9 @@ Please follow the relevant link below for the chosen setup.
 #### [2. Existing Cluster](docs/setup/existing-cluster.md)
 #### [3. GCP setup](docs/setup/gcp-setup.md)     
 
-### Setup Cellery Tooling (Optional)
+<details>
+<summary>Click to Setup Cellery Tooling</summary>
+
 1. Download and install [VS Code](https://code.visualstudio.com/Download).
 1. Install the [Ballerina vscode plugin 0.990.3](https://product-dist.ballerina.io/downloads/0.990.3/ballerina-vscode-plugin-0.990.3.vsix). 
 1. Open VS Code and navigate to `File|Code->preferences->settings->Extensions->Ballerina` and set the home value to following. 
@@ -71,6 +73,8 @@ Please follow the relevant link below for the chosen setup.
 /Library/Cellery/runtime/ballerina-0.990.3
 ```
 ![VSCode Settings](docs/images/vscode-settings.png)                               
+
+</details>
 
 ### Quick start with cellery
 Let's quickly run a sample hello world cell as shown in the diagram below.  

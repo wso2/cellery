@@ -55,6 +55,7 @@ Cellery only supports [non-persistence mode](#2.-non-persistent-volume) deployme
 
 
 ## Cellery setup with existing kubernetes cluster
+### Interactive setup
 In this cellery installation option cellery CLI uses the default kubernetes cluster configured in the $HOME/.kube/config file.
 As mentioned above this can be installed with [persistent volume](#2.-non-persistent-volume) and [non-persistent](#2.-non-persistent-volume) volume. 
 
@@ -82,7 +83,7 @@ As mentioned above this can be installed with [persistent volume](#2.-non-persis
          BACK
    ```
 
-### 1. Persistent volume
+#### 1. Persistent volume
 Cellery needs persistent volume to keep MySQL server files and WSO2 APIM deployable artifacts. 
 This option enables to save the state of the cellery system, therefore restarting the cellery runtime will not
 
@@ -99,7 +100,7 @@ Once the option `Existing cluster` is selected, the CLI will prompt to select wh
        BACK
    ```
 
-#### 1.1. Access to NFS
+##### 1.1. Access to NFS
 If the user has access to an NFS server he/she can use it as the persistent volume, else he/she can proceed with file system mount by default. 
 And based on this, user should select `yes` or `no` for the using NFS server option.  
 
@@ -116,7 +117,7 @@ And based on this, user should select `yes` or `no` for the using NFS server opt
         No
         BACK
    ```
-#### 1.2. Access to MySQL Server
+##### 1.2. Access to MySQL Server
 The user can provide database username/password of the MySQL instance that's running on his environment with this step as shown below.     
    ```
      $ cellery setup
@@ -137,7 +138,7 @@ The user can provide database username/password of the MySQL instance that's run
 Once above are performed, there will be an option to select `Basic` or `Complete` [installation packages](../../README.md#cellery-runtime-packages). 
 Now continue to [configure host entries](#configure-host-entries) to complete the setup. 
 
-### 2. Non-Persistent Volume
+#### 2. Non-Persistent Volume
 This mode allows users to start cellery system without any need for access to NFS/File system or MySQL database storage. 
 But this will not preserve the state of the cellery system, and once the cellery system is restarted any changes made during runtime will be lost, and observability and APIM changes also will be not be stored.
 This is ideal for development and quick test environments. 
@@ -165,6 +166,13 @@ This is ideal for development and quick test environments.
        ➤ Basic
          Complete
    ```
+   
+### Non-Interactive Mode
+|Persistent volume	|Access to NFS storage	| Command | Description|
+|-------------------|-----------------------|---------|------------| 
+|No	|N/A| cellery setup create existing [--complete] [--loadbalancer]| By default basic setup will be created, if `--complete` flag is passed, then complete setup will be created. If k8s cluster supports cloud based loadbalancer (e.g: GCP, Docker-for-mac), users have to pass `--loadbalancer` flag.| 
+|Yes| No |cellery setup create existing --persistent [--complete] [--loadbalancer]| In this case, the file system should be mounted or should be accessible by the k8s cluster. By default basic setup will be created, if `--complete` flag is passed, then complete setup will be created. If k8s cluster supports cloud based loadbalancer (e.g: GCP, Docker-for-mac), users have to pass `--loadbalancer` flag.| 
+|Yes |Yes| cellery setup create existing [--complete] [--dbHost <DB_HOST> --dbUsername <DB_USER_NAME> --dbPassword <DB_PASSWORD> --nfsServerIp <IP_ADDRESS> --nfsFileShare <FILE_SHARE>] [--loadbalancer]| In this case, the external database and NFS server available and k8s cluster can be connected to those to provide the persisted functionality. This is the recommended mode for the production deployment.| 
 
 ## Configure host entries 
 Once the setup is complete, cellery system hostnames should be mapped with the ip of the ingress. 

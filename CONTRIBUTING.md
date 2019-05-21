@@ -29,18 +29,18 @@ processing, dependency model generation, observability portal, etc, and docker i
 #### Steps
 1. Clone the repository to GOPATH.
 ```
-$ mkdir -p $GOPATH/src/github.com/wso2-cellery/
-$ cd $GOPATH/src/github.com/wso2-cellery/
-$ git clone https://github.com/celleryio/sdk.git
+$ mkdir -p $GOPATH/src/github.com/cellery-io/
+$ cd $GOPATH/src/github.com/cellery-io/
+$ git clone https://github.com/wso2-cellery/sdk.git
 ```
 2. Building and installing the Ballerina language extensions.
 ```
-$ cd $GOPATH/src/github.com/wso2-cellery/sdk
+$ cd $GOPATH/src/github.com/cellery-io/sdk
 $ make install-lang
 ```
 3. Building and installing the Cellery CLI.
 ```
-$ cd $GOPATH/src/github.com/wso2-cellery/sdk
+$ cd $GOPATH/src/github.com/cellery-io/sdk
 $ make install-cli
 ```
 

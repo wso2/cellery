@@ -82,3 +82,13 @@ This will remove the configurations from  `cellery-system`,`istio-system` namesp
     ✔ Yes
     ✔ Cleaning up cluster 
     ```
+
+## Non-Interactive Mode
+### Cleanup
+| Setup | Command| Description|
+|-------|--------|------------|
+|Local  | `cellery setup cleanup local` | This will cleanup the local VM image that was created|
+|GCP    | `cellery setup cleanup gcp  <CLUSTER_NAME>` | This will cleanup the GCP cluster and the resources that was spawned during the setup including NFS, MySQL server instances, and so on.|
+|Existing Cluster | `cellery setup cleanup existing <CLUSTER_NAME> [--istio] [--ingress] `| This will clean up the pods in the `cellery-system` namespace. Additionally, users can cleanup the `istio` and `nginx-ingress` namespaces by passing `--istio` and `--ingress` flags respectively |
+
+

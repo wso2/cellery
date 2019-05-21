@@ -22,12 +22,14 @@ refer the [setup command readme](cli-setup-command.md) for complete instructions
 
 #### Cellery Init
 
-This will initialize a new cellery project in the current directory with the given name which includes an auto-generated cell definition.
+This will initialize a new cellery project in the current directory with the given name which includes an auto-generated cell definition. 
+The project name also can be provided as inline param which will initialize the cellery project as given.
 
 Ex:
 
  ```
-    cellery init
+    cellery init 
+    cellery init my-first-project
  ```
  
 [Back to Command List](#cellery-cli-commands)

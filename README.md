@@ -22,12 +22,12 @@ Build, push/pull, run, scale and observe composites. Create secure APIs by defau
 ### Setup Cellery CLI
 
 #### Linux
-Download the [cellery-ubuntu-x64-0.2.0.deb](https://wso2-cellery.github.io/downloads) and install it using dpkg command as shown below.
+Download the [cellery-ubuntu-x64-0.2.1.deb](https://wso2-cellery.github.io/downloads) and install it using dpkg command as shown below.
 ```
-dpkg -i cellery-ubuntu-x64-0.2.0.deb
+dpkg -i cellery-ubuntu-x64-0.2.1.deb
 ```
 #### Mac OS
-Download [cellery-0.2.0.pkg](https://wso2-cellery.github.io/downloads) and install it by following macOS package installation steps.
+Download [cellery-0.2.1.pkg](https://wso2-cellery.github.io/downloads) and install it by following macOS package installation steps.
 
 ### Setup Cellery runtime
 Once Cellery is installed, verify the installation is working by executing `cellery version` command.
@@ -60,18 +60,19 @@ Please follow the relevant link below for the chosen setup.
 <details>
 <summary>Click here to view the steps</summary>
 
-1. Download and install [VS Code](https://code.visualstudio.com/Download).
-1. Install the [Ballerina vscode plugin 0.990.3](https://product-dist.ballerina.io/downloads/0.990.3/ballerina-vscode-plugin-0.990.3.vsix). 
-1. Open VS Code and navigate to `File|Code->preferences->settings->Extensions->Ballerina` and set the home value to following. 
+1. Download and install [Ballerina 0.990.3](https://ballerina.io/downloads/archived/)
+2. Download and install [VS Code](https://code.visualstudio.com/Download).
+3. Install the [Ballerina vscode plugin 0.990.3](https://product-dist.ballerina.io/downloads/0.990.3/ballerina-vscode-plugin-0.990.3.vsix). 
+4. Open VS Code and navigate to `File|Code->preferences->settings->Extensions->Ballerina` and set the home value to following. 
 
 ##### Linux
 ```bash
-/usr/share/cellery/runtime/ballerina-0.990.3
+/usr/lib/ballerina/ballerina-0.990.3
 ```
 
 ##### Mac OS
 ```bash
-/Library/Cellery/runtime/ballerina-0.990.3
+/Library/Ballerina/ballerina-0.990.3
 ```
 ![VSCode Settings](docs/images/vscode-settings.png)                               
 
@@ -90,26 +91,26 @@ Please follow below instructions to run the hello-world-cell.
 
 1) Execute below command that will download the hello world web cell from `wso2cellery` organization in [docker hub](https://hub.docker.com/u/wso2cellery) and run the cell.
     ```
-    $ cellery run wso2cellery/hello-world-cell:0.2.0 -n hello-world-cell
+    $ cellery run wso2cellery/hello-world-cell:0.2.1 -n hello-world-cell
     ✔ Connecting to registry-1.docker.io
     ✔ Fetching metadata
-    ✔ Pulling image wso2cellery/hello-world-cell:0.2.0
+    ✔ Pulling image wso2cellery/hello-world-cell:0.2.1
     ✔ Saving new Image to the Local Repository
     
     Image Digest : sha256:2d5659e5787df7e7ae0f58671c0b9d857b5a19e5fbdb02fccbc98a64016a97f6
     
-    ✔ Extracting Cell Image wso2cellery/hello-world-cell:0.2.0
+    ✔ Extracting Cell Image wso2cellery/hello-world-cell:0.2.1
     
     Main Instance: hello
     
-    ✔ Reading Cell Image wso2cellery/hello-world-cell:0.2.0
+    ✔ Reading Cell Image wso2cellery/hello-world-cell:0.2.1
     ✔ Validating dependencies
     
     Instances to be Used:
     
       INSTANCE NAME                            CELL IMAGE             USED INSTANCE   SHARED
      ------------------------- ------------------------------------- --------------- --------
-      hello-world-cell           wso2cellery/hello-world-cell:0.2.0   To be Created    -
+      hello-world-cell           wso2cellery/hello-world-cell:0.2.1   To be Created    -
     
     Dependency Tree to be Used:
     
@@ -120,7 +121,7 @@ Please follow below instructions to run the hello-world-cell.
     ✔ Starting main instance hello-world-cell
     
     
-    ✔ Successfully deployed cell image: wso2cellery/hello-world-cell:0.1.0
+    ✔ Successfully deployed cell image: wso2cellery/hello-world-cell:0.2.1
     
     What's next?
     --------------------------------------------------------
@@ -140,9 +141,9 @@ Please follow below instructions to run the hello-world-cell.
     
     ```
     $ cellery list instances
-                      INSTANCE                                   CELL IMAGE                   STATUS                            GATEWAY                            COMPONENTS            AGE
-     ------------------------------------------ -------------------------------------------- -------- ----------------------------------------------------------- ------------ -----------------------
-      hello                                      wso2cellery/hello-world-cell:0.1.0   Ready    hello--gateway-service                                      1            30 minutes 48 seconds
+                      INSTANCE                                   CELL IMAGE          STATUS                            GATEWAY                            COMPONENTS            AGE
+     ------------------------------------------ ----------------------------------- -------- ----------------------------------------------------------- ------------ -----------------------
+      hello                                      wso2cellery/hello-world-cell:0.2.1   Ready    hello--gateway-service                                      1            30 minutes 48 seconds
     ```
 
 3) You would have added an entry into your `/etc/hosts` file during the setting up your runtime [local setup](docs/setup/local-setup.md#configure-host-entries), [Existing Cluster](docs/setup/existing-cluster.md#configure-host-entries), 
@@ -183,7 +184,7 @@ In this section let's focus on initialize, build, run and push the same hello wo
 2. The above step will auto generate a cellery file in the location: hello-world-cell/hello-world-cell.bal with below content. This file is implemented in [Ballerina](https://ballerina.io/) - A Cloud Native Programming Language. 
 The cell `helloCell` consists of one component defined as `helloComponent` and it has one web ingress with default vhost `hello-world.com`.
 An environment variable `HELLO_NAME`with default value `Cellery` is used by `helloComponent` to render the webpage. By passing the  parameters in the runtime, the vhost entry and
-env variable HELLO_NAME can be modified.
+env variable HELLO_NAME can be modified. 
 
     ```ballerina
     import ballerina/config;
@@ -217,19 +218,10 @@ env variable HELLO_NAME can be modified.
         }
     };
     
-    # The Cellery Lifecycle Build method which is invoked for building the Cell Image.
-    #
-    # + iName - The Image name
-    # + return - The created Cell Image
     public function build(cellery:ImageName iName) returns error? {
         return cellery:createImage(helloCell, iName);
     }
     
-    # The Cellery Lifecycle Run method which is invoked for creating a Cell Instance.
-    #
-    # + iName - The Image name
-    # + instances - The map dependency instances of the Cell instance to be created
-    # + return - The Cell instance
     public function run(cellery:ImageName iName, map<cellery:ImageName> instances) returns error? {
         string vhostName = config:getAsString("VHOST_NAME");
         if (vhostName !== ""){
@@ -266,7 +258,7 @@ env variable HELLO_NAME can be modified.
 
 4. Note that in the cell file's run method at step-2, it's looking for runtime parameters `VHOST_NAME` and `HELLO_NAME`, 
 and if it's available then it'll will be using those as vhost and greeting name. Therefore run the built cellery image with ‘cellery run’ command, 
-and pass `my-hello-world.com` for `VHOST_NAME`, and your name for `HELLO_NAME` as shown below. 
+and pass `my-hello-world.com` for `VHOST_NAME`, and your name for `HELLO_NAME` as shown below. Environment variables can be passed into the cellery file as explained [here](https://github.com/wso2-cellery/spec).
     ```
     $ cellery run <DOCKER_HUB_ORG>/hello-world-cell:1.0.0 -e VHOST_NAME=my-hello-world.com -e HELLO_NAME=WSO2 -n my-hello-world
        ✔ Extracting Cell Image  <DOCKER_HUB_ORG/hello-world-cell:1.0.0
@@ -342,10 +334,10 @@ You can terminate the cells that are started during this guide.
 1) List the cells that are running in the current setup by `cellery list instances`.
     ```
     $ cellery list instances
-         INSTANCE                      CELL IMAGE                   STATUS               GATEWAY               COMPONENTS            AGE
-     ---------------- -------------------------------------------- -------- --------------------------------- ------------ -----------------------
-      hello            wso2cellery/hello-world-cell:0.1.0    Ready    hello--gateway-service            1            1 hours 2 minutes
-      my-hello-world   <ORGNAME>/hello-world-cell:1.0.0              Ready    my-hello-world--gateway-service   1            27 minutes 42 seconds
+         INSTANCE                      CELL IMAGE          STATUS               GATEWAY               COMPONENTS            AGE
+     ---------------- ----------------------------------- -------- --------------------------------- ------------ -----------------------
+      hello            wso2cellery/hello-world-cell:0.2.1    Ready    hello--gateway-service            1            1 hours 2 minutes
+      my-hello-world   <ORGNAME>/hello-world-cell:1.0.0      Ready    my-hello-world--gateway-service   1            27 minutes 42 seconds
     ```
 2) Execute terminate command for each cell instances that you want to clean up as shown below.
     ```

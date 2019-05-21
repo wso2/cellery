@@ -91,19 +91,10 @@ func RunInit(projectName string) {
 		"    }\n" +
 		"};\n" +
 		"\n" +
-		"# The Cellery Lifecycle Build method which is invoked for building the Cell Image.\n" +
-		"#\n" +
-		"# + iName - The Image name\n" +
-		"# + return - The created Cell Image\n" +
 		"public function build(cellery:ImageName iName) returns error? {\n" +
 		"    return cellery:createImage(helloCell, iName);\n" +
 		"}\n" +
 		"\n" +
-		"# The Cellery Lifecycle Run method which is invoked for creating a Cell Instance.\n" +
-		"#\n" +
-		"# + iName - The Image name\n" +
-		"# + instances - The map dependency instances of the Cell instance to be created\n" +
-		"# + return - The Cell instance\n" +
 		"public function run(cellery:ImageName iName, map<cellery:ImageName> instances) returns error? {\n" +
 		"    string vhostName = config:getAsString(\"VHOST_NAME\");\n" +
 		"    if (vhostName !== \"\"){\n" +

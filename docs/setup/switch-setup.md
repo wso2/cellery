@@ -51,3 +51,16 @@ This will remove the configurations from  `cellery-system`,`istio-system` namesp
     To create your first project, execute the command:
       $ cellery init
     ```
+
+### Non Interactive mode
+1. You can get the list of clusters by executing `cellery setup list clusters` as shown below.
+```
+$ cellery setup list clusters
+cellery-admin@cellery
+docker-for-desktop
+```
+
+2. Switch the current session to specific session, execute `cellery setup switch <CLUSTER_NAME>` as example shown below.
+```
+$ cellery setup switch cellery-admin@cellery
+```

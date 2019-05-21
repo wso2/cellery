@@ -57,7 +57,7 @@ Please follow the relevant link below for the chosen setup.
 #### [3. GCP setup](docs/setup/gcp-setup.md)     
 
 <details>
-<summary>Click to Setup Cellery Tooling</summary>
+<summary><H3>Click to Setup Cellery Tooling</H3></summary>
 
 1. Download and install [VS Code](https://code.visualstudio.com/Download).
 1. Install the [Ballerina vscode plugin 0.990.3](https://product-dist.ballerina.io/downloads/0.990.3/ballerina-vscode-plugin-0.990.3.vsix). 

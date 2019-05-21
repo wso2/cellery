@@ -24,7 +24,6 @@ cellery:Component webComponent = {
     }
 };
 
-
 cellery:CellImage webCell = {
     components: {
         webComp: webComponent
@@ -38,8 +37,8 @@ public function build(cellery:ImageName iName) returns error? {
 
 public function run(cellery:ImageName iName, map<cellery:ImageName> instance) returns error? {
     //Read TLS key file path from ENV and get the value
-    string tlsKey = readFile(config:getAsString("tls.key"));
-    string tlsCert = readFile(config:getAsString("tls.cert"));
+    string tlsKey = readFile(config:getAsString("tls.key", default = "./certs/95749524_hello.com.key"));
+    string tlsCert = readFile(config:getAsString("tls.cert", default = "./certs/95749524_hello.com.cert"));
 
     //Assign values to cell
     cellery:WebIngress webUI = <cellery:WebIngress>webCell.components.webComp.ingresses.webUI;
@@ -47,7 +46,6 @@ public function run(cellery:ImageName iName, map<cellery:ImageName> instance) re
     webUI.gatewayConfig.tls.cert = tlsCert;
     return cellery:createInstance(webCell, iName);
 }
-
 
 function readFile(string filePath) returns (string) {
     io:ReadableByteChannel bchannel = io:openReadableFile(filePath);

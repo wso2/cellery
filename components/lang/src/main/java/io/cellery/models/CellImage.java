@@ -3,7 +3,9 @@ package io.cellery.models;
 import lombok.Data;
 import org.ballerinalang.util.exceptions.BallerinaException;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -15,9 +17,11 @@ public class CellImage {
     private String orgName;
     private String cellName;
     private String cellVersion;
+    private List<String> dockerImages;
 
     public CellImage() {
         componentNameToComponentMap = new HashMap<>();
+        dockerImages = new ArrayList<>();
     }
 
     public Map<String, Component> getComponentNameToComponentMap() {
@@ -31,11 +35,7 @@ public class CellImage {
         this.componentNameToComponentMap.put(component.getName(), component);
     }
 
-    public Component getComponent(String componentName) {
-        Component temp = componentNameToComponentMap.get(componentName);
-        if (temp == null) {
-            throw new BallerinaException("Invalid component name " + componentName);
-        }
-        return temp;
+    public void addDockerImage(String imageName) {
+        dockerImages.add(imageName);
     }
 }

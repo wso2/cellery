@@ -21,7 +21,6 @@ package commands
 import (
 	"bufio"
 	"fmt"
-	"os"
 	"os/exec"
 	"strings"
 
@@ -73,7 +72,7 @@ func manageEnvironment() error {
 
 func getManageLabel() string {
 	var manageLabel string
-	if isVmInstalled() {
+	if IsVmInstalled() {
 		if isVmRuning() {
 			manageLabel = constants.VM_NAME + " is running. Select `Stop` to stop the VM"
 		} else {
@@ -86,7 +85,7 @@ func getManageLabel() string {
 }
 
 func isVmRuning() bool {
-	if isVmInstalled() {
+	if IsVmInstalled() {
 		cmd := exec.Command(constants.VBOX_MANAGE, "showvminfo", constants.VM_NAME)
 		stdoutReader, _ := cmd.StdoutPipe()
 		stdoutScanner := bufio.NewScanner(stdoutReader)
@@ -98,13 +97,11 @@ func isVmRuning() bool {
 		}()
 		err := cmd.Start()
 		if err != nil {
-			fmt.Printf("Error occurred while checking VM status: %v \n", err)
-			os.Exit(1)
+			util.ExitWithErrorMessage("Error occurred while starting to check VM status", err)
 		}
 		err = cmd.Wait()
 		if err != nil {
-			fmt.Printf("\x1b[31;1m Error occurred while checking VM status \x1b[0m %v \n", err)
-			os.Exit(1)
+			util.ExitWithErrorMessage("Error occurred while waiting to check VM status", err)
 		}
 		if strings.Contains(output, "running (since") {
 			return true
@@ -114,7 +111,7 @@ func isVmRuning() bool {
 }
 
 func getManageEnvOptions() []string {
-	if isVmInstalled() {
+	if IsVmInstalled() {
 		if isVmRuning() {
 			return []string{constants.CELLERY_MANAGE_STOP, constants.CELLERY_MANAGE_CLEANUP, constants.CELLERY_SETUP_BACK}
 		} else {
@@ -124,7 +121,7 @@ func getManageEnvOptions() []string {
 	return []string{constants.CELLERY_SETUP_BACK}
 }
 
-func isVmInstalled() bool {
+func IsVmInstalled() bool {
 	cmd := exec.Command(constants.VBOX_MANAGE, "list", "vms")
 	stdoutReader, _ := cmd.StdoutPipe()
 	stdoutScanner := bufio.NewScanner(stdoutReader)
@@ -136,13 +133,11 @@ func isVmInstalled() bool {
 	}()
 	err := cmd.Start()
 	if err != nil {
-		fmt.Printf("Error occurred while checking if VMs installed: %v \n", err)
-		os.Exit(1)
+		util.ExitWithErrorMessage("Error occurred while starting to check if VMs installed", err)
 	}
 	err = cmd.Wait()
 	if err != nil {
-		fmt.Printf("\x1b[31;1m Error occurred while checking if VMs installed \x1b[0m %v \n", err)
-		os.Exit(1)
+		util.ExitWithErrorMessage("Error occurred while waiting to check if VMs installed", err)
 	}
 
 	if strings.Contains(output, constants.VM_NAME) {

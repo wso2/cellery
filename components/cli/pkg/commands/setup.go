@@ -98,6 +98,8 @@ func RunSetup() {
 }
 
 func selectEnvironment() error {
+	contexts := getContexts()
+	contexts = append(contexts, constants.CELLERY_SETUP_BACK)
 	bold := color.New(color.Bold).SprintFunc()
 	cellTemplate := &promptui.SelectTemplates{
 		Label:    "{{ . }}",
@@ -109,7 +111,7 @@ func selectEnvironment() error {
 
 	cellPrompt := promptui.Select{
 		Label:     util.YellowBold("?") + " Select a Cellery Installed Kubernetes Cluster",
-		Items:     getContexts(),
+		Items:     contexts,
 		Templates: cellTemplate,
 	}
 	_, value, err := cellPrompt.Run()
@@ -121,80 +123,13 @@ func selectEnvironment() error {
 		RunSetup()
 	}
 
-	setContext(value)
+	RunSwitchCommand(value)
 	fmt.Printf(util.GreenBold("\n\U00002714") + " Successfully configured Cellery.\n")
 	fmt.Println()
 	fmt.Println(bold("What's next ?"))
 	fmt.Println("======================")
 	fmt.Println("To create your first project, execute the command: ")
 	fmt.Println("  $ cellery init ")
-	return nil
-}
-
-func getContexts() []string {
-	contexts := []string{}
-	cmd := exec.Command(constants.KUBECTL, "config", "view", "-o", "json")
-	stdoutReader, _ := cmd.StdoutPipe()
-	stdoutScanner := bufio.NewScanner(stdoutReader)
-	output := ""
-	go func() {
-		for stdoutScanner.Scan() {
-			output = output + stdoutScanner.Text()
-		}
-	}()
-	stderrReader, _ := cmd.StderrPipe()
-	stderrScanner := bufio.NewScanner(stderrReader)
-
-	execError := ""
-	go func() {
-		for stderrScanner.Scan() {
-			execError += stderrScanner.Text()
-		}
-	}()
-	err := cmd.Start()
-	if err != nil {
-		fmt.Printf("Error in executing cellery setup: %v \n", err)
-		os.Exit(1)
-	}
-	err = cmd.Wait()
-	if err != nil {
-		fmt.Printf("\x1b[31;1m Error occurred while configuring cellery: \x1b[0m %v \n", execError)
-		os.Exit(1)
-	}
-	jsonOutput := &Config{}
-	errJson := json.Unmarshal([]byte(output), jsonOutput)
-	if errJson != nil {
-		fmt.Println(errJson)
-	}
-
-	for i := 0; i < len(jsonOutput.Contexts); i++ {
-		contexts = append(contexts, jsonOutput.Contexts[i].Name)
-	}
-	contexts = append(contexts, constants.CELLERY_SETUP_BACK)
-	return contexts
-}
-
-func setContext(context string) error {
-	cmd := exec.Command(constants.KUBECTL, "config", "use-context", context)
-	stderrReader, _ := cmd.StderrPipe()
-	stderrScanner := bufio.NewScanner(stderrReader)
-
-	execError := ""
-	go func() {
-		for stderrScanner.Scan() {
-			execError += stderrScanner.Text()
-		}
-	}()
-	err := cmd.Start()
-	if err != nil {
-		fmt.Printf("Error in executing cellery setup: %v \n", err)
-		os.Exit(1)
-	}
-	err = cmd.Wait()
-	if err != nil {
-		fmt.Printf("\x1b[31;1m Error occurred while configuring cellery: \x1b[0m %v \n", execError)
-		os.Exit(1)
-	}
 	return nil
 }
 

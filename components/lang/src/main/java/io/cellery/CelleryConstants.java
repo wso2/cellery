@@ -37,6 +37,7 @@ public class CelleryConstants {
     // These should match the Ballerina object names of the Auto Scaling Metrics Objects
     public static final String ENVOY_GATEWAY = "Envoy";
     public static final String MICRO_GATEWAY = "MicroGateway";
+    public static final String PROTO_FILE = "protoFile";
     public static final String YAML = ".yaml";
     public static final String PROTOCOL_TCP = "TCP";
     public static final String PROTOCOL_GRPC = "GRPC";
@@ -49,6 +50,7 @@ public class CelleryConstants {
     public static final String CELLERY_IMAGE_DIR_ENV_VAR = "CELLERY_IMAGE_DIR";
     public static final String INSTANCE_NAME_PLACEHOLDER = "{{instance_name}}";
     public static final String REFERENCE_FILE_NAME = "reference.json";
+    public static final String METADATA_FILE_NAME = "metadata.json";
 
     public static final String ANNOTATION_CELL_IMAGE_ORG = "mesh.cellery.io/cell-image-org";
     public static final String ANNOTATION_CELL_IMAGE_NAME = "mesh.cellery.io/cell-image-name";

@@ -46,13 +46,15 @@ fi
 echo "Welcome to Cellery Uninstaller"
 echo "The following packages will be REMOVED:"
 echo "  cellery"
-while true; do
-    read -p "Do you wish to continue [Y/n]?" answer
-    [[ $answer == "y" || $answer == "Y" || $answer == "" ]] && break
-    [[ $answer == "n" || $answer == "N" ]] && exit 0
-    echo "Please answer with 'y' or 'n'"
-done
 
+if [[ -z "$1" ||  "$1" != "-y" ]]; then
+    while true; do
+        read -p "Do you wish to continue [Y/n]?" answer
+        [[ $answer == "y" || $answer == "Y" || $answer == "" ]] && break
+        [[ $answer == "n" || $answer == "N" ]] && exit 0
+        echo "Please answer with 'y' or 'n'"
+    done
+fi
 
 #Need to replace these with install preparation script
 VERSION=__VERSION__
@@ -63,27 +65,42 @@ echo "Cellery uninstalling process started"
 find "/usr/local/bin/" -name "cellery" | xargs rm
 if [ $? -eq 0 ]
 then
-  echo "[1/3] [DONE] Successfully deleted shortcut links"
+  echo "[1/4] [DONE] Successfully deleted shortcut links"
 else
-  echo "[1/3] [ERROR] Could not delete shortcut links" >&2
+  echo "[1/4] [ERROR] Could not delete shortcut links" >&2
 fi
 
 #forget from pkgutil
 pkgutil --forget "org.$PRODUCT.$VERSION" > /dev/null 2>&1
 if [ $? -eq 0 ]
 then
-  echo "[2/3] [DONE] Successfully deleted cellery informations"
+  echo "[2/4] [DONE] Successfully deleted cellery informations"
 else
-  echo "[2/3] [ERROR] Could not delete cellery informations" >&2
+  echo "[2/4] [ERROR] Could not delete cellery informations" >&2
 fi
 
 #remove cellery source distribution
 [ -e "/Library/Cellery" ] && rm -rf "/Library/Cellery"
 if [ $? -eq 0 ]
 then
-  echo "[3/3] [DONE] Successfully deleted cellery"
+  echo "[3/4] [DONE] Successfully deleted cellery"
 else
-  echo "[3/3] [ERROR] Could not delete cellery" >&2
+  echo "[3/4] [ERROR] Could not delete cellery" >&2
+fi
+
+#remove cellery jar from ballerina
+BRE_LIB_PATH="/Library/Ballerina/ballerina-0.990.3/bre/lib/"
+if [ -d $BRE_LIB_PATH ]
+then
+    sudo rm -f $BRE_LIB_PATH/cellery-*.jar
+    if [ $? -eq 0 ]
+    then
+      echo "[4/4] [DONE] Successfully deleted cellery jars from ballerina lib"
+    else
+      echo "[4/4] [ERROR] Could not delete cellery jars from ballerina lib" >&2
+    fi
+else
+    echo "[4/4] [DONE] No ballerina installation found"
 fi
 
 echo "Cellery uninstall process finished"

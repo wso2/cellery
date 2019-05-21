@@ -491,6 +491,18 @@ func CelleryInstallationDir() string {
 	return celleryHome
 }
 
+func BallerinaInstallationDir() string {
+	ballerinaHome := ""
+	if runtime.GOOS == "darwin" {
+		ballerinaHome = constants.BALLERINA_INSTALLATION_PATH_MAC
+	}
+	if runtime.GOOS == "linux" {
+		ballerinaHome = constants.BALLERINA_INSTALLATION_PATH_UBUNTU
+	}
+	return ballerinaHome
+
+}
+
 func CreateDir(dirPath string) error {
 	dirExist, _ := FileExists(dirPath)
 	if !dirExist {
@@ -584,13 +596,11 @@ func ExecuteCommand(cmd *exec.Cmd, errorMessage string) error {
 	}()
 	err := cmd.Start()
 	if err != nil {
-		fmt.Printf("cellery : %v: %v \n", errorMessage, err)
-		os.Exit(1)
+		return err
 	}
 	err = cmd.Wait()
 	if err != nil {
-		fmt.Printf("cellery : %v: %v \n", errorMessage, err)
-		os.Exit(1)
+		return err
 	}
 	return nil
 }
@@ -598,8 +608,7 @@ func ExecuteCommand(cmd *exec.Cmd, errorMessage string) error {
 func DownloadFromS3Bucket(bucket, item, path string, displayProgressBar bool) {
 	file, err := os.Create(filepath.Join(path, item))
 	if err != nil {
-		fmt.Printf("Error in downloading from file: %v \n", err)
-		os.Exit(1)
+		ExitWithErrorMessage("Failed to create file path "+path, err)
 	}
 
 	defer file.Close()
@@ -627,8 +636,7 @@ func DownloadFromS3Bucket(bucket, item, path string, displayProgressBar bool) {
 			Key:    aws.String(item),
 		})
 	if err != nil {
-		fmt.Printf("Error in downloading from file: %v \n", err)
-		os.Exit(1)
+		ExitWithErrorMessage("Failed to download "+item+" from s3 bucket "+bucket, fmt.Errorf("Error downloading from file", err))
 	}
 
 	writer.finish()
@@ -667,16 +675,22 @@ func ExtractTarGzFile(extractTo, archive_name string) error {
 }
 
 // RequestCredentials requests the credentials form the user and returns them
-func RequestCredentials(credentialType string) (string, string, error) {
+func RequestCredentials(credentialType string, usernameOverride string) (string, string, error) {
 	fmt.Println()
 	fmt.Println(YellowBold("?") + " " + credentialType + " credentials required")
 
-	// Requesting the username from the user
-	reader := bufio.NewReader(os.Stdin)
-	fmt.Print("Username: ")
-	username, err := reader.ReadString('\n')
-	if err != nil {
-		return "", "", err
+	var username string
+	var err error
+	if usernameOverride == "" {
+		// Requesting the username from the user
+		reader := bufio.NewReader(os.Stdin)
+		fmt.Print("Username: ")
+		username, err = reader.ReadString('\n')
+		if err != nil {
+			return "", "", err
+		}
+	} else {
+		username = usernameOverride
 	}
 
 	// Requesting the password from the user
@@ -686,21 +700,6 @@ func RequestCredentials(credentialType string) (string, string, error) {
 		return username, "", err
 	}
 	password := string(bytePassword)
-	fmt.Println()
-
-	// Requesting the confirm password from the user
-	fmt.Print("Confirm Password: ")
-	byteConfirmPassword, err := terminal.ReadPassword(0)
-	if err != nil {
-		return username, "", err
-	}
-	confirmPassword := string(byteConfirmPassword)
-	fmt.Println()
-
-	if password != confirmPassword {
-		fmt.Println("Password and Confirm password mismatch.")
-		RequestCredentials(credentialType)
-	}
 
 	fmt.Println()
 	return strings.TrimSpace(username), strings.TrimSpace(password), nil
@@ -824,8 +823,7 @@ func ParseImageTag(cellImageString string) (parsedCellImage *CellImage, err erro
 	return cellImage, nil
 }
 
-// ValidateImageTag validates the image tag (without the registry in it). This checks the version to be in the format
-// of semantic versioning
+// ValidateImageTag validates the image tag (without the registry in it).
 func ValidateImageTag(imageTag string) error {
 	r := regexp.MustCompile("^([^/:]*)/([^/:]*):([^/:]*)$")
 	subMatch := r.FindStringSubmatch(imageTag)
@@ -837,31 +835,31 @@ func ValidateImageTag(imageTag string) error {
 	organization := subMatch[1]
 	isValid, err := regexp.MatchString(fmt.Sprintf("^%s$", constants.CELLERY_ID_PATTERN), organization)
 	if err != nil || !isValid {
-		return fmt.Errorf("expects a valid organization name (lower case letters, numbers and dashes), "+
-			"received %s", organization)
+		return fmt.Errorf("expects a valid organization name (lower case letters, numbers and dashes "+
+			"with only letters and numbers at the begining and end), received %s", organization)
 	}
 
 	imageName := subMatch[2]
 	isValid, err = regexp.MatchString(fmt.Sprintf("^%s$", constants.CELLERY_ID_PATTERN), imageName)
 	if err != nil || !isValid {
-		return fmt.Errorf("expects a valid image name (lower case letters, numbers and dashes), "+
-			"received %s", imageName)
+		return fmt.Errorf("expects a valid image name (lower case letters, numbers and dashes "+
+			"with only letters and numbers at the begining and end), received %s", imageName)
 	}
 
 	imageVersion := subMatch[3]
 	isValid, err = regexp.MatchString(fmt.Sprintf("^%s$", constants.IMAGE_VERSION_PATTERN), imageVersion)
 	if err != nil || !isValid {
-		return fmt.Errorf("expects the image version to be in the format of Semantic Versioning "+
-			"(eg:- 1.0.0), received %s", imageVersion)
+		return fmt.Errorf("expects a valid image version (lower case letters, numbers, dashes and dots "+
+			"with only letters and numbers at the begining and end), received %s", imageVersion)
 	}
 
 	return nil
 }
 
 // ValidateImageTag validates the image tag (with the registry in it). The registry is an option element
-// in this validation. This checks the version to be in the format of semantic versioning
+// in this validation.
 func ValidateImageTagWithRegistry(imageTag string) error {
-	r := regexp.MustCompile("^(?:([^/:]*)/)?([^/:]*)/([^/:]*):([^/:]*)$")
+	r := regexp.MustCompile("^(?:([^/]*)/)?([^/:]*)/([^/:]*):([^/:]*)$")
 	subMatch := r.FindStringSubmatch(imageTag)
 
 	if subMatch == nil {
@@ -878,22 +876,22 @@ func ValidateImageTagWithRegistry(imageTag string) error {
 	organization := subMatch[2]
 	isValid, err = regexp.MatchString(fmt.Sprintf("^%s$", constants.CELLERY_ID_PATTERN), organization)
 	if err != nil || !isValid {
-		return fmt.Errorf("expects a valid organization name (lower case letters, numbers and dashes), "+
-			"received %s", organization)
+		return fmt.Errorf("expects a valid organization name (lower case letters, numbers and dashes "+
+			"with only letters and numbers at the begining and end), received %s", organization)
 	}
 
 	imageName := subMatch[3]
 	isValid, err = regexp.MatchString(fmt.Sprintf("^%s$", constants.CELLERY_ID_PATTERN), imageName)
 	if err != nil || !isValid {
-		return fmt.Errorf("expects a valid image name (lower case letters, numbers and dashes), "+
-			"received %s", imageName)
+		return fmt.Errorf("expects a valid image name (lower case letters, numbers and dashes "+
+			"with only letters and numbers at the begining and end), received %s", imageName)
 	}
 
 	imageVersion := subMatch[4]
 	isValid, err = regexp.MatchString(fmt.Sprintf("^%s$", constants.IMAGE_VERSION_PATTERN), imageVersion)
 	if err != nil || !isValid {
-		return fmt.Errorf("expects the image version to be in the format of Semantic Versioning "+
-			"(eg:- 1.0.0), received %s", imageVersion)
+		return fmt.Errorf("expects a valid image version (lower case letters, numbers, dashes and dots "+
+			"with only letters and numbers at the begining and end), received %s", imageVersion)
 	}
 
 	return nil
@@ -914,14 +912,12 @@ func PrintSuccessMessage(message string) {
 func GetSourceFileName(filePath string) (string, error) {
 	d, err := os.Open(filePath)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		ExitWithErrorMessage("Error opening file "+filePath, err)
 	}
 	defer d.Close()
 	fi, err := d.Readdir(-1)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		ExitWithErrorMessage("Error reading file "+filePath, err)
 	}
 	for _, fi := range fi {
 		if fi.Mode().IsRegular() && strings.HasSuffix(fi.Name(), ".bal") {
@@ -1224,4 +1220,12 @@ func IsLoadBalancerIngressTypeSelected() (bool, bool) {
 		isLoadBalancerSelected = true
 	}
 	return isLoadBalancerSelected, isBackSelected
+}
+
+func IsCommandAvailable(name string) bool {
+	cmd := exec.Command("/bin/sh", "-c", "command -v "+name)
+	if err := cmd.Run(); err != nil {
+		return false
+	}
+	return true
 }

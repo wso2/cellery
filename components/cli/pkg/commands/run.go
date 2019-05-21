@@ -26,10 +26,12 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"regexp"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/olekukonko/tablewriter"
 
@@ -788,13 +790,18 @@ func extractImage(cellImage *util.CellImage, spinner *util.Spinner) (string, err
 	}
 	if !imageExists {
 		spinner.Pause()
-		RunPull(cellImageTag, true)
+		RunPull(cellImageTag, true, "", "")
 		fmt.Println()
 		spinner.Resume()
 	}
 
 	// Unzipping image to a temporary location
-	tempPath, err := ioutil.TempDir("", "cellery-cell-image")
+	celleryHomeTmp := path.Join(util.UserHomeDir(), constants.CELLERY_HOME, "tmp")
+	if _, err := os.Stat(celleryHomeTmp); os.IsNotExist(err) {
+		os.Mkdir(celleryHomeTmp, 0755)
+	}
+
+	tempPath, err := ioutil.TempDir(celleryHomeTmp, "cellery-cell-image")
 	if err != nil {
 		return "", err
 	}
@@ -874,7 +881,71 @@ func startCellInstance(imageDir string, instanceName string, runningNode *depend
 		if err != nil {
 			util.ExitWithErrorMessage("Failed to get executable path", err)
 		}
-		cmd := exec.Command(exePath+"ballerina", cmdArgs...)
+
+		cmd := &exec.Cmd{}
+
+		if exePath != "" {
+			cmd = exec.Command(exePath+"ballerina", cmdArgs...)
+		} else {
+			currentDir, err := os.Getwd()
+			if err != nil {
+				util.ExitWithErrorMessage("Error in determining working directory", err)
+			}
+
+			//Retrieve the cellery cli docker instance status.
+			cmdDockerPs := exec.Command("docker", "ps", "--filter", "label=ballerina-runtime="+constants.CELLERY_RELEASE_VERSION,
+				"--filter", "label=currentDir="+currentDir, "--filter", "status=running", "--format", "{{.ID}}")
+
+			out, err := cmdDockerPs.Output()
+			if err != nil {
+				util.ExitWithErrorMessage("Docker Run Error", err)
+			}
+
+			if string(out) == "" {
+
+				cmdDockerRun := exec.Command("docker", "run", "-d", "-l", "ballerina-runtime="+constants.CELLERY_RELEASE_VERSION,
+					"--mount", "type=bind,source="+currentDir+",target=/home/cellery/src",
+					"--mount", "type=bind,source="+util.UserHomeDir()+string(os.PathSeparator)+".ballerina,target=/home/cellery/.ballerina",
+					"--mount", "type=bind,source="+util.UserHomeDir()+string(os.PathSeparator)+".cellery,target=/home/cellery/.cellery",
+					"--mount", "type=bind,source="+util.UserHomeDir()+string(os.PathSeparator)+".kube,target=/home/cellery/.kube",
+					"wso2cellery/ballerina-runtime:"+constants.CELLERY_RELEASE_VERSION, "sleep", "600",
+				)
+
+				out, err = cmdDockerRun.Output()
+				if err != nil {
+					util.ExitWithErrorMessage("Docker Run Error %s\n", err)
+				}
+				time.Sleep(5 * time.Second)
+			}
+
+			cmdArgs = append(cmdArgs, "-e", constants.CELLERY_IMAGE_DIR_ENV_VAR+"="+imageDir)
+
+			re := regexp.MustCompile(`^.*cellery-cell-image`)
+			balFilePath = re.ReplaceAllString(balFilePath, "/home/cellery/.cellery/tmp/cellery-cell-image")
+			dockerImageDir := re.ReplaceAllString(imageDir, "/home/cellery/.cellery/tmp/cellery-cell-image")
+
+			cmd = exec.Command("docker", "exec", "-e", constants.CELLERY_IMAGE_DIR_ENV_VAR+"="+dockerImageDir)
+			shellEnvs := os.Environ()
+			// check if any env var prepended with `CELLERY` exists. If so, set them to docker exec command.
+			if len(shellEnvs) != 0 {
+				for _, shellEnv := range shellEnvs {
+					if strings.HasPrefix(shellEnv, "CELLERY") {
+						cmd.Args = append(cmd.Args, "-e", shellEnv)
+					}
+				}
+			}
+			// set any explicitly passed env vars in cellery run command to the docker exec.
+			// This will override any env vars with identical names (prefixed with 'CELLERY') set previously.
+			if len(envVars) != 0 {
+				for _, envVar := range envVars {
+					cmd.Args = append(cmd.Args, "-e", envVar.Key+"="+envVar.Value)
+				}
+			}
+			cmd.Args = append(cmd.Args, "-w", "/home/cellery/src", "-u", "1000",
+				strings.TrimSpace(string(out)), constants.DOCKER_CLI_BALLERINA_EXECUTABLE_PATH, "run", constants.BALLERINA_PRINT_RETURN_FLAG, balFilePath+":run",
+				string(iName), string(dependenciesJson))
+		}
+		defer os.Remove(imageDir)
 		cmd.Env = os.Environ()
 		cmd.Env = append(cmd.Env, constants.CELLERY_IMAGE_DIR_ENV_VAR+"="+imageDir)
 		stdoutReader, _ := cmd.StdoutPipe()
@@ -951,8 +1022,7 @@ func generateRandomInstanceName(dependencyMetaData *util.CellImageMetaData) (str
 	uuid := fmt.Sprintf("%x", u)
 
 	// Generating random instance name
-	return dependencyMetaData.Organization + "-" + dependencyMetaData.Name + "-" +
-		strings.Replace(dependencyMetaData.Version, ".", "-", -1) + "-" + uuid, nil
+	return dependencyMetaData.Name + "-" + strings.Replace(dependencyMetaData.Version, ".", "-", -1) + "-" + uuid, nil
 }
 
 // Get list of yaml files in a dir.

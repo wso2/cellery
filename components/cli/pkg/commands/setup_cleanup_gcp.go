@@ -69,14 +69,16 @@ func manageGcp() error {
 }
 
 func cleanupGcp() error {
-	jsonAuthFile := util.FindInDirectory(filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP), ".json")
+	jsonAuthFile := util.FindInDirectory(filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP),
+		".json")
 
 	if len(jsonAuthFile) > 0 {
 		os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", jsonAuthFile[0])
 	} else {
-		fmt.Printf("Could not find authentication json file in : %s. Please copy GCP service account credentials"+
-			" json file into this directory.\n", filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP))
-		os.Exit(1)
+		util.ExitWithErrorMessage("Failed to cleanup gcp setup", fmt.Errorf("Could not find "+
+			"authentication json file in : %s. Please copy GCP service account credentials"+
+			" json file into this directory.\n", filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME,
+			constants.GCP)))
 	}
 	ctx := context.Background()
 	projectName, accountName, region, zone = getGcpData()
@@ -115,7 +117,65 @@ func cleanupGcp() error {
 		manageGcp()
 		return nil
 	}
+	RunCleanupGcp(value)
+	return nil
+}
 
+func ValidateGcpCluster(cluster string) (bool, error) {
+	valid := false
+	jsonAuthFile := util.FindInDirectory(filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP), ".json")
+
+	if len(jsonAuthFile) > 0 {
+		os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", jsonAuthFile[0])
+	} else {
+		return valid, fmt.Errorf("Could not find authentication json file in : %s. Please copy GCP service account credentials"+
+			" json file into this directory.\n", filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP))
+	}
+	ctx := context.Background()
+	gkeClient, err := google.DefaultClient(ctx, container.CloudPlatformScope)
+	if err != nil {
+		return valid, fmt.Errorf("failed to create gke client: %v", err)
+	}
+	gcpService, err := container.New(gkeClient)
+	if err != nil {
+		return valid, fmt.Errorf("failed to create gcp service: %v", err)
+	}
+	projectName, accountName, region, zone = getGcpData()
+	clusters, err := getClusterList(gcpService, projectName, zone)
+	if err != nil {
+		return valid, fmt.Errorf("failed to list clusters: %v", err)
+	}
+	clusterNameSlice := strings.Split(cluster, constants.GCP_CLUSTER_NAME)
+	if len(clusterNameSlice) > 1 {
+		uniqueNumber := strings.Split(cluster, constants.GCP_CLUSTER_NAME)[1]
+		if util.ContainsInStringArray(clusters, constants.GCP_CLUSTER_NAME+uniqueNumber) {
+			valid = true
+		}
+	}
+	return valid, nil
+}
+
+func RunCleanupGcp(value string) error {
+	jsonAuthFile := util.FindInDirectory(filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.GCP),
+		".json")
+
+	if len(jsonAuthFile) > 0 {
+		os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", jsonAuthFile[0])
+	} else {
+		util.ExitWithErrorMessage("Failed to cleanup gcp setup", fmt.Errorf("Could not find "+
+			"authentication json file in : %s. Please copy GCP service account credentials"+
+			" json file into this directory.\n", filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME,
+			constants.GCP)))
+	}
+	ctx := context.Background()
+	gkeClient, err := google.DefaultClient(ctx, container.CloudPlatformScope)
+	if err != nil {
+		fmt.Printf("Failed to create gke client: %v", err)
+	}
+	gcpService, err := container.New(gkeClient)
+	if err != nil {
+		fmt.Printf("Failed to create gcp service: %v", err)
+	}
 	// Get the suffix - unique number of GCP cluster which is common to all infrastructures (sql instance, filestore, bucket)
 	uniqueNumber := strings.TrimPrefix(value, "cellery-cluster")
 

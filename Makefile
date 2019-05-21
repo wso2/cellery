@@ -20,9 +20,6 @@ GO_BUILD_DIRECTORY := $(PROJECT_ROOT)/components/build
 GOFILES		= $(shell find . -type f -name '*.go' -not -path "./vendor/*")
 GIT_REVISION := $(shell git rev-parse --verify HEAD)
 BALLERINA_VERSION := 0.990.3
-BALLERINA_DIST_LOCATION := /build/resources/ballerina-$(BALLERINA_VERSION).zip
-BALLERINA_JRE_LOCATION := ballerina-$(BALLERINA_VERSION)/bre/lib
-BALLERINA_BIN_LOCATION := ballerina-$(BALLERINA_VERSION)/bin
 
 OBSERVABILITY_LAST_BUILD := https://wso2.org/jenkins/job/cellery/job/mesh-observability/lastSuccessfulBuild
 OBSERVABILITY_ARTIFACTS_PATH := $(OBSERVABILITY_LAST_BUILD)/artifact/components/global/*zip*
@@ -38,8 +35,6 @@ DISTRIBUTION_LAST_BUILD := https://wso2.org/jenkins/job/cellery/job/distribution
 DISTRIBUTION_ARTIFACTS_PATH := $(DISTRIBUTION_LAST_BUILD)/artifact
 DISTRIBUTION_K8S_ARTIFACT := k8s-artefacts.tar.gz
 
-JRE_PATH ?= $(PROJECT_ROOT)/jre1.8.0_202
-
 MAIN_PACKAGES := cli
 
 VERSION ?= $(GIT_REVISION)
@@ -49,6 +44,10 @@ GO_LDFLAGS := -X $(PROJECT_PKG)/components/cli/pkg/version.buildVersion=$(VERSIO
 GO_LDFLAGS += -X $(PROJECT_PKG)/components/cli/pkg/version.buildGitRevision=$(GIT_REVISION)
 GO_LDFLAGS += -X $(PROJECT_PKG)/components/cli/pkg/version.buildTime=$(shell date +%Y-%m-%dT%H:%M:%S%z)
 
+# Docker info
+DOCKER_REPO ?= wso2cellery
+DOCKER_IMAGE_TAG ?= $(VERSION)
+
 all: code.format build-lang build-docs-view build-cli
 
 .PHONY: install
@@ -56,7 +55,7 @@ install: install-lang install-cli install-docs-view
 
 .PHONY: build-lang
 build-lang:
-	cd ${PROJECT_ROOT}/components/lang; \
+	cd ${PROJECT_ROOT}/components; \
 	mvn clean install;
 
 .PHONY: build-cli
@@ -90,35 +89,29 @@ copy-k8s-artefacts:
 	mkdir -p k8s-artefacts/observability/node-server/config; \
 	unzip $(OBSERVABILITY_PORTAL_ARTIFACT) && cp config/* k8s-artefacts/observability/node-server/config/
 
-.PHONY: copy-ballerina-runtime
-copy-ballerina-runtime:
-	cd ${PROJECT_ROOT}/installers; \
-	[ -f $(BALLERINA_DIST_LOCATION) ] || \
-	curl --retry 5 https://product-dist.ballerina.io/downloads/$(BALLERINA_VERSION)/ballerina-$(BALLERINA_VERSION).zip \
-	--output $(BALLERINA_DIST_LOCATION)
-
-
 .PHONY: build-ubuntu-installer
-build-ubuntu-installer: copy-k8s-artefacts copy-ballerina-runtime
+build-ubuntu-installer: copy-k8s-artefacts
 	cd ${PROJECT_ROOT}/installers/ubuntu-x64; \
 	mkdir -p files; \
 	cp -r ../k8s-artefacts files/; \
-	unzip $(BALLERINA_DIST_LOCATION) -d files; \
-	chmod -R a+rx files/$(BALLERINA_JRE_LOCATION); \
-	cp -r $(JRE_PATH) files/$(BALLERINA_JRE_LOCATION); \
-	cp resources/ballerina files/$(BALLERINA_BIN_LOCATION); \
 	bash build-ubuntu-x64.sh $(VERSION)
 
 .PHONY: build-mac-installer
-build-mac-installer: copy-k8s-artefacts copy-ballerina-runtime
+build-mac-installer: copy-k8s-artefacts
 	cd ${PROJECT_ROOT}/installers/macOS-x64; \
 	mkdir -p files; \
 	cp -r ../k8s-artefacts files/; \
-	unzip $(BALLERINA_DIST_LOCATION) -d files; \
-	chmod -R a+rx files/$(BALLERINA_JRE_LOCATION); \
-	cp -r $(JRE_PATH) files/$(BALLERINA_JRE_LOCATION); \
-	cp darwin/Resources/ballerina files/$(BALLERINA_BIN_LOCATION); \
 	bash build-macos-x64.sh $(VERSION)
+
+.PHONY: docker
+docker:
+	cd ${PROJECT_ROOT}/installers/docker; \
+	bash init.sh; \
+	docker build -t $(DOCKER_REPO)/ballerina-runtime:$(DOCKER_IMAGE_TAG) .
+
+.PHONY: docker-push
+docker-push: docker
+	docker push $(DOCKER_REPO)/ballerina-runtime:$(DOCKER_IMAGE_TAG)
 
 .PHONY: install-docs-view
 install-docs-view:

@@ -31,6 +31,8 @@ import io.cellery.models.Component;
 import io.cellery.models.GRPC;
 import io.cellery.models.GatewaySpec;
 import io.cellery.models.GatewayTemplate;
+import io.cellery.models.STSTemplate;
+import io.cellery.models.STSTemplateSpec;
 import io.cellery.models.ServiceTemplate;
 import io.cellery.models.ServiceTemplateSpec;
 import io.cellery.models.TCP;
@@ -81,9 +83,11 @@ import static io.cellery.CelleryConstants.DEFAULT_GATEWAY_PROTOCOL;
 import static io.cellery.CelleryConstants.ENVOY_GATEWAY;
 import static io.cellery.CelleryConstants.IMAGE_SOURCE;
 import static io.cellery.CelleryConstants.INSTANCE_NAME_PLACEHOLDER;
+import static io.cellery.CelleryConstants.METADATA_FILE_NAME;
 import static io.cellery.CelleryConstants.MICRO_GATEWAY;
 import static io.cellery.CelleryConstants.PROTOCOL_GRPC;
 import static io.cellery.CelleryConstants.PROTOCOL_TCP;
+import static io.cellery.CelleryConstants.PROTO_FILE;
 import static io.cellery.CelleryConstants.REFERENCE_FILE_NAME;
 import static io.cellery.CelleryConstants.TARGET;
 import static io.cellery.CelleryConstants.YAML;
@@ -123,6 +127,7 @@ public class CreateImage extends BlockingNativeCallableUnit {
             processComponents(components);
             generateCell();
             generateCellReference();
+            generateMetadataFile();
         } catch (BallerinaException e) {
             ctx.setReturnValues(BLangVMErrors.createError(ctx, e.getMessage()));
         }
@@ -172,6 +177,7 @@ public class CreateImage extends BlockingNativeCallableUnit {
                 throw new BallerinaException("Invalid docker tag: " + tag + ". Repository name is not supported when " +
                         "building from Dockerfile");
             }
+            tag = cellImage.getOrgName() + "/" + tag;
             createDockerImage(tag, ((BString) dockerSourceMap.get("dockerDir")).stringValue());
             component.setSource(tag);
         }
@@ -210,9 +216,11 @@ public class CreateImage extends BlockingNativeCallableUnit {
         GRPC grpc = new GRPC();
         grpc.setPort((int) ((BInteger) attributeMap.get("gatewayPort")).intValue());
         grpc.setBackendPort((int) ((BInteger) attributeMap.get("backendPort")).intValue());
-        String protoFile = ((BString) attributeMap.get("protoFile")).stringValue();
-        if (!protoFile.isEmpty()) {
-            copyResourceToTarget(protoFile);
+        if (attributeMap.containsKey(PROTO_FILE)) {
+            String protoFile = ((BString) attributeMap.get(PROTO_FILE)).stringValue();
+            if (!protoFile.isEmpty()) {
+                copyResourceToTarget(protoFile);
+            }
         }
         component.setProtocol(PROTOCOL_GRPC);
         component.setContainerPort(grpc.getBackendPort());
@@ -244,6 +252,14 @@ public class CreateImage extends BlockingNativeCallableUnit {
         }
 
         if (attributeMap.containsKey("expose")) {
+            httpAPI.setAuthenticate(((BBoolean) attributeMap.get("authenticate")).booleanValue());
+            if (!httpAPI.isAuthenticate()) {
+                String context = httpAPI.getContext();
+                if (!context.startsWith("/")) {
+                    context = "/" + context;
+                }
+                component.addUnsecuredPaths(context);
+            }
             if ("global".equals(((BString) attributeMap.get("expose")).stringValue())) {
                 httpAPI.setGlobal(true);
                 httpAPI.setBackend(component.getService());
@@ -330,6 +346,9 @@ public class CreateImage extends BlockingNativeCallableUnit {
                 new ArrayList<>(cellImage.getComponentNameToComponentMap().values());
         GatewaySpec gatewaySpec = new GatewaySpec();
         List<ServiceTemplate> serviceTemplateList = new ArrayList<>();
+        List<String> unsecuredPaths = new ArrayList<>();
+        STSTemplate stsTemplate = new STSTemplate();
+        STSTemplateSpec stsTemplateSpec = new STSTemplateSpec();
         for (Component component : components) {
             ServiceTemplateSpec templateSpec = new ServiceTemplateSpec();
             if (component.getWebList().size() > 0) {
@@ -357,6 +376,7 @@ public class CreateImage extends BlockingNativeCallableUnit {
                 templateSpec.setServicePort(component.getGrpcList().get(0).getPort());
                 gatewaySpec.addGRPC(component.getGrpcList());
             }
+            unsecuredPaths.addAll(component.getUnsecuredPaths());
             templateSpec.setReplicas(component.getReplicas());
             templateSpec.setProtocol(component.getProtocol());
             List<EnvVar> envVarList = new ArrayList<>();
@@ -386,13 +406,15 @@ public class CreateImage extends BlockingNativeCallableUnit {
             serviceTemplate.setSpec(templateSpec);
             serviceTemplateList.add(serviceTemplate);
         }
-
+        stsTemplateSpec.setUnsecuredPaths(unsecuredPaths);
+        stsTemplate.setSpec(stsTemplateSpec);
         GatewayTemplate gatewayTemplate = new GatewayTemplate();
         gatewayTemplate.setSpec(gatewaySpec);
 
         CellSpec cellSpec = new CellSpec();
         cellSpec.setGatewayTemplate(gatewayTemplate);
         cellSpec.setServicesTemplates(serviceTemplateList);
+        cellSpec.setStsTemplate(stsTemplate);
         ObjectMeta objectMeta = new ObjectMetaBuilder().withName(getValidName(cellImage.getCellName()))
                 .addToAnnotations(ANNOTATION_CELL_IMAGE_ORG, cellImage.getOrgName())
                 .addToAnnotations(ANNOTATION_CELL_IMAGE_NAME, cellImage.getCellName())
@@ -438,9 +460,16 @@ public class CreateImage extends BlockingNativeCallableUnit {
         JSONObject json = new JSONObject();
         cellImage.getComponentNameToComponentMap().forEach((componentName, component) -> {
             component.getApis().forEach(api -> {
-                String url = DEFAULT_GATEWAY_PROTOCOL + "://" + INSTANCE_NAME_PLACEHOLDER + "--gateway" +
-                        "-service:" + DEFAULT_GATEWAY_PORT + "/" + api.getContext();
-                json.put(api.getContext() + "_api_url", url.replaceAll("(?<!http:)//", "/"));
+                String context = api.getContext();
+                if (StringUtils.isNotEmpty(context)) {
+                    String url = DEFAULT_GATEWAY_PROTOCOL + "://" + INSTANCE_NAME_PLACEHOLDER + "--gateway" +
+                            "-service:" + DEFAULT_GATEWAY_PORT + "/" + context;
+                    if ("/".equals(context)) {
+                        json.put(componentName + "_api_url", url.replaceAll("(?<!http:)//", "/"));
+                    } else {
+                        json.put(context + "_api_url", url.replaceAll("(?<!http:)//", "/"));
+                    }
+                }
             });
             component.getTcpList().forEach(tcp -> json.put(componentName + "_tcp_port", tcp.getPort()));
             component.getGrpcList().forEach(grpc -> json.put(componentName + "_grpc_port", grpc.getPort()));
@@ -456,12 +485,39 @@ public class CreateImage extends BlockingNativeCallableUnit {
         }
     }
 
-    private void createDockerImage(String imageName, String dockerDir) {
+    /**
+     * Generate the metadata json without dependencies.
+     */
+    private void generateMetadataFile() {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("org", cellImage.getOrgName());
+        jsonObject.put("name", cellImage.getCellName());
+        jsonObject.put("ver", cellImage.getCellVersion());
+        jsonObject.put("dockerImages", cellImage.getDockerImages());
+        String targetFileNameWithPath =
+                OUTPUT_DIRECTORY + File.separator + "cellery" + File.separator + METADATA_FILE_NAME;
+        try {
+            writeToFile(jsonObject.toString(), targetFileNameWithPath);
+        } catch (IOException e) {
+            String errMsg = "Error occurred while generating metadata file " + targetFileNameWithPath;
+            log.error(errMsg, e);
+            throw new BallerinaException(errMsg);
+        }
+    }
+
+    /**
+     * Create a Docker Image from Dockerfile.
+     *
+     * @param dockerImageTag Tag for docker image
+     * @param dockerDir      Path to docker Directory
+     */
+    private void createDockerImage(String dockerImageTag, String dockerDir) {
         DockerModel dockerModel = new DockerModel();
-        dockerModel.setName(imageName);
+        dockerModel.setName(dockerImageTag);
         try {
             DockerArtifactHandler dockerArtifactHandler = new DockerArtifactHandler(dockerModel);
             dockerArtifactHandler.buildImage(dockerModel, dockerDir);
+            cellImage.addDockerImage(dockerImageTag);
         } catch (DockerGenException | InterruptedException | IOException e) {
             String errMsg = "Error occurred while building Docker image ";
             log.error(errMsg, e);

@@ -18,10 +18,10 @@
 
 package constants
 
-const DOMAIN_NAME_PATTERN = "[a-z0-9]+((-|.)[a-z0-9]+)*"
+const DOMAIN_NAME_PATTERN = "[a-z0-9]+((?:-|.)[a-z0-9]+)*(:[0-9]+)?"
 const CELLERY_ID_PATTERN = "[a-z0-9]+(-[a-z0-9]+)*"
 const CELLERY_ALIAS_PATTERN = "[a-zA-Z0-9_-]+"
-const IMAGE_VERSION_PATTERN = "[0-9]+\\.[0-9]+\\.[0-9]+"
+const IMAGE_VERSION_PATTERN = "[a-z0-9]+((?:-|.)[a-z0-9]+)*"
 const CELL_IMAGE_PATTERN = CELLERY_ID_PATTERN + "\\/" + CELLERY_ID_PATTERN + ":" + IMAGE_VERSION_PATTERN
 const CELL_IMAGE_WITH_REGISTRY_PATTERN = "(" + DOMAIN_NAME_PATTERN + "\\/)?" + CELL_IMAGE_PATTERN
 const DEPENDENCY_LINK_PATTERN = "(" + CELLERY_ID_PATTERN + "\\.)?" + CELLERY_ALIAS_PATTERN + ":" + CELLERY_ID_PATTERN
@@ -56,10 +56,10 @@ const CELLERY_MANAGE_START = "start"
 const CELLERY_MANAGE_CLEANUP = "cleanup"
 
 const AWS_S3_BUCKET = "cellery-runtime-installation"
-const AWS_S3_ITEM_VM_COMPLETE = "cellery-runtime-complete-0.2.0.tar.gz"
-const AWS_S3_ITEM_VM_MINIMAL = "cellery-runtime-basic-0.2.0.tar.gz"
-const AWS_S3_ITEM_CONFIG_COMPLETE = "config-cellery-runtime-complete-0.2.0"
-const AWS_S3_ITEM_CONFIG_MINIMAL = "config-cellery-runtime-basic-0.2.0"
+const AWS_S3_ITEM_VM_COMPLETE = "cellery-runtime-complete-0.2.1.tar.gz"
+const AWS_S3_ITEM_VM_MINIMAL = "cellery-runtime-basic-0.2.1.tar.gz"
+const AWS_S3_ITEM_CONFIG_COMPLETE = "config-cellery-runtime-complete-0.2.1"
+const AWS_S3_ITEM_CONFIG_MINIMAL = "config-cellery-runtime-basic-0.2.1"
 const AWS_REGION = "ap-south-1"
 
 const VM_NAME = "cellery-runtime-local"
@@ -123,14 +123,18 @@ const KUBECTL_FLAG = "-f"
 const IGNORE_NOT_FOUND = "--ignore-not-found"
 const BALLERINA_PRINT_RETURN_FLAG = "--printreturn"
 
-const CELLERY_HUB_KEYRING_NAME = "hubcelleryio"
-
 const BASIC = "Basic"
 const COMPLETE = "Complete"
 
 const CELLERY_INSTALLATION_PATH_MAC = "/Library/Cellery"
 const CELLERY_INSTALLATION_PATH_UBUNTU = "/usr/share/cellery"
 const CELLERY_EXECUTABLE_PATH = "/runtime/executable/"
+
+const BALLERINA_INSTALLATION_PATH_MAC = "/Library/Ballerina/ballerina-0.990.3"
+const BALLERINA_INSTALLATION_PATH_UBUNTU = "/usr/lib/ballerina/ballerina-0.990.3"
+const BALLERINA_EXECUTABLE_PATH = "/bin/"
+
+const DOCKER_CLI_BALLERINA_EXECUTABLE_PATH = "/usr/lib/ballerina/ballerina-0.990.3/bin/ballerina"
 
 const WSO2_APIM_HOST = "https://wso2-apim-gateway"
 
@@ -150,3 +154,5 @@ const CELLERY_SQL_PASSWORD = "cellery-sql-user"
 
 const INGRESS_MODE_NODE_PORT = "Node port [kubeadm, minikube]"
 const INGRESS_MODE_LOAD_BALANCER = "Load balancer [gcp, docker for desktop]"
+
+const CELLERY_RELEASE_VERSION = "0.2.1"

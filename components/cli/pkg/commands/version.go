@@ -46,7 +46,7 @@ func RunVersion() {
 
 	// Printing Cellery version information
 	_, _ = boldWhite.Println("Cellery:")
-	fmt.Println(" CLI Version:\t\t0.2.0")
+	fmt.Println(" CLI Version:\t\t0.2.1")
 	fmt.Printf(" OS/Arch:\t\t%s/%s\n", runtime.GOOS, runtime.GOARCH)
 	//fmt.Println(" Experimental:\t\ttrue") // TODO
 
@@ -60,11 +60,12 @@ func RunVersion() {
 	balVersionCmd := exec.Command(exePath+"ballerina", "version")
 	balResult, err := balVersionCmd.Output()
 	if err != nil {
-		util.ExitWithErrorMessage("Ballerina not found",
-			errors.New("unable to find ballerina in executable"))
+		// Having b7a locally is optional since the cellery build and run can be invoked via a docker container.
+		fmt.Println(" Ballerina not found locally")
+	} else {
+		balVersion := string(balResult)
+		fmt.Println(" Version:\t\t" + strings.TrimSpace(strings.Split(balVersion, " ")[1]))
 	}
-	balVersion := string(balResult)
-	fmt.Println(" Version:\t\t" + strings.TrimSpace(strings.Split(balVersion, " ")[1]))
 
 	// Printing Kubernetes version information
 	_, _ = boldWhite.Println("\nKubernetes")

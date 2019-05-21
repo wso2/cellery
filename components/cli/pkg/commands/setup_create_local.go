@@ -30,22 +30,31 @@ import (
 	"github.com/cellery-io/sdk/components/cli/pkg/util"
 )
 
-func RunSetupCreateLocal(isCompleteSelected bool) {
-	if isVmInstalled() {
+func RunSetupCreateLocal(isCompleteSelected, confirmed bool) {
+	var err error
+	var confirmDownload = confirmed
+	if !util.IsCommandAvailable("VBoxManage") {
+		util.ExitWithErrorMessage("Error creating VM", fmt.Errorf("VBoxManage not installed"))
+	}
+	if IsVmInstalled() {
 		util.ExitWithErrorMessage("Error creating VM", fmt.Errorf("installed VM already exists"))
 	}
 	vmLocation := filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.VM)
 	repoCreateErr := util.CreateDir(vmLocation)
 	if repoCreateErr != nil {
-		os.Exit(1)
+		util.ExitWithErrorMessage("Failed to create vm directory", err)
 	}
 
 	if isCompleteSelected {
-		confirmDownload, _, err := util.GetYesOrNoFromUser(fmt.Sprintf("Downloading %s will take %s from your machine. Do you want to continue",
-			constants.AWS_S3_ITEM_VM_COMPLETE,
-			util.FormatBytesToString(util.GetS3ObjectSize(constants.AWS_S3_BUCKET, constants.AWS_S3_ITEM_VM_COMPLETE))), false)
-		if err != nil {
-			util.ExitWithErrorMessage("Failed to select an option", err)
+		if !confirmed {
+			confirmDownload, _, err = util.GetYesOrNoFromUser(fmt.Sprintf(
+				"Downloading %s will take %s from your machine. Do you want to continue",
+				constants.AWS_S3_ITEM_VM_COMPLETE,
+				util.FormatBytesToString(util.GetS3ObjectSize(constants.AWS_S3_BUCKET, constants.AWS_S3_ITEM_VM_COMPLETE))),
+				false)
+			if err != nil {
+				util.ExitWithErrorMessage("Failed to select an option", err)
+			}
 		}
 		if !confirmDownload {
 			os.Exit(1)
@@ -63,11 +72,15 @@ func RunSetupCreateLocal(isCompleteSelected bool) {
 			util.ExitWithErrorMessage("Failed to merge kube-config file", err)
 		}
 	} else {
-		confirmDownload, _, err := util.GetYesOrNoFromUser(fmt.Sprintf("Downloading %s will take %s from your machine. Do you want to continue",
-			constants.AWS_S3_ITEM_VM_MINIMAL,
-			util.FormatBytesToString(util.GetS3ObjectSize(constants.AWS_S3_BUCKET, constants.AWS_S3_ITEM_VM_MINIMAL))), false)
-		if err != nil {
-			util.ExitWithErrorMessage("Failed to select an option", err)
+		if !confirmed {
+			confirmDownload, _, err = util.GetYesOrNoFromUser(fmt.Sprintf("Downloading %s will take %s from your "+
+				"machine. Do you want to continue",
+				constants.AWS_S3_ITEM_VM_MINIMAL,
+				util.FormatBytesToString(util.GetS3ObjectSize(constants.AWS_S3_BUCKET, constants.AWS_S3_ITEM_VM_MINIMAL))),
+				false)
+			if err != nil {
+				util.ExitWithErrorMessage("Failed to select an option", err)
+			}
 		}
 		if !confirmDownload {
 			os.Exit(1)
@@ -121,7 +134,7 @@ func createLocal() error {
 	if index == 1 {
 		isCompleteSelected = true
 	}
-	RunSetupCreateLocal(isCompleteSelected)
+	RunSetupCreateLocal(isCompleteSelected, false)
 
 	return nil
 }

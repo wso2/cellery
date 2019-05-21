@@ -42,10 +42,34 @@ cellery:Component helloComponent = {
     }
 };
 
+// Hello Component
+cellery:Component helloComponentx = {
+    name: "hellox",
+    source: {
+        dockerDir: "./docker",
+        tag: "sampleapp-hellox"
+    },
+    ingresses: {
+        helloAPI: <cellery:HttpApiIngress>{
+            port: 9090,
+            context: "/hellox",
+            definition: {
+                resources: [
+                    {
+                        path: "/sayHellox",
+                        method: "GET"
+                    }
+                ]
+            },
+            expose: "global"
+        }
+    }
+};
 
 cellery:CellImage helloCell = {
     components: {
-        hello: helloComponent
+        hello: helloComponent,
+        hellox: helloComponentx
     }
 };
 

@@ -37,7 +37,7 @@ ln -s ${PRODUCT_HOME}/cellery /usr/local/bin/cellery
 BRE_LIB_PATH="/Library/Ballerina/ballerina-0.990.3/bre/lib/"
 if [ -d $BRE_LIB_PATH ]
 then
-    cp /usr/share/cellery/bre-libs/${BALLERINA_RUNTIME}/bre/lib/*.jar ${BRE_LIB_PATH}
+    cp /Library/Cellery/bre-libs/${BALLERINA_RUNTIME}/bre/lib/*.jar ${BRE_LIB_PATH}
 else
 #Pull docker based Ballerina cli.
     echo "Ballerina 0.990.3 is not installed"

@@ -64,8 +64,11 @@ func RunLogin(registryURL string, username string, password string) {
 		fmt.Println("Logging in with existing Credentials")
 	} else {
 		if password == "" {
-			registryCredentials.Username, registryCredentials.Password, err = util.RequestCredentials(
-				"Cellery Registry", username)
+			if username == "" {
+				registryCredentials.Username, registryCredentials.Password, err = credentials.FromBrowser(username)
+			} else {
+				registryCredentials.Username, registryCredentials.Password, err = credentials.FromTerminal(username)
+			}
 			if err != nil {
 				util.ExitWithErrorMessage("Error occurred while reading Credentials", err)
 			}
@@ -84,7 +87,8 @@ func RunLogin(registryURL string, username string, password string) {
 		if strings.Contains(err.Error(), "401") {
 			util.ExitWithErrorMessage("Invalid Credentials", err)
 		} else {
-			util.ExitWithErrorMessage("Error occurred while initializing connection to the Cellery Registry", err)
+			util.ExitWithErrorMessage("Error occurred while initializing connection to the Cellery Registry",
+				err)
 		}
 	}
 

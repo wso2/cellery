@@ -23,7 +23,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/cellery-io/sdk/components/cli/pkg/version"
 	"os/exec"
 	"runtime"
 	"strings"
@@ -47,7 +46,7 @@ func RunVersion() {
 
 	// Printing Cellery version information
 	_, _ = boldWhite.Println("Cellery:")
-	fmt.Printf(" CLI Version:\t\t%s\n", version.BuildVersion())
+	fmt.Println(" CLI Version:\t\t0.2.1")
 	fmt.Printf(" OS/Arch:\t\t%s/%s\n", runtime.GOOS, runtime.GOARCH)
 	//fmt.Println(" Experimental:\t\ttrue") // TODO
 

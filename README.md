@@ -87,7 +87,9 @@ The `hello-world-cell` contains, one component `hello` and it's a web app. The `
 In the quick start we'll be deploying this `hello-world-cell` and browsing the `hello` component's web page.  
 
 ---
-Please follow below instructions to run the hello-world-cell.
+Please follow below instructions to run the hello-world-cell. 
+
+**Note: Due to the [known issue](https://github.com/wso2-cellery/sdk/issues/381), please execute the below commands in any directory other than home directory.**
 
 1) Execute below command that will download the hello world web cell from `wso2cellery` organization in [docker hub](https://hub.docker.com/u/wso2cellery) and run the cell.
     ```

@@ -19,6 +19,8 @@
 package main
 
 import (
+	"crypto/tls"
+	"net/http"
 	"log"
 	"os"
 	"path/filepath"
@@ -62,6 +64,8 @@ func newCliCommand() *cobra.Command {
 }
 
 func main() {
+
+	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	logFileDirectory := filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, "logs")
 	logFilePath := filepath.Join(logFileDirectory, "cli.log")
 

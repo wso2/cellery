@@ -29,8 +29,8 @@ import (
 
 const configFile = "config.json"
 
-const defaultHubUrl = "https://hub.cellery.io:9000"
-const defaultIdpUrl = "https://idp.hub.cellery.io:9443"
+const defaultHubUrl = "https://hub.cellery.io"
+const defaultIdpUrl = "https://idp.hub.cellery.io"
 const defaultClientId = "cellerycliapplication"
 
 type Conf struct {

@@ -82,3 +82,64 @@ func GetNodes() (Node, error) {
 	}
 	return jsonOutput, nil
 }
+
+func GetCells() (Cells, error) {
+	cmd := exec.Command(
+		constants.KUBECTL,
+		"get",
+		"cells",
+		"-o",
+		"json",
+	)
+	displayVerboseOutput(cmd)
+	jsonOutput := Cells{}
+	out, err := getCommandOutputFromTextFile(cmd)
+	if err != nil {
+		return jsonOutput, err
+	}
+	err = json.Unmarshal(out, &jsonOutput)
+	return jsonOutput, err
+}
+
+func GetCell(cellName string) (Cell, error) {
+	cmd := exec.Command(constants.KUBECTL,
+		"get",
+		"cells",
+		cellName,
+		"-o",
+		"json",
+	)
+	displayVerboseOutput(cmd)
+	out, err := getCommandOutput(cmd)
+	jsonOutput := Cell{}
+	if err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			return jsonOutput, fmt.Errorf("cell instance %s not found", cellName)
+		}
+		return jsonOutput, fmt.Errorf("unknown error: %v", err)
+	}
+	err = json.Unmarshal([]byte(out), &jsonOutput)
+	if err != nil {
+		return jsonOutput, err
+	}
+	return jsonOutput, err
+}
+
+func GetPods(cellName string) (Pods, error) {
+	cmd := exec.Command(constants.KUBECTL,
+		"get",
+		"pods",
+		"-l",
+		constants.GROUP_NAME+"/cell="+cellName,
+		"-o",
+		"json",
+	)
+	displayVerboseOutput(cmd)
+	jsonOutput := Pods{}
+	out, err := getCommandOutputFromTextFile(cmd)
+	if err != nil {
+		return jsonOutput, err
+	}
+	err = json.Unmarshal(out, &jsonOutput)
+	return jsonOutput, err
+}

@@ -99,6 +99,8 @@ class CellDiagram extends React.Component {
         }
     };
 
+    static CELL_COMPONENT_SEPARATOR = " ";
+
     constructor(props) {
         super(props);
         this.dependencyGraph = React.createRef();
@@ -136,7 +138,7 @@ class CellDiagram extends React.Component {
         const cellNodes = [];
         const availableCells = data.cells;
         const availableComponents = data.components.filter((component) => (focusedCell === component.cell))
-            .map((component) => `${component.cell}:${component.name}`);
+            .map((component) => `${component.cell}${CellDiagram.CELL_COMPONENT_SEPARATOR}${component.name}`);
 
         const getGroupNodesIds = (group) => {
             const output = [];
@@ -192,7 +194,7 @@ class CellDiagram extends React.Component {
             availableComponents.forEach((node, index) => {
                 componentNodes.push({
                     id: node,
-                    label: node.split(":")[1],
+                    label: node.split(CellDiagram.CELL_COMPONENT_SEPARATOR)[1],
                     shape: "image",
                     image: "./component.svg",
                     group: CellDiagram.NodeType.COMPONENT
@@ -242,7 +244,7 @@ class CellDiagram extends React.Component {
         const nodes = new vis.DataSet(cellNodes);
         nodes.add(componentNodes);
         nodes.add({
-            id: `${focusedCell}:${CellDiagram.NodeType.GATEWAY}`,
+            id: `${focusedCell}${CellDiagram.CELL_COMPONENT_SEPARATOR}${CellDiagram.NodeType.GATEWAY}`,
             label: CellDiagram.NodeType.GATEWAY,
             shape: "image",
             image: "./gateway.svg",
@@ -253,7 +255,7 @@ class CellDiagram extends React.Component {
         const incomingNodes = [];
         dataEdges.forEach((edge, index) => {
             if (edge.from === focusedCell) {
-                edge.from = `${focusedCell}:${CellDiagram.NodeType.GATEWAY}`;
+                edge.from = `${focusedCell}${CellDiagram.CELL_COMPONENT_SEPARATOR}${CellDiagram.NodeType.GATEWAY}`;
                 incomingNodes.push(edge.from);
             }
         });
@@ -353,7 +355,8 @@ class CellDiagram extends React.Component {
                 updatedNodes.push(focusedNode);
 
                 // Placing gateway node
-                const gatewayNode = nodes.get(`${focusedCell}:${CellDiagram.NodeType.GATEWAY}`);
+                const gatewayNode = nodes.get(
+                    `${focusedCell}${CellDiagram.CELL_COMPONENT_SEPARATOR}${CellDiagram.NodeType.GATEWAY}`);
                 const gatewayPoint = findPoint(centerPoint.x, centerPoint.y, 90, size * Math.cos(180 / 8));
 
                 if (gatewayNode) {

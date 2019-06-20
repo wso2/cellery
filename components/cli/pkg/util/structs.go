@@ -197,12 +197,52 @@ type CellImageName struct {
 
 type CellImageMetaData struct {
 	CellImageName
-	Labels         map[string]string             `json:"labels"`
-	DockerImages   []string                      `json:"dockerImages"`
-	BuildTimestamp int64                         `json:"buildTimestamp"`
-	Ingresses      []string                      `json:"ingresses"`
-	Components     []string                      `json:"components"`
-	Dependencies   map[string]*CellImageMetaData `json:"dependencies"`
+	Labels              map[string]string             `json:"labels"`
+	DockerImages        []string                      `json:"dockerImages"`
+	BuildTimestamp      int64                         `json:"buildTimestamp"`
+	BuildCelleryVersion string                        `json:"buildCelleryVersion"`
+	Ingresses           []string                      `json:"ingresses"`
+	Components          []string                      `json:"components"`
+	Dependencies        map[string]*CellImageMetaData `json:"dependencies"`
+}
+
+type AutoscalePolicy struct {
+	Kind       string                  `json:"kind"`
+	APIVersion string                  `json:"apiVersion"`
+	Metadata   AutoscalePolicyMetadata `json:"metadata"`
+	Spec       AutoscalePolicySpec     `json:"spec"`
+}
+
+type AutoscalePolicyMetadata struct {
+	Name string `json:"name"`
+}
+
+type AutoscalePolicySpec struct {
+	Overridable bool   `json:"overridable"`
+	Policy      Policy `json:"policy"`
+}
+
+type Policy struct {
+	MinReplicas    int            `json:"minReplicas"`
+	MaxReplicas    int            `json:"maxReplicas"`
+	ScaleTargetRef ScaleTargetRef `json:"scaleTargetRef"`
+	Metrics        []Metric       `json:"metrics"`
+}
+
+type ScaleTargetRef struct {
+	ApiVersion string `json:"apiVersion"`
+	Kind       string `json:"kind"`
+	Name       string `json:"name"`
+}
+
+type Metric struct {
+	Type     string   `json:"type"`
+	Resource Resource `json:"resource"`
+}
+
+type Resource struct {
+	Name                     string `json:"name"`
+	TargetAverageUtilization int    `json:"targetAverageUtilization"`
 }
 
 type progressWriter struct {

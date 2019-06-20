@@ -19,20 +19,27 @@
 package main
 
 import (
+	"crypto/tls"
 	"log"
+	"net/http"
 	"os"
 	"path/filepath"
 
 	"github.com/spf13/cobra"
 
 	"github.com/cellery-io/sdk/components/cli/pkg/constants"
+	"github.com/cellery-io/sdk/components/cli/pkg/kubectl"
 	"github.com/cellery-io/sdk/components/cli/pkg/util"
 )
 
 func newCliCommand() *cobra.Command {
+	var verboseMode = false
 	cmd := &cobra.Command{
 		Use:   "cellery <command>",
 		Short: "Manage immutable cell based applications",
+		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+			kubectl.SetVerboseMode(verboseMode)
+		},
 	}
 
 	cmd.AddCommand(
@@ -54,11 +61,18 @@ func newCliCommand() *cobra.Command {
 		newExtractResourcesCommand(),
 		newInspectCommand(),
 		newViewCommand(),
+		newDeleteImageCommand(),
+		newExportPolicyCommand(),
+		newApplyPolicyCommand(),
+		newUpdateCellComponentsCommand(),
 	)
+	cmd.PersistentFlags().BoolVarP(&verboseMode, "verbose", "v", false, "Run on verbose mode")
 	return cmd
 }
 
 func main() {
+
+	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	logFileDirectory := filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, "logs")
 	logFilePath := filepath.Join(logFileDirectory, "cli.log")
 

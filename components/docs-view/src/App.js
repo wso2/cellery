@@ -54,11 +54,12 @@ const theme = createMuiTheme({
 });
 
 const App = ({data, classes}) => {
+    const getCellName = (cellData) => `${cellData.org}/${cellData.name}:${cellData.ver}`;
     const diagramData = {
-        cells: [data.name],
+        cells: [getCellName(data)],
         components: data.components.map((component) => (
             {
-                cell: data.name,
+                cell: getCellName(data),
                 name: component
             }
         )),
@@ -68,21 +69,27 @@ const App = ({data, classes}) => {
     // Recursively extract dependencies (including transitive dependencies if available)
     const extractData = (cell) => {
         if (cell.dependencies) {
-            Object.keys(cell.dependencies).forEach((alias) => {
-                const dependency = cell.dependencies[alias];
-                diagramData.cells.push(dependency.name);
+            Object.entries(cell.dependencies).forEach(([alias, dependency]) => {
+                const dependencyName = getCellName(dependency);
+                if (!diagramData.cells.includes(dependencyName)) {
+                    diagramData.cells.push(dependencyName);
+                }
                 diagramData.dependencyLinks.push({
                     alias: alias,
-                    from: cell.name,
-                    to: dependency.name
+                    from: getCellName(cell),
+                    to: dependencyName
                 });
 
                 if (dependency.components) {
                     dependency.components.forEach((component) => {
-                        diagramData.components.push({
-                            cell: dependency.name,
-                            name: component
-                        });
+                        const matches = diagramData.components.find(
+                            (datum) => datum.cell === dependencyName && datum.name === component);
+                        if (!matches) {
+                            diagramData.components.push({
+                                cell: dependencyName,
+                                name: component
+                            });
+                        }
                     });
                 }
 
@@ -104,7 +111,7 @@ const App = ({data, classes}) => {
                         </Typography>
                     </Toolbar>
                 </AppBar>
-                <CellDiagramView data={diagramData} focusedCell={data.name}/>
+                <CellDiagramView data={diagramData} focusedCell={getCellName(data)}/>
             </div>
         </MuiThemeProvider>
     );

@@ -19,17 +19,13 @@
 package commands
 
 import (
-	"bufio"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
-	"os/exec"
 	"strings"
 
 	"github.com/olekukonko/tablewriter"
 
-	"github.com/cellery-io/sdk/components/cli/pkg/constants"
+	"github.com/cellery-io/sdk/components/cli/pkg/kubectl"
 	"github.com/cellery-io/sdk/components/cli/pkg/util"
 )
 
@@ -39,85 +35,28 @@ func RunStatus(cellName string) {
 		util.ExitWithErrorMessage("Error running cell status", fmt.Errorf("cannot find cell %v \n", cellName))
 	}
 	displayStatusSummaryTable(cellCreationTime, cellStatus)
-	fmt.Println("\n")
-	fmt.Println("  -COMPONENTS-\n")
-	displayStatusDetailedTable(getPodDetails(cellName), cellName)
+	fmt.Println()
+	fmt.Println("  -COMPONENTS-")
+	fmt.Println()
+	pods, err := kubectl.GetPods(cellName)
+	if err != nil {
+		util.ExitWithErrorMessage("Error getting pods information of cell "+cellName, err)
+	}
+	displayStatusDetailedTable(pods, cellName)
 }
 
 func getCellSummary(cellName string) (cellCreationTime, cellStatus string, err error) {
 	cellCreationTime = ""
 	cellStatus = ""
-	cmd := exec.Command("kubectl", "get", "cells", cellName, "-o", "json")
-	stdoutReader, _ := cmd.StdoutPipe()
-	stdoutScanner := bufio.NewScanner(stdoutReader)
-	output := ""
-	go func() {
-		for stdoutScanner.Scan() {
-			output = output + stdoutScanner.Text()
-		}
-	}()
-	stderrReader, _ := cmd.StderrPipe()
-	stderrScanner := bufio.NewScanner(stderrReader)
-	go func() {
-		for stderrScanner.Scan() {
-			output = output + stderrScanner.Text()
-		}
-	}()
-	err = cmd.Start()
+	cell, err := kubectl.GetCell(cellName)
 	if err != nil {
-		return "", "", err
+		util.ExitWithErrorMessage("Error getting information of cell "+cellName, err)
 	}
-	err = cmd.Wait()
-	if err != nil {
-		return "", "", err
-	}
-
-	jsonOutput := &util.Cell{}
-
-	errJson := json.Unmarshal([]byte(output), jsonOutput)
-	if errJson != nil {
-		fmt.Println(errJson)
-	}
-	duration := util.GetDuration(util.ConvertStringToTime(jsonOutput.CellMetaData.CreationTimestamp))
-	cellStatus = jsonOutput.CellStatus.Status
-
+	// Get the time since cell instance creation
+	duration := util.GetDuration(util.ConvertStringToTime(cell.CellMetaData.CreationTimestamp))
+	// Get the current status of the cell
+	cellStatus = cell.CellStatus.Status
 	return duration, cellStatus, err
-}
-
-func getPodDetails(cellName string) []util.Pod {
-	cmd := exec.Command("kubectl", "get", "pods", "-l", constants.GROUP_NAME+"/cell="+cellName, "-o", "json")
-	output := ""
-
-	outfile, errPrint := os.Create("./out.txt")
-	if errPrint != nil {
-		util.ExitWithErrorMessage("Error occurred while fetching cell status", errPrint)
-	}
-	defer outfile.Close()
-	cmd.Stdout = outfile
-
-	err := cmd.Start()
-	if err != nil {
-		util.ExitWithErrorMessage("Error occurred while fetching cell status", err)
-	}
-	err = cmd.Wait()
-	if err != nil {
-		util.ExitWithErrorMessage("Error occurred while fetching cell status", err)
-	}
-
-	outputByteArray, err := ioutil.ReadFile("./out.txt")
-	os.Remove("./out.txt")
-
-	if err != nil {
-		util.ExitWithErrorMessage("Error occurred while fetching cell status", err)
-	}
-
-	output = string(outputByteArray)
-	jsonOutput := &util.CellPods{}
-	errJson := json.Unmarshal([]byte(output), jsonOutput)
-	if errJson != nil {
-		fmt.Println(errJson)
-	}
-	return jsonOutput.Items
 }
 
 func displayStatusSummaryTable(cellCreationTime, cellStatus string) error {
@@ -139,25 +78,22 @@ func displayStatusSummaryTable(cellCreationTime, cellStatus string) error {
 
 	table.Append(tableData)
 	table.Render()
-
 	return nil
 }
 
-func displayStatusDetailedTable(podItems []util.Pod, cellName string) error {
-	tableData := [][]string{}
-
-	for i := 0; i < len(podItems); i++ {
-		name := strings.Replace(strings.Split(podItems[i].MetaData.Name, "-deployment-")[0], cellName+"--", "", -1)
-		state := podItems[i].PodStatus.Phase
-
+func displayStatusDetailedTable(pods kubectl.Pods, cellName string) error {
+	var tableData [][]string
+	for _, pod := range pods.Items {
+		name := strings.Replace(strings.Split(pod.MetaData.Name, "-deployment-")[0], cellName+"--", "", -1)
+		state := pod.PodStatus.Phase
 		if strings.EqualFold(state, "Running") {
-			duration := util.GetDuration(util.ConvertStringToTime(podItems[i].PodStatus.Conditions[1].LastTransitionTime))
+			// Get the time since pod's last transition to running state
+			duration := util.GetDuration(util.ConvertStringToTime(pod.PodStatus.Conditions[1].LastTransitionTime))
 			state = "Up for " + duration
 		}
 		status := []string{name, state}
 		tableData = append(tableData, status)
 	}
-
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{"NAME", "STATUS"})
 	table.SetBorders(tablewriter.Border{Left: false, Top: false, Right: false, Bottom: false})

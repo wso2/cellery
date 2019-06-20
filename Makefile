@@ -19,7 +19,7 @@ PROJECT_PKG := github.com/cellery-io/sdk
 GO_BUILD_DIRECTORY := $(PROJECT_ROOT)/components/build
 GOFILES		= $(shell find . -type f -name '*.go' -not -path "./vendor/*")
 GIT_REVISION := $(shell git rev-parse --verify HEAD)
-BALLERINA_VERSION := 0.990.3
+BALLERINA_VERSION := 0.991.0
 
 OBSERVABILITY_LAST_BUILD := https://wso2.org/jenkins/job/cellery/job/mesh-observability/lastSuccessfulBuild
 OBSERVABILITY_ARTIFACTS_PATH := $(OBSERVABILITY_LAST_BUILD)/artifact/components/global/*zip*
@@ -38,6 +38,7 @@ DISTRIBUTION_K8S_ARTIFACT := k8s-artefacts.tar.gz
 MAIN_PACKAGES := cli
 
 VERSION ?= $(GIT_REVISION)
+INSTALLER_VERSION ?= $(GIT_REVISION)
 
 # Go build time flags
 GO_LDFLAGS := -X $(PROJECT_PKG)/components/cli/pkg/version.buildVersion=$(VERSION)
@@ -94,14 +95,14 @@ build-ubuntu-installer: copy-k8s-artefacts
 	cd ${PROJECT_ROOT}/installers/ubuntu-x64; \
 	mkdir -p files; \
 	cp -r ../k8s-artefacts files/; \
-	bash build-ubuntu-x64.sh $(VERSION)
+	bash build-ubuntu-x64.sh $(INSTALLER_VERSION)
 
 .PHONY: build-mac-installer
 build-mac-installer: copy-k8s-artefacts
 	cd ${PROJECT_ROOT}/installers/macOS-x64; \
 	mkdir -p files; \
 	cp -r ../k8s-artefacts files/; \
-	bash build-macos-x64.sh $(VERSION)
+	bash build-macos-x64.sh $(INSTALLER_VERSION)
 
 .PHONY: docker
 docker:

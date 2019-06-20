@@ -50,16 +50,16 @@ func DeleteFile(file string) error {
 	return cmd.Run()
 }
 
-func DeleteResourceWithNamespace(kind, instance, namespace string) error {
+func DeleteResource(kind, instance string) (string, error) {
 	cmd := exec.Command(
 		constants.KUBECTL,
 		"delete",
 		kind,
 		instance,
-		"-n", namespace,
+		"--ignore-not-found",
 	)
-	cmd.Stderr = os.Stderr
-	return cmd.Run()
+	displayVerboseOutput(cmd)
+	return getCommandOutput(cmd)
 }
 
 func DeleteNameSpace(nameSpace string) error {
@@ -84,6 +84,17 @@ func DeleteAllCells() error {
 	)
 	cmd.Stderr = os.Stderr
 	return cmd.Run()
+}
+
+func DeleteCell(cellInstance string) (string, error) {
+	cmd := exec.Command(
+		constants.KUBECTL,
+		"delete",
+		"cell",
+		cellInstance,
+	)
+	displayVerboseOutput(cmd)
+	return getCommandOutput(cmd)
 }
 
 func DeletePersistedVolume(persistedVolume string) error {

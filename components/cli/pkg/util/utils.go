@@ -1112,6 +1112,15 @@ func WaitForRuntime() {
 	spinner.SetNewAction("Runtime status (Istio)...OK")
 	spinner.Stop(true)
 
+	spinner = StartNewSpinner("Checking runtime status (Knative Serving)...")
+	err = kubectl.WaitForDeployments("knative-serving", time.Minute*15)
+	if err != nil {
+		spinner.Stop(false)
+		ExitWithErrorMessage("Error while checking runtime status (Knative Serving)", err)
+	}
+	spinner.SetNewAction("Runtime status (Knative Serving)...OK")
+	spinner.Stop(true)
+
 	spinner = StartNewSpinner("Checking runtime status (Cellery)...")
 	err = kubectl.WaitForDeployments("cellery-system", time.Minute*15)
 	if err != nil {
@@ -1228,4 +1237,34 @@ func IsCommandAvailable(name string) bool {
 		return false
 	}
 	return true
+}
+
+func CreateTempExecutableBalFile(file string, action string) (string, error) {
+	var ballerinaMain = ""
+	if action == "build" {
+		ballerinaMain = `
+public function main(string action, cellery:ImageName iName, map<cellery:ImageName> instances) returns error? {
+	return build(iName);
+}`
+	} else if action == "run" {
+		ballerinaMain = `
+public function main(string action, cellery:ImageName iName, map<cellery:ImageName> instances) returns error? {
+	return run(iName, instances);
+}`
+	} else {
+		return "", errors.New("invalid action:" + action)
+	}
+
+	input, err := ioutil.ReadFile(file)
+	if err != nil {
+		return "", err
+	}
+
+	var newFileContent = string(input) + ballerinaMain
+	var newFileName = strings.Replace(file, ".bal", "", 1) + "_" + action + ".bal"
+	err = ioutil.WriteFile(newFileName, []byte(newFileContent), 0644)
+	if err != nil {
+		return "", err
+	}
+	return newFileName, nil
 }

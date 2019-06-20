@@ -95,6 +95,14 @@
   version = "v1.0.1"
 
 [[projects]]
+  digest = "1:76dc72490af7174349349838f2fe118996381b31ea83243812a97e5a0fd5ed55"
+  name = "github.com/dgrijalva/jwt-go"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "06ea1031745cb8b3dab3f6a236daf2b0aa468b7e"
+  version = "v3.2.0"
+
+[[projects]]
   digest = "1:4464a497bd532888757587c0f13fb7bc88dc4a7cbff3aa833300095456912966"
   name = "github.com/docker/distribution"
   packages = [
@@ -585,6 +593,7 @@
     "github.com/aws/aws-sdk-go/aws/session",
     "github.com/aws/aws-sdk-go/service/s3",
     "github.com/aws/aws-sdk-go/service/s3/s3manager",
+    "github.com/dgrijalva/jwt-go",
     "github.com/docker/distribution/manifest",
     "github.com/docker/distribution/manifest/schema1",
     "github.com/docker/go-units",

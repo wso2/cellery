@@ -33,6 +33,8 @@ public class CelleryConstants {
     public static final String IMAGE_SOURCE = "source";
     public static final String AUTO_SCALING_METRIC_RESOURCE = "Resource";
     public static final String AUTO_SCALING_METRIC_RESOURCE_CPU = "cpu";
+    public static final String INSTANCE_NAME = "instanceName";
+
 
     // These should match the Ballerina object names of the Auto Scaling Metrics Objects
     public static final String ENVOY_GATEWAY = "Envoy";
@@ -41,13 +43,13 @@ public class CelleryConstants {
     public static final String YAML = ".yaml";
     public static final String PROTOCOL_TCP = "TCP";
     public static final String PROTOCOL_GRPC = "GRPC";
-    public static final String PROTOCOL_HTTP = "HTTP";
     public static final String TARGET = "target";
     public static final String RESOURCES = "resources";
     public static final String DEFAULT_GATEWAY_PROTOCOL = "http";
     public static final int DEFAULT_GATEWAY_PORT = 80;
     public static final String DEFAULT_PARAMETER_VALUE = "";
     public static final String CELLERY_IMAGE_DIR_ENV_VAR = "CELLERY_IMAGE_DIR";
+    public static final String GATEWAY_SERVICE = "--gateway-service";
     public static final String INSTANCE_NAME_PLACEHOLDER = "{{instance_name}}";
     public static final String REFERENCE_FILE_NAME = "reference.json";
     public static final String METADATA_FILE_NAME = "metadata.json";
@@ -55,4 +57,5 @@ public class CelleryConstants {
     public static final String ANNOTATION_CELL_IMAGE_ORG = "mesh.cellery.io/cell-image-org";
     public static final String ANNOTATION_CELL_IMAGE_NAME = "mesh.cellery.io/cell-image-name";
     public static final String ANNOTATION_CELL_IMAGE_VERSION = "mesh.cellery.io/cell-image-version";
+    public static final String ANNOTATION_CELL_IMAGE_DEPENDENCIES = "mesh.cellery.io/cell-dependencies";
 }

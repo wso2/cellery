@@ -1,36 +1,38 @@
 import ballerina/io;
 import celleryio/cellery;
 
-
-// Web Component
-cellery:Component webComponent = {
-    name: "web-ui",
-    source: {
-        image: "docker.io/celleryio/sampleapp-employee"
-    },
-    ingresses: {
-        webUI: <cellery:WebIngress>{    //web ingress will be always exposed globally.
-            port: 8080,
-            gatewayConfig: {
-                vhost: "abc.com",
-                context: "/demo" //default to “/”
-            }
-        }
-    }
-};
-
-
-cellery:CellImage webCell = {
-    components: {
-        webComp: webComponent
-    }
-};
-
 public function build(cellery:ImageName iName) returns error? {
-    return cellery:createImage(webCell, iName);
+    // Web Component
+    cellery:Component helloComponent = {
+        name: "hello",
+        source: {
+            image: "wso2cellery/samples-hello-world-webapp"
+        },
+        ingresses: {
+            webUI: <cellery:WebIngress> { // Web ingress will be always exposed globally.
+                port: 80,
+                gatewayConfig: {
+                    vhost: "hello-world.com",
+                    context: "/"
+                }
+            }
+        },
+        envVars: {
+            HELLO_NAME: {value: "Cellery"}
+        }
+    };
+
+    cellery:CellImage helloCell = {
+        components: {
+            helloComp: helloComponent
+        }
+    };
+
+    return cellery:createImage(helloCell, untaint iName);
 }
 
 
-public function run(cellery:ImageName iName, map<string> instances) returns error? {
-    return cellery:createInstance(webCell, iName);
+public function run(cellery:ImageName iName, map<cellery:ImageName> instances) returns error? {
+    cellery:CellImage helloCell = check cellery:constructCellImage(untaint iName);
+    return cellery:createInstance(helloCell, iName, instances);
 }

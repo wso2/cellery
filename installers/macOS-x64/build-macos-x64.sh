@@ -37,7 +37,7 @@ function printUsage() {
 if [[ "$1" == "-h" ||  "$1" == "--help" ]]; then
     printUsage
     exit 1
-elif [ -z "$1"]; then
+elif [[ -z "$1" ]]; then
     echo "Please enter the version of the Cellery distribution."
     printUsage
     exit 1
@@ -47,9 +47,9 @@ fi
 
 #Parameters
 TARGET_DIRECTORY="target"
-VERSION=${1}
+INST_VERSION=${1}
 PRODUCT="cellery"
-INSTALLATION_DIRECTORY="cellery-ubuntu-x64-"${1}
+INSTALLATION_DIRECTORY="cellery-ubuntu-x64-"${INST_VERSION}
 DATE=`date +%Y-%m-%d`
 TIME=`date +%H:%M:%S`
 LOG_PREFIX="[$DATE $TIME]"
@@ -146,11 +146,11 @@ copyDarwinDirectory(){
 copyBuildDirectory() {
     chmod -R 755 target/darwin/scripts/postinstall
 
-    sed -i '' -e 's/__VERSION__/'${VERSION}'/g' ${TARGET_DIRECTORY}/darwin/Distribution
+    sed -i '' -e 's/__VERSION__/'${INST_VERSION}'/g' ${TARGET_DIRECTORY}/darwin/Distribution
     sed -i '' -e 's/__PRODUCT__/cellery/g' ${TARGET_DIRECTORY}/darwin/Distribution
     chmod -R 755 ${TARGET_DIRECTORY}/darwin/Distribution
 
-    sed -i '' -e 's/__VERSION__/'${VERSION}'/g' ${TARGET_DIRECTORY}/darwin/Resources/*.html
+    sed -i '' -e 's/__VERSION__/'${INST_VERSION}'/g' ${TARGET_DIRECTORY}/darwin/Resources/*.html
     chmod -R 755 ${TARGET_DIRECTORY}/darwin/Resources/
 
     rm -rf ${TARGET_DIRECTORY}/darwinpkg
@@ -186,8 +186,8 @@ copyBuildDirectory() {
 
 function buildPackage() {
     log_info "Cellery product installer package building started.(1/3)"
-    pkgbuild --identifier org.${PRODUCT}.${VERSION} \
-    --version ${VERSION} \
+    pkgbuild --identifier org.${PRODUCT}.${INST_VERSION} \
+    --version ${INST_VERSION} \
     --scripts ${TARGET_DIRECTORY}/darwin/scripts \
     --root ${TARGET_DIRECTORY}/darwinpkg \
     ${TARGET_DIRECTORY}/package/cellery.pkg > /dev/null 2>&1
@@ -207,23 +207,23 @@ function signProduct() {
     chmod -R 755 ${TARGET_DIRECTORY}/pkg-signed
 
     productsign --sign "Developer ID Installer: <ADD ID HERE>" \
-    ${TARGET_DIRECTORY}/pkg/$1 \
-    ${TARGET_DIRECTORY}/pkg-signed/$1
+    ${TARGET_DIRECTORY}/pkg/${INST_VERSION} \
+    ${TARGET_DIRECTORY}/pkg-signed/${INST_VERSION}
 
-    pkgutil --check-signature ${TARGET_DIRECTORY}/pkg-signed/$1
+    pkgutil --check-signature ${TARGET_DIRECTORY}/pkg-signed/${INST_VERSION}
 }
 
 function createInstaller() {
     log_info "Cellery product installer generation process started.(3 Steps)"
     buildPackage
-    buildProduct cellery-macos-installer-x64-$VERSION.pkg
-    signProduct cellery-macos-installer-x64-$VERSION.pkg
+    buildProduct cellery-macos-installer-x64-${INST_VERSION}.pkg
+    signProduct cellery-macos-installer-x64-${INST_VERSION}.pkg
     log_info "Cellery product installer generation process finished."
 }
 
 function createUninstaller(){
     cp uninstall.sh ${TARGET_DIRECTORY}/darwinpkg/Library/Cellery
-    sed -i '' -e "s/__VERSION__/${VERSION}/g" "${TARGET_DIRECTORY}/darwinpkg/Library/Cellery/uninstall.sh"
+    sed -i '' -e "s/__VERSION__/${INST_VERSION}/g" "${TARGET_DIRECTORY}/darwinpkg/Library/Cellery/uninstall.sh"
     sed -i '' -e "s/__PRODUCT__/${PRODUCT}/g" "${TARGET_DIRECTORY}/darwinpkg/Library/Cellery/uninstall.sh"
 }
 

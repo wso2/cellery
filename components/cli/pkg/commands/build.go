@@ -32,11 +32,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ghodss/yaml"
-
 	"github.com/cellery-io/sdk/components/cli/pkg/constants"
 	"github.com/cellery-io/sdk/components/cli/pkg/util"
 	"github.com/cellery-io/sdk/components/cli/pkg/version"
+	"github.com/ghodss/yaml"
 )
 
 // RunBuild executes the cell's build life cycle method and saves the generated cell image to the local repo.
@@ -104,7 +103,7 @@ func RunBuild(tag string, fileName string) {
 		}
 		//Retrieve the cellery cli docker instance status.
 		cmdDockerPs := exec.Command("docker", "ps", "--filter",
-			"label=ballerina-runtime="+constants.CELLERY_RELEASE_VERSION,
+			"label=ballerina-runtime="+version.BuildVersion(),
 			"--filter", "label=currentDir="+currentDir, "--filter", "status=running", "--format", "{{.ID}}")
 		out, err := cmdDockerPs.Output()
 		if err != nil {
@@ -114,13 +113,13 @@ func RunBuild(tag string, fileName string) {
 
 		if string(out) == "" {
 			cmdDockerRun := exec.Command("docker", "run", "-d",
-				"-l", "ballerina-runtime="+constants.CELLERY_RELEASE_VERSION,
+				"-l", "ballerina-runtime="+version.BuildVersion(),
 				"-l", "current.dir="+currentDir,
 				"--mount", "type=bind,source="+currentDir+",target=/home/cellery/src",
 				"--mount", "type=bind,source="+util.UserHomeDir()+string(os.PathSeparator)+".ballerina,target=/home/cellery/.ballerina",
 				"--mount", "type=bind,source="+util.UserHomeDir()+string(os.PathSeparator)+".cellery,target=/home/cellery/.cellery",
 				"--mount", "type=bind,source="+util.UserHomeDir()+string(os.PathSeparator)+".kube,target=/home/cellery/.kube",
-				"wso2cellery/ballerina-runtime:"+constants.CELLERY_RELEASE_VERSION, "sleep", "600",
+				"wso2cellery/ballerina-runtime:"+version.BuildVersion(), "sleep", "600",
 			)
 			util.UserHomeDir()
 
@@ -149,7 +148,7 @@ func RunBuild(tag string, fileName string) {
 					if stderrScanner.Scan() && strings.HasPrefix(stderrScanner.Text(), "Unable to find image") {
 						spinner.Pause()
 						spinner.Stop(false)
-						util.StartNewSpinner(fmt.Sprintf("%s: Cannot find ballerina docker image. Pulling %s", "Building image "+util.Bold(tag), "wso2cellery/ballerina-runtime:"+constants.CELLERY_RELEASE_VERSION))
+						util.StartNewSpinner(fmt.Sprintf("%s: Cannot find ballerina docker image. Pulling %s", "Building image "+util.Bold(tag), "wso2cellery/ballerina-runtime:"+version.BuildVersion()))
 						spinner.Resume()
 						break
 					}
@@ -194,7 +193,6 @@ func RunBuild(tag string, fileName string) {
 		util.ExitWithErrorMessage("Error occurred while building cell image", err)
 	}
 	err = cmd.Wait()
-	defer os.Remove(tempBuildFileName)
 	if err != nil {
 		spinner.Stop(false)
 		fmt.Println()
@@ -204,7 +202,7 @@ func RunBuild(tag string, fileName string) {
 		fmt.Printf("\x1b[31;1m%s\x1b[0m", errStr)
 		util.ExitWithErrorMessage("Error occurred while building cell image", err)
 	}
-
+	_ = os.Remove(tempBuildFileName)
 	outStr := string(stdout.Bytes())
 	fmt.Printf("\r\x1b[2K\033[36m%s\033[m\n", outStr)
 

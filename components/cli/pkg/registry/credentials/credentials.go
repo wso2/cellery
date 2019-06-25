@@ -43,7 +43,7 @@ const callBackUrlContext = "/auth"
 const callBackUrl = "http://localhost:%d" + callBackUrlContext
 
 // FromBrowser requests the credentials from the user
-func FromBrowser(username string) (string, string, error) {
+func FromBrowser(username string, isAutherized chan bool) (string, string, error) {
 	conf := config.LoadConfig()
 	timeout := make(chan bool)
 	ch := make(chan string)
@@ -73,20 +73,28 @@ func FromBrowser(username string) (string, string, error) {
 				util.ExitWithErrorMessage("Error parsing the code", err)
 			}
 			code = r.Form.Get("code")
-			ch <- code
-			if len(code) != 0 {
-				http.Redirect(w, r, conf.Hub.Url+"/sdk/auth-success", http.StatusSeeOther)
-			} else {
-				util.ExitWithErrorMessage("Did not receive any code", err)
+			ping := r.Form.Get("ping")
+			if ping == "true" {
+				w.WriteHeader(http.StatusOK)
 			}
-			flusher, ok := w.(http.Flusher)
-			if !ok {
-				util.ExitWithErrorMessage("Error in casting the flusher", err)
-			}
-			flusher.Flush()
-			err = server.Shutdown(context.Background())
-			if err != nil {
-				util.ExitWithErrorMessage("Error while shutting down the server\n", err)
+			if code != "" {
+				ch <- code
+				authorized := <- isAutherized
+				if authorized {
+					http.Redirect(w, r, conf.Hub.Url+"/sdk/auth-success", http.StatusSeeOther)
+				} else {
+					// todo add authentication fail url
+					fmt.Println("\n\U0000274C Failed to authenticate")
+				}
+				flusher, ok := w.(http.Flusher)
+				if !ok {
+					util.ExitWithErrorMessage("Error in casting the flusher", err)
+				}
+				flusher.Flush()
+				err = server.Shutdown(context.Background())
+				if err != nil {
+					util.ExitWithErrorMessage("Error while shutting down the server\n", err)
+				}
 			}
 		})
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {

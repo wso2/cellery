@@ -72,7 +72,7 @@ public type CpuUtilizationPercentage record {|
 |};
 
 public type Dependencies record {|
-    map<ImageName|string> components?;
+    Component?[] components?;
     map<ImageName|string> cells?;
 |};
 

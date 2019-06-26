@@ -54,6 +54,9 @@ public function build(cellery:ImageName iName) returns error? {
         },
         labels: {
             team: "HR"
+        },
+        dependencies:{
+            components:[salaryComponent]
         }
     };
 

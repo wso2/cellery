@@ -106,7 +106,7 @@ func FromBrowser(username string, isAuthorized chan bool, done chan bool) (strin
 	}
 	// Setting up a timeout
 	go func() {
-		time.Sleep(5 * time.Minute)
+		time.Sleep(15 * time.Minute)
 		timeout <- true
 	}()
 	// Wait for a code, or timeout

@@ -82,14 +82,19 @@ import static io.cellery.CelleryConstants.ANNOTATION_CELL_IMAGE_DEPENDENCIES;
 import static io.cellery.CelleryConstants.ANNOTATION_CELL_IMAGE_NAME;
 import static io.cellery.CelleryConstants.ANNOTATION_CELL_IMAGE_ORG;
 import static io.cellery.CelleryConstants.ANNOTATION_CELL_IMAGE_VERSION;
+import static io.cellery.CelleryConstants.AUTO_SCALING;
 import static io.cellery.CelleryConstants.DEFAULT_GATEWAY_PORT;
 import static io.cellery.CelleryConstants.DEFAULT_GATEWAY_PROTOCOL;
 import static io.cellery.CelleryConstants.ENVOY_GATEWAY;
+import static io.cellery.CelleryConstants.ENV_VARS;
 import static io.cellery.CelleryConstants.GATEWAY_SERVICE;
 import static io.cellery.CelleryConstants.IMAGE_SOURCE;
+import static io.cellery.CelleryConstants.INGRESSES;
 import static io.cellery.CelleryConstants.INSTANCE_NAME_PLACEHOLDER;
+import static io.cellery.CelleryConstants.LABELS;
 import static io.cellery.CelleryConstants.METADATA_FILE_NAME;
 import static io.cellery.CelleryConstants.MICRO_GATEWAY;
+import static io.cellery.CelleryConstants.PROBES;
 import static io.cellery.CelleryConstants.PROTOCOL_GRPC;
 import static io.cellery.CelleryConstants.PROTOCOL_TCP;
 import static io.cellery.CelleryConstants.PROTO_FILE;
@@ -101,6 +106,7 @@ import static io.cellery.CelleryUtils.getApi;
 import static io.cellery.CelleryUtils.getValidName;
 import static io.cellery.CelleryUtils.printWarning;
 import static io.cellery.CelleryUtils.processEnvVars;
+import static io.cellery.CelleryUtils.processProbes;
 import static io.cellery.CelleryUtils.processWebIngress;
 import static io.cellery.CelleryUtils.toYaml;
 import static io.cellery.CelleryUtils.writeToFile;
@@ -149,18 +155,21 @@ public class CreateCellImage extends BlockingNativeCallableUnit {
             component.setService(component.getName());
             processSource(component, attributeMap);
             //Process Optional fields
-            if (attributeMap.containsKey("ingresses")) {
-                processIngress(((BMap<?, ?>) attributeMap.get("ingresses")).getMap(), component);
+            if (attributeMap.containsKey(INGRESSES)) {
+                processIngress(((BMap<?, ?>) attributeMap.get(INGRESSES)).getMap(), component);
             }
-            if (attributeMap.containsKey("labels")) {
-                ((BMap<?, ?>) attributeMap.get("labels")).getMap().forEach((labelKey, labelValue) ->
+            if (attributeMap.containsKey(LABELS)) {
+                ((BMap<?, ?>) attributeMap.get(LABELS)).getMap().forEach((labelKey, labelValue) ->
                         component.addLabel(labelKey.toString(), labelValue.toString()));
             }
-            if (attributeMap.containsKey("autoscaling")) {
-                processAutoScalePolicy(((BMap<?, ?>) attributeMap.get("autoscaling")).getMap(), component);
+            if (attributeMap.containsKey(AUTO_SCALING)) {
+                processAutoScalePolicy(((BMap<?, ?>) attributeMap.get(AUTO_SCALING)).getMap(), component);
             }
-            if (attributeMap.containsKey("envVars")) {
-                processEnvVars(((BMap<?, ?>) attributeMap.get("envVars")).getMap(), component);
+            if (attributeMap.containsKey(ENV_VARS)) {
+                processEnvVars(((BMap<?, ?>) attributeMap.get(ENV_VARS)).getMap(), component);
+            }
+            if (attributeMap.containsKey(PROBES)) {
+                processProbes(((BMap<?, ?>) attributeMap.get(PROBES)).getMap(), component);
             }
             cellImage.addComponent(component);
         });
@@ -283,6 +292,7 @@ public class CreateCellImage extends BlockingNativeCallableUnit {
         component.addApi(httpAPI);
     }
 
+
     /**
      * Extract the scale policy.
      *
@@ -358,6 +368,8 @@ public class CreateCellImage extends BlockingNativeCallableUnit {
                             .withContainerPort(component.getContainerPort())
                             .build())
                     .withEnv(envVarList)
+                    .withReadinessProbe(component.getReadinessProbe())
+                    .withLivenessProbe(component.getLivenessProbe())
                     .build());
 
             AutoScaling autoScaling = component.getAutoScaling();

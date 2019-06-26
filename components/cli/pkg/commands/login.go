@@ -57,7 +57,7 @@ func RunLogin(registryURL string, username string, password string) {
 		isCredentialsAlreadyPresent = err == nil && registryCredentials.Username != "" &&
 			registryCredentials.Password != ""
 	}
-
+	isAuthorized := make(chan bool)
 	if isCredentialsProvided {
 		fmt.Println("Logging in with provided Credentials")
 	} else if isCredentialsAlreadyPresent {
@@ -65,7 +65,8 @@ func RunLogin(registryURL string, username string, password string) {
 	} else {
 		if password == "" {
 			if username == "" {
-				registryCredentials.Username, registryCredentials.Password, err = credentials.FromBrowser(username)
+				registryCredentials.Username, registryCredentials.Password, err = credentials.FromBrowser(username,
+					isAuthorized)
 			} else {
 				registryCredentials.Username, registryCredentials.Password, err = credentials.FromTerminal(username)
 			}
@@ -83,6 +84,7 @@ func RunLogin(registryURL string, username string, password string) {
 	spinner := util.StartNewSpinner("Logging into Cellery Registry " + registryURL)
 	_, err = registry.New("https://"+registryURL, registryCredentials.Username, registryCredentials.Password)
 	if err != nil {
+		isAuthorized <- false
 		spinner.Stop(false)
 		if strings.Contains(err.Error(), "401") {
 			util.ExitWithErrorMessage("Invalid Credentials", err)
@@ -101,7 +103,7 @@ func RunLogin(registryURL string, username string, password string) {
 			util.ExitWithErrorMessage("Error occurred while saving Credentials", err)
 		}
 	}
-
+	isAuthorized <- true
 	spinner.Stop(true)
 	util.PrintSuccessMessage(fmt.Sprintf("Successfully logged into Registry: %s", util.Bold(registryURL)))
 }

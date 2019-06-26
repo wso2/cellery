@@ -32,10 +32,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ghodss/yaml"
+
 	"github.com/cellery-io/sdk/components/cli/pkg/constants"
 	"github.com/cellery-io/sdk/components/cli/pkg/util"
 	"github.com/cellery-io/sdk/components/cli/pkg/version"
-	"github.com/ghodss/yaml"
 )
 
 // RunBuild executes the cell's build life cycle method and saves the generated cell image to the local repo.
@@ -171,8 +172,9 @@ func RunBuild(tag string, fileName string) {
 			}
 			time.Sleep(5 * time.Second)
 		}
+		balFileName := filepath.Base(tempBuildFileName)
 		cmd = exec.Command("docker", "exec", "-w", "/home/cellery/src", "-u", "1000",
-			strings.TrimSpace(string(out)), constants.DOCKER_CLI_BALLERINA_EXECUTABLE_PATH, "run", tempBuildFileName, "build", string(iName), "{}")
+			strings.TrimSpace(string(out)), constants.DOCKER_CLI_BALLERINA_EXECUTABLE_PATH, "run", "target/"+balFileName, "build", string(iName), "{}")
 	}
 	execError := ""
 	stderrReader, _ := cmd.StderrPipe()

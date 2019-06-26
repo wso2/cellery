@@ -35,6 +35,11 @@ public class CelleryConstants {
     public static final String AUTO_SCALING_METRIC_RESOURCE_CPU = "cpu";
     public static final String INSTANCE_NAME = "instanceName";
 
+    //Dependency Constants
+    public static final String DEPENDENCIES = "dependencies";
+    public static final String CELLS = "cells";
+    public static final String COMPONENTS = "components";
+
     // Ballerina object name constants for probes
     public static final String INGRESSES = "ingresses";
     public static final String LABELS = "labels";

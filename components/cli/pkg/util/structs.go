@@ -204,6 +204,7 @@ type CellImageMetaData struct {
 	Ingresses           []string                      `json:"ingresses"`
 	Components          []string                      `json:"components"`
 	Dependencies        map[string]*CellImageMetaData `json:"dependencies"`
+	ComponentDep        map[string][]string           `json:"componentDep"`
 }
 
 type AutoscalePolicy struct {

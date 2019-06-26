@@ -231,11 +231,10 @@ public class LangTestUtils {
         return jacocoArgLine + " ";
     }
 
-    public static Map<String, CellImageInfo> getDependancyInfo(Path source) throws IOException {
+    public static Map<String, CellImageInfo> getDependencyInfo(Path source) throws IOException {
 
-        String metadataJsonPath =
-                source.toAbsolutePath().toString() + File.separator + TARGET + File.separator + CELLERY +
-                        File.separator + METADATA;
+        String metadataJsonPath = source.toAbsolutePath().toString() + File.separator + TARGET
+                + File.separator + CELLERY + File.separator + METADATA;
         Map<String, CellImageInfo> dependencyMap = new HashMap<>();
         try (InputStream input = new FileInputStream(metadataJsonPath)) {
             try (InputStreamReader inputStreamReader = new InputStreamReader(input)) {

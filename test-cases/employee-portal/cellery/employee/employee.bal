@@ -5,8 +5,7 @@ import celleryio/cellery;
 
 public function build(cellery:ImageName iName) returns error? {
     int salaryContainerPort = 8080;
-
-    // Salary Component
+        // Salary Component
     cellery:Component salaryComponent = {
         name: "salary",
         source: {
@@ -30,7 +29,17 @@ public function build(cellery:ImageName iName) returns error? {
         labels: {
             team: "Finance",
             owner: "Alice"
-        }
+        },
+        autoscaling: {
+            policy: {
+                minReplicas: 1,
+                maxReplicas: 3,
+                cpuPercentage: {
+                   percentage: 10
+                }
+             },
+             overridable: false
+         }
     };
 
     // Employee Component
@@ -54,6 +63,16 @@ public function build(cellery:ImageName iName) returns error? {
         },
         labels: {
             team: "HR"
+        },
+        autoscaling: {
+                    policy: {
+                        minReplicas: 1,
+                        maxReplicas: 3,
+                        cpuPercentage: {
+                           percentage: 10
+                        }
+                     },
+                     overridable: false
         }
     };
 

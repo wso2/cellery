@@ -14,10 +14,11 @@ Build, push/pull, run, scale and observe composites. Create secure APIs by defau
 
 ## Getting Started
 ### Pre requisites 
-1. kubectl v1.11.x (Execute `kubectl version` command and make sure kubectl client is v1.11. Please follow [instructions](https://kubernetes.io/docs/tasks/tools/install-kubectl/) to install kubectl v1.11.x)
+1. kubectl v1.11.x (Execute `kubectl version` command and make sure kubectl client is v1.11. 
+Please follow [instructions](https://kubernetes.io/docs/tasks/tools/install-kubectl/) to install kubectl v1.11.x)
 2. [Existing Kubernetes cluster](https://kubernetes.io/docs/setup/) OR  
    [VirtualBox](https://www.virtualbox.org/wiki/Downloads) (for a local installation including a Kubernetes cluster) OR  
-   [Google Cloud SDK](https://cloud.google.com/sdk/) (to install cellery runtime in GCP)
+   [Google Cloud SDK](https://cloud.google.com/sdk/) (to install Cellery runtime in GCP)
 
 ### Setup Cellery CLI
 
@@ -32,11 +33,12 @@ Download [cellery-0.2.1.pkg](https://wso2-cellery.github.io/downloads) and insta
 ### Setup Cellery runtime
 Once Cellery is installed, verify the installation is working by executing `cellery version` command.
 
-You can install the cellery runtime locally as a virtual machine (`Local`), in Google Cloud Platform (`GCP`)
-or in any Kubernetes cluster (`Existing cluster`). The installation options can be selected interactively or by passing inline command options.
+You can install the Cellery runtime locally as a virtual machine (`Local`), in Google Cloud Platform (`GCP`)
+or in any Kubernetes cluster (`Existing cluster`). The installation options can be selected interactively or by passing inline 
+command options.
 More can go to [cellery setup](docs/cli-setup-command.md) for more details.
 
-#### Which option to choose to install cellery runtime?
+#### Which option to choose to install Cellery runtime?
 
 * if you want to deploy in google cloud and have a Google cloud account -> select `GCP` option
 * if you want to deploy in an existing K8s cluster -> select`Existing cluster` option
@@ -47,8 +49,8 @@ Cellery can be installed in two packages; Basic or Complete. The following is a 
 
 | Packages | Components | Supported Functionality | 
 |----------|------------|-------------------------|
-| Basic | <ul><li>Cell controller</li><li>Light weight Identity Provider</li></ul>| <ul><li>HTTP(S) cells with local APIs</li><li>Full support for web cells</li><li>Inbuilt security for inter cell and intra cell communication</li></ul> |
-| Complete | <ul><li>Cell controller</li><li>Global API manager</li><li>Observability portal and components</li></ul> | <ul><li>Full HTTP(S) cells with local/global APIs</li><li>Full support for web cells</li><li>Inbuilt security for inter cell and intra cell communication</li><li>API management functionality</li><li>observability of cells with rich UIs</li></ul> |
+| Basic | <ul><li>Cell controller</li><li>Light weight Identity Provider</li></ul>|<ul><li>HTTP(S) cells with local APIs</li><li>Full support for web cells</li><li>Inbuilt security for inter cell and intra cell communication</li></ul> |
+| Complete | <ul><li>Cell controller</li><li>Global API manager</li><li>Observability portal and components</li></ul>| <ul><li>Full HTTP(S) cells with local/global APIs</li><li>Full support for web cells</li><li>Inbuilt security for inter cell and intra cell communication</li><li>API management functionality</li><li>observability of cells with rich UIs</li></ul> |
 
 Please follow the relevant link below for the chosen setup.
 
@@ -78,7 +80,7 @@ Please follow the relevant link below for the chosen setup.
 
 </details>
 
-### Quick start with cellery
+### Quick start with Cellery
 Let's quickly run a sample hello world cell as shown in the diagram below.  
 
 ![Hello world cell](docs/images/hello-world-architecture.jpg) 
@@ -148,7 +150,9 @@ Please follow below instructions to run the hello-world-cell.
       hello                                      wso2cellery/hello-world-cell:0.2.1   Ready    hello--gateway-service                                      1            30 minutes 48 seconds
     ```
 
-3) You would have added an entry into your `/etc/hosts` file during the setting up your runtime [local setup](docs/setup/local-setup.md#configure-host-entries), [Existing Cluster](docs/setup/existing-cluster.md#configure-host-entries), 
+3) You would have added an entry into your `/etc/hosts` file during the setting up your runtime 
+[local setup](docs/setup/local-setup.md#configure-host-entries), 
+[Existing Cluster](docs/setup/existing-cluster.md#configure-host-entries), 
 and [GCP setup](docs/setup/gcp-setup.md)     , 
 so that your browser will use the right IP address for `hello-world.com`. Use the `kubectl` tool to make sure the IP your service is running on:
     ```
@@ -167,9 +171,10 @@ Congratulations! You have successfully got running the first web cell running!
 
 
 ### Build and deploy your first cell 
-In this section let's focus on initialize, build, run and push the same hello world cell explained above. Follow the instructions listed below to create your first cell.
+In this section let's focus on initialize, build, run and push the same hello world cell explained above. 
+Follow the instructions listed below to create your first cell.
 
-1. Execute cellery init command from the command prompt, and provide the project name as ‘hello-world-cell’. 
+1. Execute `cellery init` command from the command prompt, and provide the project name as `hello-world-cell`. 
     ```
     $ cellery init
     ? Project name:  [my-project] hello-world-cell
@@ -183,10 +188,12 @@ In this section let's focus on initialize, build, run and push the same hello wo
       $ cellery build helloworld/helloworld.bal [repo/]organization/image_name:version
     --------------------------------------------------------
     ```
-2. The above step will auto generate a cellery file in the location: hello-world-cell/hello-world-cell.bal with below content. This file is implemented in [Ballerina](https://ballerina.io/) - A Cloud Native Programming Language. 
-The cell `helloCell` consists of one component defined as `helloComponent` and it has one web ingress with default vhost `hello-world.com`.
-An environment variable `HELLO_NAME`with default value `Cellery` is used by `helloComponent` to render the webpage. By passing the  parameters in the runtime, the vhost entry and
-env variable HELLO_NAME can be modified. 
+2. The above step will auto generate a Cellery file in the location: hello-world-cell/hello-world-cell.bal with below content. 
+This file is implemented in [Ballerina](https://ballerina.io/) - A Cloud Native Programming Language. 
+The cell `helloCell` consists of one component defined as `helloComponent` and it has one web ingress with default 
+vhost `hello-world.com`.
+An environment variable `HELLO_NAME`with default value `Cellery` is used by `helloComponent` to render the webpage. 
+By passing the  parameters in the runtime, the vhost entry and the environment variable HELLO_NAME can be modified. 
 
     ```ballerina
     import ballerina/config;
@@ -239,7 +246,8 @@ env variable HELLO_NAME can be modified.
     }
     ```
 
-3. Build the cellery image for hello world project by executing the cellery build command as shown below. Note `DOCKER_HUB_ORG` is your organization name in docker hub.
+3. Build the Cellery image for hello world project by executing the `cellery build` command as shown below. 
+Note `DOCKER_HUB_ORG` is your organization name in docker hub.
     ```
     $ cd hellow-world-cell
     $ cellery build hello-world-cell.bal <DOCKER_HUB_ORG>/hello-world-cell:1.0.0
@@ -259,8 +267,10 @@ env variable HELLO_NAME can be modified.
     ```
 
 4. Note that in the cell file's run method at step-2, it's looking for runtime parameters `VHOST_NAME` and `HELLO_NAME`, 
-and if it's available then it'll will be using those as vhost and greeting name. Therefore run the built cellery image with ‘cellery run’ command, 
-and pass `my-hello-world.com` for `VHOST_NAME`, and your name for `HELLO_NAME` as shown below. Environment variables can be passed into the cellery file as explained [here](https://github.com/wso2-cellery/spec).
+and if it's available then it'll will be using those as vhost and greeting name. 
+Therefore run the built Cellery image with ‘cellery run’ command, 
+and pass `my-hello-world.com` for `VHOST_NAME`, and your name for `HELLO_NAME` as shown below. 
+Environment variables can be passed into the Cellery file as explained [here](https://github.com/wso2-cellery/spec).
     ```
     $ cellery run <DOCKER_HUB_ORG>/hello-world-cell:1.0.0 -e VHOST_NAME=my-hello-world.com -e HELLO_NAME=WSO2 -n my-hello-world
        ✔ Extracting Cell Image  <DOCKER_HUB_ORG/hello-world-cell:1.0.0
@@ -295,7 +305,7 @@ and pass `my-hello-world.com` for `VHOST_NAME`, and your name for `HELLO_NAME` a
        --------------------------------------------------------
     ```
     
-5. Now your hello world cell is deployed, you can run the cellery list instances command to see the status of the deployed cell.
+5. Now your hello world cell is deployed, you can run the `cellery list instances` command to see the status of the deployed cell.
     ```
     $ cellery list instances
                         INSTANCE                                   CELL IMAGE                   STATUS                            GATEWAY                            COMPONENTS           AGE
@@ -308,9 +318,11 @@ and pass `my-hello-world.com` for `VHOST_NAME`, and your name for `HELLO_NAME` a
     ```
     ![hello world cell view](docs/images/hello-web-cell.png)
     
-7. Access url [http://my-hello-world.com/](http://my-hello-world.com/) from browser. You will see updated web page with greeting param you passed for HELLO_NAME in step-4.
+7. Access url [http://my-hello-world.com/](http://my-hello-world.com/) from browser. You will see updated web page with greeting 
+param you passed for HELLO_NAME in step-4.
 
-8. As a final step, let's push your first cell project to your docker hub account. Tp perform this execute `cellery push` as shown below.
+8. As a final step, let's push your first cell project to your docker hub account. To perform this execute `cellery push` 
+as shown below.
     ```
     $ cellery push <DOCKER_HUB_ORG>/hello-world-cell:1.0.0
     ✔ Connecting to registry-1.docker.io

@@ -174,7 +174,7 @@ Congratulations! You have successfully got running the first web cell running!
 In this section let's focus on initialize, build, run and push the same hello world cell explained above. 
 Follow the instructions listed below to create your first cell.
 
-1. Execute 'cellery init' command from the command prompt, and provide the project name as ‘hello-world-cell’. 
+1. Execute `cellery init` command from the command prompt, and provide the project name as `hello-world-cell`. 
     ```
     $ cellery init
     ? Project name:  [my-project] hello-world-cell
@@ -246,7 +246,7 @@ By passing the  parameters in the runtime, the vhost entry and the environment v
     }
     ```
 
-3. Build the Cellery image for hello world project by executing the 'cellery build' command as shown below. 
+3. Build the Cellery image for hello world project by executing the `cellery build` command as shown below. 
 Note `DOCKER_HUB_ORG` is your organization name in docker hub.
     ```
     $ cd hellow-world-cell
@@ -305,7 +305,7 @@ Environment variables can be passed into the Cellery file as explained [here](ht
        --------------------------------------------------------
     ```
     
-5. Now your hello world cell is deployed, you can run the 'cellery list instances' command to see the status of the deployed cell.
+5. Now your hello world cell is deployed, you can run the `cellery list instances` command to see the status of the deployed cell.
     ```
     $ cellery list instances
                         INSTANCE                                   CELL IMAGE                   STATUS                            GATEWAY                            COMPONENTS           AGE

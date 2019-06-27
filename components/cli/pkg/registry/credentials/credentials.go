@@ -74,6 +74,8 @@ func FromBrowser(username string, isAuthorized chan bool, done chan bool) (strin
 			code = r.Form.Get("code")
 			ping := r.Form.Get("ping")
 			if ping == "true" {
+				w.Header().Set("Access-Control-Allow-Origin", conf.Hub.Url)
+				w.Header().Set("Access-Control-Allow-Methods", http.MethodGet)
 				w.WriteHeader(http.StatusOK)
 			}
 			if code != "" {

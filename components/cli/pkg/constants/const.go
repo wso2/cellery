@@ -36,7 +36,7 @@ const GROUP_NAME = "mesh.cellery.io"
 
 const CELL_IMAGE_EXT = ".zip"
 
-const CENTRAL_REGISTRY_HOST = "registry-1.docker.io"
+const CENTRAL_REGISTRY_HOST = "registry.hub.cellery.io"
 
 const EMPTY_STRING = ""
 

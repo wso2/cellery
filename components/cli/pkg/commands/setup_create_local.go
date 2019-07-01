@@ -104,7 +104,7 @@ func RunSetupCreateLocal(isCompleteSelected, confirmed bool) {
 			util.ExitWithErrorMessage("Failed to merge kube-config file", err)
 		}
 	}
-	installVM()
+	installVM(true)
 	util.WaitForRuntime(false, false)
 }
 
@@ -144,7 +144,7 @@ func createLocal() error {
 	return nil
 }
 
-func installVM() error {
+func installVM(isComplete bool) error {
 	vmPath := filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, constants.VM, constants.VM_FILE_NAME)
 	spinner := util.StartNewSpinner("Installing Cellery Runtime")
 
@@ -154,8 +154,12 @@ func installVM() error {
 		"--ip", "192.168.56.1"), "Error Installing VM")
 
 	util.ExecuteCommand(exec.Command(constants.VBOX_MANAGE, "import", vmPath), "Error Installing VM")
+	cores := "2"
+	if isComplete {
+		cores = "4"
+	}
 	util.ExecuteCommand(exec.Command(constants.VBOX_MANAGE, "modifyvm", constants.VM_NAME,
-		"--ostype", "Ubuntu_64", "--cpus", "2", "--memory", "8000", "--natpf1", "guestkube,tcp,,6443,,6443", "--natpf1",
+		"--ostype", "Ubuntu_64", "--cpus", cores, "--memory", "8192", "--natpf1", "guestkube,tcp,,6443,,6443", "--natpf1",
 		"guestssh,tcp,,2222,,22", "--natpf1", "guesthttps,tcp,,443,,443", "--natpf1", "guesthttp,tcp,,80,,80"),
 		"Error Installing VM")
 	util.ExecuteCommand(exec.Command(constants.VBOX_MANAGE, "startvm", constants.VM_NAME, "--type", "headless"),

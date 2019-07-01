@@ -1020,7 +1020,6 @@ func ExtractImage(cellImage *util.CellImage, spinner *util.Spinner) (string, err
 	repoLocation := filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, "repo", cellImage.Organization,
 		cellImage.ImageName, cellImage.ImageVersion)
 	zipLocation := filepath.Join(repoLocation, cellImage.ImageName+constants.CELL_IMAGE_EXT)
-	cellImageTag := cellImage.Organization + "/" + cellImage.ImageName + ":" + cellImage.ImageVersion
 
 	// Pull image if not exist
 	imageExists, err := util.FileExists(zipLocation)
@@ -1031,6 +1030,8 @@ func ExtractImage(cellImage *util.CellImage, spinner *util.Spinner) (string, err
 		if spinner != nil {
 			spinner.Pause()
 		}
+		cellImageTag := cellImage.Registry + "/" + cellImage.Organization + "/" + cellImage.ImageName +
+			":" + cellImage.ImageVersion
 		RunPull(cellImageTag, true, "", "")
 		fmt.Println()
 		if spinner != nil {

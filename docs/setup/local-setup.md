@@ -51,14 +51,14 @@ This will setup the local environment, by creating a virtual machine with pre-in
    
    v. [Configure host entries](#configure-host-entries) once the cellery system is installed. 
 
-## Non-Interactive Method
+## Inline Method
 
 With the non-interactive method, creating the local setup with CLI commands with one go is supported. This supports both complete and basic setups as shown below:
 
 | Setup Option | Package | Command <img width=1100/> | Description |
 |--------------|------|---------|-------------|
-| Local | Basic | `cellery setup create local` | Creates basic local setup. This download a VM and installs to your machine. You will require Virtual Box as pre-requisite to perform this operation| 
-| Local | Complete | `cellery setup create local --complete` | Creates complete local setup. This download a VM with complete cellery runtime and installs to your machine. You will require Virtual Box as pre-requisite to perform this operation| 
+| Local | Basic | `cellery setup create local -y` | Creates basic local setup. This download a VM and installs to your machine. You will require Virtual Box as pre-requisite to perform this operation| 
+| Local | Complete | `cellery setup create local --complete -y ` | Creates complete local setup. This download a VM with complete cellery runtime and installs to your machine. You will require Virtual Box as pre-requisite to perform this operation| 
 
 [Configure host entries](#configure-host-entries) once the cellery system is installed. 
 

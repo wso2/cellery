@@ -1,8 +1,8 @@
 ## Cellery runtime installation options
 
 ### Basic vs. complete installations
-When it comes to installing Cellery, you could choose between the basic or complete installation options.
-When you run the `cellery setup` command, you can choose to either install the basic or complete version.
+When it comes to installing Cellery, you could choose between the basic or complete installation options. When you run the `cellery setup` command, 
+you can select to either install the basic or complete version.
 The basic installation would require less resources in comparison to the complete installation.
 The following table offers a comparison between what you would get.
 
@@ -13,7 +13,7 @@ The following table offers a comparison between what you would get.
 
 ### Local, existing Kubernetes cluster and GCP based installations
 
-You could opt to install Cellery either in local mode, on to an existing Kubernetes cluster or on Google Cloud.
+You could opt to install Cellery either in local mode, or on to an existing Kubernetes cluster or on Google Cloud.
 Note that you could combine either the basic or complete installations along with these options.
 
 When you run `cellery setup` in interactive mode, and select `Create`, you can select one of the following options:
@@ -24,6 +24,12 @@ When you run `cellery setup` in interactive mode, and select `Create`, you can s
 
 The following links explain in detail the setup options for different environments.
 
-* [1. Local setup](docs/setup/local-setup.md)
-* [2. Existing Cluster](docs/setup/existing-cluster.md)
-* [3. GCP setup](docs/setup/gcp-setup.md) 
+* [1. Local setup](setup/local-setup.md)
+    * [1.1. Interactive method](setup/local-setup.md#interactive-method)
+    * [1.2. Inline method](setup/local-setup.md#inline-method)
+* [2. Existing Cluster](setup/existing-cluster.md)
+    * [2.1. Interactive method](setup/existing-cluster.md#interactive-method)
+    * [2.2. Inline method](setup/existing-cluster.md#inline-method)
+* [3. GCP setup](setup/gcp-setup.md) 
+    * [3.1. Interactive method](setup/gcp-setup.md#interactive-method)
+    * [3.2. Inline method](setup/gcp-setup.md#inline-method)

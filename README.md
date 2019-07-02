@@ -10,9 +10,9 @@
 
 Build, run, and manage code-first composites on Kubernetes.
 
-- For in-depth information about how to use Cellery, visit [https://wso2-cellery.github.io/](https://wso2-cellery.github.io/)                                   
-- To ask questions and get assistance from our community, visit [our community page](docs/community.md)
-- To learn how to participate in our overall community, visit [our community page](docs/community.md)
+- For in-depth information about how to use Cellery, visit [https://wso2-cellery.github.io/](https://wso2-cellery.github.io/).                                 
+- To ask questions and get assistance from our community, use [Cellery dev mailing list](mailto:celler-dev@googlegroup.com).
+- To learn how to participate in our overall community, visit [our community page](docs/community.md).
 
 In this README:
 
@@ -24,7 +24,7 @@ In this README:
 In addition, here are some other documents you may wish to read:
 - [Cell Based Architecture](https://github.com/wso2/reference-architecture/blob/master/reference-architecture-cell-based.md) - explains the concepts of Cell based Architecture
 - [Cellery Architecture](docs/cellery-architecture.md) - explains the high-level architecture of Cellery
-- [How to code cells?](docs/cell-reference.md) - explains how Cellery cells are written
+- [How to code cells?](docs/cellery-syntax.md) - explains how Cellery cells are written
 - [CLI commands](docs/cli-reference.md) - reference for CLI commands
 - [Samples](https://github.com/wso2-cellery/samples) - a collection of useful samples
 - [Cellery community](docs/community.md) - describes how to get involved and contribute to the Cellery project
@@ -52,9 +52,8 @@ You can read more about this approach [here](https://wso2-cellery.github.io/phil
 Cellery provides a developer tooling, runtime and a management plane. This allows you to develop,
 run and manage your composite microservice applications on Kubernetes. 
 
-- Cellery SDK
-    
-    The SDK allows developers to write cells, build them, run them & manage them. 
+- **Cellery SDK**  
+    The SDK allows developers to write, build, run & manage cells. 
     A cell description file is written using the [Ballerina](https://ballerina.io) programming language. 
     In a nutshell, this file declares the microservice components that have to be included in the cell,
     the relationship between those components, dependencies to other cells, and it also declares the API 
@@ -62,14 +61,12 @@ run and manage your composite microservice applications on Kubernetes.
     
     A CLI is also part of this SDK, which allows you to build, run, test and manage your cells. 
     
-- Cellery Mesh
-
+- **Cellery Mesh**  
     The mesh provides the wiring & communications medium between cells. Components in a cell cannot invoke
     components in other cells directly. Only APIs exposed by the cells are invokable. These interactions are 
     strictly governed by security policies.
 
-- Cellery Management 
-
+- **Cellery Management**  
     This consists of a management plane, which allows you to observe your cells in the runtime, as well 
     as other runtime aspects, and it also allows you to manage security and other policies.
 
@@ -81,20 +78,16 @@ The easiest way to setup Cellery is using the 'local' mode which installs a Virt
 For other installation approaches including GCP and Docker for Desktop see [here](docs/installation-options.md)
 
 ### Prerequisites 
-1. kubectl v1.11.x (Execute `kubectl version` command and make sure kubectl client is v1.11. 
-Please follow [instructions](https://kubernetes.io/docs/tasks/tools/install-kubectl/) to install kubectl v1.11.x)
-2. [VirtualBox](https://www.virtualbox.org/wiki/Downloads) 
+- [VirtualBox](https://www.virtualbox.org/wiki/Downloads) 
 
 ### Download Cellery
 #### Linux
-Download the [cellery-ubuntu-x64-0.2.1.deb](https://wso2-cellery.github.io/downloads) 
-and install it using dpkg command as shown below.
+Download the [latest Cellery(.deb) installer](https://wso2-cellery.github.io/downloads) and install it using dpkg command as shown below.
 ```
-dpkg -i cellery-ubuntu-x64-0.2.1.deb
+dpkg -i cellery-ubuntu-x64-<version>.deb
 ```
 #### Mac OS
-Download [cellery-0.2.1.pkg](https://wso2-cellery.github.io/downloads) 
-and install it by following macOS package installation steps.
+Download [latest Cellery(.pkg) installer](https://wso2-cellery.github.io/downloads)  and install it by following macOS package installation steps.
 
 ### Setup Cellery runtime
 Once Cellery has been installed, verify the installation is working by executing `cellery version`.

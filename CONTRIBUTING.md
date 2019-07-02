@@ -47,8 +47,8 @@ $ make install-cli
 ### Issue Management
 We use GitHub issues to track all of our bugs and feature requests. Please feel free to open an issue about any 
 question, bug report or feature request that you have in mind. It will be ideal to report bugs in the relevant 
-repository as mentioned in above, but if you are not sure about the repository, you can create issues to [wso2-cellery/sdk]
-(https://github.com/wso2-cellery/sdk/) repository, and we’ll analyze the issue and then move it to relevant repository. 
+repository as mentioned in above, but if you are not sure about the repository, you can create issues to [wso2-cellery/sdk](https://github.com/wso2-cellery/sdk/issues) 
+repository, and we’ll analyze the issue and then move it to relevant repository. 
 We also welcome any external contributors who are willing to contribute. You can join a conversation in any existing issue and even send PRs to contribute
 Each issue we track has a variety of metadata which you can select with labels:
 

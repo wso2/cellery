@@ -97,14 +97,14 @@ When the process is completed Cellery will point to the newly created GCP cluste
 
 Once the installation is completed [configure the host entries](#configure-host-entries).
 
-### Non-Interactive Method
+### Inline Method
 
 With the non-interactive method, creating the GCP setup with CLI commands with one go is supported. This supports both complete and basic setups as shown below:
 
 | Setup Option | Package | Command <img width=1100/> | Description |
 |--------------|------|---------|-------------|
-| GCP | Basic | `cellery setup create gcp` | Creates basic GCP setup. This will spawn a GCP kubernetes cluster and create resources for the cellery runtime. You will require GCloud SDK as pre-requisite to perform this operation. Please check [GCP](#2.-gcp) for the steps.| 
-| GCP | Complete | `cellery setup create gcp --complete` | Creates complete GCP setup. This will spawn a GCP kubernetes cluster and create resources for the cellery runtime. You will require GCloud SDK as pre-requisite to perform this operation. Please check [GCP](#2.-gcp) for the steps| 
+| GCP | Basic | `cellery setup create gcp -y` | Creates basic GCP setup. This will spawn a GCP kubernetes cluster and create resources for the cellery runtime. You will require GCloud SDK as pre-requisite to perform this operation. Please check [GCP](#2.-gcp) for the steps.| 
+| GCP | Complete | `cellery setup create gcp --complete -y` | Creates complete GCP setup. This will spawn a GCP kubernetes cluster and create resources for the cellery runtime. You will require GCloud SDK as pre-requisite to perform this operation. Please check [GCP](#2.-gcp) for the steps| 
 
 Once the installation is completed [configure the host entries](#configure-host-entries)
 

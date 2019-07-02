@@ -299,6 +299,12 @@ public function run(cellery:ImageName iName, map<cellery:ImageName> instances) r
 }
 ```
 
+Environment variables can be passed into a cell runtime via two ways as given below.  
+
+1) With `-e` inline param when running the cell (e.g: cellery run wso2cellery/test:1.0.0 -e myEnv=test)
+2) Any environment variable starts with `CELLERY`. In that case, users do not need to pass it via inline variable, they 
+can simply export the intended environment variable it and run the cell.
+
 #### Autoscaling
 
 Autoscale policies can be specified by the Cell developer at Cell creation time. 

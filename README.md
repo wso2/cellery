@@ -210,8 +210,7 @@ the all 'cellery' commands in any directory other than the home directory.
 - [Developing a Cell](docs/writing-a-cell.md) - step by step explanation on how you could define your own cells.
 - [Setting up Cellery on an existing K8s cluster](docs/setup/existing-cluster.md) - explains how Cellery can be setup on an existing K8s cluster.
 - [Setting up Cellery on an GCP](docs/setup/gcp-cluster.md) - explains how Cellery can be setup on Google GCP.
-- [Full installation]() - explains how to install the full Cellery stack.
-
+- [Samples](https://github.com/wso2-cellery/samples/tree/master) - a collection of useful samples.
 
 
 

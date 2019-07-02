@@ -151,7 +151,6 @@ Validate your changes by reviewing the list, and select `yes` to continue.
 | Enabled       | Enabled              | ✔               | ✔                 | ✔             |
 
 ## What's Next?
-- [Installation Options](../installation-options.md) - lists all installation options with Cellery.
-- [Manage the setup](modify-setup.md) - instructions to start/stop and cleanup the Cellery installations.
-- [Switch setup](switch-setup.md) - steps to switch and work with multiple cellery installations.
 - [Developing a Cell](../writing-a-cell.md) - step by step explanation on how you could define your own cells.
+- [Scale up/down](../cell-scaling.md) - scalability of running cell instances with zero scaling and horizontal autoscaler.
+- [Observability](../cellery-observability.md) - provides the runtime insight of cells and components.

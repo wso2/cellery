@@ -214,7 +214,7 @@ the all 'cellery' commands in any directory other than the home directory.
 * [Samples](https://github.com/wso2-cellery/samples/tree/master) - a collection of useful samples.
 * [CLI commands](docs/cli-reference.md) - reference for CLI commands.
 
-Learn about full lifecycle of Cells by,
+Learn about full lifecycle of cells in Cellery from,
 * [Developing and runing a Cell](docs/writing-a-cell.md) - step by step explanation on how you could define your own cells.
 * [Testing a Cell](docs/cell-testing.md) - provides the instructions to run test against cells.
 * [Managing a Cell](docs/cell-management.md) - lists the management aspects of cells in the runtime.

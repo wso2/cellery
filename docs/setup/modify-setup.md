@@ -85,3 +85,9 @@ This will only modify the configurations on your `cellery-system` namespace.
 | Disabled      | Enabled              | ✘               | ✔                 | ✔             |
 | Enabled       | Disabled             | ✔               | ✔                 | ✘             |
 | Enabled       | Enabled              | ✔               | ✔                 | ✔             |
+
+## What's Next?
+- [Installation Options](../installation-options.md) - lists all installation options with Cellery.
+- [Manage the setup](modify-setup.md) - instructions to start/stop and cleanup the Cellery installations.
+- [Switch setup](switch-setup.md) - steps to switch and work with multiple cellery installations.
+- [Developing a Cell](../writing-a-cell.md) - step by step explanation on how you could define your own cells.

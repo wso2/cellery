@@ -33,3 +33,10 @@ The following links explain in detail the setup options for different environmen
 * [3. GCP setup](setup/gcp-setup.md) 
     * [3.1. Interactive method](setup/gcp-setup.md#interactive-method)
     * [3.2. Inline method](setup/gcp-setup.md#inline-method)
+
+## What's Next?
+- [Developing a Cell](writing-a-cell.md) - step by step explanation on how you could define your own cells
+- [Cell Specification](https://github.com/wso2-cellery/spec/blob/master/README.md) - Key concepts of Cellery.
+- [How to code cells?](cellery-syntax.md) - explains how Cellery cells are written
+- [CLI commands](cli-reference.md) - reference for CLI commands
+- [Samples](https://github.com/wso2-cellery/samples/tree/master) - a collection of useful samples

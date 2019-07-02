@@ -7,49 +7,99 @@ This will only modify the configurations on your `cellery-system` namespace.
 
 ## Usage
 
-### Interactive CLI mode
+### Interactive method
 
-1. Run `cellery setup` command
+#### Start modify setup
+1. Run `cellery setup` command.
 
     ```bash
     cellery setup
     ```
-2. Select modify option
+2. Select modify option.
 
     ```text
     cellery setup
     [Use arrow keys]
     ? Setup Cellery runtime
-        Manage
         Create
+        Manage
       ➤ Modify
         Switch
         EXIT
     ```
-3. Select whether you want to enable API Management with Global gateway
+#### Enable/Disable APIM
+If you want to enable/disable API Management with Global gateway, go into `API Manager` option and select `enable` or `disable`. Select `Back` after the selection. 
+See [inline commands](#inline-method) to perform this with one step. 
     ```text
     cellery setup
     ✔ Modify
+    ...
+    ✔ API Manager
     [Use arrow keys]
-    ? API management and global gateway
+    ? API Manager
       ➤ Enable
-        Disable
         BACK
     ```
 
-3. Select whether you want to enable Observability
-    ```text
-    cellery setup
-    ✔ Modify
-    ✔ Enable
-    [Use arrow keys]
-    ? Observability
-      ➤ Enable
-        Disable
-        BACK
-    ```
- 
-### Non-interactive CLI mode
+#### Enable/Disable Observability
+If you want to enable/disable Observability, go into `Observability` option and select `enable` or `disable`. Select `Back` after the selection. 
+See [inline commands](#inline-method) to perform this with one step.
+```text
+ cellery setup
+ ✔ Modify
+ ...
+ ✔ Observability
+ [Use arrow keys]
+ ? Observability
+   ➤ Enable
+     BACK
+```
+   
+#### Enable/Disable Autoscaling 
+If you want to enable/disable Autoscaling, go into `Zero-Scaling` and/or `Horizontal Pod Autoscaler` options and select `enable` 
+or `disable`. Select `Back` after the selection. You can select either `Zero-Scaling` or `Horizontal Pod Autoscaler` or enable both at the same time. 
+Once this is enabled, based on the configurations provided in the components, the scaling policies will be applied. Select `Back` after the selections 
+and come to modify command main menu options. See [inline commands](#inline-method) to perform this with one step. 
+```text
+ cellery setup
+ ✔ Modify
+ ....
+ ✔ Autoscaling
+ [Use arrow keys]
+ ? Select a runtime component
+ ➤ Scale-to-Zero
+   Horizontal Pod Autoscaler
+   BACK
+```
+    
+#### Complete modify setup
+1. Once you have performed all changes, you have to select `Done` option to complete the modify operations you have made. 
+```text
+ cellery setup
+ ✔ Modify
+ ...
+ ✔ BACK
+ [Use arrow keys]
+ ? Select a runtime component
+     API Manager
+     Autoscaling
+     Observability
+   ➤ DONE
+  BACK
+ ```
+    
+2. The prompt will be appearing with components that is being enabled and disabled, and asking a confirmation to continue. 
+Validate your changes by reviewing the list, and select `yes` to continue. 
+```text
+ Following modifications to the runtime will be applied
+ Enabling : Scale-to-Zero, Horizontal Pod Autoscaler
+ Use the arrow keys to navigate: ↓ ↑ → ←
+ ? Do you wish to continue:
+   ▸ Yes
+     No
+``` 
+   
+### Inline method
 
 1. Run `cellery setup modify --help` to see the available options
 
@@ -63,7 +113,13 @@ This will only modify the configurations on your `cellery-system` namespace.
     Flags:
           --apimgt          enable API Management in the runtime
       -h, --help            help for modify
+          --hpa             enable horizontal pod auto scaler in the runtime
           --observability   enable Observability in the runtime
+          --scale-to-zero   enable scale to zero in the runtime
+    
+    Global Flags:
+      -k, --insecure   Allow insecure server connections when using SSL
+      -v, --verbose    Run on verbose mode
     ```
 
 2. User appropriate flag to enable/disable system components
@@ -74,10 +130,18 @@ This will only modify the configurations on your `cellery-system` namespace.
     
     # Enable Observability without API Management
     cellery setup modify --observability
+ 
+    # Enable horizontal autoscaler
+    cellery setup modify --hpa
     
+    # Enable zero scaling
+    cellery setup modify --scale-to-zero
+    
+    #Enable both horizontal autoscaler and zero scaling
+    cellery setup modify --scale-to-zero --hpa
     ```
 
-### Feature comparison with system components
+### Feature comparison with apim and observability components
 
 | Flag --apimgt | Flag --observability | API Management  | Identity Provider | Observability |
 |:-------------:|:--------------------:|:---------------:|:-----------------:|:-------------:|

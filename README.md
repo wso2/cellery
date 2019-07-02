@@ -141,7 +141,7 @@ the all 'cellery' commands in any directory other than the home directory.
     organization in [docker hub](https://hub.docker.com/u/wso2cellery) and run the cell.
     
     ```
-    $ cellery run wso2cellery/hello-world-cell:0.2.1 -n hello-world-cell -y
+    $ cellery run wso2cellery/hello-world-cell:latest -n hello-world-cell -y
     ```
     
     You should see the following output:
@@ -149,30 +149,30 @@ the all 'cellery' commands in any directory other than the home directory.
     ```
     ✔ Connecting to registry-1.docker.io
     ✔ Fetching metadata
-    ✔ Pulling image wso2cellery/hello-world-cell:0.2.1
+    ✔ Pulling image wso2cellery/hello-world-cell:latest
     ✔ Saving new Image to the Local Repository
     
     Image Digest : sha256:2d5659e5787df7e7ae0f58671c0b9d857b5a19e5fbdb02fccbc98a64016a97f6
     
-    ✔ Extracting Cell Image wso2cellery/hello-world-cell:0.2.1
+    ✔ Extracting Cell Image wso2cellery/hello-world-cell:latest
     
     Main Instance: hello
     
-    ✔ Reading Cell Image wso2cellery/hello-world-cell:0.2.1
+    ✔ Reading Cell Image wso2cellery/hello-world-cell:latest
     ✔ Validating dependencies
     
     Instances to be Used:
     
       INSTANCE NAME                            CELL IMAGE             USED INSTANCE   SHARED
      ------------------------- ------------------------------------- --------------- --------
-      hello-world-cell           wso2cellery/hello-world-cell:0.2.1   To be Created    -
+      hello-world-cell           wso2cellery/hello-world-cell:latest   To be Created    -
     
     Dependency Tree to be Used:
     
      No Dependencies
     
     ✔ Starting main instance hello-world-cell
-    ✔ Successfully deployed cell image: wso2cellery/hello-world-cell:0.2.1
+    ✔ Successfully deployed cell image: wso2cellery/hello-world-cell:latest
     
     What's next?
     --------------------------------------------------------
@@ -189,7 +189,7 @@ the all 'cellery' commands in any directory other than the home directory.
     $ cellery list instances
              INSTANCE        CELL IMAGE                           STATUS        GATEWAY               COMPONENTS          AGE
      ---------------------- ------------------------------------ -------- -------------------------- ------------ -----------------------
-      hello-world            wso2cellery/hello-world-cell:0.2.1   Ready    hello--gateway-service        1          30 minutes 48 seconds
+      hello-world            wso2cellery/hello-world-cell:latest   Ready    hello--gateway-service        1          30 minutes 48 seconds
     ```
 
 3.  Add the following line to the /etc/hosts file.
@@ -209,11 +209,20 @@ the all 'cellery' commands in any directory other than the home directory.
     ```
 ---
     
-## What's next?    
-- [Developing a Cell](docs/writing-a-cell.md) - step by step explanation on how you could define your own cells.
-- [Setting up Cellery on an existing K8s cluster](docs/setup/existing-cluster.md) - explains how Cellery can be setup on an existing K8s cluster.
-- [Setting up Cellery on an GCP](docs/setup/gcp-cluster.md) - explains how Cellery can be setup on Google GCP.
-- [Samples](https://github.com/wso2-cellery/samples/tree/master) - a collection of useful samples.
+## What's next?
+* [Installation Options](docs/installation-options.md) - lists all installation options with Cellery.
+* [Samples](https://github.com/wso2-cellery/samples/tree/master) - a collection of useful samples.
+* [CLI commands](docs/cli-reference.md) - reference for CLI commands.
+
+Learn about full lifecycle of Cells by,
+* [Developing and runing a Cell](docs/writing-a-cell.md) - step by step explanation on how you could define your own cells.
+* [Testing a Cell](docs/cell-testing.md) - provides the instructions to run test against cells.
+* [Managing a Cell](docs/cell-management.md) 
+    * [Update] 
+    * [Scale up/down]
+    * [Observability]
+
+
 
 
 

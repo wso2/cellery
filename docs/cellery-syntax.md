@@ -1,6 +1,26 @@
 ## Cellery Language Syntax
+This section focuses on the Cellery syntax and explain how to compose cells. 
+
+- To get more information on the concepts and specification, please check [Cellery specification](https://github.com/wso2-cellery/spec/tree/master).
+
 The Cellery Language is a subset of Ballerina and Ballerina extensions. Therefore the language syntax of Cellery 
 resembles with normal Ballerina language syntax.
+
+This README explains, 
+* [Cell](#Cell)
+* [Component](#Component)
+* [Ingresses](#Ingresses)
+    * [HTTP Ingress](#1.-HTTP-Ingress)
+    * [Web Ingress](#2-web-ingress)
+        * [Define TLS](#21-define-tls-for-web-ingress)
+        * [Authentication](#22-authenticate-web-ingress)
+    * [TCP Ingress](#3-tcp-ingress)
+    * [GRPC Ingress](#4-grpc-ingress)
+* [Environmental Variables](#envvars)
+* [Autoscaling](#autoscaling)
+* [Intra-cell Communication](#intra-cell-communication)
+* [Inter-cell Communication](#inter-cell-communication)
+    
 
 #### Cell
 A Cell is a collection of components, APIs, Ingresses and Policies. A Cell record is initialized as follows;
@@ -47,7 +67,7 @@ cellery:Component helloComponent = {
 #### Ingresses
 An Ingress represents an entry point into a cell component. An ingress can be an HTTP, TCP, GRPC or Web endpoint.
 
-##### 1. HTTP Ingresses
+##### 1. HTTP Ingress
 `HttpApiIngress` supports defining HTTP API as an entry point for a cell. API definitions can be provided inline or as a swagger file. 
 A sample `HttpApiIngress` instance  with inline API definition would be as follows:
 ```ballerina
@@ -90,7 +110,7 @@ An `HttpApiIngress` can be exposed as an API by setting `expose` field. This fie
     -  `global`: Expose an HTTP API via global gateway.
 
 
-##### 2. Web Ingresses
+##### 2. Web Ingress
 Web cell ingress allows web traffic to the cell. A sample Web ingress would be as following: 
 Web ingress are always exposed globally.
 
@@ -218,7 +238,7 @@ If dynamic client registration is used dcr configs can be provided as below in t
 ```
 Similar to above sample the `clientSecret` and `clientId` values be set at the run method to pass value at the run time without burning to the image.
 
-##### 3. TCP Ingresses
+##### 3. TCP Ingress
 TCP ingress supports defining TCP endpoints. A sample TCP ingress would be as following:
 ```ballerina
 cellery:TCPIngress tcpIngress = {
@@ -229,7 +249,7 @@ cellery:TCPIngress tcpIngress = {
 
 The backendPort is the actual container port which is exposed by the container. The gatewayPort is the port exposed by the cell gateway.
 
-##### 4. GRPC Ingresses
+##### 4. GRPC Ingress
 GRPC ingress supports defining GRPC endpoints. This is similar to TCP ingress with optional field to define protofile. 
 protofile field is resolved at build method since protofile is packed at build time.
 ```ballerina
@@ -517,3 +537,7 @@ Note the run method above, which takes a variable argument map for the reference
 These are names of already deployed cell instances, which will be used to resolve the urls and link with this 
 cell instance. As an example, if the stock cell instance name is `stock-app` then the `stockRef.stock_api_url` 
 returns the host name of the running stock cell instance as `http://stock-app--gateway-service:80/stock`.
+
+# What's Next?
+1. [Developing a Cell](docs/writing-a-cell.md) - step by step explanation on how you could define your own cells.
+2. [Try Samples](https://github.com/wso2-cellery/samples/tree/master) - to play with some sample cells. 

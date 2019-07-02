@@ -218,9 +218,9 @@ Learn about full lifecycle of Cells by,
 * [Developing and runing a Cell](docs/writing-a-cell.md) - step by step explanation on how you could define your own cells.
 * [Testing a Cell](docs/cell-testing.md) - provides the instructions to run test against cells.
 * [Managing a Cell](docs/cell-management.md) 
-    * [Update] 
-    * [Scale up/down]
-    * [Observability]
+    * [Update](docs/cell-update.md)
+    * [Scale up/down](docs/cell-scaling.md)
+    * [Observability](docs/cellery-observability.md)
 
 
 

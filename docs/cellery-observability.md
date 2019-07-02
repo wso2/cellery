@@ -9,6 +9,9 @@ This README covers,
     * [Interactive method](#interactive-method)
     * [Inline method](#inline-method) 
 * [Use Cellery dashboard](#use-cellery-dashboard)
+    * [Depedency Diagram](#cell-and-component-dependency-diagrams)
+    * [Metrics](#cell-component-pod-and-node-metrics)
+    * [Distributed Search](#distributed-tracing)
 
 For additional information, 
 * Checkout the [Observability repo](https://github.com/wso2-cellery/mesh-observability/tree/master).
@@ -99,7 +102,7 @@ The landing page of the cellery dashboard will show the cell dependencies, and o
 The metrics are collected from all components and gateways, and based on this the health of a component and cell is determined. 
 The metrics can be visualized both per component and cell basis. Also Cellery provides both kubernetes pod and node level 
 metrics (system metrics) which provides CPU, memory, network, and file system usage, and request and response metrics (application metrics).
----
+
 ![Kubernetes pods of components](images/observability/kubernetes-pods.png)
 ---
 ![Node metrics](images/observability/node-metrics.png)
@@ -119,7 +122,7 @@ Each requests that comes into Cellery system is traced, and a request can be vie
 Timeline view mainly focuses on the time that the request spent on a particular operation, and hence it is easy to findout the time consuming component and operation. 
 The sequence diagram view depicts the cells and component interactions. Finally the dependency diagram shows the request path. The  trace view can be 
 filtered from [metrics view](#cell-component-pod-and-node-metrics), and a seperate distributed tracing search page. 
----
+
 ![Distributed trace search](images/observability/distributed-trace-search.png)
 ---
 ![Timeline view](images/observability/timeline-trace.png)

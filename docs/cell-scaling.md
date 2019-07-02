@@ -133,7 +133,7 @@ The above component `pet-service` has a zero scaling policy (minimum replica cou
 Further, scaling with be performed based on concurrent requests for the component, and `pet-service` has concurrency threshold `50`.
 For detailed syntax, refer [here](cellery-syntax.md).  
 
-Just [build and run the cell](writing-a-cell.md) with this scaling configuration for the component to tryout this. 
+Just [build and run the cell](writing-a-cell.md) with this scaling configuration for the component, to try out the zero scaling functionality. 
 
 #What's Next?
 - [Developing and runing a Cell](docs/writing-a-cell.md) - step by step explanation on how you could define your own cells.

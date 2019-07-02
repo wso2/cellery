@@ -32,7 +32,7 @@ then you can enable by following below command. This also can be performed by [m
     cellery setup modify --hpa
 ```
 ### Syntax
-```
+```ballerina
 cellery:Component petComponent = {
         name: "pet-service",
         source: {
@@ -102,7 +102,7 @@ you have to enable zero-scaling as shown below.
 ``` 
 
 ### Syntax
-```
+```ballerina
 cellery:Component petComponent = {
         name: "pet-service",
         source: {

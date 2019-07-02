@@ -53,6 +53,7 @@ Cellery provides a developer tooling, runtime and a management plane. This allow
 run and manage your composite microservice applications on Kubernetes. 
 
 - **Cellery SDK**  
+
     The SDK allows developers to write, build, run & manage cells. 
     A cell description file is written using the [Ballerina](https://ballerina.io) programming language. 
     In a nutshell, this file declares the microservice components that have to be included in the cell,
@@ -62,11 +63,13 @@ run and manage your composite microservice applications on Kubernetes.
     A CLI is also part of this SDK, which allows you to build, run, test and manage your cells. 
     
 - **Cellery Mesh**  
+
     The mesh provides the wiring & communications medium between cells. Components in a cell cannot invoke
     components in other cells directly. Only APIs exposed by the cells are invokable. These interactions are 
     strictly governed by security policies.
 
 - **Cellery Management**  
+
     This consists of a management plane, which allows you to observe your cells in the runtime, as well 
     as other runtime aspects, and it also allows you to manage security and other policies.
 

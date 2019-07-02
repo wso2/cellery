@@ -239,3 +239,21 @@ func GetDeployment(namespace, deployment string) (string, error) {
 	out, err := getCommandOutput(cmd)
 	return out, err
 }
+
+func GetGatewayAsMapInterface(gw string) (map[string]interface{}, error) {
+	cmd := exec.Command(constants.KUBECTL,
+		"get",
+		"gateway",
+		gw,
+		"-o",
+		"json",
+	)
+	displayVerboseOutput(cmd)
+	var output map[string]interface{}
+	out, err := getCommandOutput(cmd)
+	if err != nil {
+		return output, err
+	}
+	err = json.Unmarshal([]byte(out), &output)
+	return output, err
+}

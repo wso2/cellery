@@ -132,9 +132,7 @@ filtered from [metrics view](#cell-component-pod-and-node-metrics), and a sepera
 ---
 ![Request Path](images/observability/dependency-diagram-tarce.png)
 
- 
-
-
- 
-
+## What's Next?
+- [Update](docs/cell-update.md) - update the running cell instance with the new version.
+- [Scale up/down](docs/cell-scaling.md) - scalability of running cell instances with zero scaling and horizontal autoscaler.
 

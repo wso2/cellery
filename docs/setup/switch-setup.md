@@ -64,3 +64,8 @@ docker-for-desktop
 ```
 $ cellery setup switch cellery-admin@cellery
 ```
+## What's Next?
+- [Installation Options](../installation-options.md) - lists all installation options with Cellery.
+- [Manage the setup](modify-setup.md) - instructions to start/stop and cleanup the Cellery installations.
+- [Modify the setup](modify-setup.md) - instructions to adding and removing selected components to the current cellery installation.
+- [Developing a Cell](../writing-a-cell.md) - step by step explanation on how you could define your own cells.

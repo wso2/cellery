@@ -545,5 +545,5 @@ cell instance. As an example, if the stock cell instance name is `stock-app` the
 returns the host name of the running stock cell instance as `http://stock-app--gateway-service:80/stock`.
 
 # What's Next?
-1. [Developing a Cell](docs/writing-a-cell.md) - step by step explanation on how you could define your own cells.
-2. [Try Samples](https://github.com/wso2-cellery/samples/tree/master) - to play with some sample cells. 
+- [Developing a Cell](writing-a-cell.md) - step by step explanation on how you could define your own cells.
+- [Samples](https://github.com/wso2-cellery/samples/tree/master) - a collection of useful samples.

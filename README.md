@@ -11,7 +11,7 @@
 Build, run, and manage code-first composites on Kubernetes.
 
 - For in-depth information about how to use Cellery, visit [https://wso2-cellery.github.io/](https://wso2-cellery.github.io/).                                 
-- To ask questions and get assistance from our community, use [Cellery dev mailing list](mailto:celler-dev@googlegroup.com).
+- To ask questions and get assistance from our community, use [cellery dev mailing list](mailto:celler-dev@googlegroup.com).
 - To learn how to participate in our overall community, visit [our community page](docs/community.md).
 
 In this README:
@@ -22,13 +22,13 @@ In this README:
 - [What's next?](#whats-next)
 
 In addition, here are some other documents you may wish to read:
-- [Cell Based Architecture](https://github.com/wso2/reference-architecture/blob/master/reference-architecture-cell-based.md) - explains the concepts of Cell based Architecture
-- [Cellery Architecture](docs/cellery-architecture.md) - explains the high-level architecture of Cellery
-- [How to code cells?](docs/cellery-syntax.md) - explains how Cellery cells are written
-- [CLI commands](docs/cli-reference.md) - reference for CLI commands
-- [Samples](https://github.com/wso2-cellery/samples) - a collection of useful samples
-- [Cellery community](docs/community.md) - describes how to get involved and contribute to the Cellery project
-- [Cellery roadmap](https://github.com/wso2-cellery/sdk/wiki) - provides the roadmap of the Cellery project
+- [Cell Based Architecture](https://github.com/wso2/reference-architecture/blob/master/reference-architecture-cell-based.md) - explains the concepts of Cell based Architecture.
+- [Cellery Architecture](docs/cellery-architecture.md) - explains the high-level architecture of Cellery.
+- [How to code cells?](docs/cellery-syntax.md) - explains how Cellery cells are written.
+- [CLI commands](docs/cli-reference.md) - reference for CLI commands.
+- [Samples](https://github.com/wso2-cellery/samples) - a collection of useful samples.
+- [Cellery community](docs/community.md) - describes how to get involved and contribute to the Cellery project.
+- [Cellery roadmap](https://github.com/wso2-cellery/sdk/wiki) - provides the roadmap of the Cellery project.
 
 ## Introduction
 
@@ -207,12 +207,10 @@ the all 'cellery' commands in any directory other than the home directory.
 ---
     
 ## What's next?    
-1. [Developing a Cell](docs/writing-a-cell.md) - step by step explanation on how you could define your own cells
-1. [Setting up Cellery on an existing K8s cluster](docs/setup/existing-cluster.md) - 
-    explains how Cellery can be setup on an existing K8s cluster
-2. [Setting up Cellery on an GCP](docs/setup/gcp-cluster.md) -
-    explains how Cellery can be setup on Google GCP
-2. [Full installation]() - explains how to install the full Cellery stack
+- [Developing a Cell](docs/writing-a-cell.md) - step by step explanation on how you could define your own cells.
+- [Setting up Cellery on an existing K8s cluster](docs/setup/existing-cluster.md) - explains how Cellery can be setup on an existing K8s cluster.
+- [Setting up Cellery on an GCP](docs/setup/gcp-cluster.md) - explains how Cellery can be setup on Google GCP.
+- [Full installation]() - explains how to install the full Cellery stack.
 
 
 

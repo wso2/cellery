@@ -187,3 +187,8 @@ You can terminate the cells that are started during this guide.
     $ cellery terminate hello
     $ cellery terminate my-hello-world
     ```
+### What's Next?
+- [Cell Specification](https://github.com/wso2-cellery/spec/blob/master/README.md) - Key concepts of Cellery.
+- [How to code cells?](cellery-syntax.md) - explains how Cellery cells are written.
+- [CLI commands](cli-reference.md) - reference for CLI commands.
+- [Samples](https://github.com/wso2-cellery/samples/tree/master) - a collection of useful samples.

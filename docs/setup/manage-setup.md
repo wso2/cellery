@@ -91,4 +91,8 @@ This will remove the configurations from  `cellery-system`,`istio-system` namesp
 |GCP    | `cellery setup cleanup gcp  <CLUSTER_NAME>` | This will cleanup the GCP cluster and the resources that was spawned during the setup including NFS, MySQL server instances, and so on.|
 |Existing Cluster | `cellery setup cleanup existing <CLUSTER_NAME> [--istio] [--ingress] `| This will clean up the pods in the `cellery-system` namespace. Additionally, users can cleanup the `istio` and `nginx-ingress` namespaces by passing `--istio` and `--ingress` flags respectively |
 
-
+## What's Next?
+- [Installation Options](../installation-options.md) - lists all installation options with Cellery.
+- [Modify the setup](modify-setup.md) - instructions to adding and removing selected components to the current cellery installation.
+- [Switch setup](switch-setup.md) - steps to switch and work with multiple cellery installations.
+- [Developing a Cell](docs/writing-a-cell.md) - step by step explanation on how you could define your own cells.

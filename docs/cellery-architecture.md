@@ -86,3 +86,8 @@ an opinionated approach to building composite applications. A key aim of this wo
 cell-based architectures. There are many complexities in development, deployment, lifecycle management and operations of 
 composite, integration-first applications on a distributed compute platform.
 
+## What's Next?
+- [Quick Start](../README.md) - Includes an introduction and steps to get started with Cellery. 
+- [Cell Specification](https://github.com/wso2-cellery/spec/blob/master/README.md) - Key concepts of Cellery.
+- [How to code cells?](cellery-syntax.md) - explains how Cellery cells are written
+- [Samples](https://github.com/wso2-cellery/samples/tree/master) - a collection of useful samples

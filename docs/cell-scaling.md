@@ -5,12 +5,12 @@ and [Zero-scaling](#zero-scaling).
 This README includes,
 * [Horizontal pod autoscaler](#scale-with-hpa)
     * [Enable HPA](#enable-hpa)
-    * [Syntax](#syntax)
+    * [Syntax](#syntax-for-scaling-with-hpa)
     * [Export Policy](#export-policy)
     * [Apply Policcy](#apply-policy)
 * [Zero-scaling](#zero-scaling)
     * [Enable zero-scaling](#enable-zero-scaling)
-    * [Syntax](#enable-zero-scaling)
+    * [Syntax](#syntax-for-zero-scaling)
 
 A [component](https://github.com/wso2-cellery/spec/tree/master#component) can have either Autoscaling policy or zero scaling policy. Based on that, the underneath autoscaler will be determined. 
 Generally the autoscaling policy has minimum replica count greater than 0, and hence the [horizontal pod autoscaler](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/)

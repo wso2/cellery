@@ -1,5 +1,5 @@
 # Scaling up/down cells
-Each components within the cells can be scaled up or down. Cellery supports auto scaling with [Horizontal pod autoscaler](#scale-with-hpa), 
+Each component within the cells can be scaled up or down. Cellery supports auto scaling with [Horizontal pod autoscaler](#scale-with-hpa), 
 and [Zero-scaling](#zero-scaling).
 
 This README includes,
@@ -12,13 +12,13 @@ This README includes,
     * [Enable zero-scaling](#enable-zero-scaling)
     * [Syntax](#enable-zero-scaling)
 
-A component in a cell can have either Autoscaling policy or zero scaling policy, and based on that the underneath autoscaler will be determined. 
-The usual autoscaling policies with minimum replica count `1`, and hence the [horizontal pod autoscaler](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/)
-will be used to scale up and down the components. The zero-scaling have minimum replica count 0, and hence when the 
+A [component](https://github.com/wso2-cellery/spec/tree/master#component) can have either Autoscaling policy or zero scaling policy. Based on that, the underneath autoscaler will be determined. 
+Generally the autoscaling policy has minimum replica count greater than 0, and hence the [horizontal pod autoscaler](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/)
+will be used to scale up and down the components. The zero-scaling has minimum replica count `0`, and hence when the 
 component did not get any request, the component will be terminated and it will be running back once a request was directed to the component. 
 
 ## Scale with HPA
-If a component has a scaling policy as Autoscaling policy as explained [here](cellery-syntax.md#autoscaling), then that 
+If a component has a scaling policy as Autoscaling policy as explained [here](cellery-syntax.md#autoscaling), the specified 
 component will be scaled with [horizontal pod autoscaler](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/). 
 
 ### Enable HPA
@@ -26,12 +26,13 @@ By default [local](setup/local-setup.md), and [existing kubernetes cluster](setu
 [metrics server](https://github.com/kubernetes-incubator/metrics-server) deployed for 
 [horizontal pod autoscaler](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/) to work. [GCP](setup/gcp-setup.md) has it by default.
 Therefore, if you are using [local](setup/local-setup.md), or [existing kubernetes cluster](setup/existing-cluster.md), 
-then you can enable by following below command. This also can be performed by [modify setup](setup/modify-setup.md)
+then you can enable by following below command. This also can be performed by [modify setup](setup/modify-setup.md).
 
 ```bash
     cellery setup modify --hpa
 ```
-### Syntax
+
+### Syntax for scaling with HPA
 ```ballerina
 cellery:Component petComponent = {
         name: "pet-service",
@@ -101,7 +102,7 @@ you have to enable zero-scaling as shown below.
  cellery setup modify --scale-to-zero
 ``` 
 
-### Syntax
+### Syntax for zero-scaling
 ```ballerina
 cellery:Component petComponent = {
         name: "pet-service",
@@ -136,8 +137,8 @@ For detailed syntax, refer [here](cellery-syntax.md).
 Just [build and run the cell](writing-a-cell.md) with this scaling configuration for the component, to try out the zero scaling functionality. 
 
 #What's Next?
-- [Developing and runing a Cell](docs/writing-a-cell.md) - step by step explanation on how you could define your own cells.
-- [How to code cells?](docs/cellery-syntax.md) - explains how Cellery cells are written.
+- [Developing and runing a Cell](writing-a-cell.md) - step by step explanation on how you could define your own cells.
+- [How to code cells?](cellery-syntax.md) - explains how Cellery cells are written.
 - [Update cells](cell-update.md) - update the running cell instance with the new version.
 - [Observe cells](cellery-observability.md) - provides the runtime insight of cells and components.
 

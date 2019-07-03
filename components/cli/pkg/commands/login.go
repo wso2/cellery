@@ -22,6 +22,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/cellery-io/sdk/components/cli/pkg/constants"
+
 	"github.com/nokia/docker-registry-client/registry"
 
 	"github.com/cellery-io/sdk/components/cli/pkg/registry/credentials"
@@ -97,7 +99,11 @@ func RunLogin(registryURL string, username string, password string) {
 	// Initiating a connection to Cellery Registry (to validate credentials)
 	fmt.Println()
 	spinner := util.StartNewSpinner("Logging into Cellery Registry " + registryURL)
-	_, err = registry.New("https://"+registryURL, registryCredentials.Username, registryCredentials.Password)
+	registryPassword := registryCredentials.Password
+	if registryURL == constants.CENTRAL_REGISTRY_HOST {
+		registryPassword = registryPassword + ":ping"
+	}
+	_, err = registry.New("https://"+registryURL, registryCredentials.Username, registryPassword)
 	if err != nil {
 		runPreExitWithErrorTasks(spinner)
 		if strings.Contains(err.Error(), "401") {

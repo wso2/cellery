@@ -24,6 +24,14 @@ func GetCellGatewayHost(instance string) string {
 	return fmt.Sprintf("%s--gateway-service", instance)
 }
 
+func GetGatewayName(instance string) string {
+	return fmt.Sprintf("%s--gateway", instance)
+}
+
 func GetCellVsName(instance string) string {
 	return fmt.Sprintf("%s--vs", instance)
+}
+
+func GetCellVsHttpMatchRegex(instance string) string {
+	return fmt.Sprintf("^(%s)(--gateway-service)(\\S*)$", instance)
 }

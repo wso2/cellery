@@ -123,7 +123,7 @@ cellery:Component petComponent = {
             }
         },
         scaling: {
-            policy: <ZeroScaling>{
+            policy: <ZeroScalingPolicy> {
                 maxReplicas: 10,
                 concurrencyTarget: 50
             }

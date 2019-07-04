@@ -218,7 +218,17 @@ public type Reference record {
 
 };
 
-# Build the cell aritifacts and persist metadata
+public type Test record {|
+    string name;
+    ImageSource source;
+    map<Env> envVars?;
+|};
+
+public type TestSuite record {|
+	Test[] tests = [];
+|};
+
+# Build the cell artifacts and persist metadata
 #
 # + cellImage - The cell image definition
 # + iName - The cell image org, name & version
@@ -232,9 +242,30 @@ public function createImage(CellImage cellImage, ImageName iName) returns ( erro
         log:printError("Error occurred while persisiting cell: " + iName.name, err = wResult);
         return wResult;
     }
+    validateScaling(cellImage);
     //Generate yaml file and other artifacts via extern function
     return createCellImage(cellImage, iName);
 }
+
+
+function validateScaling(CellImage cellImage) {
+    foreach var(key,component) in cellImage.components {
+        if (!(component["scalingPolicy"] is ()) && (component.scalingPolicy is AutoScalingPolicy)) {
+            AutoScalingPolicy policy = <AutoScalingPolicy> component.scalingPolicy;
+            if ((!(policy.metrics["cpu"] is ()) && (policy.metrics.cpu is Percentage)) &&
+            ((component["resources"] is ())|| component.resources["limits"] is ())) {
+                io:println("Warning: cpu percentage is defined without resource limits in component: [" + component.name+ "]."+
+                " Scaling may not work due to the missing resource limits.");
+            }
+            if ((!(policy.metrics["memory"] is ()) && (policy.metrics.memory is Percentage))
+            && ((component["resources"] is ()) || component.resources["limits"] is ())) {
+                io:println("Warning: memory percentage is defined without resource limits in component [" + component.name+ "]."+
+                " Scaling may not work due to the missing resource limits.");
+            }
+        }
+    }
+}
+
 
 # Build the cell yaml
 #
@@ -248,7 +279,7 @@ public function createCellImage(CellImage cellImage, ImageName iName) returns ( 
 # + cellImage - The cell image definition
 # + iName - The cell instance name
 # + instances - The cell instance dependencies
-# + return - error optinal
+# + return - error optional
 public function createInstance(CellImage cellImage, ImageName iName, map<ImageName> instances) returns ( error?) = external;
 
 # Update the cell aritifacts with runtime changes
@@ -308,6 +339,27 @@ public function getReference(Component component, string dependencyAlias) return
     }
     return <Reference>ref;
 }
+
+# Run instances required for executing tests
+#
+# + iName - Cell instance name to start before executing tests
+# + instances - The cell instance dependencies
+# + return - error optional
+public function runInstances(ImageName iName, map<ImageName> instances) returns ImageName[] = external;
+
+# Run tests for cell instance
+#
+# + iName - The cell instance name to test
+# + testSuite - The testsuite to run
+# + return - error optional
+public function runTestSuite(ImageName iName, TestSuite testSuite) returns (error?) = external;
+
+# Description
+#
+# + iName - Cell instance name to stop after executing tests
+# + instances -  The cell instance dependencies 
+# + return - error optional
+public function stopInstances(ImageName iName, ImageName[] instances) returns (error?) = external;
 
 function parseCellDependency(string alias) returns ImageName {
     string org = alias.substring(0, alias.indexOf("/"));

@@ -909,6 +909,11 @@ func PrintSuccessMessage(message string) {
 	fmt.Printf("\n%s %s\n", GreenBold("\U00002714"), message)
 }
 
+func PrintWarningMessage(message string) {
+	fmt.Println()
+	fmt.Printf("%s\n", YellowBold("\U000026A0 "+message))
+}
+
 func GetSourceFileName(filePath string) (string, error) {
 	d, err := os.Open(filePath)
 	if err != nil {
@@ -937,6 +942,19 @@ func RunMethodExists(sourceFile string) (bool, error) {
 	// Check whether run method exists
 	return regexp.MatchString(
 		`.*public(\s)+function(\s)+run(\s)*\((s)*cellery:ImageName(\s)+.+(\s)*,(\s)*map<cellery:ImageName>(\s)+.+(\s)*\)(\s)+returns(\s)+error\\?`,
+		string(sourceFileBytes))
+}
+
+// TestMethodExists checks if the test method exists in ballerina file
+func TestMethodExists(sourceFile string) (bool, error) {
+	sourceFileBytes, err := ioutil.ReadFile(sourceFile)
+	if err != nil {
+		return false, err
+	}
+
+	// Check whether test method exists
+	return regexp.MatchString(
+		`.*public(\s)+function(\s)+test(\s)*\((s)*cellery:ImageName(\s)+.+(\s)*,(\s)*map<cellery:ImageName>(\s)+.+(\s)*\)(\s)+returns(\s)+error\\?`,
 		string(sourceFileBytes))
 }
 
@@ -1234,6 +1252,11 @@ public function main(string action, cellery:ImageName iName, map<cellery:ImageNa
 		ballerinaMain = `
 public function main(string action, cellery:ImageName iName, map<cellery:ImageName> instances) returns error? {
 	return run(iName, instances);
+}`
+	} else if action == "test" {
+		ballerinaMain = `
+public function main(string action, cellery:ImageName iName, map<cellery:ImageName> instances) returns error? {
+	return test(iName, instances);
 }`
 	} else {
 		return "", errors.New("invalid action:" + action)

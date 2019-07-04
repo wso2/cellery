@@ -20,13 +20,13 @@ package main
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/spf13/cobra"
 
+	"github.com/cellery-io/sdk/components/cli/pkg/commands"
 	"github.com/cellery-io/sdk/components/cli/pkg/runtime"
 	"github.com/cellery-io/sdk/components/cli/pkg/util"
-
-	"github.com/cellery-io/sdk/components/cli/pkg/commands"
 )
 
 var apimEnabled = false
@@ -48,6 +48,12 @@ func newSetupModifyCommand() *cobra.Command {
 		Short: "Modify Cellery runtime",
 		Args:  cobra.NoArgs,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
+			if runtime.IsGcpRuntime() {
+				if strings.TrimSpace(hpa) != "" {
+					fmt.Printf("HPA cannot be changed in gcp runtime")
+					hpa = ""
+				}
+			}
 			invalidInputMessage := "invalid input for"
 			acceptedValuesMessage := "expected values are enable or disable"
 			if !isValidInput(apimgt) {

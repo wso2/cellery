@@ -332,7 +332,8 @@ public class CreateCellImage extends BlockingNativeCallableUnit {
         boolean bOverridable = false;
         if ("AutoScalingPolicy".equals(scalePolicy.getType().getName())) {
             // Autoscaling
-            autoScalingPolicy.setMinReplicas(((BInteger) bScalePolicy.get("minReplicas")).intValue());
+            cellImage.setAutoScaling(true);
+            autoScalingPolicy.setMinReplicas((bScalePolicy.get("minReplicas")).toString());
             autoScalingPolicy.setMaxReplicas(((BInteger) bScalePolicy.get(MAX_REPLICAS)).intValue());
             bOverridable = ((BBoolean) bScalePolicy.get("overridable")).booleanValue();
             LinkedHashMap metricsMap = ((BMap) bScalePolicy.get("metrics")).getMap();
@@ -345,7 +346,8 @@ public class CreateCellImage extends BlockingNativeCallableUnit {
 
         } else {
             //Zero Scaling
-            autoScalingPolicy.setMinReplicas(0);
+            cellImage.setZeroScaling(true);
+            autoScalingPolicy.setMinReplicas("0");
             if (bScalePolicy.containsKey(MAX_REPLICAS)) {
                 autoScalingPolicy.setMaxReplicas(((BInteger) bScalePolicy.get(MAX_REPLICAS)).intValue());
             }
@@ -526,6 +528,8 @@ public class CreateCellImage extends BlockingNativeCallableUnit {
         jsonObject.put("name", cellImage.getCellName());
         jsonObject.put("ver", cellImage.getCellVersion());
         jsonObject.put("dockerImages", cellImage.getDockerImages());
+        jsonObject.put("zeroScaling", cellImage.isZeroScaling());
+        jsonObject.put("autoScaling", cellImage.isAutoScaling());
 
         JSONObject labelsJsonObject = new JSONObject();
         JSONObject cellDependenciesJSON = new JSONObject();

@@ -51,7 +51,11 @@ func RunPush(cellImage string, username string, password string) {
 	parsedCellImage, err := util.ParseImageTag(cellImage)
 	//Read docker images from metadata.json
 	spinner := util.StartNewSpinner("Extracting Cell Image " + util.Bold(cellImage))
-	imageDir, err := ExtractImage(parsedCellImage, spinner)
+	imageDir, err := ExtractImage(parsedCellImage, false, spinner)
+	if err != nil {
+		spinner.Stop(false)
+		util.ExitWithErrorMessage("Error occurred while extracting image", err)
+	}
 	metadataFileContent, err := ioutil.ReadFile(filepath.Join(imageDir, constants.ZIP_ARTIFACTS, "cellery",
 		"metadata.json"))
 	if err != nil {
@@ -104,10 +108,29 @@ func RunPush(cellImage string, username string, password string) {
 		if err != nil {
 			if strings.Contains(err.Error(), "401") {
 				// Requesting the credentials since server responded with an Unauthorized status code
-				registryCredentials.Username, registryCredentials.Password, err = credentials.FromTerminal(username)
+				var isAuthorized chan bool
+				var done chan bool
+				finalizeChannelCalls := func(isAuthSuccessful bool) {
+					if isAuthorized != nil {
+						isAuthorized <- isAuthSuccessful
+					}
+					if done != nil {
+						<-done
+					}
+				}
+				if parsedCellImage.Registry == constants.CENTRAL_REGISTRY_HOST {
+					isAuthorized = make(chan bool)
+					done = make(chan bool)
+					registryCredentials.Username, registryCredentials.Password, err = credentials.FromBrowser(username,
+						isAuthorized, done)
+				} else {
+					registryCredentials.Username, registryCredentials.Password, err = credentials.FromTerminal(username)
+				}
 				if err != nil {
+					finalizeChannelCalls(false)
 					util.ExitWithErrorMessage("Failed to acquire credentials", err)
 				}
+				finalizeChannelCalls(true)
 				fmt.Println()
 
 				// Trying to push the image again with the provided credentials
@@ -187,7 +210,7 @@ func pushImage(parsedCellImage *util.CellImage, username string, password string
 	hub, err := registry.New("https://"+parsedCellImage.Registry, username, password)
 	if err != nil {
 		spinner.Stop(false)
-		util.ExitWithErrorMessage("Error occurred while initializing connection to the Cellery Registry", err)
+		return fmt.Errorf("failed to initialize connection to Cellery Registry %v", err)
 	}
 
 	imageName := fmt.Sprintf("%s/%s:%s", parsedCellImage.Organization, parsedCellImage.ImageName,

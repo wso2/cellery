@@ -39,6 +39,7 @@ import (
 
 	"github.com/cellery-io/sdk/components/cli/pkg/constants"
 	"github.com/cellery-io/sdk/components/cli/pkg/kubectl"
+	celleryRuntime "github.com/cellery-io/sdk/components/cli/pkg/runtime"
 	"github.com/cellery-io/sdk/components/cli/pkg/util"
 	"github.com/cellery-io/sdk/components/cli/pkg/version"
 )
@@ -53,7 +54,7 @@ func RunRun(cellImageTag string, instanceName string, startDependencies bool, sh
 	if err != nil {
 		util.ExitWithErrorMessage("Error occurred while parsing cell image", err)
 	}
-	imageDir, err := ExtractImage(parsedCellImage, spinner)
+	imageDir, err := ExtractImage(parsedCellImage, true, spinner)
 	if err != nil {
 		spinner.Stop(false)
 		util.ExitWithErrorMessage("Error occurred while extracting image", err)
@@ -101,6 +102,35 @@ func RunRun(cellImageTag string, instanceName string, startDependencies bool, sh
 		}
 	}
 	fmt.Printf("\r\x1b[2K\n%s: %s\n\n", util.Bold("Main Instance"), instanceName)
+
+	if cellImageMetadata.ZeroScaling {
+		// Check K-Native is installed.
+		if ok, err := celleryRuntime.IsKnativeEnabled(); err == nil {
+			if !ok {
+				spinner.Stop(false)
+				util.ExitWithErrorMessage(fmt.Sprintf("Unable to start cell instance [%s] from image [%s/%s:%s]",
+					instanceName, cellImageMetadata.CellImageName.Organization, cellImageMetadata.CellImageName.Name,
+					cellImageMetadata.CellImageName.Version),
+					fmt.Errorf("cell contains zero-scaling components, "+
+						"but Knative is not enabled in Cellery runtime"))
+			}
+		} else {
+			util.ExitWithErrorMessage("Error occurred while checking whether Knative is enabled.", err)
+		}
+	}
+	if cellImageMetadata.AutoScaling {
+		// Check metrics-server is installed.
+		if ok, err := celleryRuntime.IsHpaEnabled(); err == nil {
+			if !ok {
+				util.PrintWarningMessage(fmt.Sprintf("Cell instance [%s] from image [%s/%s:%s] "+
+					"contains auto-scaling components, but metrics-server is not enabled in Cellery runtime. "+
+					"Autoscaling may not work. ", instanceName, cellImageMetadata.CellImageName.Organization,
+					cellImageMetadata.CellImageName.Name, cellImageMetadata.CellImageName.Version))
+			}
+		} else {
+			util.PrintWarningMessage("Error occurred while checking whether metrics-server is enabled.")
+		}
+	}
 
 	var parsedDependencyLinks []*dependencyAliasLink
 	if len(dependencyLinks) > 0 {
@@ -748,7 +778,7 @@ func startDependencyTree(registry string, tree *dependencyTreeNode, spinner *uti
 						ImageName:    dependencyNode.MetaData.Name,
 						ImageVersion: dependencyNode.MetaData.Version,
 					}
-					imageDir, err := ExtractImage(cellImage, spinner)
+					imageDir, err := ExtractImage(cellImage, true, spinner)
 					if err != nil {
 						spinner.Stop(false)
 						util.ExitWithErrorMessage(errorMessage, fmt.Errorf("failed to extract "+
@@ -1016,7 +1046,7 @@ func getYamlFiles(path string) ([]string, error) {
 
 // extractImage extracts the image into a temporary directory and returns the path.
 // Cleaning the path after finishing your work is your responsibility.
-func ExtractImage(cellImage *util.CellImage, spinner *util.Spinner) (string, error) {
+func ExtractImage(cellImage *util.CellImage, pullIfNotPresent bool, spinner *util.Spinner) (string, error) {
 	repoLocation := filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, "repo", cellImage.Organization,
 		cellImage.ImageName, cellImage.ImageVersion)
 	zipLocation := filepath.Join(repoLocation, cellImage.ImageName+constants.CELL_IMAGE_EXT)
@@ -1027,15 +1057,20 @@ func ExtractImage(cellImage *util.CellImage, spinner *util.Spinner) (string, err
 		return "", err
 	}
 	if !imageExists {
-		if spinner != nil {
-			spinner.Pause()
-		}
-		cellImageTag := cellImage.Registry + "/" + cellImage.Organization + "/" + cellImage.ImageName +
-			":" + cellImage.ImageVersion
-		RunPull(cellImageTag, true, "", "")
-		fmt.Println()
-		if spinner != nil {
-			spinner.Resume()
+		if pullIfNotPresent {
+			if spinner != nil {
+				spinner.Pause()
+			}
+			cellImageTag := cellImage.Registry + "/" + cellImage.Organization + "/" + cellImage.ImageName +
+				":" + cellImage.ImageVersion
+			RunPull(cellImageTag, true, "", "")
+			fmt.Println()
+			if spinner != nil {
+				spinner.Resume()
+			}
+		} else {
+			return "", fmt.Errorf("image %s/%s:%s not present on the local repository", cellImage.Organization,
+				cellImage.ImageName, cellImage.ImageVersion)
 		}
 	}
 

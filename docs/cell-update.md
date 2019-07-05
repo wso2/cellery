@@ -69,7 +69,9 @@ cellery terminate pet-be
 Find more information on the steps [here](https://github.com/wso2-cellery/samples/blob/master/docs/pet-store/update-cell.md).
 
 # What's Next?
-- [Scale pet-be cell](scale-cell.md) - walks through the steps to scale pet-be cell with horizontal pod autoscaler, and zero scaling with Knative. 
-- [Observe the pet-store](observability.md) - This shows how you can observe and understand the runtime operations to the pet-store application.
-- [Pet store sample](../../cells/pet-store/README.md) - provides the instructions to work with pet-store sample.
+- [Developing and runing a Cell](writing-a-cell.md) - step by step explanation on how you could define your own cells.
+- [CLI Commands](cli-reference.md) - reference for CLI commands.
+- [How to code cells?](cellery-syntax.md) - explains how Cellery cells are written.
+- [Scale up/down](cell-scaling.md) - scalability of running cell instances with zero scaling and horizontal autoscaler.
+- [Observe cells](cellery-observability.md) - provides the runtime insight of cells and components.
 

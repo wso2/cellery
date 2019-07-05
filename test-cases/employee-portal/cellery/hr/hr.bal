@@ -11,7 +11,7 @@ public function build(cellery:ImageName iName) returns error? {
         ingresses: {
             "hr": <cellery:HttpApiIngress>{
                 port: 8080,
-                context: "hr-api",
+                context: "hr",
                 definition: {
                     resources: [
                         {
@@ -55,30 +55,16 @@ public function run(cellery:ImageName iName, map<cellery:ImageName> instances) r
 }
 
 // cellery test command will facilitate all flags as cellery run
-public function test(cellery:ImageName iName, map<cellery:ImageName> instances) returns error? {
-
-    cellery:ImageName[] instanceList = cellery:runInstances(iName, instances);
-    string hr_cell_url = "http://" + iName.instanceName + "--gateway-service:80/hr";
-    string emp_cell_url = "";
-    string stock_cell_url = "";
-
-    foreach var (dep, imageName) in instances {
-        if (dep == "employeeCellDep") {
-            emp_cell_url = "http://" + imageName.instanceName + "--gateway-service:80/employee";
-        } else if (dep == "stockCellDep") {
-            stock_cell_url = "http://" + imageName.instanceName + "--gateway-service:80/stock";
-        }
-    }
-
+public function test(cellery:ImageName iName, map<cellery:ImageName> instances) returns error? {    
     cellery:Test employeeExternalTest1 = {
         name: "hr-test1",
         source: {
             image: "docker.io/celleryio/sampleapp-test-hr"
         },
         envVars: {
-            HR_CELL_URL: { value: hr_cell_url },
-            EMP_CELL_URL: { value: emp_cell_url },
-            STOCK_CELL_URL: { value: stock_cell_url }
+            HR_CELL_URL: { value: <string>cellery:resolveReference(iName).hr_api_url },
+            EMP_CELL_URL: { value: <string>cellery:resolveReference(instances.employeeCellDep).employee_api_url },
+            STOCK_CELL_URL: { value: <string>cellery:resolveReference(instances.stockCellDep).stock_api_url }
         }
     };
 
@@ -88,7 +74,7 @@ public function test(cellery:ImageName iName, map<cellery:ImageName> instances) 
             image: "docker.io/celleryio/sampleapp-test2-hr"
         },
         envVars: {
-            EMP_CELL_URL: { value: emp_cell_url }
+            EMP_CELL_URL: { value: <string>cellery:resolveReference(instances.employeeCellDep).employee_api_url }
         }
     };
 
@@ -96,6 +82,7 @@ public function test(cellery:ImageName iName, map<cellery:ImageName> instances) 
         tests: [employeeExternalTest1, employeeExternalTest2]
     };
 
+    cellery:ImageName[] instanceList = cellery:runInstances(iName, instances);
     error? a = cellery:runTestSuite(iName, hrTestSuite);
     return cellery:stopInstances(iName, instanceList);
 }

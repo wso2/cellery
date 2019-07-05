@@ -4,7 +4,7 @@
 * [init](#cellery-init) - initialize a cellery project.
 * [build](#cellery-build) - build a cell image.
 * [run](#cellery-run) - create cell instance(s). 
-* [list](#cellery-list) - list running instances/cell images.
+* [list](#cellery-list) - list information about cell instances/images.
 * [delete](#cellery-delete) - Delete cell images.
 * [login](#cellery-login) - login to cell image repository.
 * [push](#cellery-push) - push a built image to cell image repository.
@@ -14,10 +14,24 @@
 * [logs](#cellery-logs) - display logs of one/all components of a cell instance.
 * [inspect](#cellery-inspect) - list the files included in a cell image. 
 * [extract-resources](#cellery-extract-resources) - extract packed resources in a cell image.
+* [update](#cellery-update) - perform a patch update on a particular cell instance.
+* [route-traffic](#cellery-route-traffic) - route a percentage of traffic to a new cell instance.
+* [export-policy](#cellery-export-policy) - export a policy from cellery run time.
+* [apply-policy](#cellery-apply-policy) - apply a policy to a cellery instance.
 
 #### Cellery Setup
 Cellery setup command install and manage cellery runtimes. For this purpose it supports several sub commands. Please 
 refer the [setup command readme](cli-setup-command.md) for complete instructions.
+
+##### Cellery setup status:
+
+Display status of cluster with a status list of system components
+
+Ex:
+
+ ```
+    cellery setup status
+ ```
 
 [Back to Command List](#cellery-cli-commands)
 
@@ -137,6 +151,23 @@ Ex:
 
 [Back to Command List](#cellery-cli-commands)
 
+###### Cellery List dependencies
+
+List the dependency information for a given cell instance. The dependency cell image, version and the cell instance name
+will be provided as the output. 
+
+###### Parameters: 
+
+* _cell instance name: A valid cell instance name._
+
+Ex:
+
+ ```
+    cellery list dependencies my-cell-inst 
+ ```
+
+[Back to Command List](#cellery-cli-commands)
+
 #### Cellery delete
 
 Delete cell images. This command will delete one or more cell images from cellery local repository. Users can also delete all cell images by executing the command with "--all" flag.
@@ -200,15 +231,17 @@ Ex:
 
 #### Cellery Terminate
 
-Terminate the running cell instance within cell runtime.
+Terminate running cell instances within cell runtime.
 
 ###### Parameters:
 
-* _cell instance name: Name of the instance running in the cellery system_
+* _cell instance names: Names of the instances running in the cellery system_
 
 Ex: 
  ```
-   cellery terminate my-cell-inst
+   cellery terminate employee
+   cellery terminate pet-fe pet-be
+   cellery terminate --all
  ```
  
  [Back to Command List](#cellery-cli-commands)
@@ -282,3 +315,132 @@ Ex:
  ```
 
 [Back to Command List](#cellery-cli-commands)
+
+#### Cellery Update
+
+Perform a patch update on a running cell instance, using the new cell image provided. This is done as a rolling update, hence only changes to docker images encapsulated within components will be applied.
+
+###### Parameters:
+
+* _cell instance name: The name of a running cell instance, which should be updated._
+* _cell image name: The name of the new cell image, which will be used to perform a rolling update on the running instance's components._
+
+Ex:
+ ```
+   cellery update myhello cellery/sample-hello:1.0.3
+ ```
+ 
+[Back to Command List](#cellery-cli-commands)
+
+#### Cellery Route Traffic
+
+This is used to direct a percentage of traffic originating from one cell instance to another. This command is used in advanced deployment patterns such as Blue-Green and Canary. 
+
+###### Parameters:
+
+* _existing dependency instance: Existing dependency instance, which is currently recieving 100% traffic from the relevane source instance(s)._
+
+###### Flags (Mandatory):
+
+* _-p, --percentage: The new dependency instance and the percentage of traffic which should be routed to it, joined by a '=' sign._
+
+###### Flags (Optional):
+
+* _-s, --source: The source instance which is generating traffic for the dependency instance specified in the Parameters above. 
+If this is not given all instances which are currently depending on the provided dependency instance will be considered._
+
+Ex:
+ ```
+   cellery route-traffic --source hr-client-1 hr-inst-1 --percentage hr-inst-2=20 
+   cellery route-traffic hr-inst-1 --percentage hr-inst-2=100
+ ```
+
+[Back to Command List](#cellery-cli-commands)
+
+#### Cellery Export Policy
+
+Export a policy from the Cellery runtime as a file system artifact. This can be either exported to a file specified by the CLI user, or a file starting with cell instance name.
+
+##### Cellery Export Policy Autoscale:
+
+Export a set of autoscale policies which is applicable to a given cell instance.
+
+###### Parameters: 
+
+* _cell instance name: A valid cell instance name._
+
+###### Flags (Optional):
+
+* _-f, --file: File name to which the autoscale policy should be exported._
+
+
+Ex:
+ ```
+   cellery export-policy autoscale mytestcell1 -f myscalepolicy.yaml
+   cellery export-policy autoscale mytestcell1
+ ```
+ 
+ [Back to Command List](#cellery-cli-commands)
+ 
+ #### Cellery Apply Policy
+ 
+Apply a policy/set of policies included in a file to the Cellery runtime targeting a running cell instance. 
+ 
+ ##### Cellery Apply Policy Autoscale:
+ 
+ Apply a file containing a set of autoscale policies to the given cell instance.
+ 
+ ###### Parameters: 
+ 
+ * _autoscale policy file: A file containing a valid autoscale policy/set of autoscale policies._
+ * _instance name: The target instance to which the autoscale policies should be applied._
+ 
+ ###### Flags (Optional):
+ 
+ * _-c, --components: Comma separated list of components of the provided instance, to which the autoscale policy should be applied._
+ * _-g, --gateway: Flag to indicate that the given autoscale policy should be applied to only the gateway of the target instance._
+ 
+ Ex:
+  ```
+    cellery apply-policy autoscale myscalepolicy.yaml myinstance --components comp1,comp2
+    cellery apply-policy autoscale myscalepolicy.yaml myinstance --gateway
+    cellery apply-policy autoscale myscalepolicy.yaml myinstance
+  ```
+  
+ ###### Sample autoscale policy:
+  ```yaml
+    type: AutoscalePolicy
+    rules:
+    - overridable: true
+      policy:
+        maxReplicas: 4
+        metrics:
+        - resource:
+            name: cpu
+            targetAverageUtilization: 40
+          type: Resource
+        minReplicas: "1"
+      target:
+        name: controller
+        type: component
+    ---
+    type: AutoscalePolicy
+    rules:
+      - overridable: false
+        policy:
+          maxReplicas: 2
+          metrics:
+            - resource:
+                name: cpu
+                targetAverageUtilization: 50
+              type: Resource
+          minReplicas: "1"
+        target:
+          type: gateway
+    ---
+  ```
+  * If the target type is specified as 'component', that implies that the policy should be applied to the component denoted by the target name.
+  * If the target type is 'gateway' it should be applied to the gateway of the relevant cell instance.
+  * The flag 'overridable' implies whether the existing policy can be overriden by the same command repeatedly. 
+  
+  [Back to Command List](#cellery-cli-commands)

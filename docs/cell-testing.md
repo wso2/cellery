@@ -68,7 +68,7 @@ new instances with the provided name will be started, and those will be terminat
 - Once  the tests are executed, the logs are stored in the same location from where the command is executed. 
 
 # What's Next?
-- [Pet store sample test](https://github.com/wso2-cellery/samples/tree/master/cells/pet-store) - takes through the sample cellery test.
+- [Pet store sample test](https://github.com/wso2-cellery/samples/blob/master/docs/pet-store/test-be-cell.md) - takes through the sample cellery test.
 - [Developing and runing a Cell](writing-a-cell.md) - step by step explanation on how you could define your own cells.
 - [How to code cells?](cellery-syntax.md) - explains how Cellery cells are written.
 - [Update cells](cell-update.md) - update the running cell instance with the new version.

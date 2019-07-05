@@ -4,6 +4,7 @@
 * [init](#cellery-init) - initialize a cellery project.
 * [build](#cellery-build) - build a cell image.
 * [run](#cellery-run) - create cell instance(s). 
+* [view](#cellery-view) - view cell and component dependencies.
 * [list](#cellery-list) - list information about cell instances/images.
 * [delete](#cellery-delete) - Delete cell images.
 * [login](#cellery-login) - login to cell image repository.
@@ -96,6 +97,15 @@ Ex:
     cellery run wso2/my-cell:1.0.0 -y
  ```
 
+[Back to Command List](#cellery-cli-commands)
+
+#### Cellery View
+
+View the cell image with inter component dependencies, and inter cell dependencies.
+
+ ```
+    cellery view wso2/my-cell:1.0.0
+ ```
 [Back to Command List](#cellery-cli-commands)
 
 #### Cellery List

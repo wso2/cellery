@@ -5,7 +5,7 @@ Follow the below steps to install cellery into your GCP.
 
 i. Use gloud init command and create a project if not exists. Make sure gcloud is configured to the project which you want to install cellery runtime, and also billing is enabled.
 ```
-   gloud init
+   gcloud init
 ```
 ii. Make sure zone and region is set correctly for the project. Execute below mentioned command.
 ```

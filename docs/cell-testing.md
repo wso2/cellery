@@ -54,18 +54,18 @@ can use any existing test cases and wrap as docker images to execute the tests.
 or the cellery test framework will start a new instance and run the test against it. For example, if the test should be executed against `test-be` cell, then it will first check whether
 there is an instance already exists in the runtime and if so, the test will be executed against that instance. Otherwise, 
 new instances with the provided name will be started, and those will be terminated once the tests are executed. 
-```
-$ cellery run wso2cellery/pet-be-cell:latest -n pet-be -y
-$ cellery test wso2cellery/pet-be-cell:latest -n pet-be
+    ```
+    $ cellery run wso2cellery/pet-be-cell:latest -n pet-be -y
+    $ cellery test wso2cellery/pet-be-cell:latest -n pet-be
  
-OR
+    OR
 
-$ cellery test wso2cellery/pet-be-cell:latest -n pet-be 
+    $ cellery test wso2cellery/pet-be-cell:latest -n pet-be 
 
-OR 
-$ cellery test wso2cellery/pet-be-cell:latest -n pet-be -d 
-```
-- Once  the tests are executed the logs are stored in the same location from where the command is executed. 
+    OR 
+    $ cellery test wso2cellery/pet-be-cell:latest -n pet-be -d 
+    ```
+- Once  the tests are executed, the logs are stored in the same location from where the command is executed. 
 
 # What's Next?
 - [Pet store sample test](https://github.com/wso2-cellery/samples/tree/master/cells/pet-store) - takes through the sample cellery test.

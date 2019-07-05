@@ -99,9 +99,6 @@ Once Cellery has been installed, verify the installation is working by executing
 In this quickstart guide, we will install a basic local Cellery runtime by running the following 
 command:
 
-**IMPORTANT:** Due to the [known issue](https://github.com/wso2-cellery/sdk/issues/381), please execute 
-the all 'cellery' commands in any directory other than the home directory.
-
 1. Run the local setup command. 
 
     ```
@@ -134,9 +131,6 @@ The `hello-world-cell` contains one component `hello`. The `hello` component is 
 is written in Node.js and it is a simple webapp. In the quick start we will be deploying the `hello-world-cell`.
 
 Now let's look at the steps required to run this cell. 
-
-**IMPORTANT:** Due to the [known issue](https://github.com/wso2-cellery/sdk/issues/381), please execute 
-the all 'cellery' commands in any directory other than the home directory.
 
 1. Execute the `cellery run` command that will download the hello-world cell from the `wso2cellery` 
     organization in [docker hub](https://hub.docker.com/u/wso2cellery) and run the cell.

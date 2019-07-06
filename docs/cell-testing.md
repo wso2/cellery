@@ -15,32 +15,22 @@ public function run(cellery:ImageName iName, map<cellery:ImageName> instances) r
 }
 
 public function test(cellery:ImageName iName, map<cellery:ImageName> instances) returns error? {
-    string pet_be_url = "http://" + iName.instanceName + "--gateway-service:80";
-    cellery:Test petBeTest1 = {
+    cellery:Test petBeTest = {
         name: "pet-be-test",
         source: {
-            image: "docker.io/wso2cellery/pet-be-tests1"
+            image: "docker.io/wso2cellery/pet-be-tests"
         },
         envVars: {
-            PET_BE_CELL_URL: { value: pet_be_url }
+            PET_BE_CELL_URL: { value: <string>cellery:resolveReference(iName).controller_api_url }
         }
     };
-    cellery:Test petBeTest2 = {
-         name: "pet-be-test",
-         source: {
-             image: "docker.io/wso2cellery/pet-be-tests2"
-         },
-         envVars: {
-            PET_BE_CELL_URL: { value: pet_be_url }
-         }
-    };
-    cellery:TestSuite hrTestSuite = {
-        tests: [petBeTest1, petBeTest2]
+    cellery:TestSuite petBeTestSuite = {
+        tests: [petBeTest]
     };
 
     cellery:ImageName[] instanceList = cellery:runInstances(iName, instances);
-    error? a = cellery:runTestSuite(iName, hrTestSuite);
-    return cellery:stopInstances(iName, instanceList);
+    error? a = cellery:runTestSuite(iName, petBeTestSuite);
+return cellery:stopInstances(iName, instanceList);
 }
 ```
 

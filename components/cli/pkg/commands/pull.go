@@ -232,7 +232,7 @@ func pullImage(parsedCellImage *util.CellImage, username string, password string
 		}
 		// TODO : Add a proper validation based on major, minor, patch, version before stable release
 		if metadata.BuildCelleryVersion != "" && metadata.BuildCelleryVersion != version.BuildVersion() {
-			fmt.Printf("\r\x1b[2K%s Pulled image version (%s) and Cellery installation version (%s) "+
+			fmt.Printf("\r\x1b[2K%s Pulled cell image's build version (%s) and Cellery installation version (%s) "+
 				"do not match. The image %s/%s:%s may not work properly with this installation.\n",
 				util.YellowBold("\U000026A0"), util.Bold(metadata.BuildCelleryVersion), version.BuildVersion(),
 				parsedCellImage.Organization, parsedCellImage.ImageName, parsedCellImage.ImageVersion)

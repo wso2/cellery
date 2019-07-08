@@ -105,6 +105,15 @@ func CreateRuntime(artifactsPath string, isPersistentVolume, hasNfsStorage, isLo
 		return fmt.Errorf("error installing istio: %v", err)
 	}
 
+	// Fix for applying only knative serving CRD's
+	if err := InstallKnativeServing(filepath.Join(util.CelleryInstallationDir(), constants.K8S_ARTIFACTS)); err != nil {
+		return fmt.Errorf("error installing knative serving: %v", err)
+	}
+
+	if err := kubectl.DeleteNameSpace("knative-serving"); err != nil {
+		return fmt.Errorf("error removing knative-serving namespace: %v", err)
+	}
+
 	// Apply controller CRDs
 	spinner.SetNewAction("Creating controller")
 	if err := InstallController(filepath.Join(util.CelleryInstallationDir(), constants.K8S_ARTIFACTS)); err != nil {

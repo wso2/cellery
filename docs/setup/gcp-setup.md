@@ -121,7 +121,7 @@ Then update the /etc/hosts file with that Ip as follows.
 
 ## Trying Out
 
-Once the installation process is completed, you can try out [quick start with cellery](../../README.md#quick-start-with-cellery).
+Once the installation process is completed, you can try out [quick start with cellery](../../README.md#quickstart-guide).
 
 ## Cleaning Up
 

@@ -6,8 +6,8 @@ Hence we have persistence mode and non-persisted mode. Also it requires network 
 
 Cellery installer is tested on K8s environments with following component versions.
 
-- Kubernetes:  1.11.x  
-- Docker : docker-ce 18.06.0
+- Kubernetes:  1.14.x  
+- Docker : Docker 19.03.0-rc2 - Edge channel
 - MySQL Server: 5.7
 - NFS Server : NFSv3 compatible
 
@@ -172,9 +172,9 @@ This is ideal for development and quick test environments.
 ### Inline Method
 |Persistent volume	|Access to NFS storage	| Command | Description|
 |-------------------|-----------------------|---------|------------| 
-|No	|N/A| cellery setup create existing [--complete] [--loadbalancer] -y| By default basic setup will be created, if `--complete` flag is passed, then complete setup will be created. If k8s cluster supports cloud based loadbalancer (e.g: GCP, Docker-for-mac), users have to pass `--loadbalancer` flag.| 
-|Yes| No |cellery setup create existing --persistent [--complete] [--loadbalancer] -y | In this case, the file system should be mounted or should be accessible by the k8s cluster. By default basic setup will be created, if `--complete` flag is passed, then complete setup will be created. If k8s cluster supports cloud based loadbalancer (e.g: GCP, Docker-for-mac), users have to pass `--loadbalancer` flag.| 
-|Yes |Yes| cellery setup create existing [--complete] [--dbHost <DB_HOST> --dbUsername <DB_USER_NAME> --dbPassword <DB_PASSWORD> --nfsServerIp <IP_ADDRESS> --nfsFileShare <FILE_SHARE>] [--loadbalancer] -y | In this case, the external database and NFS server available and k8s cluster can be connected to those to provide the persisted functionality. This is the recommended mode for the production deployment.| 
+|No	|N/A| cellery setup create existing [--complete] [--loadbalancer] | By default basic setup will be created, if `--complete` flag is passed, then complete setup will be created. If k8s cluster supports cloud based loadbalancer (e.g: GCP, Docker-for-mac), users have to pass `--loadbalancer` flag.| 
+|Yes| No |cellery setup create existing --persistent [--complete] [--loadbalancer] | In this case, the file system should be mounted or should be accessible by the k8s cluster. By default basic setup will be created, if `--complete` flag is passed, then complete setup will be created. If k8s cluster supports cloud based loadbalancer (e.g: GCP, Docker-for-mac), users have to pass `--loadbalancer` flag.| 
+|Yes |Yes| cellery setup create existing [--complete] [--dbHost <DB_HOST> --dbUsername <DB_USER_NAME> --dbPassword <DB_PASSWORD> --nfsServerIp <IP_ADDRESS> --nfsFileShare <FILE_SHARE>] [--loadbalancer] | In this case, the external database and NFS server available and k8s cluster can be connected to those to provide the persisted functionality. This is the recommended mode for the production deployment.| 
 
 ## Configure host entries 
 Once the setup is complete, cellery system hostnames should be mapped with the ip of the ingress. 
@@ -202,7 +202,7 @@ desktop for the IPs to appear in the `kubectl get ingress` command. **
 **2. In some pre-configured setups, (ex.: setups created with kubeam command line tool), it might be required to specifically find the publicly exposed IP(s) of the nodes and update the ingress-nginx kubernetes service's `externalIPs` section by using `kubectl edit` command.**
 
 ## Trying Out
-Once the installation process is completed, you can try out [quick start with cellery](../../README.md#quick-start-with-cellery).
+Once the installation process is completed, you can try out [quick start with cellery](../../README.md#quickstart-guide).
 
 ## Cleaning Up
 Please refer readme for [managing cellery runtimes](./manage-setup.md) for details on how to clean up the setup.

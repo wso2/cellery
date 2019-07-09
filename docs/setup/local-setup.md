@@ -71,7 +71,7 @@ Add below to /etc/host entries to access cellery hosts.
 
 ## Trying Out
 
-Once the installation process is completed, you can try out [quick start with cellery](../../README.md#quick-start-with-cellery).
+Once the installation process is completed, you can try out [quick start with cellery](../../README.md#quickstart-guide).
 
 ## Cleaning Up
 

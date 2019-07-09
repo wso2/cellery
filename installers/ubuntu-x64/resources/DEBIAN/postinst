@@ -22,7 +22,7 @@ then
     #Remove stale cellery-*.jar files if exists.
     rm -f $BRE_LIB_PATH/cellery-*.jar
     #Copy Cellery libs to bre libs
-    cp /usr/share/cellery/bre-libs/${BALLERINA_RUNTIME}/bre/lib/*.jar ${BRE_LIB_PATH}
+    cp /usr/share/cellery/bre-libs/${BALLERINA_RUNTIME}/bre/lib/cellery-${CELLERY_VERSION}.jar ${BRE_LIB_PATH}
 else
 #Pull docker based Ballerina cli.
     echo "Ballerina 0.991.0 is not installed"

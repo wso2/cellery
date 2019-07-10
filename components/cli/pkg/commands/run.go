@@ -112,10 +112,10 @@ func RunRun(cellImageTag string, instanceName string, startDependencies bool, sh
 					instanceName, cellImageMetadata.CellImageName.Organization, cellImageMetadata.CellImageName.Name,
 					cellImageMetadata.CellImageName.Version),
 					fmt.Errorf("cell contains zero-scaling components, "+
-						"but Knative is not enabled in Cellery runtime"))
+						"but zero-scaling is not enabled in Cellery runtime"))
 			}
 		} else {
-			util.ExitWithErrorMessage("Error occurred while checking whether Knative is enabled.", err)
+			util.ExitWithErrorMessage("Error occurred while checking whether zero-scaling is enabled.", err)
 		}
 	}
 	if cellImageMetadata.AutoScaling {

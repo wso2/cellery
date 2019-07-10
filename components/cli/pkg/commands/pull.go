@@ -82,48 +82,9 @@ func RunPull(cellImage string, isSilent bool, username string, password string) 
 		err = pullImage(parsedCellImage, "", "")
 		if err != nil {
 			if strings.Contains(err.Error(), "401") {
-				// Requesting the credentials since server responded with an Unauthorized status code
-				var isAuthorized chan bool
-				var done chan bool
-				finalizeChannelCalls := func(isAuthSuccessful bool) {
-					if isAuthorized != nil {
-						isAuthorized <- isAuthSuccessful
-					}
-					if done != nil {
-						<-done
-					}
-				}
-				if strings.HasSuffix(parsedCellImage.Registry, constants.CENTRAL_REGISTRY_HOST) {
-					isAuthorized = make(chan bool)
-					done = make(chan bool)
-					registryCredentials.Username, registryCredentials.Password, err = credentials.FromBrowser(username,
-						isAuthorized, done)
-				} else {
-					registryCredentials.Username, registryCredentials.Password, err = credentials.FromTerminal(username)
-				}
-				if err != nil {
-					finalizeChannelCalls(false)
-					util.ExitWithErrorMessage("Failed to acquire credentials", err)
-				}
-				finalizeChannelCalls(true)
-				fmt.Println()
-
-				// Trying to pull the image again with the provided credentials
-				err = pullImage(parsedCellImage, registryCredentials.Username, registryCredentials.Password)
-				if err != nil {
-					util.ExitWithErrorMessage("Failed to pull image", err)
-				}
-
-				if credManager != nil {
-					err = credManager.StoreCredentials(registryCredentials)
-					if err == nil {
-						fmt.Printf("\n%s Saved Credentials for %s Registry", util.GreenBold("\U00002714"),
-							util.Bold(parsedCellImage.Registry))
-					} else {
-						fmt.Printf("\n\n%s %s", util.YellowBold("\U000026A0"),
-							"Error occurred while saving credentials")
-					}
-				}
+				util.ExitWithErrorMessage(fmt.Sprintf("Image %s/%s:%s not found in Registry %s",
+					parsedCellImage.Organization, parsedCellImage.ImageName, parsedCellImage.ImageVersion,
+					parsedCellImage.Registry), err)
 			} else {
 				util.ExitWithErrorMessage("Failed to pull image", err)
 			}

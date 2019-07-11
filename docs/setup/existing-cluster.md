@@ -186,9 +186,6 @@ Run the following kubectl command to get the IP address.
    ```
     kubectl get ingress -n cellery-system
    ```
-    
-**Note: Due to some known issue in the nginx-ingress with docker for desktop, users will need to restart the docker for 
-desktop for the IPs to appear in the `kubectl get ingress` command. **
 
    Then update the /etc/hosts file with that Ip as follows. 
      

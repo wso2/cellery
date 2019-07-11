@@ -12,29 +12,29 @@ Cellery installer is tested on K8s environments with following component version
 - NFS Server : NFSv3 compatible
 
 ## Tested Kubernetes Providers
-1. [GCP GKE](#1.-gcp-gke)
+1. [GCP GKE](#1-gcp-gke)
 
-2. [Docker for Desktop on MacOS](#2.-docker-for-desktop-on-macos) 
+2. [Docker for Desktop on MacOS](#2-docker-for-desktop-on-macos) 
 
-3. [Kube Admin](#3.-kube-admin)
+3. [Kube Admin](#3-kube-admin)
 
-4. [Minikube](#4.-minikube)
+4. [Minikube](#4-minikube)
 
 ### 1. GCP GKE
-Cellery system can be installed into the existing GCP setup in both modes; [Persisted volume](#1.-persistent-volume) and [Non-persisted volume](#2.-non-persistent-volume).
-NFS share and set of MySQL databases are required to proceed with the Cellery installation if users opted to go with [Persisted volume](#1.-persistent-volume).  
+Cellery system can be installed into the existing GCP setup in both modes; [Persisted volume](#1-persistent-volume) and [Non-persisted volume](#2-non-persistent-volume).
+NFS share and set of MySQL databases are required to proceed with the Cellery installation if users opted to go with [Persisted volume](#1-persistent-volume).  
 
 Follow below steps to configure your GCP setup to install cellery system on to it. 
 
 1. Create GKE k8s cluster.  
-**Note: Follow steps - 2, 3, 4 only if you want to create cellery system with [persisted volume](#1.-persistent-volume)** 
+**Note: Follow steps - 2, 3, 4 only if you want to create cellery system with [persisted volume](#1-persistent-volume)** 
 2. Create NFS server and  MySQL server in the same GCP compute region and the zone i.
 3. User can find the [SQL script](https://raw.githubusercontent.com/wso2-cellery/distribution/master/installer/k8s-artefacts/mysql/dbscripts/init.sql) file in the Cellery distribution repository. 
 Please note to replace the database username (`DATABASE_USERNAME`) and the password (`DATABASE_PASSWORD`) accordingly.
 4. Import the script that was prepared in step-2 into MySQL database.
 
 ### 2. Docker for Desktop on macOS
-Cellery system can be installed into the docker for desktop setup in both modes; [Persisted volume](#2.-non-persistent-volume) and [Non-persisted volume](#non-persistent-volume).
+Cellery system can be installed into the docker for desktop setup in both modes; [Persisted volume](#2-non-persistent-volume) and [Non-persisted volume](#non-persistent-volume).
 User needs to increase the Docker Desktop resources to support Cellery runtime. Minimum resources required by Cellery runtime:
 
  * CPU : 4 core or more
@@ -45,7 +45,7 @@ User needs to increase the Docker Desktop resources to support Cellery runtime. 
  * User may need to restart the Docker Desktop to update the ingress-nginx EXTERNAL-IP after deploying the Cellery runtime.  ( This is a known issue in Docker Desktop.)
 
 ### 3. Kube Admin
-Tested on Ubuntu 18.04. Cellery supports both [persistent](#1.-persistent-volume) and [non-persistent](#2.-non-persistent-volume) runtime deployment on kubeadm based k8s. 
+Tested on Ubuntu 18.04. Cellery supports both [persistent](#1-persistent-volume) and [non-persistent](#2-non-persistent-volume) runtime deployment on kubeadm based k8s. 
 
 **Note:**
 To run in persistence mode follow the below instructions
@@ -53,13 +53,13 @@ To run in persistence mode follow the below instructions
  * Create a folder in **/var/tmp/cellery** and give full executable permission to create and modify the artifacts which are shared with the cellery runtime.
 
 ### 4. Minikube
-Cellery only supports [non-persistence mode](#2.-non-persistent-volume) deployment on Minikube.
+Cellery only supports [non-persistence mode](#2-non-persistent-volume) deployment on Minikube.
 
 
 ## Cellery setup with existing kubernetes cluster
 ### Interactive Method
 In this cellery installation option cellery CLI uses the default kubernetes cluster configured in the $HOME/.kube/config file.
-As mentioned above this can be installed with [persistent volume](#2.-non-persistent-volume) and [non-persistent](#2.-non-persistent-volume) volume. 
+As mentioned above this can be installed with [persistent volume](#2-non-persistent-volume) and [non-persistent](#2-non-persistent-volume) volume. 
 
    i. Execute `cellery setup` command to configure Cellery runtime. This 
     will prompt a list of selections. By selecting `create ` section users can setup the Cellery runtime: 
@@ -106,7 +106,7 @@ Once the option `Existing cluster` is selected, the CLI will prompt to select wh
 If the user has access to an NFS server he/she can use it as the persistent volume, else he/she can proceed with file system mount by default. 
 And based on this, user should select `yes` or `no` for the using NFS server option.  
 
-**Note: If you are trying this on docker for desktop, and you don't have NFS, then you will be required add /var/tmp/cellery to the [Docker Desktop](#2.-docker-for-desktop-on-macos) file sharing as mentioned.**
+**Note: If you are trying this on docker for desktop, and you don't have NFS, then you will be required add /var/tmp/cellery to the [Docker Desktop](#2-docker-for-desktop-on-macos) file sharing as mentioned.**
    
    ```
     $ cellery setup 
@@ -137,7 +137,7 @@ The user can provide database username/password of the MySQL instance that's run
       Confirm Password:
    ```
    
-Once above are performed, there will be an option to select `Basic` or `Complete` [installation packages](../../README.md#cellery-runtime-packages). 
+Once above are performed, there will be an option to select `Basic` or `Complete` [installation packages](../../docs/installation-options.md). 
 Now continue to [configure host entries](#configure-host-entries) to complete the setup. 
 
 #### 2. Non-Persistent Volume

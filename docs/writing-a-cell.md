@@ -145,7 +145,7 @@ Environment variables can be passed into the Cellery file as explained [here](ht
     ```
     $ cellery view <DOCKER_HUB_ORG>/hello-world-cell:1.0.0
     ```
-    ![hello world cell view](docs/images/hello-web-cell.png)
+    ![hello world cell view](images/hello-web-cell.png)
     
 7. Access url [http://my-hello-world.com/](http://my-hello-world.com/) from browser. You will see updated web page with greeting 
 param you passed for HELLO_NAME in step-4.

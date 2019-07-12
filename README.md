@@ -1,10 +1,10 @@
 ![Cellery Logo](docs/images/cellery-logo.svg)
 
-[![Build Status](https://travis-ci.org/wso2-cellery/sdk.svg?branch=master)](https://travis-ci.org/wso2-cellery/sdk)
-[![codecov](https://codecov.io/gh/wso2-cellery/sdk/branch/master/graph/badge.svg)](https://codecov.io/gh/wso2-cellery/sdk)
+[![Build Status](https://travis-ci.org/wso2-cellery/sdk.svg?branch=v0.3.0)](https://travis-ci.org/wso2-cellery/sdk)
+[![codecov](https://codecov.io/gh/wso2-cellery/sdk/branch/v0.3.0/graph/badge.svg)](https://codecov.io/gh/wso2-cellery/sdk)
 [![GitHub (pre-)release](https://img.shields.io/github/release/wso2-cellery/sdk/all.svg)](https://github.com/wso2-cellery/sdk/releases)
 [![GitHub (Pre-)Release Date](https://img.shields.io/github/release-date-pre/wso2-cellery/sdk.svg)](https://github.com/wso2-cellery/sdk/releases)
-[![GitHub last commit](https://img.shields.io/github/last-commit/wso2-cellery/sdk.svg)](https://github.com/wso2-cellery/sdk/commits/master)
+[![GitHub last commit](https://img.shields.io/github/last-commit/wso2-cellery/sdk.svg)](https://github.com/wso2-cellery/sdk/commits/v0.3.0)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 
@@ -23,7 +23,7 @@ In this README:
 - [What's next?](#whats-next)
 
 In addition, here are some other documents you may wish to read:
-- [Cell Based Architecture](https://github.com/wso2/reference-architecture/blob/master/reference-architecture-cell-based.md) - explains the concepts of Cell based Architecture.
+- [Cell Based Architecture](https://github.com/wso2/reference-architecture/blob/v0.3.0/reference-architecture-cell-based.md) - explains the concepts of Cell based Architecture.
 - [Cellery Architecture](docs/cellery-architecture.md) - explains the high-level architecture of Cellery.
 - [How to code cells?](docs/cellery-syntax.md) - explains how Cellery cells are written.
 - [CLI commands](docs/cli-reference.md) - reference for CLI commands.
@@ -86,12 +86,12 @@ For other installation approaches including GCP and Docker for Desktop see [here
 
 ### Download Cellery
 #### Linux
-Download the [latest Cellery(.deb) installer](https://wso2-cellery.github.io/downloads) and install it using dpkg command as shown below.
+Download the [0.3.0 Cellery(.deb) installer](https://wso2-cellery.github.io/downloads) and install it using dpkg command as shown below.
 ```
 dpkg -i cellery-ubuntu-x64-<version>.deb
 ```
 #### Mac OS
-Download [latest Cellery(.pkg) installer](https://wso2-cellery.github.io/downloads)  and install it by following macOS package installation steps.
+Download [0.3.0 Cellery(.pkg) installer](https://wso2-cellery.github.io/downloads)  and install it by following macOS package installation steps.
 
 ### Setup Cellery runtime
 Once Cellery has been installed, verify the installation is working by executing `cellery version`.
@@ -136,7 +136,7 @@ Now let's look at the steps required to run this cell.
     organization in [docker hub](https://hub.docker.com/u/wso2cellery) and run the cell.
     
     ```
-    $ cellery run wso2cellery/hello-world-cell:latest -n hello-world-cell -y
+    $ cellery run wso2cellery/hello-world-cell:0.3.0 -n hello-world-cell -y
     ```
     
     You should see the following output:
@@ -144,30 +144,30 @@ Now let's look at the steps required to run this cell.
     ```
     ✔ Connecting to registry-1.docker.io
     ✔ Fetching metadata
-    ✔ Pulling image wso2cellery/hello-world-cell:latest
+    ✔ Pulling image wso2cellery/hello-world-cell:0.3.0
     ✔ Saving new Image to the Local Repository
     
     Image Digest : sha256:2d5659e5787df7e7ae0f58671c0b9d857b5a19e5fbdb02fccbc98a64016a97f6
     
-    ✔ Extracting Cell Image wso2cellery/hello-world-cell:latest
+    ✔ Extracting Cell Image wso2cellery/hello-world-cell:0.3.0
     
     Main Instance: hello
     
-    ✔ Reading Cell Image wso2cellery/hello-world-cell:latest
+    ✔ Reading Cell Image wso2cellery/hello-world-cell:0.3.0
     ✔ Validating dependencies
     
     Instances to be Used:
     
       INSTANCE NAME                            CELL IMAGE             USED INSTANCE   SHARED
      ------------------------- ------------------------------------- --------------- --------
-      hello-world-cell           wso2cellery/hello-world-cell:latest   To be Created    -
+      hello-world-cell           wso2cellery/hello-world-cell:0.3.0   To be Created    -
     
     Dependency Tree to be Used:
     
      No Dependencies
     
     ✔ Starting main instance hello-world-cell
-    ✔ Successfully deployed cell image: wso2cellery/hello-world-cell:latest
+    ✔ Successfully deployed cell image: wso2cellery/hello-world-cell:0.3.0
     
     What's next?
     --------------------------------------------------------
@@ -184,7 +184,7 @@ Now let's look at the steps required to run this cell.
     $ cellery list instances
              INSTANCE        CELL IMAGE                           STATUS        GATEWAY               COMPONENTS          AGE
      ---------------------- ------------------------------------ -------- -------------------------- ------------ -----------------------
-      hello-world            wso2cellery/hello-world-cell:latest   Ready    hello--gateway-service        1          30 minutes 48 seconds
+      hello-world            wso2cellery/hello-world-cell:0.3.0   Ready    hello--gateway-service        1          30 minutes 48 seconds
     ```
 
 3.  Add the following line to the /etc/hosts file.
@@ -206,7 +206,7 @@ Now let's look at the steps required to run this cell.
     
 ## What's next?
 * [Installation Options](docs/installation-options.md) - lists all installation options with Cellery.
-* [Samples](https://github.com/wso2-cellery/samples/tree/master) - a collection of useful samples.
+* [Samples](https://github.com/wso2-cellery/samples/tree/v0.3.0) - a collection of useful samples.
 * [CLI commands](docs/cli-reference.md) - reference for CLI commands.
 
 Learn about full lifecycle of cells in Cellery from,

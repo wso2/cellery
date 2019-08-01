@@ -19,13 +19,6 @@
 
 package image
 
-type CellImage struct {
-	Registry     string
-	Organization string
-	ImageName    string
-	ImageVersion string
-}
-
 type Cell struct {
 	CellMetaData CellMetaData `json:"metadata"`
 	CellSpec     CellSpec     `json:"spec"`
@@ -102,23 +95,39 @@ type GatewayDefinition struct {
 	Path   string `json:"path"`
 }
 
+type CellImage struct {
+	Registry     string
+	Organization string
+	ImageName    string
+	ImageVersion string
+}
+
 type CellImageName struct {
 	Organization string `json:"org"`
 	Name         string `json:"name"`
 	Version      string `json:"ver"`
 }
 
-type CellImageMetaData struct {
+type MetaData struct {
 	CellImageName
-	Labels              map[string]string             `json:"labels"`
-	DockerImages        []string                      `json:"dockerImages"`
+	Type                string                        `json:"type"`
+	Components          map[string]*ComponentMetaData `json:"components"`
 	BuildTimestamp      int64                         `json:"buildTimestamp"`
 	BuildCelleryVersion string                        `json:"buildCelleryVersion"`
-	Ingresses           []string                      `json:"ingresses"`
-	Components          []string                      `json:"components"`
-	Dependencies        map[string]*CellImageMetaData `json:"dependencies"`
-	ComponentDep        map[string][]string           `json:"componentDep"`
-	Exposed             []string                      `json:"exposed"`
-	ZeroScaling         bool                          `json:"zeroScaling"`
-	AutoScaling         bool                          `json:"autoScaling"`
+	ZeroScalingRequired bool                          `json:"zeroScalingRequired"`
+	AutoScalingRequired bool                          `json:"autoScalingRequired"`
+}
+
+type ComponentMetaData struct {
+	DockerImage          string                 `json:"dockerImage"`
+	IsDockerPushRequired bool                   `json:"isDockerPushRequired"`
+	Labels               map[string]string      `json:"labels"`
+	IngressTypes         []string               `json:"ingressTypes"`
+	Dependencies         *ComponentDependencies `json:"dependencies"`
+	Exposed              bool                   `json:"exposed"`
+}
+
+type ComponentDependencies struct {
+	Cells      map[string]*MetaData `json:"cells"`
+	Components []string             `json:"components"`
 }

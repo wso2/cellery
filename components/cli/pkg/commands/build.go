@@ -106,7 +106,7 @@ func RunBuild(tag string, fileName string) {
 			spinner.Stop(false)
 			util.ExitWithErrorMessage("Error in determining working directory", err)
 		}
-		//Retrieve the cellery cli docker instance status.
+		// Retrieve the cellery cli docker instance status.
 		cmdDockerPs := exec.Command("docker", "ps", "--filter",
 			"label=ballerina-runtime="+version.BuildVersion(),
 			"--filter", "label=currentDir="+currentDir, "--filter", "status=running", "--format", "{{.ID}}")
@@ -307,81 +307,6 @@ func generateMetaData(cellImage *image.CellImage, targetDir string, spinner *uti
 		util.ExitWithErrorMessage("Error occurred while reading metadata "+metadataFile, err)
 	}
 
-	metadata := &image.CellImageMetaData{
-		Labels:              map[string]string{},
-		DockerImages:        []string{},
-		BuildTimestamp:      time.Now().Unix(),
-		BuildCelleryVersion: version.BuildVersion(),
-		Ingresses:           []string{},
-		Components:          []string{},
-		Dependencies:        map[string]*image.CellImageMetaData{},
-		ComponentDep:        map[string][]string{},
-		Exposed:             []string{},
-		ZeroScaling:         false,
-		AutoScaling:         false,
-	}
-	err = json.Unmarshal(metadataJSON, metadata)
-	if err != nil {
-		util.ExitWithErrorMessage(errorMessage, err)
-	}
-
-	for alias, dependencyMetadata := range metadata.Dependencies {
-		cellImageZip := path.Join(util.UserHomeDir(), constants.CELLERY_HOME, "repo",
-			dependencyMetadata.Organization, dependencyMetadata.Name, dependencyMetadata.Version,
-			dependencyMetadata.Name+constants.CELL_IMAGE_EXT)
-
-		dependencyImage := dependencyMetadata.Organization + "/" + dependencyMetadata.Name +
-			":" + dependencyMetadata.Version
-		if cellImage.Registry != "" {
-			dependencyImage = cellImage.Registry + "/" + dependencyImage
-		}
-
-		// Pulling the dependency if not exist (This will not be executed most of the time)
-		dependencyExists, err := util.FileExists(cellImageZip)
-		if !dependencyExists {
-			spinner.Pause()
-			RunPull(dependencyImage, true, "", "")
-			fmt.Println()
-			spinner.Resume()
-		}
-
-		// Create temp directory
-		currentTime := time.Now()
-		timestamp := currentTime.Format("27065102350415")
-		tempPath := filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, "tmp", timestamp)
-		err = util.CreateDir(tempPath)
-		if err != nil {
-			util.ExitWithErrorMessage(errorMessage, err)
-		}
-
-		// Unzipping Cellery Image
-		err = util.Unzip(cellImageZip, tempPath)
-		if err != nil {
-			util.ExitWithErrorMessage(errorMessage, err)
-		}
-
-		// Reading the dependency's metadata
-		metadataJsonContent, err := ioutil.ReadFile(
-			filepath.Join(tempPath, "artifacts", "cellery", "metadata.json"))
-		if err != nil {
-			util.ExitWithErrorMessage(errorMessage+". metadata.json file not found for dependency: "+dependencyImage,
-				err)
-		}
-		dependencyMetadata := &image.CellImageMetaData{}
-		err = json.Unmarshal(metadataJsonContent, dependencyMetadata)
-		if err != nil {
-			util.ExitWithErrorMessage(errorMessage, err)
-		}
-
-		metadata.Dependencies[alias] = dependencyMetadata
-
-		// Cleaning up
-		err = os.RemoveAll(tempPath)
-		if err != nil {
-			util.ExitWithErrorMessage("Error occurred while cleaning up", err)
-		}
-	}
-
 	cellYamlContent, err := ioutil.ReadFile(filepath.Join(targetDir, "cellery", cellImage.ImageName+".yaml"))
 	if err != nil {
 		util.ExitWithErrorMessage(errorMessage, err)
@@ -392,22 +317,122 @@ func generateMetaData(cellImage *image.CellImage, targetDir string, spinner *uti
 		util.ExitWithErrorMessage(errorMessage, err)
 	}
 
-	// Getting the components of the Cell Image being built
-	var components []string
-	for _, component := range k8sCell.CellSpec.ComponentTemplates {
-		components = append(components, component.Metadata.Name)
+	metadata := &image.MetaData{
+		CellImageName: image.CellImageName{
+			Organization: cellImage.Organization,
+			Name:         cellImage.ImageName,
+			Version:      cellImage.ImageVersion,
+		},
+		Type:                "Cell",
+		Components:          map[string]*image.ComponentMetaData{},
+		BuildTimestamp:      time.Now().Unix(),
+		BuildCelleryVersion: version.BuildVersion(),
+		ZeroScalingRequired: false,
+		AutoScalingRequired: false,
 	}
-	metadata.Components = components
+	err = json.Unmarshal(metadataJSON, metadata)
+	if err != nil {
+		util.ExitWithErrorMessage(errorMessage, err)
+	}
+
+	for componentName, componentMetadata := range metadata.Components {
+		for alias, dependencyMetadata := range componentMetadata.Dependencies.Cells {
+			cellImageZip := path.Join(util.UserHomeDir(), constants.CELLERY_HOME, "repo",
+				dependencyMetadata.Organization, dependencyMetadata.Name, dependencyMetadata.Version,
+				dependencyMetadata.Name+constants.CELL_IMAGE_EXT)
+
+			dependencyImage := dependencyMetadata.Organization + "/" + dependencyMetadata.Name +
+				":" + dependencyMetadata.Version
+			if cellImage.Registry != "" {
+				dependencyImage = cellImage.Registry + "/" + dependencyImage
+			}
+
+			// Pulling the dependency if not exist (This will not be executed most of the time)
+			dependencyExists, err := util.FileExists(cellImageZip)
+			if !dependencyExists {
+				spinner.Pause()
+				RunPull(dependencyImage, true, "", "")
+				fmt.Println()
+				spinner.Resume()
+			}
+
+			// Create temp directory
+			currentTime := time.Now()
+			timestamp := currentTime.Format("27065102350415")
+			tempPath := filepath.Join(util.UserHomeDir(), constants.CELLERY_HOME, "tmp", timestamp)
+			err = util.CreateDir(tempPath)
+			if err != nil {
+				util.ExitWithErrorMessage(errorMessage, err)
+			}
+
+			// Unzipping Cellery Image
+			err = util.Unzip(cellImageZip, tempPath)
+			if err != nil {
+				util.ExitWithErrorMessage(errorMessage, err)
+			}
+
+			// Reading the dependency's metadata
+			metadataJsonContent, err := ioutil.ReadFile(
+				filepath.Join(tempPath, "artifacts", "cellery", "metadata.json"))
+			if err != nil {
+				util.ExitWithErrorMessage(errorMessage+". metadata.json file not found for dependency: "+dependencyImage,
+					err)
+			}
+			dependencyMetadata := &image.MetaData{}
+			err = json.Unmarshal(metadataJsonContent, dependencyMetadata)
+			if err != nil {
+				util.ExitWithErrorMessage(errorMessage, err)
+			}
+
+			metadata.Components[componentName].Dependencies.Cells[alias] = dependencyMetadata
+
+			// Cleaning up
+			err = os.RemoveAll(tempPath)
+			if err != nil {
+				util.ExitWithErrorMessage("Error occurred while cleaning up", err)
+			}
+		}
+	}
 
 	// Getting the Ingress Types
-	if k8sCell.CellSpec.GateWayTemplate.GatewaySpec.TcpApis != nil {
-		metadata.Ingresses = append(metadata.Ingresses, "TCP")
+	for _, tcpApi := range k8sCell.CellSpec.GateWayTemplate.GatewaySpec.TcpApis {
+		hasTCPType := false
+		for _, ingressType := range metadata.Components[tcpApi.Backend].IngressTypes {
+			if ingressType == "TCP" {
+				hasTCPType = true
+				break
+			}
+		}
+		if !hasTCPType {
+			metadata.Components[tcpApi.Backend].IngressTypes = append(metadata.Components[tcpApi.Backend].IngressTypes,
+				"TCP")
+		}
 	}
-	if k8sCell.CellSpec.GateWayTemplate.GatewaySpec.HttpApis != nil {
-		metadata.Ingresses = append(metadata.Ingresses, "HTTP")
+	for _, httpApi := range k8sCell.CellSpec.GateWayTemplate.GatewaySpec.HttpApis {
+		hasHttpType := false
+		for _, ingressType := range metadata.Components[httpApi.Backend].IngressTypes {
+			if ingressType == "HTTP" {
+				hasHttpType = true
+				break
+			}
+		}
+		if !hasHttpType {
+			metadata.Components[httpApi.Backend].IngressTypes = append(metadata.Components[httpApi.Backend].IngressTypes,
+				"HTTP")
+		}
 	}
-	if k8sCell.CellSpec.GateWayTemplate.GatewaySpec.GrpcApis != nil {
-		metadata.Ingresses = append(metadata.Ingresses, "GRPC")
+	for _, grpcApi := range k8sCell.CellSpec.GateWayTemplate.GatewaySpec.GrpcApis {
+		hasGrpcType := false
+		for _, ingressType := range metadata.Components[grpcApi.Backend].IngressTypes {
+			if ingressType == "GRPC" {
+				hasGrpcType = true
+				break
+			}
+		}
+		if !hasGrpcType {
+			metadata.Components[grpcApi.Backend].IngressTypes = append(metadata.Components[grpcApi.Backend].IngressTypes,
+				"GRPC")
+		}
 	}
 
 	metadataFileContent, err := json.Marshal(metadata)

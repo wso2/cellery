@@ -64,7 +64,7 @@ func RunPush(cellImage string, username string, password string) {
 		spinner.Stop(false)
 		util.ExitWithErrorMessage("Error occurred while reading Cell Image metadata", err)
 	}
-	cellImageMetadata := &image.CellImageMetaData{}
+	cellImageMetadata := &image.MetaData{}
 	err = json.Unmarshal(metadataFileContent, cellImageMetadata)
 	if err != nil {
 		util.ExitWithErrorMessage("Error occurred while parsing cell image", err)
@@ -97,13 +97,19 @@ func RunPush(cellImage string, username string, password string) {
 		}
 	}
 
+	var dockerImagesToBePushed []string
+	for _, componentMetadata := range cellImageMetadata.Components {
+		if componentMetadata.IsDockerPushRequired {
+			dockerImagesToBePushed = append(dockerImagesToBePushed, componentMetadata.DockerImage)
+		}
+	}
 	if isCredentialsPresent {
 		// Pushing the image using the saved credentials
 		err = pushImage(parsedCellImage, registryCredentials.Username, registryCredentials.Password)
 		if err != nil {
 			util.ExitWithErrorMessage("Failed to push image", err)
 		}
-		pushDockerImages(cellImageMetadata.DockerImages)
+		pushDockerImages(dockerImagesToBePushed)
 	} else {
 		// Pushing image without credentials
 		err = pushImage(parsedCellImage, "", "")
@@ -145,7 +151,7 @@ func RunPush(cellImage string, username string, password string) {
 				if err != nil {
 					util.ExitWithErrorMessage("Failed to push image", err)
 				}
-				pushDockerImages(cellImageMetadata.DockerImages)
+				pushDockerImages(dockerImagesToBePushed)
 
 				if credManager != nil {
 					log.Printf("Storing credentials in Credentials Manager")
@@ -162,7 +168,7 @@ func RunPush(cellImage string, username string, password string) {
 				util.ExitWithErrorMessage("Failed to pull image", err)
 			}
 		} else {
-			pushDockerImages(cellImageMetadata.DockerImages)
+			pushDockerImages(dockerImagesToBePushed)
 		}
 	}
 	util.PrintSuccessMessage(fmt.Sprintf("Successfully pushed cell image: %s", util.Bold(cellImage)))

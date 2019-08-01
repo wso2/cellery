@@ -63,7 +63,7 @@ func RunUpdateCellComponents(instance string, image string) error {
 		spinner.Stop(false)
 		return err
 	}
-	cellImageMetadata := &img.CellImageMetaData{}
+	cellImageMetadata := &img.MetaData{}
 	err = json.Unmarshal(metadataFileContent, cellImageMetadata)
 	if err != nil {
 		spinner.Stop(false)

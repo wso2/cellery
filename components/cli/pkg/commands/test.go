@@ -76,7 +76,7 @@ func RunTest(cellImageTag string, instanceName string, startDependencies bool, s
 		spinner.Stop(false)
 		util.ExitWithErrorMessage("Error occurred while reading Cell Image metadata", err)
 	}
-	cellImageMetadata := &image.CellImageMetaData{}
+	cellImageMetadata := &image.MetaData{}
 	err = json.Unmarshal(metadataFileContent, cellImageMetadata)
 	if err != nil {
 		spinner.Stop(false)
@@ -193,10 +193,20 @@ func RunTest(cellImageTag string, instanceName string, startDependencies bool, s
 	immediateDependencies := map[string]*dependencyTreeNode{}
 	// Check if the provided links are immediate dependencies of the root Cell
 	for _, link := range parsedDependencyLinks {
-		if metadata, hasKey := cellImageMetadata.Dependencies[link.DependencyAlias]; hasKey {
+		var dependencyMetadata *image.MetaData
+	cellImageMetadataLoop:
+		for _, componentMetadata := range cellImageMetadata.Components {
+			for alias, metadata := range componentMetadata.Dependencies.Cells {
+				if link.DependencyAlias == alias {
+					dependencyMetadata = metadata
+					break cellImageMetadataLoop
+				}
+			}
+		}
+		if dependencyMetadata != nil {
 			immediateDependencies[link.DependencyAlias] = &dependencyTreeNode{
 				Instance:  link.DependencyInstance,
-				MetaData:  metadata,
+				MetaData:  dependencyMetadata,
 				IsShared:  false,
 				IsRunning: link.IsRunning,
 			}
@@ -204,8 +214,19 @@ func RunTest(cellImageTag string, instanceName string, startDependencies bool, s
 			// If cellImageMetadata does not contain the provided link, there is a high chance that the user
 			// made a mistake in the command. Therefore, this is validated strictly
 			var allowedAliases []string
-			for alias := range cellImageMetadata.Dependencies {
-				allowedAliases = append(allowedAliases, alias)
+			for _, componentMetadata := range cellImageMetadata.Components {
+				for alias := range componentMetadata.Dependencies.Cells {
+					isAlreadyPresent := false
+					for _, addedAlias := range allowedAliases {
+						if addedAlias == alias {
+							isAlreadyPresent = true
+							break
+						}
+					}
+					if !isAlreadyPresent {
+						allowedAliases = append(allowedAliases, alias)
+					}
+				}
 			}
 			spinner.Stop(false)
 			util.ExitWithErrorMessage("Invalid links",
@@ -216,22 +237,23 @@ func RunTest(cellImageTag string, instanceName string, startDependencies bool, s
 	}
 
 	// Check if instances are provided for all the dependencies of the root Cell
-	for alias := range cellImageMetadata.Dependencies {
-		isLinkProvided := false
-		for _, link := range parsedDependencyLinks {
-			if link.DependencyAlias == alias {
-				isLinkProvided = true
-				break
+	for _, componentMetadata := range cellImageMetadata.Components {
+		for alias := range componentMetadata.Dependencies.Cells {
+			isLinkProvided := false
+			for _, link := range parsedDependencyLinks {
+				if link.DependencyAlias == alias {
+					isLinkProvided = true
+					break
+				}
+			}
+			if !isLinkProvided {
+				// If a link is not provided for a particular dependency, the main instance cannot be started.
+				// The links is required for the main instance to discover the dependency in the runtime
+				spinner.Stop(false)
+				util.ExitWithErrorMessage("Links for all the dependencies not found",
+					fmt.Errorf("required link for alias %s in instance %s not found", alias, instanceName))
 			}
 		}
-		if !isLinkProvided {
-			// If a link is not provided for a particular dependency, the main instance cannot be started.
-			// The links is required for the main instance to discover the dependency in the runtime
-			spinner.Stop(false)
-			util.ExitWithErrorMessage("Links for all the dependencies not found",
-				fmt.Errorf("required link for alias %s in instance %s not found", alias, instanceName))
-		}
-
 	}
 	mainNode = &dependencyTreeNode{
 		Instance:     instanceName,

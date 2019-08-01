@@ -24,6 +24,7 @@ public class Component {
     private List<GRPC> grpcList;
     private List<Web> webList;
     private String source;
+    private boolean isDockerPushRequired;
     private String service;
     private String protocol;
     private int containerPort;

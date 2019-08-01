@@ -17,7 +17,6 @@ public class CellImage {
     private String orgName;
     private String cellName;
     private String cellVersion;
-    private List<String> dockerImages;
     private List<Dependency> dependencies;
     private boolean zeroScaling;
     private boolean autoScaling;
@@ -25,7 +24,6 @@ public class CellImage {
 
     public CellImage() {
         componentNameToComponentMap = new HashMap<>();
-        dockerImages = new ArrayList<>();
         dependencies = new ArrayList<>();
     }
 
@@ -38,10 +36,6 @@ public class CellImage {
             throw new BallerinaException("Two components with same name exists " + component.getName());
         }
         this.componentNameToComponentMap.put(component.getName(), component);
-    }
-
-    public void addDockerImage(String imageName) {
-        dockerImages.add(imageName);
     }
 
     public void addDependency(Dependency dependency) {

@@ -63,6 +63,7 @@ import org.ballerinalang.util.exceptions.BallerinaException;
 import org.ballerinax.docker.generator.DockerArtifactHandler;
 import org.ballerinax.docker.generator.exceptions.DockerGenException;
 import org.ballerinax.docker.generator.models.DockerModel;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -207,6 +208,7 @@ public class CreateCellImage extends BlockingNativeCallableUnit {
             }
             tag = cellImage.getOrgName() + "/" + tag;
             createDockerImage(tag, ((BString) dockerSourceMap.get("dockerDir")).stringValue());
+            component.setDockerPushRequired(true);
             component.setSource(tag);
         }
     }
@@ -532,41 +534,52 @@ public class CreateCellImage extends BlockingNativeCallableUnit {
         jsonObject.put("org", cellImage.getOrgName());
         jsonObject.put("name", cellImage.getCellName());
         jsonObject.put("ver", cellImage.getCellVersion());
-        jsonObject.put("dockerImages", cellImage.getDockerImages());
-        jsonObject.put("zeroScaling", cellImage.isZeroScaling());
-        jsonObject.put("autoScaling", cellImage.isAutoScaling());
+        jsonObject.put("zeroScalingRequired", cellImage.isZeroScaling());
+        jsonObject.put("autoScalingRequired", cellImage.isAutoScaling());
 
-        JSONObject labelsJsonObject = new JSONObject();
-        JSONObject cellDependenciesJSON = new JSONObject();
-        JSONObject componentDependenciesJSON = new JSONObject();
-        components.forEach((componentKey, componentValue) -> {
+        JSONObject componentsJsonObject = new JSONObject();
+        components.forEach((key, componentValue) -> {
             LinkedHashMap attributeMap = ((BMap) componentValue).getMap();
+            String componentName = ((BString) attributeMap.get("name")).stringValue();
+            JSONObject componentJson = new JSONObject();
+
+            JSONObject labelsJsonObject = new JSONObject();
             if (attributeMap.containsKey(LABELS)) {
                 ((BMap<?, ?>) attributeMap.get(LABELS)).getMap().forEach((labelKey, labelValue) ->
                         labelsJsonObject.put(labelKey.toString(), labelValue.toString()));
             }
+            componentJson.put("labels", labelsJsonObject);
+
+            JSONObject cellDependenciesJsonObject = new JSONObject();
+            JSONArray componentDependenciesJsonArray = new JSONArray();
             if (attributeMap.containsKey(DEPENDENCIES)) {
                 LinkedHashMap<?, ?> dependencies = ((BMap<?, ?>) attributeMap.get(DEPENDENCIES)).getMap();
                 if (dependencies.containsKey(CELLS)) {
                     LinkedHashMap<?, ?> cellDependencies = ((BMap) dependencies.get(CELLS)).getMap();
-                    extractCellDependencies(cellDependenciesJSON, cellDependencies);
+                    extractCellDependencies(cellDependenciesJsonObject, cellDependencies);
                 }
                 if (dependencies.containsKey(COMPONENTS)) {
                     BValueArray componentsArray = ((BValueArray) dependencies.get(COMPONENTS));
-                    List<String> dependentComponents = new ArrayList<>();
                     IntStream.range(0, (int) componentsArray.size()).forEach(componentIndex -> {
                         LinkedHashMap component = ((BMap) componentsArray.getBValue(componentIndex)).getMap();
-                        dependentComponents.add(((BString) component.get("name")).stringValue());
+                        componentDependenciesJsonArray.put(((BString) component.get("name")).stringValue());
                     });
-                    componentDependenciesJSON.put(((BString) attributeMap.get("name")).stringValue(),
-                            dependentComponents);
                 }
             }
+            JSONObject dependenciesJsonObject = new JSONObject();
+            dependenciesJsonObject.put("cells", cellDependenciesJsonObject);
+            dependenciesJsonObject.put("components", componentDependenciesJsonArray);
+            componentJson.put("dependencies", dependenciesJsonObject);
+
+            componentJson.put("exposed", exposedComponents.contains(componentName));
+            componentsJsonObject.put(componentName, componentJson);
         });
-        jsonObject.put("labels", labelsJsonObject);
-        jsonObject.put("dependencies", cellDependenciesJSON);
-        jsonObject.put("componentDep", componentDependenciesJSON);
-        jsonObject.put("exposed", exposedComponents);
+        cellImage.getComponentNameToComponentMap().forEach((componentName, component) -> {
+            JSONObject componentJsonObject = componentsJsonObject.getJSONObject(componentName);
+            componentJsonObject.put("dockerImage", component.getSource());
+            componentJsonObject.put("isDockerPushRequired", component.isDockerPushRequired());
+        });
+        jsonObject.put("components", componentsJsonObject);
 
         String targetFileNameWithPath =
                 OUTPUT_DIRECTORY + File.separator + "cellery" + File.separator + METADATA_FILE_NAME;
@@ -623,7 +636,6 @@ public class CreateCellImage extends BlockingNativeCallableUnit {
         try {
             DockerArtifactHandler dockerArtifactHandler = new DockerArtifactHandler(dockerModel);
             dockerArtifactHandler.buildImage(dockerModel, Paths.get(dockerDir));
-            cellImage.addDockerImage(dockerImageTag);
         } catch (DockerGenException | InterruptedException e) {
             String errMsg = "Error occurred while building Docker image ";
             log.error(errMsg, e);

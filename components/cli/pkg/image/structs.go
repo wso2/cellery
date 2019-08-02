@@ -64,30 +64,27 @@ type GatewaySpec struct {
 	HttpApis []GatewayHttpApi `json:"http"`
 	TcpApis  []GatewayTcpApi  `json:"tcp"`
 	GrpcApis []GatewayGrpcApi `json:"grpc"`
+	Host     string           `json:"host"`
 }
 
 type GatewayHttpApi struct {
-	Backend     string              `json:"backend"`
-	Context     string              `json:"context"`
-	Definitions []GatewayDefinition `json:"definitions"`
-	Global      bool                `json:"global"`
-	Vhost       string              `json:"vhost"`
+	Backend      string              `json:"backend"`
+	Context      string              `json:"context"`
+	Definitions  []GatewayDefinition `json:"definitions"`
+	Global       bool                `json:"global"`
+	Authenticate string              `json:"authenticate"`
 }
 
 type GatewayTcpApi struct {
-	Backend     string              `json:"backend"`
-	Context     string              `json:"context"`
-	Definitions []GatewayDefinition `json:"definitions"`
-	Global      bool                `json:"global"`
-	Vhost       string              `json:"vhost"`
+	Backend     string `json:"backendHost"`
+	BackendPort uint16 `json:"backendPort"`
+	Port        uint16 `json:"port"`
 }
 
 type GatewayGrpcApi struct {
-	Backend     string              `json:"backend"`
-	Context     string              `json:"context"`
-	Definitions []GatewayDefinition `json:"definitions"`
-	Global      bool                `json:"global"`
-	Vhost       string              `json:"vhost"`
+	Backend     string `json:"backendHost"`
+	BackendPort uint16 `json:"backendPort"`
+	Port        uint16 `json:"port"`
 }
 
 type GatewayDefinition struct {

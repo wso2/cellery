@@ -323,7 +323,7 @@ func generateMetaData(cellImage *image.CellImage, targetDir string, spinner *uti
 			Name:         cellImage.ImageName,
 			Version:      cellImage.ImageVersion,
 		},
-		Type:                "Cell",
+		Kind:                "Cell",
 		Components:          map[string]*image.ComponentMetaData{},
 		BuildTimestamp:      time.Now().Unix(),
 		BuildCelleryVersion: version.BuildVersion(),
@@ -392,6 +392,7 @@ func generateMetaData(cellImage *image.CellImage, targetDir string, spinner *uti
 				util.ExitWithErrorMessage("Error occurred while cleaning up", err)
 			}
 		}
+		componentMetadata.IngressTypes = []string{}
 	}
 
 	// Getting the Ingress Types

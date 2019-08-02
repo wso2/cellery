@@ -24,44 +24,73 @@
  */
 
 window.__CELL_METADATA__ = {
-    org: "my-org",
+    org: "myorg",
     name: "hr",
-    ver: "0.1.0",
-    components: ["hr"],
-    ingresses: ["HTTP"],
-    dependencies: {
-        employee: {
-            org: "my-org",
-            name: "employee",
-            ver: "0.1.0",
-            components: ["employee", "salary"],
-            ingresses: ["HTTP"],
+    ver: "1.0.0",
+    type: "Cell",
+    components: {
+        hr: {
+            dockerImage: "wso2cellery/sampleapp-hr:0.3.0",
+            isDockerPushRequired: false,
+            labels: {},
+            ingressTypes: ["HTTP"],
             dependencies: {
-                hrSystem: {
-                    org: "my-org",
-                    name: "people-hr",
-                    ver: "0.1.0",
-                    components: ["people-hr"],
-                    ingresses: ["HTTP"],
-                    dependencies: {},
-                    componentDep: {},
-                    exposed: ["people-hr"]
-                }
+                cells: {
+                    employeeCellDep: {
+                        org: "myorg",
+                        name: "employee",
+                        ver: "1.0.0",
+                        type: "Cell",
+                        components: {
+                            employee: {
+                                dockerImage: "wso2cellery/sampleapp-employee:0.3.0",
+                                isDockerPushRequired: false,
+                                labels: {team: "HR"},
+                                ingressTypes: ["HTTP"],
+                                dependencies: {cells: {}, components: ["salary"]},
+                                exposed: true
+                            },
+                            salary: {
+                                dockerImage: "wso2cellery/sampleapp-salary:0.3.0",
+                                isDockerPushRequired: false,
+                                labels: {owner: "Alice", team: "Finance"},
+                                ingressTypes: ["HTTP"],
+                                dependencies: {cells: {}, components: []},
+                                exposed: true
+                            }
+                        },
+                        buildTimestamp: 1564723109,
+                        buildCelleryVersion: "0.4.0-SNAPSHOT",
+                        zeroScalingRequired: false,
+                        autoScalingRequired: false
+                    },
+                    stockCellDep: {
+                        org: "myorg",
+                        name: "stock",
+                        ver: "1.0.0",
+                        type: "Cell",
+                        components: {
+                            stock: {
+                                dockerImage: "wso2cellery/sampleapp-stock:0.3.0",
+                                isDockerPushRequired: false,
+                                labels: {},
+                                ingressTypes: ["HTTP"],
+                                dependencies: {cells: {}, components: []},
+                                exposed: true
+                            }
+                        },
+                        buildTimestamp: 1564723152,
+                        buildCelleryVersion: "0.4.0-SNAPSHOT",
+                        zeroScalingRequired: false,
+                        autoScalingRequired: false
+                    }
+                }, components: []
             },
-            componentDep: {employee: ["salary"]},
-            exposed: ["employee"]
-        },
-        stock: {
-            org: "my-org",
-            name: "stock",
-            ver: "0.1.0",
-            components: ["stock-options"],
-            ingresses: ["HTTP"],
-            dependencies: {},
-            componentDep: {},
-            exposed: ["stock-options"]
+            exposed: true
         }
     },
-    componentDep: {},
-    exposed: ["hr"]
+    buildTimestamp: 1564723164,
+    buildCelleryVersion: "0.4.0-SNAPSHOT",
+    zeroScalingRequired: false,
+    autoScalingRequired: false
 };

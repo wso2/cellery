@@ -107,7 +107,7 @@ type CellImageName struct {
 
 type MetaData struct {
 	CellImageName
-	Type                string                        `json:"type"`
+	Kind                string                        `json:"kind"`
 	Components          map[string]*ComponentMetaData `json:"components"`
 	BuildTimestamp      int64                         `json:"buildTimestamp"`
 	BuildCelleryVersion string                        `json:"buildCelleryVersion"`

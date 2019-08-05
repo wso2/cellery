@@ -25,7 +25,7 @@ class CellDiagramView extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            focused: props.focusedCell
+            focused: props.focusedNode
         };
     }
 
@@ -40,15 +40,15 @@ class CellDiagramView extends React.Component {
 
         return (
             <div>
-                <CellDiagram data={data} focusedCell={this.state.focused} onClickNode={this.onClickCell}/>
+                <CellDiagram data={data} focusedNode={this.state.focused} onClickNode={this.onClickCell}/>
             </div>);
     };
 
 }
 
 CellDiagramView.propTypes = {
-    data: PropTypes.object.isRequired,
-    focusedCell: PropTypes.string.isRequired
+    focusedNode: PropTypes.string.isRequired,
+    data: PropTypes.object.isRequired
 };
 
 export default CellDiagramView;

@@ -144,7 +144,7 @@ const App = ({data, classes}) => {
                         </Typography>
                     </Toolbar>
                 </AppBar>
-                <CellDiagramView data={diagramData} focusedCell={getCellName(data)}/>
+                <CellDiagramView data={diagramData} focusedNode={getCellName(data)}/>
             </div>
         </MuiThemeProvider>
     );

@@ -410,16 +410,23 @@ func generateMetaData(cellImage *image.CellImage, targetDir string, spinner *uti
 		}
 	}
 	for _, httpApi := range k8sCell.CellSpec.GateWayTemplate.GatewaySpec.HttpApis {
-		hasHttpType := false
-		for _, ingressType := range metadata.Components[httpApi.Backend].IngressTypes {
-			if ingressType == "HTTP" {
-				hasHttpType = true
-				break
+		addIngressType := func(ingressType string) {
+			hasHttpType := false
+			for _, ingressType := range metadata.Components[httpApi.Backend].IngressTypes {
+				if ingressType == ingressType {
+					hasHttpType = true
+					break
+				}
+			}
+			if !hasHttpType {
+				metadata.Components[httpApi.Backend].IngressTypes = append(metadata.Components[httpApi.Backend].IngressTypes,
+					ingressType)
 			}
 		}
-		if !hasHttpType {
-			metadata.Components[httpApi.Backend].IngressTypes = append(metadata.Components[httpApi.Backend].IngressTypes,
-				"HTTP")
+		if k8sCell.CellSpec.GateWayTemplate.GatewaySpec.Host == "" {
+			addIngressType("HTTP")
+		} else {
+			addIngressType("WEB")
 		}
 	}
 	for _, grpcApi := range k8sCell.CellSpec.GateWayTemplate.GatewaySpec.GrpcApis {

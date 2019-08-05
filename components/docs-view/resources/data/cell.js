@@ -23,74 +23,102 @@
  * This is only used as a reference since this should be replaced.
  */
 
+/* eslint quote-props: ["off"] */
+/* eslint no-underscore-dangle: ["off"] */
+
 window.__CELL_METADATA__ = {
-    org: "myorg",
-    name: "hr",
-    ver: "1.0.0",
-    type: "Cell",
-    components: {
-        hr: {
-            dockerImage: "wso2cellery/sampleapp-hr:0.3.0",
-            isDockerPushRequired: false,
-            labels: {},
-            ingressTypes: ["HTTP"],
-            dependencies: {
-                cells: {
-                    employeeCellDep: {
-                        org: "myorg",
-                        name: "employee",
-                        ver: "1.0.0",
-                        type: "Cell",
-                        components: {
-                            employee: {
-                                dockerImage: "wso2cellery/sampleapp-employee:0.3.0",
-                                isDockerPushRequired: false,
-                                labels: {team: "HR"},
-                                ingressTypes: ["HTTP"],
-                                dependencies: {cells: {}, components: ["salary"]},
-                                exposed: true
+    "org": "myorg",
+    "name": "hr",
+    "ver": "1.0.0",
+    "kind": "Cell",
+    "components": {
+        "hr": {
+            "dockerImage": "wso2cellery/sampleapp-hr:0.3.0",
+            "isDockerPushRequired": false,
+            "labels": {},
+            "ingressTypes": [
+                "HTTP"
+            ],
+            "dependencies": {
+                "cells": {
+                    "employeeCellDep": {
+                        "org": "myorg",
+                        "name": "employee",
+                        "ver": "1.0.0",
+                        "kind": "Cell",
+                        "components": {
+                            "employee": {
+                                "dockerImage": "wso2cellery/sampleapp-employee:0.3.0",
+                                "isDockerPushRequired": false,
+                                "labels": {
+                                    "team": "HR"
+                                },
+                                "ingressTypes": [
+                                    "HTTP"
+                                ],
+                                "dependencies": {
+                                    "cells": {},
+                                    "components": [
+                                        "salary"
+                                    ]
+                                },
+                                "exposed": true
                             },
-                            salary: {
-                                dockerImage: "wso2cellery/sampleapp-salary:0.3.0",
-                                isDockerPushRequired: false,
-                                labels: {owner: "Alice", team: "Finance"},
-                                ingressTypes: ["HTTP"],
-                                dependencies: {cells: {}, components: []},
-                                exposed: true
+                            "salary": {
+                                "dockerImage": "wso2cellery/sampleapp-salary:0.3.0",
+                                "isDockerPushRequired": false,
+                                "labels": {
+                                    "owner": "Alice",
+                                    "team": "Finance"
+                                },
+                                "ingressTypes": [
+                                    "HTTP"
+                                ],
+                                "dependencies": {
+                                    "cells": {},
+                                    "components": []
+                                },
+                                "exposed": true
                             }
                         },
-                        buildTimestamp: 1564723109,
-                        buildCelleryVersion: "0.4.0-SNAPSHOT",
-                        zeroScalingRequired: false,
-                        autoScalingRequired: false
+                        "buildTimestamp": 1565001781,
+                        "buildCelleryVersion": "0.4.0-SNAPSHOT",
+                        "zeroScalingRequired": false,
+                        "autoScalingRequired": false
                     },
-                    stockCellDep: {
-                        org: "myorg",
-                        name: "stock",
-                        ver: "1.0.0",
-                        type: "Cell",
-                        components: {
-                            stock: {
-                                dockerImage: "wso2cellery/sampleapp-stock:0.3.0",
-                                isDockerPushRequired: false,
-                                labels: {},
-                                ingressTypes: ["HTTP"],
-                                dependencies: {cells: {}, components: []},
-                                exposed: true
+                    "stockCellDep": {
+                        "org": "myorg",
+                        "name": "stock",
+                        "ver": "1.0.0",
+                        "kind": "Cell",
+                        "components": {
+                            "stock": {
+                                "dockerImage": "wso2cellery/sampleapp-stock:0.3.0",
+                                "isDockerPushRequired": false,
+                                "labels": {},
+                                "ingressTypes": [
+                                    "HTTP"
+                                ],
+                                "dependencies": {
+                                    "cells": {},
+                                    "components": []
+                                },
+                                "exposed": true
                             }
                         },
-                        buildTimestamp: 1564723152,
-                        buildCelleryVersion: "0.4.0-SNAPSHOT",
-                        zeroScalingRequired: false,
-                        autoScalingRequired: false
+                        "buildTimestamp": 1565001794,
+                        "buildCelleryVersion": "0.4.0-SNAPSHOT",
+                        "zeroScalingRequired": false,
+                        "autoScalingRequired": false
                     }
-                }, components: []
+                },
+                "components": []
             },
-            exposed: true
+            "exposed": true
         }
     },
-    buildTimestamp: 1564723164,
-    buildCelleryVersion: "0.4.0-SNAPSHOT",
-    zeroScalingRequired: false,
-    autoScalingRequired: false
+    "buildTimestamp": 1565001804,
+    "buildCelleryVersion": "0.4.0-SNAPSHOT",
+    "zeroScalingRequired": false,
+    "autoScalingRequired": false
 };

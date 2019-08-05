@@ -55,13 +55,14 @@ const theme = createMuiTheme({
 });
 
 const App = ({data, classes}) => {
-    const getFQN = (cellData) => `${cellData.org}/${cellData.name}:${cellData.ver}`;
+    const getFQN = (nodeData) => `${nodeData.org}/${nodeData.name}:${nodeData.ver}`;
+    const focusedNodeFQN = getFQN(data);
     const diagramData = {
         cells: [], // List of all the cell FQNs
         composites: [], // List of all the composite FQNs
         components: Object.keys(data.components).map((component) => (
             {
-                cell: getFQN(data),
+                parent: focusedNodeFQN,
                 name: component
             }
         )),
@@ -71,47 +72,48 @@ const App = ({data, classes}) => {
 
     // Adding the main Cell/Composite
     if (data.kind === Constants.Type.CELL) {
-        diagramData.cells.push(getFQN(data));
+        diagramData.cells.push(focusedNodeFQN);
     } else if (data.kind === Constants.Type.COMPOSITE) {
-        diagramData.composites.push(getFQN(data));
+        diagramData.composites.push(focusedNodeFQN);
     } else {
         throw Error(`Unknown type ${data.kind}`);
     }
 
     // Recursively extract dependencies (including transitive dependencies if available)
-    const extractData = (cell) => {
-        if (cell.components) {
-            Object.values(cell.components).forEach((component) => {
+    const extractData = (node) => {
+        const nodeFQN = getFQN(node);
+        if (node.components) {
+            Object.values(node.components).forEach((component) => {
                 Object.entries(component.dependencies.cells).forEach(([alias, dependency]) => {
-                    const dependencyName = getFQN(dependency);
+                    const dependencyFQN = getFQN(dependency);
 
                     // Adding the dependency to the Cells/Composites list
-                    if (cell.kind === Constants.Type.CELL) {
-                        if (!diagramData.cells.includes(dependencyName)) {
-                            diagramData.cells.push(dependencyName);
+                    if (dependency.kind === Constants.Type.CELL) {
+                        if (!diagramData.cells.includes(dependencyFQN)) {
+                            diagramData.cells.push(dependencyFQN);
                         }
-                    } else if (cell.kind === Constants.Type.COMPOSITE) {
-                        if (!diagramData.composites.includes(dependencyName)) {
-                            diagramData.composites.push(dependencyName);
+                    } else if (dependency.kind === Constants.Type.COMPOSITE) {
+                        if (!diagramData.composites.includes(dependencyFQN)) {
+                            diagramData.composites.push(dependencyFQN);
                         }
                     } else {
-                        throw Error(`Unknown type ${cell.kind}`);
+                        throw Error(`Unknown type ${dependency.kind}`);
                     }
 
                     // Adding the link from the Cell to the dependency
                     diagramData.dependencyLinks.push({
                         alias: alias,
-                        from: getFQN(cell),
-                        to: dependencyName
+                        from: nodeFQN,
+                        to: dependencyFQN
                     });
 
                     if (dependency.components) {
                         Object.keys(dependency.components).forEach((component) => {
                             const matches = diagramData.components.find(
-                                (datum) => datum.cell === dependencyName && datum.name === component);
+                                (datum) => datum.parent === dependencyFQN && datum.name === component);
                             if (!matches) {
                                 diagramData.components.push({
-                                    cell: dependencyName,
+                                    parent: dependencyFQN,
                                     name: component
                                 });
                             }
@@ -122,37 +124,37 @@ const App = ({data, classes}) => {
             });
         }
 
-        if (!diagramData.metaInfo.hasOwnProperty(getFQN(cell))) {
-            const cellMetaInfo = {
-                type: cell.type,
+        if (!diagramData.metaInfo.hasOwnProperty(nodeFQN)) {
+            const nodeMetaInfo = {
+                type: node.kind,
                 ingresses: [],
                 componentDependencyLinks: []
             };
 
-            if (cell.components) {
-                Object.entries(cell.components).forEach(([componentName, component]) => {
+            if (node.components) {
+                Object.entries(node.components).forEach(([componentName, component]) => {
                     component.dependencies.components.forEach((dependentComponent) => {
-                        cellMetaInfo.componentDependencyLinks.push({
-                            from: `${getFQN(cell)} ${componentName}`,
-                            to: `${getFQN(cell)} ${dependentComponent}`
+                        nodeMetaInfo.componentDependencyLinks.push({
+                            from: componentName,
+                            to: dependentComponent
                         });
                     });
-                    if (cell.kind === Constants.Type.CELL && component.exposed) {
-                        cellMetaInfo.componentDependencyLinks.push({
-                            from: `${getFQN(cell)} gateway`,
-                            to: `${getFQN(cell)} ${componentName}`
+                    if (node.kind === Constants.Type.CELL && component.exposed) {
+                        nodeMetaInfo.componentDependencyLinks.push({
+                            from: "gateway",
+                            to: componentName
                         });
                     }
                     if (component.ingressTypes) {
                         component.ingressTypes.forEach((ingressType) => {
-                            if (!cellMetaInfo.ingresses.includes(ingressType)) {
-                                cellMetaInfo.ingresses.push(ingressType);
+                            if (!nodeMetaInfo.ingresses.includes(ingressType)) {
+                                nodeMetaInfo.ingresses.push(ingressType);
                             }
                         });
                     }
                 });
             }
-            diagramData.metaInfo[getFQN(cell)] = cellMetaInfo;
+            diagramData.metaInfo[nodeFQN] = nodeMetaInfo;
         }
     };
     extractData(data);
@@ -169,7 +171,7 @@ const App = ({data, classes}) => {
                         </Typography>
                     </Toolbar>
                 </AppBar>
-                <CellDiagramView data={diagramData} focusedNode={getFQN(data)}/>
+                <CellDiagramView data={diagramData} focusedNode={focusedNodeFQN}/>
             </div>
         </MuiThemeProvider>
     );

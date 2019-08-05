@@ -318,7 +318,7 @@ func ReplaceInstanceName(srcFile, oldString, newString string) error {
 		return err
 	}
 	fileContent := strings.Replace(string(input), oldString, newString, 1)
-	
+
 	if err = ioutil.WriteFile(srcFile, []byte(fileContent), 0666); err != nil {
 		return err
 	}

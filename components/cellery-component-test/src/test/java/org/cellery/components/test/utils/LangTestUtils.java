@@ -237,15 +237,19 @@ public class LangTestUtils {
         try (InputStream input = new FileInputStream(metadataJsonPath)) {
             try (InputStreamReader inputStreamReader = new InputStreamReader(input)) {
                 JsonElement parsedJson = new JsonParser().parse(inputStreamReader);
-                JsonObject dependenciesJsonObject = parsedJson.getAsJsonObject().getAsJsonObject("dependencies");
-                for (Map.Entry<String, JsonElement> e : dependenciesJsonObject.entrySet()) {
-                    JsonObject dependency = e.getValue().getAsJsonObject();
-                    String key = e.getKey();
-                    String org = dependency.getAsJsonPrimitive("org").getAsString();
-                    String name = dependency.getAsJsonPrimitive("name").getAsString();
-                    String ver = dependency.getAsJsonPrimitive("ver").getAsString();
-                    CellImageInfo cell = new CellImageInfo(org, name, ver, "");
-                    dependencyMap.put(key, cell);
+                JsonObject componentsJsonObject = parsedJson.getAsJsonObject().getAsJsonObject("components");
+                for (Map.Entry<String, JsonElement> componentEntry : componentsJsonObject.entrySet()) {
+                    JsonObject dependenciesJsonObject = componentEntry.getValue().getAsJsonObject()
+                            .getAsJsonObject("dependencies").getAsJsonObject("cells");
+                    for (Map.Entry<String, JsonElement> e : dependenciesJsonObject.entrySet()) {
+                        JsonObject dependency = e.getValue().getAsJsonObject();
+                        String key = e.getKey();
+                        String org = dependency.getAsJsonPrimitive("org").getAsString();
+                        String name = dependency.getAsJsonPrimitive("name").getAsString();
+                        String ver = dependency.getAsJsonPrimitive("ver").getAsString();
+                        CellImageInfo cell = new CellImageInfo(org, name, ver, "");
+                        dependencyMap.put(key, cell);
+                    }
                 }
             }
         }

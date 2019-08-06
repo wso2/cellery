@@ -23,6 +23,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import io.cellery.CelleryConstants;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.logging.Log;
@@ -244,9 +245,9 @@ public class LangTestUtils {
                     for (Map.Entry<String, JsonElement> e : dependenciesJsonObject.entrySet()) {
                         JsonObject dependency = e.getValue().getAsJsonObject();
                         String key = e.getKey();
-                        String org = dependency.getAsJsonPrimitive("org").getAsString();
-                        String name = dependency.getAsJsonPrimitive("name").getAsString();
-                        String ver = dependency.getAsJsonPrimitive("ver").getAsString();
+                        String org = dependency.getAsJsonPrimitive(CelleryConstants.ORG).getAsString();
+                        String name = dependency.getAsJsonPrimitive(CelleryConstants.NAME).getAsString();
+                        String ver = dependency.getAsJsonPrimitive(CelleryConstants.VERSION).getAsString();
                         CellImageInfo cell = new CellImageInfo(org, name, ver, "");
                         dependencyMap.put(key, cell);
                     }

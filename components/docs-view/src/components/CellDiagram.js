@@ -20,6 +20,7 @@
 
 import "vis/dist/vis-network.min.css";
 import CircularProgress from "@material-ui/core/CircularProgress";
+import Constants from "../constants";
 import React from "react";
 import vis from "vis";
 import {withStyles} from "@material-ui/core/styles";
@@ -348,7 +349,7 @@ class CellDiagram extends React.Component {
 
 
         const incomingNodes = [];
-        if (data.metaInfo[focusedNode].type === CellDiagram.NodeType.CELL) {
+        if (data.metaInfo[focusedNode].type === Constants.Type.CELL) {
             nodes.add({
                 id: `${focusedNode}${CellDiagram.CELL_COMPONENT_SEPARATOR}${CellDiagram.NodeType.GATEWAY}`,
                 label: CellDiagram.NodeType.GATEWAY,
@@ -475,7 +476,7 @@ class CellDiagram extends React.Component {
                 updatedNodes.push(focused);
 
                 // Placing gateway node
-                if (data.metaInfo[focusedNode].type === CellDiagram.NodeType.CELL) {
+                if (data.metaInfo[focusedNode].type === Constants.Type.CELL) {
                     const gatewayNode = nodes.get(
                         `${focusedNode}${CellDiagram.CELL_COMPONENT_SEPARATOR}${CellDiagram.NodeType.GATEWAY}`);
                     const gatewayPoint = findPoint(centerPoint.x, centerPoint.y, 90, size * Math.cos(180 / 8));

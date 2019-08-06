@@ -5,7 +5,8 @@
   "homepage": ".",
   "scripts": {
     "clean": "rimraf ./build/ && rimraf ./node-server/public/ && rimraf ./coverage/",
-    "lint": "eslint --color --fix src/",
+    "lint": "eslint --color src/",
+    "lint:fix": "eslint --color --fix src/",
     "build": "react-scripts build && copyfiles -u 1 resources/data/cell.js ./build/",
     "test": "CI=true react-scripts test --colors --testURL=http://test.cellery.com --coverage",
     "eject": "react-scripts eject"

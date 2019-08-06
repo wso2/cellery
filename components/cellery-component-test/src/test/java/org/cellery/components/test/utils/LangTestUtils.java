@@ -23,6 +23,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import io.cellery.CelleryConstants;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.logging.Log;
@@ -237,15 +238,19 @@ public class LangTestUtils {
         try (InputStream input = new FileInputStream(metadataJsonPath)) {
             try (InputStreamReader inputStreamReader = new InputStreamReader(input)) {
                 JsonElement parsedJson = new JsonParser().parse(inputStreamReader);
-                JsonObject dependenciesJsonObject = parsedJson.getAsJsonObject().getAsJsonObject("dependencies");
-                for (Map.Entry<String, JsonElement> e : dependenciesJsonObject.entrySet()) {
-                    JsonObject dependency = e.getValue().getAsJsonObject();
-                    String key = e.getKey();
-                    String org = dependency.getAsJsonPrimitive("org").getAsString();
-                    String name = dependency.getAsJsonPrimitive("name").getAsString();
-                    String ver = dependency.getAsJsonPrimitive("ver").getAsString();
-                    CellImageInfo cell = new CellImageInfo(org, name, ver, "");
-                    dependencyMap.put(key, cell);
+                JsonObject componentsJsonObject = parsedJson.getAsJsonObject().getAsJsonObject("components");
+                for (Map.Entry<String, JsonElement> componentEntry : componentsJsonObject.entrySet()) {
+                    JsonObject dependenciesJsonObject = componentEntry.getValue().getAsJsonObject()
+                            .getAsJsonObject("dependencies").getAsJsonObject("cells");
+                    for (Map.Entry<String, JsonElement> e : dependenciesJsonObject.entrySet()) {
+                        JsonObject dependency = e.getValue().getAsJsonObject();
+                        String key = e.getKey();
+                        String org = dependency.getAsJsonPrimitive(CelleryConstants.ORG).getAsString();
+                        String name = dependency.getAsJsonPrimitive(CelleryConstants.NAME).getAsString();
+                        String ver = dependency.getAsJsonPrimitive(CelleryConstants.VERSION).getAsString();
+                        CellImageInfo cell = new CellImageInfo(org, name, ver, "");
+                        dependencyMap.put(key, cell);
+                    }
                 }
             }
         }

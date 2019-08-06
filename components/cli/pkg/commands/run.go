@@ -76,7 +76,7 @@ func RunRun(cellImageTag string, instanceName string, startDependencies bool, sh
 		spinner.Stop(false)
 		util.ExitWithErrorMessage("Error occurred while reading Cell Image metadata", err)
 	}
-	cellImageMetadata := &image.CellImageMetaData{}
+	cellImageMetadata := &image.MetaData{}
 	err = json.Unmarshal(metadataFileContent, cellImageMetadata)
 	if err != nil {
 		spinner.Stop(false)
@@ -104,7 +104,7 @@ func RunRun(cellImageTag string, instanceName string, startDependencies bool, sh
 	}
 	fmt.Printf("\r\x1b[2K\n%s: %s\n\n", util.Bold("Main Instance"), instanceName)
 
-	if cellImageMetadata.ZeroScaling {
+	if cellImageMetadata.ZeroScalingRequired {
 		// Check K-Native is installed.
 		if ok, err := celleryRuntime.IsKnativeEnabled(); err == nil {
 			if !ok {
@@ -119,7 +119,7 @@ func RunRun(cellImageTag string, instanceName string, startDependencies bool, sh
 			util.ExitWithErrorMessage("Error occurred while checking whether zero-scaling is enabled.", err)
 		}
 	}
-	if cellImageMetadata.AutoScaling {
+	if cellImageMetadata.AutoScalingRequired {
 		// Check metrics-server is installed.
 		if ok, err := celleryRuntime.IsHpaEnabled(); err == nil {
 			if !ok {
@@ -273,10 +273,20 @@ func RunRun(cellImageTag string, instanceName string, startDependencies bool, sh
 					fmt.Errorf("all the instances should be avaialable in the runtime when running "+
 						"without depedencies, instance %s not available in the runtime", link.DependencyInstance))
 			} else if link.Instance == "" || link.Instance == instanceName {
-				if metadata, hasKey := cellImageMetadata.Dependencies[link.DependencyAlias]; hasKey {
+				var dependencyMetadata *image.MetaData
+			cellImageMetadataLoop:
+				for _, componentMetadata := range cellImageMetadata.Components {
+					for alias, metadata := range componentMetadata.Dependencies.Cells {
+						if link.DependencyAlias == alias {
+							dependencyMetadata = metadata
+							break cellImageMetadataLoop
+						}
+					}
+				}
+				if dependencyMetadata != nil {
 					immediateDependencies[link.DependencyAlias] = &dependencyTreeNode{
 						Instance:  link.DependencyInstance,
-						MetaData:  metadata,
+						MetaData:  dependencyMetadata,
 						IsShared:  false,
 						IsRunning: link.IsRunning,
 					}
@@ -284,8 +294,19 @@ func RunRun(cellImageTag string, instanceName string, startDependencies bool, sh
 					// If cellImageMetadata does not contain the provided link, there is a high chance that the user
 					// made a mistake in the command. Therefore, this is validated strictly
 					var allowedAliases []string
-					for alias := range cellImageMetadata.Dependencies {
-						allowedAliases = append(allowedAliases, alias)
+					for _, componentMetadata := range cellImageMetadata.Components {
+						for alias := range componentMetadata.Dependencies.Cells {
+							isAlreadyPresent := false
+							for _, addedAlias := range allowedAliases {
+								if addedAlias == alias {
+									isAlreadyPresent = true
+									break
+								}
+							}
+							if !isAlreadyPresent {
+								allowedAliases = append(allowedAliases, alias)
+							}
+						}
 					}
 					spinner.Stop(false)
 					util.ExitWithErrorMessage("Invalid links",
@@ -304,22 +325,23 @@ func RunRun(cellImageTag string, instanceName string, startDependencies bool, sh
 		}
 
 		// Check if instances are provided for all the dependencies of the root Cell
-		for alias := range cellImageMetadata.Dependencies {
-			isLinkProvided := false
-			for _, link := range parsedDependencyLinks {
-				if link.DependencyAlias == alias {
-					isLinkProvided = true
-					break
+		for _, componentMetadata := range cellImageMetadata.Components {
+			for alias := range componentMetadata.Dependencies.Cells {
+				isLinkProvided := false
+				for _, link := range parsedDependencyLinks {
+					if link.DependencyAlias == alias {
+						isLinkProvided = true
+						break
+					}
+				}
+				if !isLinkProvided {
+					// If a link is not provided for a particular dependency, the main instance cannot be started.
+					// The links is required for the main instance to discover the dependency in the runtime
+					spinner.Stop(false)
+					util.ExitWithErrorMessage("Links for all the dependencies not found",
+						fmt.Errorf("required link for alias %s in instance %s not found", alias, instanceName))
 				}
 			}
-			if !isLinkProvided {
-				// If a link is not provided for a particular dependency, the main instance cannot be started.
-				// The links is required for the main instance to discover the dependency in the runtime
-				spinner.Stop(false)
-				util.ExitWithErrorMessage("Links for all the dependencies not found",
-					fmt.Errorf("required link for alias %s in instance %s not found", alias, instanceName))
-			}
-
 		}
 		mainNode = &dependencyTreeNode{
 			Instance:     instanceName,
@@ -351,7 +373,7 @@ func RunRun(cellImageTag string, instanceName string, startDependencies bool, sh
 }
 
 // validateDependencyTree validates the dependency tree of the root instance
-func validateDependencyLinks(rootInstance string, rootMetaData *image.CellImageMetaData,
+func validateDependencyLinks(rootInstance string, rootMetaData *image.MetaData,
 	dependencyLinks []*dependencyAliasLink) error {
 	// Validating the links provided by the user
 	for _, link := range dependencyLinks {
@@ -360,7 +382,7 @@ func validateDependencyLinks(rootInstance string, rootMetaData *image.CellImageM
 			// If the duplicate aliases have matching Cell Images, then they can share the instance.
 			// However, if duplicate aliases are present without parent instances and referring to different
 			// Cell Images, the links should be more specific using parent instance
-			var validateSubtree func(metadata *image.CellImageMetaData) error
+			var validateSubtree func(metadata *image.MetaData) error
 			// cellImage is used to store the Cell image which is referred to by this link. This is used to validate
 			// whether the Cell images of the duplicated aliases (without the parent instance) match.
 			var cellImage *image.CellImage
@@ -368,40 +390,43 @@ func validateDependencyLinks(rootInstance string, rootMetaData *image.CellImageM
 			// (without the parent instance) which is duplicated in the dependency tree. A warning is shown later to
 			// the user about these instances since this could be a mistake
 			userSpecifiedSharedInstances := map[string]string{}
-			validateSubtree = func(metadata *image.CellImageMetaData) error {
-				for alias, dependencyMetadata := range metadata.Dependencies {
-					if alias == link.DependencyAlias {
-						if cellImage == nil {
-							// This is the first time the alias was found in the dependency tree.
-							// (Since the Cell Image was not set)
-							cellImage = &image.CellImage{
-								Organization: dependencyMetadata.Organization,
-								ImageName:    dependencyMetadata.Name,
-								ImageVersion: dependencyMetadata.Version,
-							}
-						} else {
-							// Check if the provided alias which is duplicated in the dependency tree is the same image
-							if cellImage.Organization != dependencyMetadata.Organization ||
-								cellImage.ImageName != dependencyMetadata.Name ||
-								cellImage.ImageVersion != dependencyMetadata.Version {
-								return fmt.Errorf("duplicated alias %s in dependency tree, referes to different "+
-									"images %s/%s:%s and %s/%s:%s, provided aliases which are duplicated in the "+
-									"depedencies should be more specific using parent instance", alias,
-									cellImage.Organization, cellImage.ImageName, cellImage.ImageVersion,
-									dependencyMetadata.Organization, dependencyMetadata.Name,
-									dependencyMetadata.Version)
+			validateSubtree = func(metadata *image.MetaData) error {
+				for _, componentMetadata := range metadata.Components {
+					for alias, dependencyMetadata := range componentMetadata.Dependencies.Cells {
+						if alias == link.DependencyAlias {
+							if cellImage == nil {
+								// This is the first time the alias was found in the dependency tree.
+								// (Since the Cell Image was not set)
+								cellImage = &image.CellImage{
+									Organization: dependencyMetadata.Organization,
+									ImageName:    dependencyMetadata.Name,
+									ImageVersion: dependencyMetadata.Version,
+								}
 							} else {
-								// Since the Cell Image is the same in both aliases the instance will be reused
-								// The instance is stored to show a warning to the user later
-								if _, hasKey := userSpecifiedSharedInstances[link.DependencyAlias]; !hasKey {
-									userSpecifiedSharedInstances[link.DependencyAlias] = link.DependencyInstance
+								// Check if the provided alias which is duplicated in the dependency
+								// tree is the same image
+								if cellImage.Organization != dependencyMetadata.Organization ||
+									cellImage.ImageName != dependencyMetadata.Name ||
+									cellImage.ImageVersion != dependencyMetadata.Version {
+									return fmt.Errorf("duplicated alias %s in dependency tree, referes to "+
+										"different images %s/%s:%s and %s/%s:%s, provided aliases which are "+
+										"duplicated in the depedencies should be more specific using parent "+
+										"instance", alias, cellImage.Organization, cellImage.ImageName,
+										cellImage.ImageVersion, dependencyMetadata.Organization,
+										dependencyMetadata.Name, dependencyMetadata.Version)
+								} else {
+									// Since the Cell Image is the same in both aliases the instance will be reused
+									// The instance is stored to show a warning to the user later
+									if _, hasKey := userSpecifiedSharedInstances[link.DependencyAlias]; !hasKey {
+										userSpecifiedSharedInstances[link.DependencyAlias] = link.DependencyInstance
+									}
 								}
 							}
 						}
-					}
-					err := validateSubtree(dependencyMetadata)
-					if err != nil {
-						return err
+						err := validateSubtree(dependencyMetadata)
+						if err != nil {
+							return err
+						}
 					}
 				}
 				return nil
@@ -441,8 +466,8 @@ func validateDependencyLinks(rootInstance string, rootMetaData *image.CellImageM
 }
 
 // generateDependencyOrder reads the metadata and generates a proper start up order for dependencies
-func generateDependencyTree(rootInstance string, rootMetaData *image.CellImageMetaData,
-	dependencyLinks []*dependencyAliasLink, shareDependencies bool) (*dependencyTreeNode, error) {
+func generateDependencyTree(rootInstance string, rootMetaData *image.MetaData, dependencyLinks []*dependencyAliasLink,
+	shareDependencies bool) (*dependencyTreeNode, error) {
 	// aliasToTreeNodeMap is used to keep track of the already created user provided tree nodes.
 	// The key of the is the alias and the value is the tree node.
 	// The alias is prefixed by the instance only if the user specified the parent instance as well.
@@ -458,74 +483,76 @@ func generateDependencyTree(rootInstance string, rootMetaData *image.CellImageMe
 
 	// traverseDependencies traverses through the dependency tree and populates the startup order considering the
 	// relationship between dependencies
-	var traverseDependencies func(instance string, metaData *image.CellImageMetaData, treeNode *dependencyTreeNode) error
-	traverseDependencies = func(instance string, metaData *image.CellImageMetaData, treeNode *dependencyTreeNode) error {
-		for alias, dependencyMetaData := range metaData.Dependencies {
-			var dependencyNode *dependencyTreeNode
+	var traverseDependencies func(instance string, metaData *image.MetaData, treeNode *dependencyTreeNode) error
+	traverseDependencies = func(instance string, metaData *image.MetaData, treeNode *dependencyTreeNode) error {
+		for _, componentMetaData := range metaData.Components {
+			for alias, dependencyMetaData := range componentMetaData.Dependencies.Cells {
+				var dependencyNode *dependencyTreeNode
 
-			// Check if the dependency link is provided by the user
-			for _, link := range dependencyLinks {
-				if alias == link.DependencyAlias && (link.Instance == "" || link.Instance == instance) {
-					var aliasPrefix string
-					if link.Instance != "" {
-						aliasPrefix = link.Instance + "."
-					}
-					key := aliasPrefix + alias
-
-					if node, hasKey := aliasToTreeNodeMap[key]; hasKey {
-						// Since the alias is already present in the map, the instance will be shared
-						dependencyNode = node
-						dependencyNode.IsShared = true
-					} else {
-						dependencyNode = &dependencyTreeNode{
-							Instance:     link.DependencyInstance,
-							MetaData:     dependencyMetaData,
-							Dependencies: map[string]*dependencyTreeNode{},
-							IsShared:     false,
-							IsRunning:    link.IsRunning,
+				// Check if the dependency link is provided by the user
+				for _, link := range dependencyLinks {
+					if alias == link.DependencyAlias && (link.Instance == "" || link.Instance == instance) {
+						var aliasPrefix string
+						if link.Instance != "" {
+							aliasPrefix = link.Instance + "."
 						}
-						aliasToTreeNodeMap[key] = dependencyNode
-						usedDependencyLinks = append(usedDependencyLinks, link)
-					}
-					break
-				}
-			}
+						key := aliasPrefix + alias
 
-			if dependencyNode == nil {
-				if shareDependencies {
-					// Check if an instance had been already allocated for this image
-					for _, existingNode := range generatedInstanceTreeNodes {
-						if existingNode.MetaData.Organization == dependencyMetaData.Organization &&
-							existingNode.MetaData.Name == dependencyMetaData.Name &&
-							existingNode.MetaData.Version == dependencyMetaData.Version {
-							dependencyNode = existingNode
-							existingNode.IsShared = true
+						if node, hasKey := aliasToTreeNodeMap[key]; hasKey {
+							// Since the alias is already present in the map, the instance will be shared
+							dependencyNode = node
+							dependencyNode.IsShared = true
+						} else {
+							dependencyNode = &dependencyTreeNode{
+								Instance:     link.DependencyInstance,
+								MetaData:     dependencyMetaData,
+								Dependencies: map[string]*dependencyTreeNode{},
+								IsShared:     false,
+								IsRunning:    link.IsRunning,
+							}
+							aliasToTreeNodeMap[key] = dependencyNode
+							usedDependencyLinks = append(usedDependencyLinks, link)
 						}
+						break
 					}
 				}
 
 				if dependencyNode == nil {
-					// Since no suitable instance that can be used is present, a random name is generated
-					dependencyInstance, err := generateRandomInstanceName(dependencyMetaData)
-					if err != nil {
-						return err
+					if shareDependencies {
+						// Check if an instance had been already allocated for this image
+						for _, existingNode := range generatedInstanceTreeNodes {
+							if existingNode.MetaData.Organization == dependencyMetaData.Organization &&
+								existingNode.MetaData.Name == dependencyMetaData.Name &&
+								existingNode.MetaData.Version == dependencyMetaData.Version {
+								dependencyNode = existingNode
+								existingNode.IsShared = true
+							}
+						}
 					}
-					dependencyNode = &dependencyTreeNode{
-						Instance:     dependencyInstance,
-						MetaData:     dependencyMetaData,
-						Dependencies: map[string]*dependencyTreeNode{},
-						IsShared:     false,
-						IsRunning:    false,
-					}
-					generatedInstanceTreeNodes = append(generatedInstanceTreeNodes, dependencyNode)
-				}
-			}
 
-			// Traversing the dependencies (Depth First Search for start up items)
-			treeNode.Dependencies[alias] = dependencyNode
-			err := traverseDependencies(dependencyNode.Instance, dependencyMetaData, dependencyNode)
-			if err != nil {
-				return err
+					if dependencyNode == nil {
+						// Since no suitable instance that can be used is present, a random name is generated
+						dependencyInstance, err := generateRandomInstanceName(dependencyMetaData)
+						if err != nil {
+							return err
+						}
+						dependencyNode = &dependencyTreeNode{
+							Instance:     dependencyInstance,
+							MetaData:     dependencyMetaData,
+							Dependencies: map[string]*dependencyTreeNode{},
+							IsShared:     false,
+							IsRunning:    false,
+						}
+						generatedInstanceTreeNodes = append(generatedInstanceTreeNodes, dependencyNode)
+					}
+				}
+
+				// Traversing the dependencies (Depth First Search for start up items)
+				treeNode.Dependencies[alias] = dependencyNode
+				err := traverseDependencies(dependencyNode.Instance, dependencyMetaData, dependencyNode)
+				if err != nil {
+					return err
+				}
 			}
 		}
 		return nil
@@ -1015,7 +1042,7 @@ func startCellInstance(imageDir string, instanceName string, runningNode *depend
 }
 
 // generateRandomInstanceName generates a random instance name with a UUID as the suffix
-func generateRandomInstanceName(dependencyMetaData *image.CellImageMetaData) (string, error) {
+func generateRandomInstanceName(dependencyMetaData *image.MetaData) (string, error) {
 	u := make([]byte, 4)
 	_, err := rand.Read(u)
 	if err != nil {
@@ -1109,7 +1136,7 @@ type environmentVariable struct {
 type dependencyTreeNode struct {
 	Mux          sync.Mutex
 	Instance     string
-	MetaData     *image.CellImageMetaData
+	MetaData     *image.MetaData
 	Dependencies map[string]*dependencyTreeNode
 	IsShared     bool
 	IsRunning    bool

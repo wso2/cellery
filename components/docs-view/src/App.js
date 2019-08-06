@@ -17,6 +17,7 @@
 import AppBar from "@material-ui/core/AppBar";
 import CellDiagramView from "./components/CellDiagramView";
 import CelleryLogo from "./icons/CelleryLogo";
+import Constants from "./constants";
 import CssBaseline from "@material-ui/core/CssBaseline/CssBaseline";
 import React from "react";
 import Toolbar from "@material-ui/core/Toolbar";
@@ -54,80 +55,106 @@ const theme = createMuiTheme({
 });
 
 const App = ({data, classes}) => {
-    const getCellName = (cellData) => `${cellData.org}/${cellData.name}:${cellData.ver}`;
+    const getFQN = (nodeData) => `${nodeData.org}/${nodeData.name}:${nodeData.ver}`;
+    const focusedNodeFQN = getFQN(data);
     const diagramData = {
-        cells: [getCellName(data)],
-        components: data.components.map((component) => (
+        cells: [], // List of all the cell FQNs
+        composites: [], // List of all the composite FQNs
+        components: Object.keys(data.components).map((component) => (
             {
-                cell: getCellName(data),
+                parent: focusedNodeFQN,
                 name: component
             }
         )),
-        metaInfo: {},
-        dependencyLinks: []
+        metaInfo: {}, // All the additional information of each Cell/Composite
+        dependencyLinks: [] // The dependency links between Cells/Composites
     };
 
-    // Recursively extract dependencies (including transitive dependencies if available)
-    const extractData = (cell) => {
-        if (cell.dependencies) {
-            Object.entries(cell.dependencies).forEach(([alias, dependency]) => {
-                const dependencyName = getCellName(dependency);
-                if (!diagramData.cells.includes(dependencyName)) {
-                    diagramData.cells.push(dependencyName);
-                }
-                diagramData.dependencyLinks.push({
-                    alias: alias,
-                    from: getCellName(cell),
-                    to: dependencyName
-                });
+    // Adding the main Cell/Composite
+    if (data.kind === Constants.Type.CELL) {
+        diagramData.cells.push(focusedNodeFQN);
+    } else if (data.kind === Constants.Type.COMPOSITE) {
+        diagramData.composites.push(focusedNodeFQN);
+    } else {
+        throw Error(`Unknown type ${data.kind}`);
+    }
 
-                if (dependency.components) {
-                    dependency.components.forEach((component) => {
-                        const matches = diagramData.components.find(
-                            (datum) => datum.cell === dependencyName && datum.name === component);
-                        if (!matches) {
-                            diagramData.components.push({
-                                cell: dependencyName,
-                                name: component
-                            });
+    // Recursively extract dependencies (including transitive dependencies if available)
+    const extractData = (node) => {
+        const nodeFQN = getFQN(node);
+        if (node.components) {
+            Object.values(node.components).forEach((component) => {
+                Object.entries(component.dependencies.cells).forEach(([alias, dependency]) => {
+                    const dependencyFQN = getFQN(dependency);
+
+                    // Adding the dependency to the Cells/Composites list
+                    if (dependency.kind === Constants.Type.CELL) {
+                        if (!diagramData.cells.includes(dependencyFQN)) {
+                            diagramData.cells.push(dependencyFQN);
                         }
+                    } else if (dependency.kind === Constants.Type.COMPOSITE) {
+                        if (!diagramData.composites.includes(dependencyFQN)) {
+                            diagramData.composites.push(dependencyFQN);
+                        }
+                    } else {
+                        throw Error(`Unknown type ${dependency.kind}`);
+                    }
+
+                    // Adding the link from the Cell to the dependency
+                    diagramData.dependencyLinks.push({
+                        alias: alias,
+                        from: nodeFQN,
+                        to: dependencyFQN
                     });
-                }
-                extractData(dependency);
+
+                    if (dependency.components) {
+                        Object.keys(dependency.components).forEach((component) => {
+                            const matches = diagramData.components.find(
+                                (datum) => datum.parent === dependencyFQN && datum.name === component);
+                            if (!matches) {
+                                diagramData.components.push({
+                                    parent: dependencyFQN,
+                                    name: component
+                                });
+                            }
+                        });
+                    }
+                    extractData(dependency);
+                });
             });
         }
 
-        if (!diagramData.metaInfo.hasOwnProperty(getCellName(cell))) {
-            const cellMetaInfo = {
-                cell: getCellName(cell),
+        if (!diagramData.metaInfo.hasOwnProperty(nodeFQN)) {
+            const nodeMetaInfo = {
+                type: node.kind,
                 ingresses: [],
                 componentDependencyLinks: []
             };
 
-            if (cell.componentDep) {
-                Object.entries(cell.componentDep).forEach(([component, dependency]) => {
-                    dependency.forEach((dependentComponent) => {
-                        cellMetaInfo.componentDependencyLinks.push({
-                            from: `${getCellName(cell)} ${component}`,
-                            to: `${getCellName(cell)} ${dependentComponent}`
+            if (node.components) {
+                Object.entries(node.components).forEach(([componentName, component]) => {
+                    component.dependencies.components.forEach((dependentComponent) => {
+                        nodeMetaInfo.componentDependencyLinks.push({
+                            from: componentName,
+                            to: dependentComponent
                         });
                     });
+                    if (node.kind === Constants.Type.CELL && component.exposed) {
+                        nodeMetaInfo.componentDependencyLinks.push({
+                            from: "gateway",
+                            to: componentName
+                        });
+                    }
+                    if (component.ingressTypes) {
+                        component.ingressTypes.forEach((ingressType) => {
+                            if (!nodeMetaInfo.ingresses.includes(ingressType)) {
+                                nodeMetaInfo.ingresses.push(ingressType);
+                            }
+                        });
+                    }
                 });
             }
-
-            if (cell.exposed) {
-                cell.exposed.forEach((component) => {
-                    cellMetaInfo.componentDependencyLinks.push({
-                        from: `${getCellName(cell)} gateway`,
-                        to: `${getCellName(cell)} ${component}`
-                    });
-                });
-            }
-
-            if (cell.ingresses) {
-                cellMetaInfo.ingresses = cell.ingresses;
-            }
-            diagramData.metaInfo[getCellName(cell)] = cellMetaInfo;
+            diagramData.metaInfo[nodeFQN] = nodeMetaInfo;
         }
     };
     extractData(data);
@@ -144,7 +171,7 @@ const App = ({data, classes}) => {
                         </Typography>
                     </Toolbar>
                 </AppBar>
-                <CellDiagramView data={diagramData} focusedNode={getCellName(data)}/>
+                <CellDiagramView data={diagramData} focusedNode={focusedNodeFQN}/>
             </div>
         </MuiThemeProvider>
     );

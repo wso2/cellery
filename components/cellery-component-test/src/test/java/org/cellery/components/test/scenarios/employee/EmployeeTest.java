@@ -17,7 +17,9 @@
  */
 package org.cellery.components.test.scenarios.employee;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.cellery.CelleryUtils;
 import io.cellery.models.API;
@@ -204,9 +206,53 @@ public class EmployeeTest {
         try (InputStream input = new FileInputStream(metadataJsonPath)) {
             try (InputStreamReader inputStreamReader = new InputStreamReader(input)) {
                 JsonElement parsedJson = new JsonParser().parse(inputStreamReader);
-                Assert.assertEquals(parsedJson.getAsJsonObject().getAsJsonArray("exposed").size(), 2);
-                Assert.assertFalse(parsedJson.getAsJsonObject().get("componentDep").getAsJsonObject()
-                        .get("employee").isJsonNull());
+                JsonObject metadataJson = parsedJson.getAsJsonObject();
+                Assert.assertEquals(metadataJson.size(), 6);
+                Assert.assertEquals(metadataJson.get("org").getAsString(), "myorg");
+                Assert.assertEquals(metadataJson.get("name").getAsString(), "employee");
+                Assert.assertEquals(metadataJson.get("ver").getAsString(), "1.0.0");
+                Assert.assertFalse(metadataJson.get("zeroScalingRequired").getAsBoolean());
+                Assert.assertFalse(metadataJson.get("autoScalingRequired").getAsBoolean());
+
+                JsonObject components = metadataJson.getAsJsonObject("components");
+                Assert.assertNotNull(components);
+                Assert.assertEquals(components.size(), 2);
+                {
+                    JsonObject employeeComponent = components.getAsJsonObject("employee");
+                    Assert.assertEquals(employeeComponent.get("dockerImage").getAsString(),
+                            "wso2cellery/sampleapp-employee:0.3.0");
+                    Assert.assertFalse(employeeComponent.get("isDockerPushRequired").getAsBoolean());
+                    Assert.assertTrue(employeeComponent.get("exposed").getAsBoolean());
+
+                    JsonObject labels = employeeComponent.getAsJsonObject("labels");
+                    Assert.assertEquals(labels.size(), 1);
+                    Assert.assertEquals(labels.get("team").getAsString(), "HR");
+
+                    JsonObject dependencies = employeeComponent.getAsJsonObject("dependencies");
+                    JsonArray componentDependencies = dependencies.getAsJsonArray("components");
+                    Assert.assertEquals(componentDependencies.size(), 1);
+                    Assert.assertEquals(componentDependencies.get(0).getAsString(), "salary");
+                    JsonObject cellDependencies = dependencies.getAsJsonObject("cells");
+                    Assert.assertEquals(cellDependencies.size(), 0);
+                }
+                {
+                    JsonObject salaryComponent = components.getAsJsonObject("salary");
+                    Assert.assertEquals(salaryComponent.get("dockerImage").getAsString(),
+                            "wso2cellery/sampleapp-salary:0.3.0");
+                    Assert.assertFalse(salaryComponent.get("isDockerPushRequired").getAsBoolean());
+                    Assert.assertTrue(salaryComponent.get("exposed").getAsBoolean());
+
+                    JsonObject labels = salaryComponent.getAsJsonObject("labels");
+                    Assert.assertEquals(labels.size(), 2);
+                    Assert.assertEquals(labels.get("owner").getAsString(), "Alice");
+                    Assert.assertEquals(labels.get("team").getAsString(), "Finance");
+
+                    JsonObject dependencies = salaryComponent.getAsJsonObject("dependencies");
+                    JsonArray componentDependencies = dependencies.getAsJsonArray("components");
+                    Assert.assertEquals(componentDependencies.size(), 0);
+                    JsonObject cellDependencies = dependencies.getAsJsonObject("cells");
+                    Assert.assertEquals(cellDependencies.size(), 0);
+                }
             }
         }
     }

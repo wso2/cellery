@@ -129,7 +129,7 @@ func displayCellImageApisTable(cellImageName string) {
 				var ingressData []string
 				ingressData = append(ingressData, componentName)
 
-				if len(ingress.Vhost) == 0 {
+				if len(cellImageContent.CellSpec.GateWayTemplate.GatewaySpec.Host) == 0 {
 					ingressType = "HTTP"
 				}
 				ingressData = append(ingressData, ingressType)

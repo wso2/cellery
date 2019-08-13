@@ -83,7 +83,7 @@ const App = ({data, classes}) => {
     const extractData = (node) => {
         const nodeFQN = getFQN(node);
         if (node.components) {
-            Object.values(node.components).forEach((component) => {
+            Object.entries(node.components).forEach(([componentName, component]) => {
                 Object.entries(component.dependencies.cells).forEach(([alias, dependency]) => {
                     const dependencyFQN = getFQN(dependency);
 
@@ -103,7 +103,10 @@ const App = ({data, classes}) => {
                     // Adding the link from the Cell to the dependency
                     diagramData.dependencyLinks.push({
                         alias: alias,
-                        from: nodeFQN,
+                        from: {
+                            parent: nodeFQN,
+                            component: componentName
+                        },
                         to: dependencyFQN
                     });
 

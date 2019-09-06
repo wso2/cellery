@@ -20,6 +20,7 @@ package io.cellery.impl;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import io.cellery.CelleryConstants;
 import io.cellery.CelleryUtils;
 import io.cellery.models.Cell;
 import io.cellery.models.CellMeta;
@@ -43,6 +44,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.ballerinalang.bre.Context;
 import org.ballerinalang.bre.bvm.BLangVMErrors;
 import org.ballerinalang.bre.bvm.BlockingNativeCallableUnit;
+import org.ballerinalang.connector.api.BLangConnectorSPIUtil;
 import org.ballerinalang.model.types.BArrayType;
 import org.ballerinalang.model.types.BMapType;
 import org.ballerinalang.model.types.BTypes;
@@ -50,6 +52,7 @@ import org.ballerinalang.model.types.TypeKind;
 import org.ballerinalang.model.values.BMap;
 import org.ballerinalang.model.values.BString;
 import org.ballerinalang.model.values.BValue;
+import org.ballerinalang.model.values.BValueArray;
 import org.ballerinalang.natives.annotations.Argument;
 import org.ballerinalang.natives.annotations.BallerinaFunction;
 import org.ballerinalang.natives.annotations.ReturnType;
@@ -70,6 +73,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static io.cellery.CelleryConstants.ANNOTATION_CELL_IMAGE_DEPENDENCIES;
 import static io.cellery.CelleryConstants.CELL;
@@ -83,6 +87,7 @@ import static io.cellery.CelleryConstants.POD_RESOURCES;
 import static io.cellery.CelleryConstants.PROBES;
 import static io.cellery.CelleryConstants.YAML;
 import static io.cellery.CelleryUtils.appendToFile;
+import static io.cellery.CelleryUtils.getFilesByExtension;
 import static io.cellery.CelleryUtils.isCellInstanceRunning;
 import static io.cellery.CelleryUtils.printDebug;
 import static io.cellery.CelleryUtils.printWarning;
@@ -116,20 +121,27 @@ public class CreateInstance extends BlockingNativeCallableUnit {
     private String instanceName;
     private Map dependencyInfo = new LinkedHashMap();
     private static Tree dependencyTree = new Tree();
+    private BValueArray bValueArray;
+    private AtomicLong runCount;
 
     public void execute(Context ctx) {
-        PrintStream out = System.out;
+        BArrayType bArrayType =
+                new BArrayType(ctx.getProgramFile().getPackageInfo(CelleryConstants.CELLERY_PACKAGE).getTypeDefInfo(
+                        CelleryConstants.IMAGE_NAME_DEFINITION).typeInfo.getType());
+        bValueArray = new BValueArray(bArrayType);
+        runCount = new AtomicLong(0L);
         String instanceArg;
         boolean startDependencies =  ctx.getBooleanArgument(0);
         final BMap refArgument = (BMap) ctx.getNullableRefArgument(0);
         LinkedHashMap nameStruct = ((BMap) ctx.getNullableRefArgument(1)).getMap();
         String cellName = ((BString) nameStruct.get("name")).stringValue();
+        String org = ((BString) nameStruct.get("org")).stringValue();
+        String version = ((BString) nameStruct.get("ver")).stringValue();
         instanceName = ((BString) nameStruct.get(INSTANCE_NAME)).stringValue();
         if (instanceName.isEmpty()) {
             instanceName = generateRandomInstanceName(((BString) nameStruct.get("name")).stringValue(),
                     ((BString) nameStruct.get("ver")).stringValue());
         }
-        out.println("Creating instance ===> " + instanceName);
         validateMainInstance(instanceName);
         String destinationPath = System.getenv(CELLERY_IMAGE_DIR_ENV_VAR) + File.separator +
                 "artifacts" + File.separator + "cellery";
@@ -166,16 +178,14 @@ public class CreateInstance extends BlockingNativeCallableUnit {
         // dependencyInfo is generated once all the validations are passing and all instance names are assigned
         // Generate dependency info
         dependencyInfo = generateDependencyInfo();
-        out.println("Dependency info of instance " + instanceName + ": " + dependencyInfo);
         if (startDependencies) {
             try {
                 // Display the dependency tree info table
                 displayDependentCellTable();
                 // Start the dependency tree
-                startDependencyTree();
+                startDependencyTree(ctx);
             } catch (Exception e) {
                 String error = "Unable to start dependencies";
-                out.println(error);
                 log.error(error, e);
             }
         }
@@ -199,19 +209,17 @@ public class CreateInstance extends BlockingNativeCallableUnit {
             writeToFile(toYaml(composite), cellYAMLPath);
             // Update cell yaml with instance name
             replaceInFile(cellYAMLPath, "  name: \"" + cellName + "\"\n", "  name: \"" + instanceName + "\"\n");
-//            ctx.setReturnValues(new BString(cellYAMLPath));
-            out.println("Applying cell yaml for instance " + instanceName);
             // Apply yaml file of the instance
             KubernetesClient.apply(cellYAMLPath);
             KubernetesClient.waitFor("Ready", 30 * 60, instanceArg, "default");
+            addToStartedInstances(ctx, org, cellName, version, instanceName);
+            ctx.setReturnValues(bValueArray);
         } catch (IOException | BallerinaException e) {
             String error = "Unable to persist updated composite yaml " + destinationPath;
-            out.println(error);
             log.error(error, e);
             ctx.setReturnValues(BLangVMErrors.createError(ctx, error + ". " + e.getMessage()));
         } catch (Exception e) {
             String error = "Unable to apply composite yaml " + destinationPath;
-            out.println(error);
             log.error(error, e);
         }
     }
@@ -438,12 +446,12 @@ public class CreateInstance extends BlockingNativeCallableUnit {
         BMap<String, BValue> dependencyInfoMap = new BMap<>(new BMapType(new BArrayType(BTypes.typeString)));
         for (Map.Entry<String, CellMeta> dependentCell :
                 ((CellMeta) dependencyTree.getRoot().getData()).getCellDependencies().entrySet()) {
-            BMap<String, BValue> mapObjB = new BMap<>(new BArrayType(BTypes.typeString));
-            mapObjB.put("org", new BString(dependentCell.getValue().getOrg()));
-            mapObjB.put("name", new BString(dependentCell.getValue().getName()));
-            mapObjB.put("ver", new BString(dependentCell.getValue().getVer()));
-            mapObjB.put("instanceName", new BString(dependentCell.getValue().getInstanceName()));
-            dependencyInfoMap.put(dependentCell.getKey(), mapObjB);
+            BMap<String, BValue> dependentCellMap = new BMap<>(new BArrayType(BTypes.typeString));
+            dependentCellMap.put("org", new BString(dependentCell.getValue().getOrg()));
+            dependentCellMap.put("name", new BString(dependentCell.getValue().getName()));
+            dependentCellMap.put("ver", new BString(dependentCell.getValue().getVer()));
+            dependentCellMap.put("instanceName", new BString(dependentCell.getValue().getInstanceName()));
+            dependencyInfoMap.put(dependentCell.getKey(), dependentCellMap);
         }
         return ((BMap) dependencyInfoMap).getMap();
     }
@@ -519,19 +527,17 @@ public class CreateInstance extends BlockingNativeCallableUnit {
      * @throws Exception if cell start fails
      */
     private void startInstance(String org, String name, String version, String cellInstanceName) throws Exception {
-        PrintStream out = System.out;
         Path imageDir = Paths.get(System.getProperty("user.home"), ".cellery", "repo", org, name, version,
                 name + ".zip");
         Path tempDir = Paths.get(System.getProperty("user.home"), ".cellery", "tmp");
         Path tempBalFileDir = Files.createTempDirectory(Paths.get(tempDir.toString()), "cellery-cell-image");
         unzip(imageDir.toString(), tempBalFileDir.toString());
-
-        String tempBalFile = tempBalFileDir + File.separator + "src" + File.separator +  name + ".bal";
+        String tempBalFile = getFilesByExtension(tempBalFileDir + File.separator + "src", "bal").
+                get(0).toString();
         String ballerinaMain = "public function main(string action, cellery:ImageName iName, map<cellery:ImageName> " +
                 "instances, boolean startDependencies) returns error? {\n" +
                 "\treturn run(iName, instances, startDependencies);\n" +
                 "}";
-        out.println(tempBalFile);
         appendToFile(ballerinaMain, tempBalFile);
         // Create a cell image json object
         JSONObject image = new JSONObject();
@@ -539,7 +545,6 @@ public class CreateInstance extends BlockingNativeCallableUnit {
         image.put("name", name);
         image.put("ver", version);
         image.put("instanceName", cellInstanceName);
-        out.println(image.toString());
         Map<String, String> environment = new HashMap<>();
         environment.put(CELLERY_IMAGE_DIR_ENV_VAR, tempBalFileDir.toString());
         CelleryUtils.executeShellCommand(null, CelleryUtils::printInfo, CelleryUtils::printInfo,
@@ -551,7 +556,7 @@ public class CreateInstance extends BlockingNativeCallableUnit {
      *
      * @throws Exception if dependency tree starting fails
      */
-    private void startDependencyTree() throws Exception {
+    private void startDependencyTree(Context ctx) throws Exception {
         PrintStream out = System.out;
         out.println("Starting dependency tree");
         for (Node node : dependencyTree.getTree()) {
@@ -564,6 +569,7 @@ public class CreateInstance extends BlockingNativeCallableUnit {
             if (!(dependencyTree.getRoot().equals(node)) && !isCellInstanceRunning(cellMetaInstanceName)) {
                 out.println("Starting instance " + cellMetaInstanceName);
                 startInstance(org, name, version, cellMetaInstanceName);
+                addToStartedInstances(ctx, org, name, version, cellMetaInstanceName);
             }
         }
     }
@@ -623,7 +629,6 @@ public class CreateInstance extends BlockingNativeCallableUnit {
      * @param dependencyLinks links to the dependent cells
      */
     private void validateDependencyLinksInstances(Map<?, ?> dependencyLinks) {
-        PrintStream out = System.out;
         ArrayList<String> invalidInstances = new ArrayList<>();
         if (dependencyLinks.size() > 0) {
             dependencyLinks.forEach((alias, info) -> {
@@ -636,7 +641,6 @@ public class CreateInstance extends BlockingNativeCallableUnit {
         if (invalidInstances.size() > 0) {
             String errMsg = "Cell dependency validation failed. Instances " + String.join(", ", invalidInstances)
                     + " not running";
-            out.println(errMsg);
             throw new BallerinaException(errMsg);
         }
     }
@@ -647,7 +651,6 @@ public class CreateInstance extends BlockingNativeCallableUnit {
      * @param dependencyLinks links to the dependent cells
      */
     private void validateDependencyLinksAliasNames(Map<?, ?> dependencyLinks) {
-        PrintStream out = System.out;
         ArrayList<String> invalidAliases = new ArrayList<>();
         if (dependencyLinks.size() > 0) {
             dependencyLinks.forEach((alias, info) -> {
@@ -660,7 +663,6 @@ public class CreateInstance extends BlockingNativeCallableUnit {
         if (invalidAliases.size() > 0) {
             String errMsg = "Cell dependency validation failed. Aliases " + String.join(", ", invalidAliases)
                     + " invalid";
-            out.println(errMsg);
             throw new BallerinaException(errMsg);
         }
     }
@@ -671,7 +673,6 @@ public class CreateInstance extends BlockingNativeCallableUnit {
      * @param dependencyLinks links to the dependent cells
      */
     private void validateRequiredDependencyLinks(Map<?, ?> dependencyLinks) {
-        PrintStream out = System.out;
         ArrayList<String> missingAliases = new ArrayList<>();
         // Iterate the dependency tree
         for (Node node : dependencyTree.getTree()) {
@@ -689,7 +690,6 @@ public class CreateInstance extends BlockingNativeCallableUnit {
             String errMsg = "Cell dependency validation failed. All links to dependent cells should be defined when " +
                     "running instance without starting dependencies. Missing dependency aliases: " +
                     String.join(", ", missingAliases);
-            out.println(errMsg);
             throw new BallerinaException(errMsg);
         }
     }
@@ -700,12 +700,27 @@ public class CreateInstance extends BlockingNativeCallableUnit {
      * @param instanceName cell instance name
      */
     private void validateMainInstance(String instanceName) {
-        PrintStream out = System.out;
         if (isCellInstanceRunning(instanceName)) {
             String errMsg = "instance to be created should not be present in the runtime, instance" + instanceName +
                     " is already available in the runtime";
-            out.println(errMsg);
             throw new BallerinaException(errMsg);
         }
+    }
+
+    /**
+     * Add the instance to started instances array.
+     *
+     * @param ctx Context
+     * @param org organization name
+     * @param name cell name
+     * @param version cell version
+     * @param instanceName cell instance name
+     */
+    private void addToStartedInstances(Context ctx, String org, String name, String version, String instanceName) {
+        BMap<String, BValue> bmap = BLangConnectorSPIUtil.createBStruct(ctx,
+                CelleryConstants.CELLERY_PACKAGE,
+                CelleryConstants.IMAGE_NAME_DEFINITION,
+                org, name, version, instanceName);
+        bValueArray.add(runCount.getAndIncrement(), bmap);
     }
 }

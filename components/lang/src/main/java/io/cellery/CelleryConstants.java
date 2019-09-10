@@ -98,4 +98,5 @@ public class CelleryConstants {
     public static final String CONTEXT = "context";
     public static final String CELLERY = "cellery";
     public static final String CELLERY_API_VERSION = "mesh.cellery.io/v1alpha2";
+    public static final String CENTRAL_REGISTRY_HOST = "registry.hub.cellery.io";
 }

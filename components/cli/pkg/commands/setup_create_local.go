@@ -142,10 +142,12 @@ func downloadVmConfirmation(confirmed bool) bool {
 					// If the user wish to get the updated vm download the latest vm
 					downloadVm, _, err = util.GetYesOrNoFromUser(fmt.Sprintf(
 						"Updated version of %s is available and will take %s from your "+
-							"machine. Do you want to continue",
+							"machine. Do you want to use the upgraded version",
 						vm, util.FormatBytesToString(util.GetS3ObjectSize(constants.AWS_S3_BUCKET, vm))), false)
 					if !downloadVm {
-						os.Exit(0)
+						// Not exiting CLI since user response "No" suggests using old image
+						fmt.Println("Installing existing cellery-local-setup")
+						downloadVm = false
 					}
 				} else {
 					// When inline command (cellery setup create local) is executed download confirmation will not be prompted

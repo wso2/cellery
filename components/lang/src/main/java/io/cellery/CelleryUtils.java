@@ -19,7 +19,6 @@ package io.cellery;
 
 import io.cellery.models.API;
 import io.cellery.models.Cell;
-import io.cellery.models.CellMeta;
 import io.cellery.models.Component;
 import io.cellery.models.Composite;
 import io.cellery.models.Destination;
@@ -27,7 +26,6 @@ import io.cellery.models.Node;
 import io.cellery.models.OIDC;
 import io.cellery.models.Port;
 import io.cellery.models.Test;
-import io.cellery.models.Tree;
 import io.cellery.models.Web;
 import io.cellery.util.KubernetesClient;
 import io.cellery.models.internal.ImageComponent;
@@ -789,22 +787,5 @@ public class CelleryUtils {
     public static boolean fileExists(String path) {
         File tmpDir = new File(path);
         return tmpDir.exists();
-    }
-
-    /**
-     * Build dependency tree.
-     *
-     * @param node node that will be added to the tree
-     */
-    private static void buildDependencyTree(Node<CellMeta> node, Tree dependencyTree) {
-        CellMeta cell = node.getData();
-        Map<String, CellMeta> dependentCells = cell.getCellDependencies();
-        if (dependentCells.size() > 0) {
-            for (Map.Entry<String, CellMeta> dependentCell : dependentCells.entrySet()) {
-                Node<CellMeta> childNode = node.addChild(dependentCell.getValue());
-                buildDependencyTree(childNode, dependencyTree);
-            }
-        }
-        dependencyTree.addNode(node);
     }
 }

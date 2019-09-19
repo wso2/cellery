@@ -61,7 +61,7 @@ func FromBrowser(username string, isAuthorized chan bool, done chan bool) (strin
 		httpPortString = ":" + strconv.Itoa(codeReceiverPort)
 	}
 	redirectUrl := url.QueryEscape(fmt.Sprintf(callBackUrl, codeReceiverPort))
-	var hubAuthUrl = conf.Hub.Url + "/sdk/fidp-select?redirectUrl=" + redirectUrl
+	var hubAuthUrl = conf.Hub.Url + "/sdk/sign-in?redirectUrl=" + redirectUrl
 
 	go func() {
 		mux := http.NewServeMux()

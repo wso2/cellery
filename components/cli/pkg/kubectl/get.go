@@ -299,7 +299,7 @@ func GetDeployment(namespace, deployment string) (string, error) {
 func GetGatewayAsMapInterface(gw string) (map[string]interface{}, error) {
 	cmd := exec.Command(constants.KUBECTL,
 		"get",
-		"gateway",
+		"gateways",
 		gw,
 		"-o",
 		"json",

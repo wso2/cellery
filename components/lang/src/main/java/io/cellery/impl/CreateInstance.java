@@ -167,6 +167,7 @@ public class CreateInstance extends BlockingNativeCallableUnit {
             instanceName = generateRandomInstanceName(((BString) nameStruct.get("name")).stringValue(),
                     ((BString) nameStruct.get("ver")).stringValue());
         }
+        printInfo("starting instance " + instanceName);
         String cellImageDir = System.getenv(CELLERY_IMAGE_DIR_ENV_VAR);
         if (cellImageDir == null) {
             try (InputStream inputStream = new FileInputStream(DEBUG_BALLERINA_CONF)) {
@@ -635,7 +636,6 @@ public class CreateInstance extends BlockingNativeCallableUnit {
                 "\t}\n" +
                 "}";
         appendToFile(ballerinaMain, tempBalFile);
-        createTempDirForDependency(tempBalFile, System.getProperty("user.dir"), cellInstanceName);
         // Create a cell image json object
         JSONObject image = new JSONObject();
         image.put("org", org);
@@ -653,6 +653,7 @@ public class CreateInstance extends BlockingNativeCallableUnit {
         }
         Path workingDir = Paths.get(System.getProperty("user.dir"));
         if (Files.exists(workingDir.resolve(CelleryConstants.BALLERINA_TOML))) {
+            createTempDirForDependency(tempBalFile, System.getProperty("user.dir"), cellInstanceName);
             CelleryUtils.executeShellCommand(null, CelleryUtils::printInfo, CelleryUtils::printInfo,
                     environment, "ballerina", "run", cellInstanceName, "run", image.toString(), dependentCells,
                     "false", shareDependenciesFlag);

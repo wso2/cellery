@@ -249,7 +249,7 @@ func RunBuild(tag string, fileName string) {
 		util.ExitWithErrorMessage("Error occurred creating cell image", err)
 	}
 	balTomlParent := filepath.Dir(filepath.Dir(filepath.Join(currentDir, fileName)))
-	balTomlfileExist, err := util.FileExists(balTomlParent)
+	balTomlfileExist, err := util.FileExists(filepath.Join(balTomlParent, constants.BALLERINA_TOML))
 
 	if err != nil {
 		util.ExitWithErrorMessage("Error occurred while checking if Ballerina.toml exists", err)

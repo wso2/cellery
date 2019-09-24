@@ -21,12 +21,14 @@ import io.cellery.CelleryConstants;
 import io.cellery.CelleryUtils;
 import io.cellery.models.Cell;
 import io.cellery.models.CellSpec;
-import io.cellery.models.Image;
+import io.cellery.models.Component;
+import io.cellery.models.ComponentSpec;
+import io.cellery.models.ComponentTemplate;
 import io.cellery.models.STSTemplate;
 import io.cellery.models.STSTemplateSpec;
-import io.cellery.models.ServiceTemplate;
-import io.cellery.models.ServiceTemplateSpec;
 import io.cellery.models.Test;
+import io.cellery.models.internal.Image;
+import io.cellery.util.KubernetesClient;
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
 import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.EnvVarBuilder;
@@ -262,11 +264,13 @@ public class RunTestSuite extends BlockingNativeCallableUnit {
         cellImage.setOrgName(((BString) nameStruct.get(ORG)).stringValue());
         cellImage.setCellVersion(((BString) nameStruct.get(VERSION)).stringValue());
 
-        List<ServiceTemplate> serviceTemplateList = new ArrayList<>();
+        List<Component> componentList = new ArrayList<>();
         List<String> unsecuredPaths = new ArrayList<>();
         STSTemplate stsTemplate = new STSTemplate();
         STSTemplateSpec stsTemplateSpec = new STSTemplateSpec();
-        ServiceTemplateSpec templateSpec = new ServiceTemplateSpec();
+
+        ComponentSpec componentSpec = new ComponentSpec();
+        componentSpec.setType(SERVICE_TYPE_JOB);
 
         List<EnvVar> envVarList = new ArrayList<>();
         cellImage.getTest().getEnvVars().forEach((key, value) -> {
@@ -275,24 +279,24 @@ public class RunTestSuite extends BlockingNativeCallableUnit {
             }
             envVarList.add(new EnvVarBuilder().withName(key).withValue(value).build());
         });
-        templateSpec.setContainer(new ContainerBuilder()
-                .withImage(cellImage.getTest().getSource())
-                .withEnv(envVarList)
-                .build());
-        templateSpec.setType(SERVICE_TYPE_JOB);
-        ServiceTemplate serviceTemplate = new ServiceTemplate();
-        serviceTemplate.setMetadata(new ObjectMetaBuilder()
+        ComponentTemplate componentTemplate = new ComponentTemplate();
+        componentTemplate.addContainer(new ContainerBuilder().withImage(cellImage.getTest().getSource()).withEnv
+                (envVarList).build());
+
+        Component component = new Component();
+        component.setMetadata(new ObjectMetaBuilder()
                 .withName(cellImage.getTest().getName())
                 .withLabels(cellImage.getTest().getLabels())
                 .build());
-        serviceTemplate.setSpec(templateSpec);
-        serviceTemplateList.add(serviceTemplate);
+        component.setSpec(componentSpec);
+
+        componentList.add(component);
         stsTemplateSpec.setUnsecuredPaths(unsecuredPaths);
         stsTemplate.setSpec(stsTemplateSpec);
 
         CellSpec cellSpec = new CellSpec();
-        cellSpec.setServicesTemplates(serviceTemplateList);
-        cellSpec.setStsTemplate(stsTemplate);
+        cellSpec.setComponents(componentList);
+        cellSpec.setSts(stsTemplate);
         ObjectMeta objectMeta = new ObjectMetaBuilder().withName(getValidName(cellImage.getCellName()))
                 .addToAnnotations(ANNOTATION_CELL_IMAGE_ORG, cellImage.getOrgName())
                 .addToAnnotations(ANNOTATION_CELL_IMAGE_NAME, cellImage.getCellName())
@@ -306,10 +310,8 @@ public class RunTestSuite extends BlockingNativeCallableUnit {
         try {
 
             CelleryUtils.writeToFile(toYaml(testCell), targetPath);
-            CelleryUtils.writeToFile(toYaml(testCell), targetPath);
             CelleryUtils.printDebug("Creating test cell " + testName);
-            CelleryUtils.executeShellCommand("kubectl apply -f " + targetPath, null,
-                    CelleryUtils::printDebug, CelleryUtils::printWarning);
+            KubernetesClient.apply(targetPath);
             printInfo("Executing test " + testName + "...");
 
             // Wait for job to be available

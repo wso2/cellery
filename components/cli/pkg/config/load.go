@@ -30,8 +30,8 @@ import (
 const configFile = "config.json"
 
 const defaultHubUrl = "https://hub.cellery.io"
-const defaultIdpUrl = "https://idp.hub.cellery.io"
-const defaultClientId = "cellerycliapplication"
+const defaultIdpUrl = "https://id.choreo.dev"
+const defaultClientId = "s8jIVx9uJKE087FosgcSwNVjGd0a"
 
 type Conf struct {
 	Hub *HubConf `json:"hub"`

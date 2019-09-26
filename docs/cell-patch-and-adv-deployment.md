@@ -23,9 +23,9 @@ Therefore, this should be only permitted when there is no API changes.
  
 Below steps should be followed to perform the patch operation for a component in a running cell/composite. 
  
-1) Update the component `controller` of the currently running `pet-be` instance with below command. This will update its components respectively.
+1) Update the component `controller` of the currently running `pet-be` instance with below command.
 ```
-cellery update pet-be controller --container-image mycontainerorg/hello:1.0.1
+cellery patch pet-be controller --container-image mycontainerorg/hello:1.0.1
 ```
 3) Now execute `kubectl get pods` and you can see the pods of the `pet-be` are getting initialized. And finally, older pods are getting terminated.
 ```

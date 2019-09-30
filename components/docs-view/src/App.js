@@ -144,7 +144,7 @@ const App = ({data, classes}) => {
                             to: dependentComponent
                         });
                     });
-                    if (node.kind === Constants.Type.CELL) {
+                    if (node.kind === Constants.Type.CELL && component.ingressTypes.length > 0) {
                         nodeMetaInfo.componentDependencyLinks.push({
                             from: "gateway",
                             to: componentName

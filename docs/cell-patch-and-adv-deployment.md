@@ -58,12 +58,12 @@ cell instances. Then, we can  completely switch 100% traffic to `pet-be-v2` and 
 
 - Route the 50% of the traffic to the new `pet-be-v2` cell instance. 
 ```
-$ cellery route-traffic pet-be -p pet-be-v2=50
+$ cellery route-traffic -d pet-be -t pet-be-v2 -p 50
 ```
 
 - The traffic can be completely switched to 100% to the `pet-be-v2` as shown below. 
 ```
-$ cellery route-traffic pet-be -p pet-be-v2=100
+$ cellery route-traffic -d pet-be -t pet-be-v2
 ```
 - Terminate the old instance `pet-be` (once all clients have switched to the new instance), and only have the `pet-be-v2` cell running. 
 ```
@@ -76,7 +76,7 @@ An instance will be selected and will be propagated via the header `x-instance-i
 The above commands will apply to all cell/composite instances which has a dependency on `pet-be`. If required, route-traffic command can be applied to only a selected set of instances
 using the `-s/--source` option:
 ```
-$ cellery route-traffic -s pet-fe pet-be -p pet-be-v2=50
+$ cellery route-traffic -s pet-fe -d pet-be -t pet-be-v2 -p 50
 ```
 Refer to [CLI docs](cli-reference.md#cellery-route-traffic) for a complete guide on managing advanced deployments with cell instances.
 

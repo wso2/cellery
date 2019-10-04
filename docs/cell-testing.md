@@ -9,13 +9,12 @@ Cellery supports writing integration tests in two ways:
  Cellery supports writing in-line integration tests using Ballerina and [Telepresence](https://www.telepresence.io/).
  Inline tests can be written according to the standards of [Testerina](https://v1-0.ballerina.io/learn/how-to-test-ballerina-code/) which is the Ballerina test framework. 
  
- Telepresense makes the developer feel as micro services run in their local machine despite actually they are
+ Telepresence makes the developer feel as micro services run in their local machine despite actually they are
   running in a remote kubernetes cluster. Testerina provides the smooth experience of
    writing integration tests to these local services which actually run in a kubernetes cluster.  
  
-Writing in-line tests is as easy as writing writing an integration test to a service which runs in developer machine
-. Cellery provides a set of helper functions which eases writing tests by providing
- information about running Cells (services and so on) so that developer can use them in writing tests.
+Writing in-line tests is as easy as writing an integration test to a service which runs in developer machine
+. Cellery provides a set of helper functions which eases writing tests.
  
  #### Helper Functions
 
@@ -93,8 +92,7 @@ function setup() {
 #### Function```stopInstances```
 
 Stops and destroys the instances created for the purpose of running tests. Instances that were already available before
- starting
- tests will be kep without stopping.
+ starting tests are kept without stopping.
 
 ```ballerina
 # Handle deletion of instances for running tests
@@ -106,18 +104,18 @@ public function cleanUp() {
 ```
 [back to helper functions](#helper-functions)
 
-For more information and samples about writing in-line tests please refer [here](link to sample)
+For more information and samples about writing in-line tests please refer [here](https://github.com/wso2-cellery/samples/blob/master/docs/pet-store/test-be-cell.md)
 
  ## Docker image based tests
 
  
-This mechanism gives the the developers the flexibility of running any test suite which is packaged as a docker image
+This mechanism gives developers the flexibility of running any test suite which is packaged as a docker image
 , on top of Cells they have developed. Developers can choose their own technologies and tools seamlessly and package
- them as a docker image so that it can be run against Cells. 
+ them as a docker image in order to develop their test suite. 
  
  Writing docker image based tests for Cells is straight forward since the actual test
-  is in the docker images, and developers can select any framework and language to develop the test. Also, can use
-   any existing test cases and wrap as docker images to execute the tests.
+  is in the docker images, and since developers can select any framework or language to develop their suite. Also, they
+   can use any existing test cases and wrap as docker images.
    
 Along with ```build``` and ```run``` methods, ```test``` method includes the instructions that needs to be executed during the Cellery
  test.
@@ -151,8 +149,13 @@ return cellery:stopInstances(iName, instanceList);
 } 
 ```
 
-* Above sample cell file shows the cellery test method, where there are two tests are defined, and added into the test suite. These tests will be executed sequentially one after the other in the provided order.
+* Above sample cell file shows the ```cellery test``` method, where there are two tests are defined, and added into
+ the test suite. These tests are be executed sequentially one after the other in the provided order.
 
-* The Cellery ```test``` will support all the input params as same as the run method. The tests could be executed on
- already running instance, or the Cellery test framework will start a new instance and run the test against it. For
-  example, if the test should be executed against ```test-be cell```, then it will first check whether there is an instance already exists in the runtime and if so, the test will be executed against that instance. Otherwise, new instances with the provided name will be started, and those will be terminated once the tests are executed.
+* The ```cellery test``` supports all the input params as same as the run method. The tests could be executed on
+ already running instance, or the Cellery test framework starts a new instance and run the test against it. For
+  example, if the test should be executed against ```test-be cell```, then it first checks whether there is an
+   instance already exists in the runtime and if so, the tests are executed against that instance. Otherwise, new
+    instances with the provided name is started, and those are be terminated once the tests are finished.
+  
+  For more information and samples about writing docker image based tests please refer [here](https://github.com/wso2-cellery/samples/blob/master/docs/pet-store/test-be-cell.md)

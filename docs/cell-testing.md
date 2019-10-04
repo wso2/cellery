@@ -115,7 +115,7 @@ This mechanism gives the the developers the flexibility of running any test suit
 , on top of Cells they have developed. Developers can choose their own technologies and tools seamlessly and package
  them as a docker image so that it can be run against Cells. 
  
- Writing docker image based tests for Cells is straight forward as it gives the flexibility since the actual test
+ Writing docker image based tests for Cells is straight forward since the actual test
   is in the docker images, and developers can select any framework and language to develop the test. Also, can use
    any existing test cases and wrap as docker images to execute the tests.
    

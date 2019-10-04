@@ -1,8 +1,8 @@
 # Cellery Testing
 
 Cellery supports writing integration tests in two ways:
- 1) Inline tests 
- 2) Docker image based tests
+ 1) [Inline tests](#in-line-tests)
+ 2) [Docker image based tests](#docker-image-based-tests)
  
 ## In-line tests
  

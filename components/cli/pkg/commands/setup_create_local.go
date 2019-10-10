@@ -107,10 +107,7 @@ func RunSetupCreateLocal(isCompleteSelected, forceDownload, confirmed bool) {
 		util.ExitWithErrorMessage("Failed to merge kube-config file", err)
 	}
 	fmt.Printf("Extracting %s ...", vm)
-	err = util.ExtractTarGzFile(downloadLocation, vmPath)
-	if err != nil {
-		util.ExitWithErrorMessage("Failed to extract vm", err)
-	}
+	util.ExtractTarGzFile(downloadLocation, vmPath)
 	vbox.InstallVM(isCompleteSelected)
 	runtime.WaitFor(false, false)
 }

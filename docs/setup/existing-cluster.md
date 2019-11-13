@@ -12,8 +12,14 @@ Cellery installer is tested on K8s environments with following component version
 - NFS Server : NFSv3 compatible
 
 ## Prerequisite
-- [Kubectl version 1.14 or more](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
-- [Download and install Cellery](../../README.md#download-cellery)
+### Mandatory
+- Kubernetes server version 1.13/1.14/1.15
+- [Kubectl version 1.13/1.14/1.15](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
+- [Cellery](../../README.md#download-cellery)
+
+### Optional
+- [Ballerina 1.0.3](https://ballerina.io/downloads/)
+If Ballerina 1.0.3 is not installed, Cellery will execute ballerina using Docker.
 
 ## Tested Kubernetes Providers
 1. [GCP GKE](#1-gcp-gke)

@@ -1,8 +1,13 @@
 GCP setup
 ---
 ## Prerequisite
-- [Kubectl version 1.14 or more](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
-- [Download and install Cellery](../../README.md#download-cellery)
+### Mandatory
+- [Kubectl version 1.13/1.14/1.15](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
+- [Cellery](../../README.md#download-cellery)
+
+### Optional
+- [Ballerina 1.0.3](https://ballerina.io/downloads/)
+If Ballerina 1.0.3 is not installed, Cellery will execute ballerina using Docker.
 
 To create a GCP based cellery installation, you need to have GCP account and [Gloud SDK](https://cloud.google.com/sdk/docs/) installed in your machine. 
 Follow the below steps to install cellery into your GCP.

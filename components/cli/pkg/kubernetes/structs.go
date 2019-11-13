@@ -57,8 +57,20 @@ type Cell struct {
 }
 
 type ComponentDetail struct {
-	Ingress       map[string]GatewayHttpApi `json:"ingresses"`
-	ComponentName string                    `json:"name"`
+	Ingress       map[string]IngressDetail `json:"ingresses"`
+	ComponentName string                   `json:"name"`
+}
+
+type IngressDetail struct {
+	IngressType    string                     `json:"ingressType"`
+	IngressTypeTCP string                     `json:"ingressTypeTCP"`
+	ApiVersion     string                     `json:"apiVersion"`
+	Port           int                        `json:"port"`
+	Context        string                     `json:"context"`
+	Expose         string                     `json:"expose"`
+	Definition     map[string][]APIDefinition `json:"definition"`
+	GatewayPort    int                        `json:"gatewayPort"`
+	GatewayConfig  GatewayConfig              `json:"gatewayConfig"`
 }
 
 type Composite struct {
@@ -146,21 +158,14 @@ type ClusterIngress struct {
 }
 
 type GatewayHttpApi struct {
-	Context        string                     `json:"context"`
-	Version        string                     `json:"version"`
-	Definitions    []APIDefinition            `json:"definitions"`
-	Definition     map[string][]APIDefinition `json:"definition"`
-	Global         bool                       `json:"global"`
-	Authenticate   bool                       `json:"authenticate"`
-	Port           uint32                     `json:"port"`
-	Destination    Destination                `json:"destination,omitempty"`
-	ZeroScale      bool                       `json:"zeroScale,omitempty"`
-	IngressType    string                     `json:"ingressType"`
-	IngressTypeTCP string                     `json:"ingressTypeTCP"`
-	ApiVersion     string                     `json:"apiVersion"`
-	Expose         string                     `json:"expose"`
-	GatewayPort    int                        `json:"gatewayPort"`
-	GatewayConfig  GatewayConfig              `json:"gatewayConfig"`
+	Context      string          `json:"context"`
+	Version      string          `json:"version"`
+	Definitions  []APIDefinition `json:"definitions"`
+	Global       bool            `json:"global"`
+	Authenticate bool            `json:"authenticate"`
+	Port         uint32          `json:"port"`
+	Destination  Destination     `json:"destination,omitempty"`
+	ZeroScale    bool            `json:"zeroScale,omitempty"`
 }
 
 type GatewayConfig struct {

@@ -1,8 +1,14 @@
 Local setup
 ---
 ## Prerequisite
-- [Kubectl version 1.14 or more](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
-- [Download and install Cellery](../../README.md#download-cellery)
+### Mandatory
+- [VirtualBox](https://www.virtualbox.org/wiki/Downloads) 
+- [Kubectl version 1.13/1.14/1.15](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
+- [Cellery](../../README.md#download-cellery)
+
+### Optional
+- [Ballerina 1.0.3](https://ballerina.io/downloads/)
+If Ballerina 1.0.3 is not installed, Cellery will execute ballerina using Docker.
 
 This will setup the local environment, by creating a virtual machine with pre-installed kubeadm and cellery runtime. 
 

@@ -24,9 +24,72 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
+
 	"github.com/cellery-io/sdk/components/cli/internal/test"
 	"github.com/cellery-io/sdk/components/cli/pkg/image"
 )
+
+func TestRunPush(t *testing.T) {
+	currentDir, err := ioutil.TempDir("", "current-dir")
+	if err != nil {
+		t.Errorf("failed to create current dir")
+	}
+	defer func() {
+		if err := os.RemoveAll(currentDir); err != nil {
+			t.Errorf("failed to remove current dir")
+		}
+	}()
+	mockFileSystem := test.NewMockFileSystem(test.SetCurrentDir(currentDir), test.SetRepository(filepath.Join(
+		"testdata", "repo")))
+	tests := []struct {
+		name             string
+		image            string
+		username         string
+		password         string
+		expectedToPass   bool
+		expectedErrorMsg string
+		credManager      *test.MockCredManager
+	}{
+		{
+			name:             "push valid image with credentials",
+			image:            "myorg/hello:1.0.0",
+			username:         "alice",
+			password:         "alice123",
+			expectedToPass:   true,
+			expectedErrorMsg: "",
+			credManager:      test.NewMockCredManager(test.SetCredentials("myhub.cellery.io", "aclice", "alice123")),
+		},
+		{
+			name:             "push valid image without credentials",
+			image:            "myorg/hello:1.0.0",
+			username:         "",
+			password:         "",
+			expectedToPass:   true,
+			expectedErrorMsg: "",
+			credManager:      test.NewMockCredManager(test.SetCredentials("myhub.cellery.io", "aclice", "alice123")),
+		},
+	}
+	for _, tst := range tests {
+		t.Run(tst.name, func(t *testing.T) {
+			mockCli := test.NewMockCli(test.SetCredManager(tst.credManager),
+				test.SetFileSystem(mockFileSystem),
+				test.SetRegistry(test.NewMockRegistry()),
+				test.SetDockerCli(test.NewMockDockerCli()),
+			)
+			err := RunPush(mockCli, tst.image, tst.username, tst.password)
+			if tst.expectedToPass {
+				if err != nil {
+					t.Errorf("error in RunPush, %v", err)
+				}
+			} else {
+				if diff := cmp.Diff(tst.expectedErrorMsg, err.Error()); diff != "" {
+					t.Errorf("invalid error message (-want, +got)\n%v", diff)
+				}
+			}
+		})
+	}
+}
 
 func TestPushImage(t *testing.T) {
 	parsedCellImage := &image.CellImage{

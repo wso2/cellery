@@ -19,15 +19,12 @@
 package image
 
 import (
-	"bufio"
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -95,7 +92,9 @@ func RunPush(cli cli.Cli, cellImage string, username string, password string) er
 		if err != nil {
 			return fmt.Errorf("failed to push image, %v", err)
 		}
-		pushDockerImages(dockerImagesToBePushed)
+		if err := cli.DockerCli().PushImages(dockerImagesToBePushed); err != nil {
+			return fmt.Errorf("failed to push docker images (with credentials), %v", err)
+		}
 	} else {
 		// Pushing image without credentials
 		err = pushImage(cli, parsedCellImage, "", "")
@@ -141,16 +140,17 @@ func RunPush(cli cli.Cli, cellImage string, username string, password string) er
 				if err != nil {
 					return fmt.Errorf("failed to push image, %v", err)
 				}
-				pushDockerImages(dockerImagesToBePushed)
-
+				if err := cli.DockerCli().PushImages(dockerImagesToBePushed); err != nil {
+					return fmt.Errorf("failed to push docker images (without credentials), %v", err)
+				}
 				if credManager != nil {
 					log.Printf("Storing credentials in Credentials Manager")
 					err = credManager.StoreCredentials(registryCredentials)
 					if err == nil {
-						fmt.Printf("\n%s Saved Credentials for %s Registry", util.GreenBold("\U00002714"),
+						fmt.Fprintf(cli.Out(), "\n%s Saved Credentials for %s Registry", util.GreenBold("\U00002714"),
 							util.Bold(parsedCellImage.Registry))
 					} else {
-						fmt.Printf("\n\n%s %s", util.YellowBold("\U000026A0"),
+						fmt.Fprintf(cli.Out(), "\n\n%s %s", util.YellowBold("\U000026A0"),
 							"Error occurred while saving credentials")
 					}
 				}
@@ -158,45 +158,13 @@ func RunPush(cli cli.Cli, cellImage string, username string, password string) er
 				return fmt.Errorf("failed to pull image, %v", err)
 			}
 		} else {
-			pushDockerImages(dockerImagesToBePushed)
+			if err := cli.DockerCli().PushImages(dockerImagesToBePushed); err != nil {
+				return fmt.Errorf("failed to push docker images (without credentials), %v", err)
+			}
 		}
 	}
 	util.PrintSuccessMessage(fmt.Sprintf("Successfully pushed cell image: %s", util.Bold(cellImage)))
 	util.PrintWhatsNextMessage("pull the image", "cellery pull "+cellImage)
-	return nil
-}
-
-func pushDockerImages(dockerImages []string) error {
-	log.Printf("Pushing docker images [%s]", strings.Join(dockerImages, ", "))
-	for _, elem := range dockerImages {
-		cmd := exec.Command("docker", "push", elem)
-		execError := ""
-		stderrReader, _ := cmd.StderrPipe()
-		stderrScanner := bufio.NewScanner(stderrReader)
-		go func() {
-			for stderrScanner.Scan() {
-				execError += stderrScanner.Text()
-			}
-		}()
-		var stdout, stderr bytes.Buffer
-		cmd.Stdout = &stdout
-		cmd.Stderr = &stderr
-		err := cmd.Start()
-		if err != nil {
-			errStr := string(stderr.Bytes())
-			fmt.Printf("%s\n", errStr)
-			return fmt.Errorf("error occurred while pushing Docker image, %v", err)
-		}
-		err = cmd.Wait()
-		if err != nil {
-			fmt.Println()
-			fmt.Printf("\x1b[31;1m\nPush Failed.\x1b[0m %v \n", execError)
-			fmt.Println("\x1b[31;1m======================\x1b[0m")
-			errStr := string(stderr.Bytes())
-			fmt.Printf("\x1b[31;1m%s\x1b[0m", errStr)
-			return fmt.Errorf("error occurred while pushing cell image, %v", err)
-		}
-	}
 	return nil
 }
 

@@ -23,6 +23,7 @@ type MockDockerCli struct {
 	clientVersion string
 }
 
+// NewMockDockerCli returns a MockDockerCli instance.
 func NewMockDockerCli(opts ...func(*MockDockerCli)) *MockDockerCli {
 	cli := &MockDockerCli{}
 	for _, opt := range opts {
@@ -31,22 +32,31 @@ func NewMockDockerCli(opts ...func(*MockDockerCli)) *MockDockerCli {
 	return cli
 }
 
+// SetServerVersion sets server version of mock docker cli.
 func SetServerVersion(version string) func(*MockDockerCli) {
 	return func(cli *MockDockerCli) {
 		cli.serverVersion = version
 	}
 }
 
+// SetClientVersion sets client version of mock docker cli.
 func SetClientVersion(version string) func(*MockDockerCli) {
 	return func(cli *MockDockerCli) {
 		cli.clientVersion = version
 	}
 }
 
+// ServerVersion returns the docker server version.
 func (cli *MockDockerCli) ServerVersion() (string, error) {
 	return cli.serverVersion, nil
 }
 
+// ClientVersion returns the docker client version.
 func (cli *MockDockerCli) ClientVersion() (string, error) {
 	return cli.clientVersion, nil
+}
+
+// PushImages pushes docker images.
+func (cli *MockDockerCli) PushImages(dockerImages []string) error {
+	return nil
 }

@@ -19,26 +19,33 @@
 package docker
 
 import (
+	"bufio"
+	"bytes"
 	"fmt"
+	"log"
 	"os/exec"
 	"strings"
 )
 
 const docker = "docker"
+const push = "push"
 
 type Docker interface {
 	ServerVersion() (string, error)
 	ClientVersion() (string, error)
+	PushImages(dockerImages []string) error
 }
 
 type CelleryDockerCli struct {
 }
 
+// NewCelleryDockerCli returns a CelleryDockerCli instance.
 func NewCelleryDockerCli() *CelleryDockerCli {
 	cli := &CelleryDockerCli{}
 	return cli
 }
 
+// ServerVersion returns the docker server version.
 func (cli *CelleryDockerCli) ServerVersion() (string, error) {
 	cmd := exec.Command(docker,
 		"version",
@@ -52,6 +59,7 @@ func (cli *CelleryDockerCli) ServerVersion() (string, error) {
 	return string(dockerServerResult), nil
 }
 
+// ClientVersion returns the docker client version.
 func (cli *CelleryDockerCli) ClientVersion() (string, error) {
 	cmd := exec.Command(docker,
 		"version",
@@ -63,4 +71,43 @@ func (cli *CelleryDockerCli) ClientVersion() (string, error) {
 		return string(dockerClientResult), fmt.Errorf("error while getting Docker Client version, %v", strings.TrimSpace(string(dockerClientResult)))
 	}
 	return string(dockerClientResult), nil
+}
+
+// PushImages pushes docker images.
+func (cli *CelleryDockerCli) PushImages(dockerImages []string) error {
+	// Todo: Update method signature as PushImage(dockerImage string)
+	log.Printf("Pushing docker images [%s]", strings.Join(dockerImages, ", "))
+	for _, elem := range dockerImages {
+		cmd := exec.Command(docker,
+			push,
+			elem,
+		)
+		execError := ""
+		stderrReader, _ := cmd.StderrPipe()
+		stderrScanner := bufio.NewScanner(stderrReader)
+		go func() {
+			for stderrScanner.Scan() {
+				execError += stderrScanner.Text()
+			}
+		}()
+		var stdout, stderr bytes.Buffer
+		cmd.Stdout = &stdout
+		cmd.Stderr = &stderr
+		err := cmd.Start()
+		if err != nil {
+			errStr := string(stderr.Bytes())
+			fmt.Printf("%s\n", errStr)
+			return fmt.Errorf("error occurred while pushing Docker image, %v", err)
+		}
+		err = cmd.Wait()
+		if err != nil {
+			fmt.Println()
+			fmt.Printf("\x1b[31;1m\nPush Failed.\x1b[0m %v \n", execError)
+			fmt.Println("\x1b[31;1m======================\x1b[0m")
+			errStr := string(stderr.Bytes())
+			fmt.Printf("\x1b[31;1m%s\x1b[0m", errStr)
+			return fmt.Errorf("error occurred while pushing cell image, %v", err)
+		}
+	}
+	return nil
 }

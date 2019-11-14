@@ -99,15 +99,13 @@ components:
 - name: controller
   scalingPolicy:
     hpa:
+      minReplicas: 1
       maxReplicas: 5
       metrics:
       - resource:
-          name: cpu
-          target:
-            averageUtilization: 40
-            type: Utilization
+          name: memory
+          targetAverageValue: "64Mi"
         type: Resource
-      minReplicas: 1
 - name: catalog
   scalingPolicy:
     replicas: 1
@@ -121,10 +119,8 @@ components:
       maxReplicas: 3
       metrics:
         - resource:
-            name: memory
-            target:
-              averageUtilization: 50
-              type: Utilization
+            name: cpu
+            targetAverageUtilization: 50
           type: Resource
 gateway:
   scalingPolicy:

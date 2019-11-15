@@ -471,9 +471,7 @@ Apply a policy/set of policies included in a file to the Cellery runtime targeti
         metrics:
         - resource:
             name: cpu
-            target:
-              averageUtilization: 40
-              type: Utilization
+            targetAverageUtilization: 50
           type: Resource
         minReplicas: 1
   - name: catalog
@@ -488,12 +486,10 @@ Apply a policy/set of policies included in a file to the Cellery runtime targeti
         minReplicas: 1
         maxReplicas: 3
         metrics:
-          - resource:
-              name: memory
-              target:
-                averageUtilization: 50
-                type: Utilization
-            type: Resource
+        - resource:
+            name: memory
+            targetAverageValue: "64Mi"
+          type: Resource
   gateway:
     scalingPolicy:
       replicas: 1

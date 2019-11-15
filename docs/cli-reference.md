@@ -518,7 +518,6 @@ Apply a policy/set of policies included in a file to the Cellery runtime targeti
             name: memory
             targetAverageValue: 64Mi
           type: Resource
-        minReplicas: 1
   - name: portal
   gateway: 
     scalingPolicy:

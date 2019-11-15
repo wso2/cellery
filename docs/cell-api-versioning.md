@@ -12,17 +12,18 @@ Cell APIs can be selectively published to the Cellery global gateway to be acces
 marking the relevant HTTP ingress as `expose: global` and by using a global API publisher configuration. 
 
 If a set of cell APIs are to be exposed globally each with a unique context, each ingress should be marked as to be exposed 
-as global.
+as global. The version can be specified as well. 
 Ex.: 
 ```ballerina
 cellery:HttpApiIngress helloAPI = {
     // ...
+    apiVersion: "1.0.2",
     expose: "global"
 };
 ```
  
 If cell APIs are to be exposed with a common root context, the global publisher configuration can be used to specify it.  
-Each context specified in the HTTP ingress will be used as a sub context of the root context specified in the publisher. 
+Each context specified in the HTTP ingress will be used as a sub context of the root context specified in the publisher. Since the version is specified here, it will apply to all APIs. 
 Ex.:
 ```ballerina
 cellery:CellImage hrCell = {

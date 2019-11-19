@@ -981,20 +981,13 @@ public class CelleryUtils {
                 }, environment,
                 "ballerina", "version");
         if (balVersionCmdOutput.contains("Ballerina")) {
-            if (balVersionCmdOutput.split("Language").length > 0) {
-                // Ballerina version > 1.0.0
+            if (balVersionCmdOutput.split("Language").length == 2) {
                 String balVersionOutput = balVersionCmdOutput.split("Language")[0];
-                if (balVersionOutput.split(" ").length > 0) {
+                if (balVersionOutput.split(" ").length == 2) {
                     String ballerinaVersion = balVersionOutput.split(" ")[1];
                     if (ballerinaVersion.equals(CelleryConstants.BALLERINA_VERSION)) {
                         return "";
                     }
-                }
-            } else {
-                // Ballerina version < 1.0.0
-                String ballerinaVersion = balVersionCmdOutput.split(" ")[1];
-                if (ballerinaVersion.equals(CelleryConstants.BALLERINA_VERSION)) {
-                    return "";
                 }
             }
         }

@@ -114,16 +114,14 @@ public class CreateInstance {
     private static MapValue dependencyInfo;
     private static MapValue<String, Object> bmap;
     private static AtomicLong runCount;
-    private static Map<String, Node<Meta>> uniqueInstances;
-    private static Map<String, Node<Meta>> queuedInstances;
+    private static Map<String, Node<Meta>> dependencyTreeInstances;
     private static Map dependencyTreeTable;
     private static boolean shareDependencies;
 
     public static ArrayValue createInstanceExternal(MapValue image, MapValue iName, MapValue userDependencyLinks,
                                             boolean startDependencies, boolean shareDependencies)
             throws BallerinaCelleryException {
-        uniqueInstances = new HashMap();
-        queuedInstances = new HashMap();
+        dependencyTreeInstances = new HashMap();
         dependencyTreeTable = new HashMap<String, Node>();
         ArrayValue bValueArray = new ArrayValue(new BArrayType(BallerinaValues.createRecordValue(new BPackage(
                         CELLERY_PKG_ORG, CELLERY_PKG_NAME, CELLERY_PKG_VERSION),
@@ -303,7 +301,7 @@ public class CreateInstance {
      * @return random instance name generated
      */
     private static String generateRandomInstanceName(String name, String ver) {
-        String instanceName = name + ver + randomString(4);
+        String instanceName = name + "-" + ver + "-" + randomString(4);
         return instanceName.replace(".", "");
     }
 
@@ -730,25 +728,22 @@ public class CreateInstance {
         }
         // Once all dependent cells are started or there are no dependent cells, start the current instance
         String cellMetaInstanceName = meta.getInstanceName();
-        String cellImageName = meta.getOrg() + "/" + meta.getName() + ":" + meta.getVer();
         // Start the cell instance if not already running
         // This will not start root instance
         if (!dependencyTree.getRoot().equals(node) && !node.getData().isRunning()) {
-            if (!queuedInstances.containsKey(cellImageName)) {
-                JSONObject dependentCellsMap = new JSONObject();
-                for (Map.Entry<String, Meta> dependentCell : meta.getDependencies().entrySet()) {
-                    // Create a dependent cell image json object
-                    JSONObject dependentCellImage = new JSONObject();
-                    dependentCellImage.put("org", dependentCell.getValue().getOrg());
-                    dependentCellImage.put("name", dependentCell.getValue().getName());
-                    dependentCellImage.put("ver", dependentCell.getValue().getVer());
-                    dependentCellImage.put("instanceName", dependentCell.getValue().getInstanceName());
-                    dependentCellsMap.put(dependentCell.getKey(), dependentCellImage);
-                }
-                startInstance(meta.getOrg(), meta.getName(), meta.getVer(), cellMetaInstanceName,
-                        dependentCellsMap.toString(), shareDependencies, meta.getEnvironmentVariables());
-                queuedInstances.put(cellImageName, node);
+            JSONObject dependentCellsMap = new JSONObject();
+            for (Map.Entry<String, Meta> dependentCell : meta.getDependencies().entrySet()) {
+                // Create a dependent cell image json object
+                JSONObject dependentCellImage = new JSONObject();
+                dependentCellImage.put("org", dependentCell.getValue().getOrg());
+                dependentCellImage.put("name", dependentCell.getValue().getName());
+                dependentCellImage.put("ver", dependentCell.getValue().getVer());
+                dependentCellImage.put("instanceName", dependentCell.getValue().getInstanceName());
+                dependentCellsMap.put(dependentCell.getKey(), dependentCellImage);
             }
+            startInstance(meta.getOrg(), meta.getName(), meta.getVer(), cellMetaInstanceName,
+                    dependentCellsMap.toString(), shareDependencies, meta.getEnvironmentVariables());
+            node.getData().setRunning(true);
         }
     }
 
@@ -797,13 +792,13 @@ public class CreateInstance {
                     getVer()));
         }
         if (shareDependencies) {
-            if (uniqueInstances.containsKey(cellImage)) {
+            if (dependencyTreeInstances.containsKey(cellImage)) {
                 // If there already is a cell image that means this is a shared instance
-                uniqueInstances.get(cellImage).getData().setShared(true);
+                dependencyTreeInstances.get(cellImage).getData().setShared(true);
                 node.getData().setShared(true);
-                node.getData().setInstanceName(uniqueInstances.get(cellImage).getData().getInstanceName());
+                node.getData().setInstanceName(dependencyTreeInstances.get(cellImage).getData().getInstanceName());
             } else {
-                uniqueInstances.put(cellImage, node);
+                dependencyTreeInstances.put(cellImage, node);
             }
         }
         for (Node<Meta> childNode : node.getChildren()) {

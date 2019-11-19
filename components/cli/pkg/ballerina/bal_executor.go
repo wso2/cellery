@@ -169,16 +169,10 @@ func (balExecutor *LocalBalExecutor) Version() (string, error) {
 		return "", fmt.Errorf("error waiting to get ballerina version, %v", err)
 	}
 	if strings.Contains(version, "Ballerina") {
-		if len(strings.Split(version, "Language")) > 0 {
-			// Ballerina version > 1.0.0
+		if len(strings.Split(version, "Language")) == 2 {
 			balVersionOutput := strings.Split(version, "Language")[0]
-			if len(strings.Split(balVersionOutput, " ")) > 0 {
+			if len(strings.Split(balVersionOutput, " ")) == 2 {
 				return strings.Split(balVersionOutput, " ")[1], nil
-			}
-		} else {
-			// Ballerina version < 1.0.0
-			if len(strings.Split(version, " ")) > 0 {
-				return strings.Split(version, " ")[1], nil
 			}
 		}
 	}

@@ -39,7 +39,7 @@ import (
 	"github.com/cellery-io/sdk/components/cli/pkg/util"
 )
 
-const celleryVerboseMode = "DEBUG_MODE"
+const CelleryTestVerboseMode = "CELLERY_DEBUG_MODE"
 
 // RunTest starts Cell instance (along with dependency instances if specified by the user)\
 func RunTest(cli cli.Cli, cellImageTag string, instanceName string, startDependencies bool, shareDependencies bool,
@@ -239,7 +239,7 @@ func startTestCellInstance(cli cli.Cli, imageDir string, instanceName string, ru
 		Key:   celleryImageDirEnvVar,
 		Value: imageDir})
 	balEnvVars = append(balEnvVars, &ballerina.EnvironmentVariable{
-		Key:   celleryVerboseMode,
+		Key:   CelleryTestVerboseMode,
 		Value: verboseMode})
 
 	for _, envVar := range envVars {
@@ -413,7 +413,7 @@ func PromtConfirmation(assumeYes bool, balProj string) error {
 func CreateBallerinaConf(iName string, verboseMode string, imageDir string, dependencyLinks string,
 	envVars []*environmentVariable, balProj string) error {
 
-	content := []string{fmt.Sprintf("DEBUG_MODE=\"%s\"\n", verboseMode)}
+	content := []string{fmt.Sprintf(CelleryTestVerboseMode+"=\"%s\"\n", verboseMode)}
 	content = append(content, fmt.Sprintf(constants.CelleryImageDirEnvVar+"=\"%s\"\n", imageDir))
 	for _, envVar := range envVars {
 		content = append(content, fmt.Sprintf(envVar.Key+"=\"%s\"\n", envVar.Value))

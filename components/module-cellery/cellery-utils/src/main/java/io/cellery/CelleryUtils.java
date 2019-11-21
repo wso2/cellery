@@ -572,7 +572,7 @@ public class CelleryUtils {
      * @param message debug message
      */
     public static void printDebug(String message) {
-        if ("true".equalsIgnoreCase(System.getenv("DEBUG_MODE"))) {
+        if ("true".equalsIgnoreCase(System.getenv("CELLERY_DEBUG_MODE"))) {
             PrintStream out = System.out;
             out.println("Debug: " + message);
         }

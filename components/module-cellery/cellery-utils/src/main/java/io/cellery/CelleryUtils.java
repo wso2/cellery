@@ -981,9 +981,14 @@ public class CelleryUtils {
                 }, environment,
                 "ballerina", "version");
         if (balVersionCmdOutput.contains("Ballerina")) {
-            String ballerinaVersion = balVersionCmdOutput.split(" ")[1];
-            if (ballerinaVersion.equals(CelleryConstants.BALLERINA_VERSION)) {
-                return "";
+            if (balVersionCmdOutput.split("Language").length == 2) {
+                String balVersionOutput = balVersionCmdOutput.split("Language")[0];
+                if (balVersionOutput.split(" ").length == 2) {
+                    String ballerinaVersion = balVersionOutput.split(" ")[1];
+                    if (ballerinaVersion.equals(CelleryConstants.BALLERINA_VERSION)) {
+                        return "";
+                    }
+                }
             }
         }
         exePath = ballerinaInstallationDirectory() + CelleryConstants.BALLERINA_EXECUTABLE_PATH;

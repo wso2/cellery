@@ -44,6 +44,8 @@ func RunVersion(cli cli.Cli) error {
 	if err != nil {
 		// Having b7a locally is optional since the cellery build and run can be invoked via a docker container.
 		fmt.Fprintln(cli.Out(), fmt.Sprintf(" Ballerina %s not installed locally", constants.BallerinaVersion))
+	} else if balVersion != constants.BallerinaVersion {
+		fmt.Fprintln(cli.Out(), fmt.Sprintf(" Ballerina %s not installed locally", constants.BallerinaVersion))
 	} else {
 		fmt.Fprintln(cli.Out(), " Version:\t\t"+strings.TrimSpace(balVersion))
 	}

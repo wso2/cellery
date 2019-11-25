@@ -117,7 +117,6 @@ const DockerCliBallerinaExecutablePath = "/usr/lib/ballerina/ballerina-" + Balle
 const Wso2ApimHost = "https://wso2-apim-gateway"
 
 const CelleryImageDirEnvVar = "CELLERY_IMAGE_DIR"
-const TestDegubFlag = "DEBUG_MODE"
 
 const RootDir = "/"
 const VAR = "var"

@@ -101,6 +101,11 @@ dpkg -i cellery-ubuntu-x64-<version>.deb
 #### Mac OS
 - Download [latest Cellery(.pkg) installer](https://wso2-cellery.github.io/downloads)  and install it by following macOS package installation steps.
 
+- Cellery is avaialbe as a Brew Cask. Run below to install through Brew
+    
+    ```
+    brew cask install cellery
+    ```
 
 ### Setup Cellery runtime
 Once Cellery has been installed, verify the installation is working by executing `cellery version`.

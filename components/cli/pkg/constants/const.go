@@ -73,8 +73,7 @@ const BallerinaToml = "Ballerina.toml"
 const TargetDirName = "target"
 const TempTestModule = "tmp"
 const BalTestExecFIle = "test.sh"
-const BalInitTestExecFIle = "init-test.sh"
-const BalProjExt = "_proj"
+const BalInitTestExecFIle = "init-project.sh"
 
 const Wso2ApimHost = "https://wso2-apim-gateway"
 

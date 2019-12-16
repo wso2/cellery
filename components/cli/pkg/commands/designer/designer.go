@@ -19,13 +19,8 @@
 package designer
 
 import (
-	"cellery.io/cellery/components/cli/cli"
-	"cellery.io/cellery/components/cli/pkg/constants"
-	"cellery.io/cellery/components/cli/pkg/util"
 	"encoding/json"
 	"fmt"
-	"github.com/gorilla/handlers"
-	"github.com/gorilla/mux"
 	"log"
 	"net/http"
 	"os"
@@ -34,6 +29,13 @@ import (
 	"strings"
 	"text/template"
 	"time"
+
+	"github.com/gorilla/handlers"
+	"github.com/gorilla/mux"
+
+	"cellery.io/cellery/components/cli/cli"
+	"cellery.io/cellery/components/cli/pkg/constants"
+	"cellery.io/cellery/components/cli/pkg/util"
 )
 
 var tmpSourceDir string

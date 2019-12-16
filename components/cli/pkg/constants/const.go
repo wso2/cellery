@@ -98,5 +98,5 @@ const GatewayHost = "gateway_host"
 const PORT = "port"
 const HOST = "host"
 
-const CELL  = "cell"
-const COMPOSITE  = "composite"
+const CELL = "cell"
+const COMPOSITE = "composite"

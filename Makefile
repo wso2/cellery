@@ -57,10 +57,7 @@ GO_LDFLAGS += -X $(PROJECT_PKG)/components/cli/pkg/version.buildTime=$(shell dat
 DOCKER_REPO ?= wso2cellery
 DOCKER_IMAGE_TAG ?= $(VERSION)
 
-all: code.format build-lang build-docs-view build-cli test-cli
-
-.PHONY: install
-install: install-lang install-cli install-docs-view
+all: code.format build-lang build-docs-view build-designer build-cli test-cli
 
 .PHONY: test-cli
 test-cli:
@@ -81,13 +78,19 @@ build-docs-view:
 	npm ci; \
 	npm run build
 
+.PHONY: build-designer
+build-desinger:
+	cd ${PROJECT_ROOT}/components/designer; \
+	npm ci; \
+	npm run build
+
 .PHONY: install-lang
 install-lang:
 	cd ${PROJECT_ROOT}/components; \
     mvn clean install -Dmaven.test.skip=true;
 
 .PHONY: install-cli
-install-cli:
+install-cli: code.format
 	go build -o ${GO_BUILD_DIRECTORY}/cellery -ldflags "$(GO_LDFLAGS)" -x ./components/cli/cmd/cellery; \
     sudo cp ${GO_BUILD_DIRECTORY}/cellery /usr/local/bin; \
 

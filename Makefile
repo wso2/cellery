@@ -59,6 +59,9 @@ DOCKER_IMAGE_TAG ?= $(VERSION)
 
 all: code.format build-lang build-docs-view build-designer build-cli test-cli
 
+.PHONY: install
+install: install-lang install-cli install-docs-view
+
 .PHONY: test-cli
 test-cli:
 	go test -race -covermode=atomic -coverprofile=$(PROJECT_ROOT)/coverage.txt ./components/cli/pkg/commands/...

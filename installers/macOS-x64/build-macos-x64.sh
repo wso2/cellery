@@ -176,7 +176,7 @@ copyBuildDirectory() {
     cp -R ../../components/docs-view/build/* ${TARGET_DIRECTORY}/darwinpkg/Library/Cellery/docs-view
 
     mkdir -p ${TARGET_DIRECTORY}/darwinpkg/Library/Cellery/designer
-    cp -R ../../components/designer/build/* ${TARGET_DIRECTORY}/darwinpkg/Library/Cellery/desinger
+    cp -R ../../components/designer/build/* ${TARGET_DIRECTORY}/darwinpkg/Library/Cellery/designer
 
     rm -rf ${TARGET_DIRECTORY}/package
     mkdir -p ${TARGET_DIRECTORY}/package

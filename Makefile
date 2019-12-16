@@ -79,7 +79,7 @@ build-docs-view:
 	npm run build
 
 .PHONY: build-designer
-build-desinger:
+build-designer:
 	cd ${PROJECT_ROOT}/components/designer; \
 	npm ci; \
 	npm run build

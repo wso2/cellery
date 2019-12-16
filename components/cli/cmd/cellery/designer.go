@@ -19,8 +19,9 @@
 package main
 
 import (
-	"cellery.io/cellery/components/cli/pkg/commands/designer"
 	"github.com/spf13/cobra"
+
+	"cellery.io/cellery/components/cli/pkg/commands/designer"
 
 	"cellery.io/cellery/components/cli/cli"
 	"cellery.io/cellery/components/cli/pkg/util"

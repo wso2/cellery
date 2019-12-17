@@ -79,7 +79,7 @@ type TemplateDependency struct {
 
 type TemplateComponent struct {
 	Name         string
-	Image        string
+	SourceImage  string
 	Dependencies []TemplateDependency
 }
 

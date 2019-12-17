@@ -21,6 +21,7 @@ package designer
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -50,14 +51,26 @@ func RunDesigner(cli cli.Cli) error {
 	// It's important that this is before your catch-all route ("/")
 	api := r.PathPrefix("/api/").Subrouter()
 	api.HandleFunc("/generate", generateHandler).Methods(http.MethodPost)
+	api.PathPrefix("/download").HandlerFunc(downloadHandler(filepath.Join(tmpZipDir, "downloads.zip")))
 
 	// Serve static assets directly.
 	designerDir := path.Join(cli.FileSystem().CelleryInstallationDir(), "designer")
 	r.PathPrefix("/static").Handler(http.FileServer(http.Dir(designerDir)))
 
-	r.PathPrefix("/download").HandlerFunc(downloadHandler(filepath.Join(tmpZipDir, "downloads.zip")))
+	// Serve all the files in the Designer root folder
+	designerRootFiles, err := ioutil.ReadDir(designerDir)
+	if err != nil {
+		return fmt.Errorf("failed to read files in the designer installation directory %v", err)
+	}
+	for _, designerRootFile := range designerRootFiles {
+		fileName := designerRootFile.Name()
+		if !strings.HasPrefix(fileName, ".") { // Ignoring hidden files
+			r.PathPrefix("/" + fileName).HandlerFunc(singleFileHandler(path.Join(designerDir, fileName)))
+		}
+	}
+
 	// Catch-all: Serve Designer app entry-point (index.html).
-	r.PathPrefix("/").HandlerFunc(indexHandler(path.Join(designerDir, "index.html")))
+	r.PathPrefix("/").HandlerFunc(singleFileHandler(path.Join(designerDir, "index.html")))
 
 	srv := &http.Server{
 		Handler:      handlers.LoggingHandler(os.Stdout, r),
@@ -74,7 +87,7 @@ func RunDesigner(cli cli.Cli) error {
 	return nil
 }
 
-func indexHandler(entryPoint string) func(w http.ResponseWriter, r *http.Request) {
+func singleFileHandler(entryPoint string) func(w http.ResponseWriter, r *http.Request) {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, entryPoint)
 	}
@@ -130,8 +143,8 @@ func generateCode(designerMeta DesignMeta) error {
 		}
 		for _, component := range node.Components {
 			templateComponent := TemplateComponent{
-				Name:  strings.Replace(component.Label, "-", "_", -1),
-				Image: component.Image,
+				Name:        strings.Replace(component.Label, "-", "_", -1),
+				SourceImage: component.SourceImage,
 			}
 			for alias, dependencyID := range component.Dependencies {
 				dependency, err := getDependency(dependencyID, designerMeta)

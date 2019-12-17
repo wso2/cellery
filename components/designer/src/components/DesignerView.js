@@ -914,7 +914,7 @@ class DesignerView extends React.Component {
             data: data
         }).then(function (response) {
             let element = document.createElement('a');
-            element.setAttribute('href', 'http://127.0.0.1:8088/download');
+            element.setAttribute('href', 'http://127.0.0.1:8088/api/download');
             element.setAttribute('download', "generated_code.zip");
             element.style.display = 'none';
             document.body.appendChild(element);

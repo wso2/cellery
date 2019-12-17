@@ -48,6 +48,9 @@ func RunRun(cli cli.Cli, cellImageTag string, instanceName string, startDependen
 		return fmt.Errorf("runtime validation failed. %v", err)
 	}
 	extractedImage, err := extractImage(cli, cellImageTag, instanceName, dependencyLinks, envVars)
+	if err != nil {
+		return err
+	}
 
 	if err = cli.ExecuteTask(fmt.Sprintf("Starting main instance %v", util.Bold(instanceName)),
 		fmt.Sprintf("Failed to start main instance %v", util.Bold(instanceName)),
@@ -153,7 +156,10 @@ func ExtractImage(cli cli.Cli, cellImage *image.CellImage, pullIfNotPresent bool
 		if pullIfNotPresent {
 			cellImageTag := cellImage.Registry + "/" + cellImage.Organization + "/" + cellImage.ImageName +
 				":" + cellImage.ImageVersion
-			RunPull(cli, cellImageTag, true, "", "")
+			err = RunPull(cli, cellImageTag, true, "", "")
+			if err != nil {
+				return "", err
+			}
 		} else {
 			return "", fmt.Errorf("image %s/%s:%s not present on the local repository", cellImage.Organization,
 				cellImage.ImageName, cellImage.ImageVersion)

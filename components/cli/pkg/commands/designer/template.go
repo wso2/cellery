@@ -27,7 +27,7 @@ public function build(cellery:ImageName iName) returns error? {
     cellery:Component {{$value.Name}} = {
         name: "{{$value.Name}}",
         src: {
-            image: "{{$value.Image}}"
+            image: "{{$value.SourceImage}}"
         },
         ingresses: {},
         envVars: {},

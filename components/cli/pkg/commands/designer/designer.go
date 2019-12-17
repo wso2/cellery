@@ -130,8 +130,8 @@ func generateCode(designerMeta DesignMeta) error {
 		}
 		for _, component := range node.Components {
 			templateComponent := TemplateComponent{
-				Name:  strings.Replace(component.Label, "-", "_", -1),
-				Image: component.Image,
+				Name:        strings.Replace(component.Label, "-", "_", -1),
+				SourceImage: component.SourceImage,
 			}
 			for alias, dependencyID := range component.Dependencies {
 				dependency, err := getDependency(dependencyID, designerMeta)

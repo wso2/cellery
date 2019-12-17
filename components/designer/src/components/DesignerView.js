@@ -317,9 +317,30 @@ class DesignerView extends React.Component {
             this.nodesData.update(nodes);
         });
 
-
         this.network.on('selectNode', (params) => {
 
+            this.setState({
+                isNodeSelected: true,
+                isEdgeSelected: false,
+            });
+
+            const selectedNode = this.nodesData.get(params.nodes[0]);
+            if (selectedNode.type === "cell" || selectedNode.type === "composite") {
+                this.setState({
+                    nodeType: "cell"
+                });
+            } else if (selectedNode.type === "component") {
+                this.setState({
+                    nodeType: "component"
+                });
+            } else if (selectedNode.type === "gateway") {
+                this.setState({
+                    nodeType: "gateway"
+                });
+            }
+        });
+
+        this.network.on('dragStart', (params) => {
             this.setState({
                 isNodeSelected: true,
                 isEdgeSelected: false,
@@ -458,12 +479,13 @@ class DesignerView extends React.Component {
                     type: nodeType,
                     image: this.viewGenerator(nodeType),
                     parent: '',
+                    name: nodeLabel,
                     sourceImage: ''
                 });
             } else if ((nodeType === "cell" || nodeType === "composite")) {
                 nodeLabel = "new-" + nodeType + "-" + maxId;
                 nodes.unshift({
-                    label: nodeLabel,
+                    label: "my-org/" + nodeLabel + ":latest",
                     id: (maxId + 1) + "-node",
                     x: params.pointer.canvas.x,
                     y: params.pointer.canvas.y,
@@ -472,8 +494,9 @@ class DesignerView extends React.Component {
                     value: 3,
                     type: nodeType,
                     image: this.viewGenerator(nodeType),
-                    org: "org-name",
-                    version: "latest"
+                    org: "my-org",
+                    version: "latest",
+                    name: nodeLabel
                 });
             }
 
@@ -512,6 +535,8 @@ class DesignerView extends React.Component {
                 helpText: ""
             });
         });
+
+        this.network.off('click');
     };
 
     getEdges = () => {
@@ -545,12 +570,21 @@ class DesignerView extends React.Component {
                     item.value = value;
                 } else if (attr === "label") {
                     item.label = value;
+                } else if (attr === "name") {
+                    item.name = value;
+                    if(item.type === "cell" || item.type === "composite"){
+                        item.label = item.org + "/" + value + ":" + item.version;
+                    } else {
+                        item.label = value;
+                    }
                 } else if (attr === "parent") {
                     item.parent = value;
                 } else if (attr === "org") {
                     item.org = value;
+                    item.label = value + "/" + item.name + ":" + item.version;
                 } else if (attr === "version") {
                     item.version = value;
+                    item.label = item.org + "/" + item.name + ":" + value;
                 } else if (attr === "sourceImage") {
                     item.sourceImage = value;
                 }
@@ -662,6 +696,7 @@ class DesignerView extends React.Component {
                     type: node.type,
                     image: node.image,
                     org: node.org,
+                    name: node.name,
                     version: node.version
                 });
 
@@ -708,8 +743,8 @@ class DesignerView extends React.Component {
                 let xValue = this.network.getPositions(node)[node].x;
                 let yValue = this.network.getPositions(node)[node].y;
                 if (xValue > bb.left && xValue < bb.right && yValue > bb.top && yValue < bb.bottom) {
-                    nodeData.parent = selectedNode.label;
-                    this.updateNode(node, selectedNode.label, "parent");
+                    nodeData.parent = selectedNode.name;
+                    this.updateNode(node, selectedNode.name, "parent");
                     this.nodesData.update(nodeData);
                 }
             });
@@ -724,6 +759,8 @@ class DesignerView extends React.Component {
             this.updateNode(selectedNode[0], event.target.value, "org");
         } else if (field === "label") {
             this.updateNode(selectedNode[0], event.target.value, "label");
+        } else if (field === "name") {
+            this.updateNode(selectedNode[0], event.target.value, "name");
         } else if (field === "version") {
             this.updateNode(selectedNode[0], event.target.value, "version");
         } else if (field === "sourceImage") {
@@ -743,6 +780,8 @@ class DesignerView extends React.Component {
             return selectedNodeData.label;
         } else if (field === "version") {
             return selectedNodeData.version;
+        } else if (field === "name") {
+            return selectedNodeData.name;
         } else if (field === "sourceImage") {
             return selectedNodeData.sourceImage;
         }
@@ -827,13 +866,13 @@ class DesignerView extends React.Component {
         parentNodes.forEach((node, index) => {
             node.components = [];
             childNodes.forEach((childNode, index) => {
-                if (childNode.parent === node.label) {
+                if (childNode.parent === node.name) {
                     node.components.push(childNode)
                 }
             });
 
             if (node.type === "cell") {
-                const gatewayNode = gatewayNodes.filter((gateway) => (gateway.parent === node.label))[0];
+                const gatewayNode = gatewayNodes.filter((gateway) => (gateway.parent === node.name))[0];
                 node.gateway = gatewayNode ? gatewayNode : {};
             } else {
                 node.gateway = {};
@@ -900,9 +939,9 @@ class DesignerView extends React.Component {
 
         networkDataStructure.data.nodes.forEach((node) => {
             if (node.id === id) {
-                parent = node.label;
+                parent = node.name;
             } else if (node.gateway.id === id) {
-                parent = node.label;
+                parent = node.name;
             } else {
                 node.components.forEach((comp) => {
                     if (comp.id === id) {
@@ -921,13 +960,13 @@ class DesignerView extends React.Component {
             this.graph.nodes.forEach((node) => {
                 if ((node.type === "component" && node.parent === "") ||
                     (node.type === "gateway" && node.parent === "")) {
-                    errorMsgs.push(node.label + " is not placed in a cell or composite");
+                    errorMsgs.push(node.name + " is not placed in a cell or composite");
                 }
             });
 
             const networkDataStructure = this.buildDataStructure();
             networkDataStructure.data.nodes.forEach((node) => {
-                if (node.type === "cell" && node.gateway === {}) {
+                if (node.type === "cell" && Object.keys(node.gateway).length === 0) {
                     errorMsgs.push(node.label + " does not have a gateway node properly placed inside the cell");
                 }
             });
@@ -1017,21 +1056,21 @@ class DesignerView extends React.Component {
                             <Grid container spacing={1} direction="row" justify="flex-end" alignItems="center">
                                 <Grid item>
                                     {
-                                        isNodeSelected ?
+                                        isNodeSelected && (nodeType === "cell" || nodeType === "composite" ||
+                                            nodeType === "gateway" || nodeType === "component")?
                                             (<ButtonGroup size="small" aria-label="small outlined button group">
                                                 <Tooltip title="Increase size" placement="bottom">
                                                     <Button onClick={this.increaseSize}>
                                                         <img alt="increase size" src={require('../icons/increase-size.svg')}
-                                                             height={16}/>
+                                                             height={15}/>
                                                     </Button>
                                                 </Tooltip>
                                                 <Tooltip title="Decrease size" placement="bottom">
                                                     <Button onClick={this.decreaseSize}>
                                                         <img alt="decrease size" src={require('../icons/decrease-size.svg')}
-                                                             height={16}/>
+                                                             height={15}/>
                                                     </Button>
                                                 </Tooltip>
-
                                                 <Tooltip title="Delete" placement="bottom">
                                                     <Button onClick={this.deleteNode}><Delete
                                                         fontSize="small"/></Button>
@@ -1040,7 +1079,7 @@ class DesignerView extends React.Component {
                                             : null
                                     }
                                     {
-                                        !isNodeSelected && isEdgeSelected ?
+                                        (isEdgeSelected && (nodeType === "link")) ?
                                             (<ButtonGroup size="small" aria-label="small outlined button group">
                                                 <Tooltip title="Delete" placement="bottom">
                                                     <Button onClick={this.deleteEdge}><Delete
@@ -1161,8 +1200,8 @@ class DesignerView extends React.Component {
                                                         label="Image Name"
                                                         multiline
                                                         rowsMax="4"
-                                                        defaultValue={this.getDefaultNodeValue("label")}
-                                                        onChange={this.getChangeHandler("label")}
+                                                        defaultValue={this.getDefaultNodeValue("name")}
+                                                        onChange={this.getChangeHandler("name")}
                                                         size="small"
                                                         inputProps={{style: {fontSize: 12}}}
                                                         InputLabelProps={{style: {fontSize: 12}}}
@@ -1200,8 +1239,8 @@ class DesignerView extends React.Component {
                                                         label="Name"
                                                         multiline
                                                         rowsMax="4"
-                                                        defaultValue={this.getDefaultNodeValue("label")}
-                                                        onChange={this.getChangeHandler("label")}
+                                                        defaultValue={this.getDefaultNodeValue("name")}
+                                                        onChange={this.getChangeHandler("name")}
                                                         size="small"
                                                         inputProps={{style: {fontSize: 12}}}
                                                         InputLabelProps={{style: {fontSize: 12}}}
@@ -1238,7 +1277,7 @@ class DesignerView extends React.Component {
                                                 <TextField
                                                     id="standard-multiline-flexible"
                                                     label="Name"
-                                                    defaultValue={this.getDefaultNodeValue("label")}
+                                                    defaultValue={this.getDefaultNodeValue("name")}
                                                     disabled
                                                     size="small"
                                                     inputProps={{style: {fontSize: 12}}}

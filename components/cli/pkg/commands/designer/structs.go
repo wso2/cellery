@@ -23,7 +23,7 @@ type DesignMeta struct {
 	Data Data   `json:"data"`
 }
 type Components struct {
-	Label        string            `json:"label"`
+	Name         string            `json:"name"`
 	ID           string            `json:"id"`
 	X            int               `json:"x"`
 	Y            int               `json:"y"`
@@ -37,7 +37,7 @@ type Components struct {
 	Dependencies map[string]string `json:"dependencies"`
 }
 type Gateway struct {
-	Label    string `json:"label"`
+	Name     string `json:"name"`
 	ID       string `json:"id"`
 	X        int    `json:"x"`
 	Y        int    `json:"y"`
@@ -48,7 +48,7 @@ type Gateway struct {
 	Parent   string `json:"parent"`
 }
 type Nodes struct {
-	Label      string       `json:"label"`
+	Name       string       `json:"name"`
 	ID         string       `json:"id"`
 	X          int          `json:"x"`
 	Y          int          `json:"y"`
@@ -61,7 +61,6 @@ type Nodes struct {
 	Version    string       `json:"version"`
 	Components []Components `json:"components"`
 	Gateway    Gateway      `json:"gateway"`
-	Name       string       `json:"name,omitempty"`
 }
 
 type Data struct {

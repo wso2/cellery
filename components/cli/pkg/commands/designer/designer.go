@@ -137,13 +137,13 @@ func generateCode(designerMeta DesignMeta) error {
 		Parse(codeTemplate))
 	for _, node := range designerMeta.Data.Nodes {
 		cell := TemplateImage{
-			Name:       strings.Replace(node.Label, "-", "_", -1),
+			Name:       strings.Replace(node.Name, "-", "_", -1),
 			Type:       node.Type,
 			Components: nil,
 		}
 		for _, component := range node.Components {
 			templateComponent := TemplateComponent{
-				Name:        strings.Replace(component.Label, "-", "_", -1),
+				Name:        strings.Replace(component.Name, "-", "_", -1),
 				SourceImage: component.SourceImage,
 			}
 			for alias, dependencyID := range component.Dependencies {
@@ -193,7 +193,7 @@ func getDependency(nodeId string, meta DesignMeta) (TemplateDependency, error) {
 			dependency := TemplateDependency{
 				Org:  node.Org,
 				Name: node.Version,
-				Ver:  node.Label,
+				Ver:  node.Name,
 				Type: constants.CELL,
 			}
 			return dependency, nil
@@ -203,7 +203,7 @@ func getDependency(nodeId string, meta DesignMeta) (TemplateDependency, error) {
 				dependency := TemplateDependency{
 					Org:  node.Org,
 					Name: node.Version,
-					Ver:  node.Label,
+					Ver:  node.Name,
 					Type: constants.COMPOSITE,
 				}
 				return dependency, nil

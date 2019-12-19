@@ -25,11 +25,11 @@ type DesignMeta struct {
 type Components struct {
 	Name         string            `json:"name"`
 	ID           string            `json:"id"`
-	X            int               `json:"x"`
-	Y            int               `json:"y"`
+	X            float64           `json:"x"`
+	Y            float64           `json:"y"`
 	Shape        string            `json:"shape"`
-	Value        int               `json:"value"`
-	Iterator     int               `json:"iterator"`
+	Value        float64           `json:"value"`
+	Iterator     float64           `json:"iterator"`
 	Type         string            `json:"type"`
 	Image        string            `json:"image"`
 	Parent       string            `json:"parent"`
@@ -37,24 +37,24 @@ type Components struct {
 	Dependencies map[string]string `json:"dependencies"`
 }
 type Gateway struct {
-	Name     string `json:"name"`
-	ID       string `json:"id"`
-	X        int    `json:"x"`
-	Y        int    `json:"y"`
-	Shape    string `json:"shape"`
-	Value    int    `json:"value"`
-	Iterator int    `json:"iterator"`
-	Type     string `json:"type"`
-	Parent   string `json:"parent"`
+	Name     string  `json:"name"`
+	ID       string  `json:"id"`
+	X        float64 `json:"x"`
+	Y        float64 `json:"y"`
+	Shape    string  `json:"shape"`
+	Value    float64 `json:"value"`
+	Iterator float64 `json:"iterator"`
+	Type     string  `json:"type"`
+	Parent   string  `json:"parent"`
 }
 type Nodes struct {
 	Name       string       `json:"name"`
 	ID         string       `json:"id"`
-	X          int          `json:"x"`
-	Y          int          `json:"y"`
+	X          float64      `json:"x"`
+	Y          float64      `json:"y"`
 	Shape      string       `json:"shape"`
-	Iterator   int          `json:"iterator"`
-	Value      int          `json:"value"`
+	Iterator   float64      `json:"iterator"`
+	Value      float64      `json:"value"`
 	Type       string       `json:"type"`
 	Image      string       `json:"image"`
 	Org        string       `json:"org"`

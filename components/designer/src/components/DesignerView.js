@@ -103,15 +103,15 @@ const styles = (theme) => ({
             easing: theme.transitions.easing.sharp,
             duration: theme.transitions.duration.leavingScreen
         }),
-        marginLeft: Number(theme.spacing.unit),
-        marginRight: -drawerWidth + theme.spacing.unit
+        marginLeft: Number(theme.spacing(1)),
+        marginRight: -drawerWidth + theme.spacing(1)
     },
     contentShift: {
         transition: theme.transitions.create("margin", {
             easing: theme.transitions.easing.easeOut,
             duration: theme.transitions.duration.enteringScreen
         }),
-        marginRight: theme.spacing.unit
+        marginRight: theme.spacing(1)
     },
     sideBarHeading: {
         fontSize: 10,
@@ -128,7 +128,7 @@ const styles = (theme) => ({
         fontSize: 12
     },
     legendContent: {
-        padding: theme.spacing.unit * 2
+        padding: theme.spacing(2)
     },
     legendText: {
         display: "inline-flex",
@@ -200,7 +200,8 @@ class DesignerView extends React.Component {
             openSnackBar: false,
             errorContent: "",
             nodeType: 'none',
-            jsonFile: {}
+            jsonFile: {},
+            isInternalEdgeClicked: false
         };
         this.graph = {
             nodes: [],
@@ -374,21 +375,27 @@ class DesignerView extends React.Component {
             });
         });
 
-        this.network.on('selectEdge', (params) => {
+        this.network.on('select', (params) => {
+            this.setState({
+                isInternalEdgeClicked: false
+            });
+            const edge = this.network.getEdgeAt({x:params.pointer.DOM.x,y:params.pointer.DOM.y});
+            if(edge){
+                this.network.selectEdges([edge]);
 
-            this.getEdges();
+                this.selectEdge();
 
-            if (this.network.getSelectedNodes().length >= 1) {
-                this.setState({
-                    isEdgeSelected: false,
-                });
-            } else {
-                this.setState({
-                    isEdgeSelected: true,
-                    nodeType: "link"
-                });
+                const selectedEdge = this.edgesData.get(edge);
+                if ((this.getNodeParentFromId(selectedEdge.from) === this.getNodeParentFromId(selectedEdge.to))) {
+                    this.setState({
+                        isInternalEdgeClicked: true
+                    });
+                }
             }
+        });
 
+        this.network.on('selectEdge', (params) => {
+            this.selectEdge();
         });
 
         this.network.on('deselectEdge', (params) => {
@@ -397,6 +404,21 @@ class DesignerView extends React.Component {
                 nodeType: "none"
             });
         });
+    };
+
+    selectEdge = () => {
+        this.getEdges();
+
+        if (this.network.getSelectedNodes().length >= 1) {
+            this.setState({
+                isEdgeSelected: false,
+            });
+        } else {
+            this.setState({
+                isEdgeSelected: true,
+                nodeType: "link"
+            });
+        }
     };
 
     viewGenerator = (nodeType) => {
@@ -459,7 +481,8 @@ class DesignerView extends React.Component {
             isNodeSelected: false,
             isEdgeSelected: false,
             helpText: "Click on empty space to place the element",
-            nodeType: "none"
+            nodeType: "none",
+            isInternalEdgeClicked: false
         });
 
         this.network.off('click');
@@ -533,7 +556,8 @@ class DesignerView extends React.Component {
             isAddClicked: true,
             helpText: "Click on a node and drag the link to another node to connect them",
             isNodeSelected: false,
-            nodeType: "none"
+            nodeType: "none",
+            isInternalEdgeClicked: false
         });
 
         this.network.on('release', (params) => {
@@ -738,6 +762,10 @@ class DesignerView extends React.Component {
         const gatewayNodeIds = this.getTypeNodesIds("gateway");
         const childNodes = componentNodeIds.concat(gatewayNodeIds);
 
+        childNodes.forEach((node) => {
+            const nodeData = this.nodesData.get(node);
+            nodeData.parent = "";
+        });
         parentNodes.forEach((item) => {
             const bb = this.network.getBoundingBox(item);
             const selectedNode = this.nodesData.get(item);
@@ -749,9 +777,6 @@ class DesignerView extends React.Component {
                 if (xValue > bb.left && xValue < bb.right && yValue > bb.top && yValue < bb.bottom) {
                     nodeData.parent = selectedNode.name;
                     this.updateNode(node, selectedNode.name, "parent");
-                } else {
-                    nodeData.parent = "";
-                    this.updateNode(node, "", "parent");
                 }
                 this.nodesData.update(nodeData);
             });
@@ -797,7 +822,7 @@ class DesignerView extends React.Component {
     getDefaultEdgeValue = () => {
         let {edges} = this.graph;
         const selectedEdge = this.network.getSelectedEdges()[0];
-        const edgeLabel = edges.find((item) => item.id === selectedEdge).label
+        const edgeLabel = edges.find((item) => item.id === selectedEdge).label;
         return edgeLabel;
     };
 
@@ -807,7 +832,8 @@ class DesignerView extends React.Component {
         this.network.deleteSelected();
         this.setState({
             isNodeSelected: false,
-            nodeType: "none"
+            nodeType: "none",
+            isInternalEdgeClicked: false
         });
 
         if (selectedNode.length > 0) {
@@ -833,7 +859,8 @@ class DesignerView extends React.Component {
         this.network.deleteSelected();
         this.setState({
             isEdgeSelected: false,
-            nodeType: "none"
+            nodeType: "none",
+            isInternalEdgeClicked: false
         });
 
         if (selectedEdges.length > 0) {
@@ -1034,7 +1061,8 @@ class DesignerView extends React.Component {
 
     render() {
         const {classes} = this.props;
-        const {isAddClicked, open, isNodeSelected, isEdgeSelected, helpText, nodeType, openSnackBar, errorContent} = this.state;
+        const {isAddClicked, open, isNodeSelected, isEdgeSelected, helpText, nodeType, openSnackBar, errorContent,
+            isInternalEdgeClicked} = this.state;
 
         return (
             <div>
@@ -1273,15 +1301,17 @@ class DesignerView extends React.Component {
                                     {
                                         (isEdgeSelected && (nodeType === "link")) ?
                                             (
-                                                <TextField
-                                                    id="standard-multiline-flexible"
-                                                    label="Alias"
-                                                    defaultValue={this.getDefaultEdgeValue()}
-                                                    onChange={this.getChangeHandler("alias")}
-                                                    size="small"
-                                                    inputProps={{style: {fontSize: 12}}}
-                                                    InputLabelProps={{style: {fontSize: 12}}}
-                                                />
+                                                isInternalEdgeClicked
+                                                    ? <div className={classes.noContentMsg}>No properties found.</div>
+                                                    : <TextField
+                                                        id="standard-multiline-flexible"
+                                                        label="Alias"
+                                                        defaultValue={this.getDefaultEdgeValue()}
+                                                        onChange={this.getChangeHandler("alias")}
+                                                        size="small"
+                                                        inputProps={{style: {fontSize: 12}}}
+                                                        InputLabelProps={{style: {fontSize: 12}}}
+                                                    />
                                             ) : null
                                     }
                                     {

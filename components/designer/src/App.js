@@ -53,7 +53,7 @@ const App = () => {
 };
 
 App.propTypes = {
-    classes: PropTypes.object.isRequired
+    classes: PropTypes.object
 };
 
 export default App;

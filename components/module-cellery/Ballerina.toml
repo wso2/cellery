@@ -11,4 +11,4 @@ target = "java8"
 
   [[platform.libraries]]
   module = "cellery"
-  path = "./cellery-utils/target/cellery-utils-0.6.0-SNAPSHOT.jar"
+  path = "./cellery-utils/target/cellery-utils-0.6.0.jar"

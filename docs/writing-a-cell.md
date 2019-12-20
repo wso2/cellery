@@ -1,7 +1,7 @@
 ## Developing & running your first cell
 
 In this section let's focus on initialize, build, run and push the same hello world cell explained above. 
-Follow the instructions listed below to create your first cell. To create a cell that requires additional resources, you can create a Ballerina project for the cell. To get started with a Ballerina project, follow instructions given [here]().
+Follow the instructions listed below to create your first cell. To create a cell that requires additional resources, you can create a Ballerina project for the cell. To get started with a Ballerina project, follow instructions given [here](https://github.com/wso2/cellery/blob/master/docs/writing-a-cell-bal-project.md).
 
 1. Execute `cellery init` command from the command prompt, and provide the project name as `hello-world-cell`. 
     ```

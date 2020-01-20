@@ -2,10 +2,8 @@
 
 You can engage with the Cellery community using these channels:
 
-1. To ask questions about Cellery and join our community, 
-    - Use [Slack](https://join.slack.com/t/cellery-io/shared_invite/enQtNzkwMzI4NjE2MDA1LThkZTI2ZjQ2OWEzNmIwZWQ5ZDg3MGFmNWZiYmY3MWVmZTRiMjdjZDZlMmUyNmY4YmNmYjQ0MDRlZDEzNDg3N2U) 
-    - Follow on [Twitter](https://twitter.com/cellery_io)  
-    - Use [Cellery-dev mailing list](mailto:wso2-cellery-dev@googlegroups.com)
-    - Join [Bi-weekly community call](https://wso2.zoom.us/j/139403337) on Wednesdays at 9:00 AM PDT/9:30 PM IST (Staring from November 6th).  [Subcribe](https://calendar.google.com/calendar?cid=e1mp251ag5nipemhluldtptj8o@group.calendar.google.com) to cellery community calendar to know get notified about our events.
+1. See our community engagement in, 
+   - [Cellery-dev mailing list](https://groups.google.com/forum/#!forum/wso2-cellery-dev)
+   - [Bi-weekly community call notes](https://docs.google.com/document/d/1Ndj3Beh-iRgLKxGx76_t2AQ_67ZhPS_aKCbm27GQ_ms/edit?ts=5ddcae15#heading=h.j5r8jmg8lp6w) from our first community call on November 6th.
 2. To report issues, use [github issues](https://github.com/wso2/cellery/issues).
 3. To build from source, and get a basic understanding on core Cellery github repoistories, please read [Contribution Guide](../CONTRIBUTING.md).

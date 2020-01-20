@@ -11,11 +11,9 @@
 Build, run, and manage code-first composites on Kubernetes.
 
 - For in-depth information about how to use Cellery, visit [https://wso2-cellery.github.io/](https://wso2-cellery.github.io/).                                 
-- Engage with our community via, 
-    - [Slack](https://join.slack.com/t/cellery-io/shared_invite/enQtNzkwMzI4NjE2MDA1LThkZTI2ZjQ2OWEzNmIwZWQ5ZDg3MGFmNWZiYmY3MWVmZTRiMjdjZDZlMmUyNmY4YmNmYjQ0MDRlZDEzNDg3N2U) 
-    - [Twitter](https://twitter.com/cellery_io) 
-    - [Cellery-dev mailing list](mailto:wso2-cellery-dev@googlegroups.com)
-    - [Bi-weekly community call](https://wso2.zoom.us/j/139403337) on Wednesdays at 9:00 AM PDT/9:30 PM IST (Staring from November 6th). [Subcribe](https://calendar.google.com/calendar?cid=e1mp251ag5nipemhluldtptj8o@group.calendar.google.com) to cellery community calendar to know get notified about our events.   
+- See our community engagement in, 
+    - [Cellery-dev mailing list](https://groups.google.com/forum/#!forum/wso2-cellery-dev)
+    - [Bi-weekly community call notes](https://docs.google.com/document/d/1Ndj3Beh-iRgLKxGx76_t2AQ_67ZhPS_aKCbm27GQ_ms/edit?ts=5ddcae15#heading=h.j5r8jmg8lp6w) from our first community call on November 6th.
 - To learn how to participate in our overall community, visit [our community page](docs/community.md).
 - To understand the usecases and integrations of Cellery, visit [our blogs](https://medium.com/wso2-cellery).
 - To explore already existing Cellery images, visit [cellery hub](https://hub.cellery.io/).
